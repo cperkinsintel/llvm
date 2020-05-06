@@ -129,7 +129,7 @@ int something(float *fromParam) {
   float *usmSharedP2 = static_cast<float *>(sycl::malloc_shared(sizeof(float), queue));
   float *usmSharedP3 = static_cast<float *>(sycl::malloc(sizeof(float), device, context, cl::sycl::usm::alloc::shared));
   float *usmSharedP4 = static_cast<float *>(sycl::malloc(sizeof(float), queue, cl::sycl::usm::alloc::shared));
-  float *usmSharedP5 = sycl::malloc_shared<float>(1, device, context);
+  float *usmSharedP5 = sycl::malloc_shared<float>(2, device, context);
 
   float *usmShAlignP = static_cast<float *>(sycl::aligned_alloc_shared(1, sizeof(float), device, context));
   float *usmShAlignP2 = static_cast<float *>(sycl::aligned_alloc_shared(1, sizeof(float), queue));
@@ -150,6 +150,8 @@ int something(float *fromParam) {
   float *usmDeviceP2 = static_cast<float *>(sycl::malloc_device(sizeof(float), queue));
   float *usmDeviceP3 = static_cast<float *>(sycl::malloc(sizeof(float), device, context, cl::sycl::usm::alloc::device));
   float *usmDeviceP4 = static_cast<float *>(sycl::malloc(sizeof(float), queue, cl::sycl::usm::alloc::device));
+
+  float *okPRValueInit = usmSharedP5++;
 
   cl::sycl::kernel_single_task<class AName>([=]() {
     // --- Captures
@@ -267,6 +269,8 @@ int something(float *fromParam) {
     usmDeviceP2[0] = 1;
     usmDeviceP3[0] = 1;
     usmDeviceP4[0] = 1;
+    //
+    okPRValueInit[0] = 81;
   });
 
   auto noProblemLambda = [=]() {

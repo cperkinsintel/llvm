@@ -440,16 +440,17 @@ void Sema::checkSYCLDevicePointerCapture(VarDecl *Var,
       const StringLiteral *SL = dyn_cast<StringLiteral>(Init);
       if (SL)
         howAllocated = WillCrash;
-
-      if (Init->isRValue()) // pr-value pointer initialization (likely nullptr or &stackVar)
-        howAllocated = WillCrash;
+      
+      const UnaryOperator *UO = dyn_cast<UnaryOperator>(Init);
+      if(UO && (UO->getOpcode() == UO_AddrOf))
+        howAllocated = WillCrash;    
     }
   }
   // else: Var does not have local initialization, might be parameter, etc.
 
   // We may have identified some initialization as unsafe. But that variable is subject to change.
-  // So we look through the statements to see if that variable otherwise referenced before capture. 
-  // We don't try to vette most references - if there is one, we return to the safe harbor of "unknown"
+  // So we look through the statements to see if that variable is otherwise referenced before capture. 
+  // We don't try to vette most references - its mere existence means we back away from emitting an error.
   DeclContext *DC = Var->getParentFunctionOrMethod();
   const FunctionDecl *FD = dyn_cast_or_null<FunctionDecl>(DC);
   if(FD && FD->hasBody()){
