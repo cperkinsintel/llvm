@@ -283,22 +283,141 @@ void Sema::checkSYCLDeviceVarDecl(VarDecl *Var) {
   checkSYCLVarType(*this, Ty, Loc, Visited);
 }
 
+#include <iostream>
+bool FindVarInExpr(Sema &S, VarDecl *V, std::function<bool(const Expr*)> AF, const Expr *E) {
+  //std::cout << "FindVarInExpr REACHED " << std::endl;
+  if(!E){ return false; }
+
+
+  E = E->IgnoreCasts();
+  //std::cout << "CheckExpr: " << E->getSourceRange().printToString(S.getSourceManager()) 
+  //          << E->getStmtClassName() << std::endl;
+  switch(E->getStmtClass()){
+    case Stmt::StmtClass::CallExprClass:
+      {
+        //std::cout << "CheckCallF: " << E->getSourceRange().printToString(S.getSourceManager()) << std::endl;
+        const CallExpr *CCE = dyn_cast<CallExpr>(E);
+        CallExpr *CE = const_cast<CallExpr*>(CCE);
+        Expr **CallArgs = CE->getArgs();
+        auto num = CE->getNumArgs();
+        bool match = false;
+        for(unsigned i = 0; i < num; i++) {
+          Expr* Arg = CallArgs[i];
+          Arg = Arg->IgnoreCasts(); 
+          //std::cout << "Call Arg: " << Arg->getSourceRange().printToString(S.getSourceManager())
+          //          << Arg->getStmtClassName() << std::endl;
+          match = FindVarInExpr(S, V, AF, Arg);
+          if(match){ return match; }
+        }
+        return match;
+      }
+     
+    case Stmt::StmtClass::BinaryOperatorClass:
+      {
+        //std::cout << "CheckBinaryOp: " << E->getSourceRange().printToString(S.getSourceManager()) << std::endl;
+        const BinaryOperator *BO = dyn_cast<BinaryOperator>(E);
+
+        bool match = false;
+        const Expr* LHS = BO->getLHS();
+        const Expr* RHS = BO->getRHS();
+        //std::cout << "lhs!" << std::endl;
+        //std::cout << "lhs:  " << LHS->getStmtClassName() << std::endl;
+        match = FindVarInExpr(S, V, AF, LHS);
+        if(match) { 
+          //std::cout << "Binary LHS Match! " << BO->isAssignmentOp() << std::endl;
+          if(BO->isAssignmentOp() && AF && AF(RHS)) //Run the assignment func. If it returns true, pretend we didn't find a match so as to continue searching. 
+            return false;
+          else
+            return match; 
+        }
+        
+        match = FindVarInExpr(S, V, AF, RHS);
+        return match;
+      }
+
+    case Stmt::StmtClass::UnaryOperatorClass:
+      {
+        //std::cout << "CheckUnaryOp: " << E->getSourceRange().printToString(S.getSourceManager()) << std::endl;
+        const UnaryOperator *UO = dyn_cast<UnaryOperator>(E);
+        const Expr* Sub = UO->getSubExpr();
+        return FindVarInExpr(S, V, AF, Sub);
+      }
+
+    case Stmt::StmtClass::DeclRefExprClass:
+      {
+        //std::cout << "CheckDeclRef: " << E->getSourceRange().printToString(S.getSourceManager()) << std::endl;
+        const DeclRefExpr *DRE = dyn_cast<DeclRefExpr>(E);
+        const ValueDecl *VD = DRE->getDecl();
+        //std::cout << "DeclRefExpr: " << VD->getNameAsString() << " -- " << V->getNameAsString() 
+        //          << "  ==? " << (VD == V) << std::endl;
+        return (VD == V);
+      }
+
+    default:
+      break;
+  }
+  return false; 
+}
+
+bool FindVarInStmt(Sema &S,  VarDecl *V, std::function<bool(const Expr*)> assignF, const Stmt *St) {
+  if(!St)
+    return false;
+
+  const Expr *E = dyn_cast<Expr>(St);
+  if(E)
+    return FindVarInExpr(S, V, assignF, E);
+  else {
+    for(const Stmt *SubStmt : St->children()){
+      bool match = FindVarInStmt(S, V, assignF, SubStmt);
+      if(match)
+        return match;
+    }
+  }
+  return false;
+}
+
 void Sema::checkSYCLDevicePointerCapture(VarDecl *Var,
                                          SourceLocation CaptureLoc) {
   // Any pointer captured into the SYCL kernel lambda will fail when
   // dereferenced...except USM. If it weren't for USM we could just emit a
   // deferred diagnostic for every pointer capture. Instead, we attempt to
-  // identify which pointers are USM, and which are definitely not. For those
-  // that are definitely not, we emit an error. For those that are unknown, we
-  // emit a gentle note suggesting the user ensure they are using USM.  For USM
-  // pointers, we do nothing.
+  // identify which pointers are USM, and which are definitely not (and will crash). 
+  // For those that will crash, we emit an error. 
+  // For those that are unknown, we _could_ emit a gentle note suggesting the user 
+  // double check that they are using USM.  But at this time we do not. 
+  // For safe USM pointers, we do nothing.
   assert(getLangOpts().SYCLIsDevice &&
          "Should only be called during SYCL compilation");
   assert(Var->getType()->isAnyPointerType() &&
          "Should only be called for pointer types being captured.");
 
-  enum ExprAllocation { Unknown, USM, Not_USM };
+  enum ExprAllocation { Unknown, USM, WillCrash };
   ExprAllocation howAllocated = Unknown;
+
+  // we use this to check 
+  auto VetteCallExpr = [&howAllocated](const Expr *E){
+    E = E->IgnoreCasts();
+    //std::cout << "Vette-ing " << E->getStmtClassName() << std::endl;
+    const CallExpr *CE = dyn_cast<CallExpr>(E);
+    bool updated = false;
+    if(CE){
+      const FunctionDecl *func = CE->getDirectCallee();
+      auto FullName = func->getQualifiedNameAsString();
+      //std::cout << "vette full name: " << FullName << std::endl;
+      // Check to see if this function call is one of the USM allocators.
+      if ((FullName.rfind("cl::sycl::malloc", 0) == 0) ||
+          (FullName.rfind("cl::sycl::aligned_alloc", 0) == 0)) {
+        howAllocated = USM;
+        updated = true;
+      } 
+      else if (howAllocated == Unknown && ((FullName.compare("malloc") == 0) || (FullName.compare("calloc") == 0))) {
+        howAllocated = WillCrash;
+        updated = true;
+      }
+    }
+    return updated;
+  };
+  std::function<bool(const Expr*)> AssignF = VetteCallExpr;
 
   SourceLocation DecLoc = SourceLocation();
 
@@ -310,41 +429,57 @@ void Sema::checkSYCLDevicePointerCapture(VarDecl *Var,
 
     const CallExpr *CE = dyn_cast<CallExpr>(Init);
     if (CE) {
-      // Captured pointer is result of function call.
-      const FunctionDecl *func = CE->getDirectCallee();
-      auto FullName = func->getQualifiedNameAsString();
-      // Check to see if this function call is one of the USM allocators.
-      if ((FullName.rfind("cl::sycl::malloc", 0) == 0) ||
-          (FullName.rfind("cl::sycl::aligned_alloc", 0) == 0))
-        howAllocated = USM;
-      else if ((FullName.compare("malloc") == 0) ||
-               (FullName.compare("calloc") == 0))
-        howAllocated = Not_USM;
-
+      VetteCallExpr(CE); //modifies howAllocated via side-effect.
     } else {
       // Var has initialization, but not as return result of a function,
       // disqualify any other obvious bad initialization expressions.
       const StringLiteral *SL = dyn_cast<StringLiteral>(Init);
       if (SL)
-        howAllocated = Not_USM;
+        howAllocated = WillCrash;
 
-      if (Init->isRValue()) // pr-value
-        howAllocated = Not_USM;
+      if (Init->isRValue()) // pr-value pointer initialization (likely nullptr or &stackVar)
+        howAllocated = WillCrash;
     }
+
+    // if(howAllocated == WillCrash){
+    //   // We know this pointer, as initialized, is unacceptable for capture.  However, it is possible
+    //   // that it might be modified afterwards.  
+    //   DeclContext *DC = Var->getParentFunctionOrMethod(); // also getParentFunctionOrMethod, and getDeclContext
+    //   const FunctionDecl *FD = dyn_cast<FunctionDecl>(DC);
+    //   if(FD && FD->hasBody()){
+    //     Stmt *TopStmt = FD->getBody(FD);
+    //     bool match = FindVarInStmt(*this, Var, TopStmt);
+    //     if(match)
+    //       howAllocated = Unknown; 
+    //   }
+    // }
   }
-  // else: Var does not have local initialization, might be parameter, or
-  // initialized via ref, etc.
-  //      Nothing more we can determine at this time.
+  // else: Var does not have local initialization, might be parameter, etc.
 
-  // diagnostics
-  if (howAllocated == Not_USM)
-    SYCLDiagIfDeviceCode(CaptureLoc, diag::err_sycl_illegal_memory_reference);
-  else if (howAllocated == Unknown)
-    SYCLDiagIfDeviceCode(CaptureLoc, diag::note_unknown_memory_reference);
+  // We may have identified some initialization as unsafe. But that variable is subject to change.
+  // So we look through the statements to see if that variable otherwise referenced before capture. 
+  // We don't try to vette most references - if there is one, we return to the safe harbor of "unknown"
+  DeclContext *DC = Var->getParentFunctionOrMethod();
+  const FunctionDecl *FD = dyn_cast_or_null<FunctionDecl>(DC);
+  if(FD && FD->hasBody()){
+    Stmt *TopStmt = FD->getBody(FD);
+    bool match = FindVarInStmt(*this, Var, AssignF, TopStmt);
+    if(match)
+      howAllocated = Unknown; 
+  }
+  
 
-  if (howAllocated != USM && DecLoc.isValid())
-    SYCLDiagIfDeviceCode(DecLoc, diag::note_sycl_capture_declared_here);
+
+  // diagnostics --if being called from Visitor, have to use straight diagnostics
+  if (howAllocated == WillCrash){
+    Diag(CaptureLoc, diag::err_sycl_illegal_memory_reference); //SYCLDiagIfDeviceCode
+    if(DecLoc.isValid())
+      Diag(DecLoc, diag::note_var_declared_here);
+  }
+  
 }
+
+
 
 class MarkDeviceFunction : public RecursiveASTVisitor<MarkDeviceFunction> {
 public:
@@ -408,6 +543,19 @@ public:
 
   bool VisitCXXDynamicCastExpr(const CXXDynamicCastExpr *E) {
     SemaRef.Diag(E->getExprLoc(), diag::err_sycl_restrict) << Sema::KernelRTTI;
+    return true;
+  }
+
+  //CP
+  bool VisitDeclRefExpr(DeclRefExpr *E) {
+    ValueDecl *D = E->getDecl();
+    QualType Ty = D->getType();
+    SourceRange   RefRange = E->getSourceRange();
+    if(Ty->isAnyPointerType() && E->refersToEnclosingVariableOrCapture()) {
+      VarDecl *DVar = dyn_cast<VarDecl>(D);
+      if(DVar)
+        SemaRef.checkSYCLDevicePointerCapture(DVar, RefRange.getBegin());
+    }
     return true;
   }
 
