@@ -285,9 +285,8 @@ void Sema::checkSYCLDeviceVarDecl(VarDecl *Var) {
 
 #include <iostream>
 bool FindVarInExpr(Sema &S, VarDecl *V, std::function<bool(const Expr*)> AF, const Expr *E) {
-  //std::cout << "FindVarInExpr REACHED " << std::endl;
+  // See FindVarInStmt (next) for explantion.
   if(!E){ return false; }
-
 
   E = E->IgnoreCasts();
   //std::cout << "CheckExpr: " << E->getSourceRange().printToString(S.getSourceManager()) 
@@ -360,6 +359,11 @@ bool FindVarInExpr(Sema &S, VarDecl *V, std::function<bool(const Expr*)> AF, con
 }
 
 bool FindVarInStmt(Sema &S,  VarDecl *V, std::function<bool(const Expr*)> assignF, const Stmt *St) {
+  // We have a variable declaration and want to know if it is referenced
+  // in this expression or statement children. This code walks down 
+  // looking for a match, and returns on the first one. It takes a (possibly nullptr)
+  // assignment function which will be called with the RHS expression
+  // if the Var is being assigned on the left. 
   if(!St)
     return false;
 
@@ -394,7 +398,7 @@ void Sema::checkSYCLDevicePointerCapture(VarDecl *Var,
   enum ExprAllocation { Unknown, USM, WillCrash };
   ExprAllocation howAllocated = Unknown;
 
-  // we use this to check 
+  // We use this to check declarations and assignments
   auto VetteCallExpr = [&howAllocated](const Expr *E){
     E = E->IgnoreCasts();
     //std::cout << "Vette-ing " << E->getStmtClassName() << std::endl;
@@ -440,19 +444,6 @@ void Sema::checkSYCLDevicePointerCapture(VarDecl *Var,
       if (Init->isRValue()) // pr-value pointer initialization (likely nullptr or &stackVar)
         howAllocated = WillCrash;
     }
-
-    // if(howAllocated == WillCrash){
-    //   // We know this pointer, as initialized, is unacceptable for capture.  However, it is possible
-    //   // that it might be modified afterwards.  
-    //   DeclContext *DC = Var->getParentFunctionOrMethod(); // also getParentFunctionOrMethod, and getDeclContext
-    //   const FunctionDecl *FD = dyn_cast<FunctionDecl>(DC);
-    //   if(FD && FD->hasBody()){
-    //     Stmt *TopStmt = FD->getBody(FD);
-    //     bool match = FindVarInStmt(*this, Var, TopStmt);
-    //     if(match)
-    //       howAllocated = Unknown; 
-    //   }
-    // }
   }
   // else: Var does not have local initialization, might be parameter, etc.
 
@@ -469,14 +460,12 @@ void Sema::checkSYCLDevicePointerCapture(VarDecl *Var,
   }
   
 
-
   // diagnostics --if being called from Visitor, have to use straight diagnostics
   if (howAllocated == WillCrash){
     Diag(CaptureLoc, diag::err_sycl_illegal_memory_reference); //SYCLDiagIfDeviceCode
     if(DecLoc.isValid())
-      Diag(DecLoc, diag::note_var_declared_here);
+      Diag(DecLoc, diag::note_declared_at);
   }
-  
 }
 
 
