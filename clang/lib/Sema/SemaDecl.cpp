@@ -14386,6 +14386,10 @@ Decl *Sema::ActOnFinishFunctionBody(Decl *dcl, Stmt *Body,
     DiscardCleanupsInEvaluationContext();
   }
 
+  //CP
+  if(LangOpts.SYCLIsDevice)
+    diagSYCLDevicePointerCaptures(FD);
+
   if (LangOpts.OpenMP || LangOpts.CUDA || LangOpts.SYCLIsDevice) {
     auto ES = getEmissionStatus(FD);
     if (ES == Sema::FunctionEmissionStatus::Emitted ||

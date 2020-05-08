@@ -159,7 +159,7 @@ int something(float *fromParam) {
     //-- various bad pointers
     //    all of these will cause crashes if not caught. 
 
-    // Xxpected-note@#call_kernelFunc {{called by 'kernel_single_task<AName, (lambda}}
+    // expected-note@#call_kernelFunc {{called by 'kernel_single_task<AName, (lambda}}
     // expected-note@#decl_mallocFloatP {{declared here}}
     // expected-error@+1 {{Illegal memory reference in SYCL device kernel. Use USM (malloc_shared, etc) instead.}}
     calledFromLambda(mallocFloatP);
@@ -229,7 +229,7 @@ int something(float *fromParam) {
     // expected-error@+1 {{Illegal memory reference in SYCL device kernel. Use USM (malloc_shared, etc) instead.}}
     float someValue = *callocFloatP2;
 
-    /*
+    
     // --- Only the first capture of a pointer emits anything. So these accesses will NOT emit redundant diagnostics.
     calledFromLambda(mallocFloatP);
     stackFloatP[0] = 31.0;
@@ -242,7 +242,7 @@ int something(float *fromParam) {
     mallocFloatP2[0] = 81;
     callocFloatP[0] = 81;
     float someOtherValue = *callocFloatP2;
-    */
+    
 
     // --- These captures all use USM, and should pass without any notes or errors.
     calledFromLambda(usmSharedP);
