@@ -2219,12 +2219,6 @@ AnalysisBasedWarnings::IssueWarnings(sema::AnalysisBasedWarnings::Policy P,
       !Diags.isIgnored(diag::warn_arc_repeated_use_of_weak, D->getBeginLoc()))
     diagnoseRepeatedUseOfWeak(S, fscope, D, AC.getParentMap());
 
-  //CP
-  //  if(S.getLangOpts().SYCLIsDevice){
-  //    FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
-  //    S.diagSYCLDevicePointerCaptures(FD);
-  //  }
-
 
   // Check for infinite self-recursion in functions
   if (!Diags.isIgnored(diag::warn_infinite_recursive_function,

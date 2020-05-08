@@ -27,6 +27,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include <array>
+#include <unordered_map>
 
 using namespace clang;
 
@@ -283,18 +284,17 @@ void Sema::checkSYCLDeviceVarDecl(VarDecl *Var) {
   checkSYCLVarType(*this, Ty, Loc, Visited);
 }
 
-#include <iostream>
-bool FindVarInExpr(Sema &S, VarDecl *V, std::function<bool(const Expr*)> AF, const Expr *E) {
-  // See FindVarInStmt (next) for explantion.
+bool isVarInExpr(VarDecl *V, std::function<bool(const Expr*)> AF, const Expr *E) {
+  // We have a variable declaration and want to know if it is referenced
+  // anywhere in this expression. If the variable is found, but having its value changed via 
+  // assignment, the AF function can decide whether to match or not.  
   if(!E){ return false; }
 
   E = E->IgnoreCasts();
-  //std::cout << "CheckExpr: " << E->getSourceRange().printToString(S.getSourceManager()) 
-  //          << E->getStmtClassName() << std::endl;
+  
   switch(E->getStmtClass()){
     case Stmt::StmtClass::CallExprClass:
       {
-        //std::cout << "CheckCallF: " << E->getSourceRange().printToString(S.getSourceManager()) << std::endl;
         const CallExpr *CCE = dyn_cast<CallExpr>(E);
         CallExpr *CE = const_cast<CallExpr*>(CCE);
         Expr **CallArgs = CE->getArgs();
@@ -303,9 +303,7 @@ bool FindVarInExpr(Sema &S, VarDecl *V, std::function<bool(const Expr*)> AF, con
         for(unsigned i = 0; i < num; i++) {
           Expr* Arg = CallArgs[i];
           Arg = Arg->IgnoreCasts(); 
-          //std::cout << "Call Arg: " << Arg->getSourceRange().printToString(S.getSourceManager())
-          //          << Arg->getStmtClassName() << std::endl;
-          match = FindVarInExpr(S, V, AF, Arg);
+          match = isVarInExpr(V, AF, Arg);
           if(match){ return match; }
         }
         return match;
@@ -313,42 +311,32 @@ bool FindVarInExpr(Sema &S, VarDecl *V, std::function<bool(const Expr*)> AF, con
      
     case Stmt::StmtClass::BinaryOperatorClass:
       {
-        //std::cout << "CheckBinaryOp: " << E->getSourceRange().printToString(S.getSourceManager()) << std::endl;
         const BinaryOperator *BO = dyn_cast<BinaryOperator>(E);
-
         bool match = false;
         const Expr* LHS = BO->getLHS();
         const Expr* RHS = BO->getRHS();
-        //std::cout << "lhs!" << std::endl;
-        //std::cout << "lhs:  " << LHS->getStmtClassName() << std::endl;
-        match = FindVarInExpr(S, V, AF, LHS);
+        match = isVarInExpr(V, AF, LHS);
         if(match) { 
-          //std::cout << "Binary LHS Match! " << BO->isAssignmentOp() << std::endl;
           if(BO->isAssignmentOp() && AF && AF(RHS)) //Run the assignment func. If it returns true, pretend we didn't find a match so as to continue searching. 
             return false;
           else
             return match; 
         }
-        
-        match = FindVarInExpr(S, V, AF, RHS);
+        match = isVarInExpr(V, AF, RHS);
         return match;
       }
 
     case Stmt::StmtClass::UnaryOperatorClass:
       {
-        //std::cout << "CheckUnaryOp: " << E->getSourceRange().printToString(S.getSourceManager()) << std::endl;
         const UnaryOperator *UO = dyn_cast<UnaryOperator>(E);
         const Expr* Sub = UO->getSubExpr();
-        return FindVarInExpr(S, V, AF, Sub);
+        return isVarInExpr(V, AF, Sub);
       }
 
     case Stmt::StmtClass::DeclRefExprClass:
       {
-        //std::cout << "CheckDeclRef: " << E->getSourceRange().printToString(S.getSourceManager()) << std::endl;
         const DeclRefExpr *DRE = dyn_cast<DeclRefExpr>(E);
         const ValueDecl *VD = DRE->getDecl();
-        //std::cout << "DeclRefExpr: " << VD->getNameAsString() << " -- " << V->getNameAsString() 
-        //          << "  ==? " << (VD == V) << std::endl;
         return (VD == V);
       }
 
@@ -358,21 +346,18 @@ bool FindVarInExpr(Sema &S, VarDecl *V, std::function<bool(const Expr*)> AF, con
   return false; 
 }
 
-bool FindVarInStmt(Sema &S,  VarDecl *V, std::function<bool(const Expr*)> assignF, const Stmt *St) {
+bool isVarInStmt(VarDecl *V, std::function<bool(const Expr*)> AssignF, const Stmt *St) {
   // We have a variable declaration and want to know if it is referenced
-  // in this expression or statement children. This code walks down 
-  // looking for a match, and returns on the first one. It takes a (possibly nullptr)
-  // assignment function which will be called with the RHS expression
-  // if the Var is being assigned on the left. 
+  // in this statment or its children, if any.  
   if(!St)
     return false;
 
   const Expr *E = dyn_cast<Expr>(St);
   if(E)
-    return FindVarInExpr(S, V, assignF, E);
+    return isVarInExpr(V, AssignF, E);
   else {
     for(const Stmt *SubStmt : St->children()){
-      bool match = FindVarInStmt(S, V, assignF, SubStmt);
+      bool match = isVarInStmt(V, AssignF, SubStmt);
       if(match)
         return match;
     }
@@ -381,17 +366,28 @@ bool FindVarInStmt(Sema &S,  VarDecl *V, std::function<bool(const Expr*)> assign
 }
 
 
-#include <queue>
-#include <unordered_map>
 typedef std::tuple<VarDecl*, SourceLocation, FunctionDecl*> CaptureTuple;
-typedef std::queue<CaptureTuple> CaptureQueue;
 typedef std::unordered_multimap<FunctionDecl*, CaptureTuple> CaptureMMap;
-
-CaptureQueue PotentialCapturesQ;
 
 CaptureMMap  PotentialCapturesMM;
 
 void Sema::checkSYCLDevicePointerCapture(VarDecl *Var, SourceLocation CaptureLoc) {
+  // Proper diagnoses of a captured lambda variable can't be performed until the 
+  // parent function's body is ready.  So we file the potential capture under its parent
+  // FunctionDecl, and diagnose it when that function is finished.
+  assert(getLangOpts().SYCLIsDevice &&
+         "Should only be called during SYCL compilation");
+  assert(Var->getType()->isAnyPointerType() &&
+         "Should only be called for pointer types being captured.");
+
+  FunctionDecl *LambdaFD = dyn_cast<FunctionDecl>(getCurLexicalContext()); 
+  DeclContext *DC = LambdaFD->getParentFunctionOrMethod();
+  FunctionDecl *ParentFD = dyn_cast_or_null<FunctionDecl>(DC);
+  
+  PotentialCapturesMM.insert(std::make_pair(ParentFD, std::make_tuple(Var, CaptureLoc, LambdaFD))); 
+}
+
+void Sema::diagSYCLDevicePointerCaptures(FunctionDecl *CallFD) {
   // Any pointer captured into the SYCL kernel lambda will fail when
   // dereferenced...except USM. If it weren't for USM we could just emit a
   // deferred diagnostic for every pointer capture. Instead, we attempt to
@@ -400,26 +396,9 @@ void Sema::checkSYCLDevicePointerCapture(VarDecl *Var, SourceLocation CaptureLoc
   // For those that are unknown, we _could_ emit a gentle note suggesting the user 
   // double check that they are using USM.  But at this time we do not. 
   // For safe USM pointers, we do nothing.
-  assert(getLangOpts().SYCLIsDevice &&
-         "Should only be called during SYCL compilation");
-  assert(Var->getType()->isAnyPointerType() &&
-         "Should only be called for pointer types being captured.");
-
-  FunctionDecl *FD = dyn_cast<FunctionDecl>(getCurLexicalContext());
-  DeclContext *DC = FD->getParentFunctionOrMethod();
-  FunctionDecl *parentFD = dyn_cast_or_null<FunctionDecl>(DC);
-  std::cout << "checkSYCL contextFD: " << FD << " - parentFD: "  << parentFD << std::endl;
-  
-  PotentialCapturesQ.push(std::make_tuple(Var, CaptureLoc, FD)); //easy
-
-  PotentialCapturesMM.insert(std::make_pair(parentFD, std::make_tuple(Var, CaptureLoc, FD))); //hard
-}
-
-void Sema::diagSYCLDevicePointerCaptures(FunctionDecl *callFD) {
-
   if(PotentialCapturesMM.empty()){ return; }
 
-  auto PCs = PotentialCapturesMM.equal_range(callFD);
+  auto PCs = PotentialCapturesMM.equal_range(CallFD);
 
   for_each(PCs.first, PCs.second, [this](CaptureMMap::value_type& CapVal) {
   
@@ -431,16 +410,14 @@ void Sema::diagSYCLDevicePointerCaptures(FunctionDecl *callFD) {
     enum ExprAllocation { Unknown, USM, WillCrash };
     ExprAllocation howAllocated = Unknown;
 
-    // We use this to check declarations and assignments
+    // We will use this to check declarations and assignments.
     auto VetteCallExpr = [&howAllocated](const Expr *E){
       E = E->IgnoreCasts();
-      //std::cout << "Vette-ing " << E->getStmtClassName() << std::endl;
       const CallExpr *CE = dyn_cast<CallExpr>(E);
       bool updated = false;
       if(CE){
         const FunctionDecl *func = CE->getDirectCallee();
         auto FullName = func->getQualifiedNameAsString();
-        std::cout << "vette full name: " << FullName << std::endl;
         // Check to see if this function call is one of the USM allocators.
         if ((FullName.rfind("cl::sycl::malloc", 0) == 0) ||
             (FullName.rfind("cl::sycl::aligned_alloc", 0) == 0)) {
@@ -466,7 +443,7 @@ void Sema::diagSYCLDevicePointerCaptures(FunctionDecl *callFD) {
 
       const CallExpr *CE = dyn_cast<CallExpr>(Init);
       if (CE) {
-        VetteCallExpr(CE); //modifies howAllocated via side-effect.
+        VetteCallExpr(CE); //Modifies howAllocated via side-effect.
       } else {
         // Var has initialization, but not as return result of a function,
         // disqualify any other obvious bad initialization expressions.
@@ -482,31 +459,27 @@ void Sema::diagSYCLDevicePointerCaptures(FunctionDecl *callFD) {
     // else: Var does not have local initialization, might be parameter, etc.
 
     // We may have identified some initialization as unsafe. But that variable is subject to change.
-    // So we look through the statements to see if that variable is otherwise referenced before capture. 
-    // We don't try to vette most references - its mere existence means we back away from emitting an error.
+    // So we look through the statements to see if that variable is otherwise referenced before capture,
+    // or if reassigned it is assessed with AssignF. 
     DeclContext *DC = Var->getParentFunctionOrMethod();
     const FunctionDecl *FD = dyn_cast_or_null<FunctionDecl>(DC);
-    DeclContext *DC2 = FDCap->getParentFunctionOrMethod();
-    const FunctionDecl *FD2 = dyn_cast_or_null<FunctionDecl>(DC2);
-    std::cout << "FD: " << FD << " - " << ( FD ? FD->hasBody() : false) << " FD2: " << FD2 << " - " << ( FD2 ? FD2->hasBody() : false) << std::endl;
     if(FD && FD->hasBody()){
-      std::cout << "body yes " << Var->getNameAsString() << std::endl;
       Stmt *TopStmt = FD->getBody(FD);
-      bool match = FindVarInStmt(*this, Var, AssignF, TopStmt);
+      bool match = isVarInStmt(Var, AssignF, TopStmt);
       if(match)
         howAllocated = Unknown; 
     } else {
-      std::cout << "NO Body " << Var->getNameAsString() << " FD: " << FD << std::endl;
-      //howAllocated = Unknown;  
+      howAllocated = Unknown;
     }
     
-    // diagnostics   We use long form because we need to pass in the captured FunctionDecl.
+    // Emit diagnostics.   We use long form because we need to pass in the captured FunctionDecl.
     if (howAllocated == WillCrash){
       Sema::DeviceDiagBuilder(Sema::DeviceDiagBuilder::K_Deferred, CaptureLoc, diag::err_sycl_illegal_memory_reference, FDCap, *this);
       if(DecLoc.isValid())
         Sema::DeviceDiagBuilder(Sema::DeviceDiagBuilder::K_Deferred, DecLoc, diag::note_declared_at, FDCap, *this);
     }
   }); //for_each
+  PotentialCapturesMM.erase(CallFD);
 }
 
 
@@ -575,19 +548,6 @@ public:
     SemaRef.Diag(E->getExprLoc(), diag::err_sycl_restrict) << Sema::KernelRTTI;
     return true;
   }
-
-  //CP
-  // bool VisitDeclRefExpr(DeclRefExpr *E) {
-  //   ValueDecl *D = E->getDecl();
-  //   QualType Ty = D->getType();
-  //   SourceRange   RefRange = E->getSourceRange();
-  //   if(Ty->isAnyPointerType() && E->refersToEnclosingVariableOrCapture()) {
-  //     VarDecl *DVar = dyn_cast<VarDecl>(D);
-  //     if(DVar)
-  //       SemaRef.checkSYCLDevicePointerCapture(DVar, RefRange.getBegin());
-  //   }
-  //   return true;
-  // }
 
   // The call graph for this translation unit.
   CallGraph SYCLCG;

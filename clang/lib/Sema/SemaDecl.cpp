@@ -14386,7 +14386,6 @@ Decl *Sema::ActOnFinishFunctionBody(Decl *dcl, Stmt *Body,
     DiscardCleanupsInEvaluationContext();
   }
 
-  //CP
   if(LangOpts.SYCLIsDevice)
     diagSYCLDevicePointerCaptures(FD);
 
