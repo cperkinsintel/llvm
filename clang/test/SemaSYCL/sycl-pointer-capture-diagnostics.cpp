@@ -58,15 +58,13 @@ void *malloc(std::size_t sz);
 void *calloc(std::size_t num, std::size_t sz);
 //-- End Mocks
 
-
-
 struct Mesh {
   float a;
 };
 
 // User functions that might allocate memory in some way unknown to us.
-float* unknownFunc();
-Mesh* unknownMeshF();
+float *unknownFunc();
+Mesh *unknownMeshF();
 
 void allocateUSMByHandle(float **pointerHandle, std::size_t sz, sycl::device &dev, sycl::context &ctxt) {
   float *mem = sycl::malloc_shared<float>(sz, dev, ctxt);
@@ -87,13 +85,13 @@ int something(float *fromParam) {
   //-- various bad pointers
   float stackFloat = 20.0;
   float *stackFloatP = &stackFloat; //#decl_stackFloatP
-  float *neverInitialized; 
+  float *neverInitialized;
 
   // std::string is already caught by 'non-trivially copy constructible' check.
   // so we only worry about literal strings.
   auto stringLiteral = "omgwtf"; //#decl_stringLiteral
 
-  //-- various 'unknown' pointers.  
+  //-- various 'unknown' pointers.
   // No message or error. Up to dev to ensure they don't crash.
 
   //fromParam
@@ -101,7 +99,6 @@ int something(float *fromParam) {
   float *apocryphal = unknownFunc(); //#decl_apocryphal
   float *usmByHandle;
   allocateUSMByHandle(&usmByHandle, 10, device, context);
-
 
   //this one initialized as bad, but later changed. No error emitted
   float *firstBadLaterGood = &stackFloat;
@@ -112,8 +109,8 @@ int something(float *fromParam) {
   stackMesh.a = 31.0;
   Mesh *stackMeshP = &stackMesh; //#decl_stackMeshP
   Mesh *neverInitializedMeshP;
-  Mesh *mallocMeshP = static_cast<Mesh *>(malloc(sizeof(Mesh)));                            //#decl_mallocMeshP
-  Mesh *mallocMeshP2 = static_cast<Mesh *>(malloc(sizeof(Mesh)));                           //#decl_mallocMeshP2
+  Mesh *mallocMeshP = static_cast<Mesh *>(malloc(sizeof(Mesh)));  //#decl_mallocMeshP
+  Mesh *mallocMeshP2 = static_cast<Mesh *>(malloc(sizeof(Mesh))); //#decl_mallocMeshP2
   Mesh *unknownMeshP = unknownMeshF();
   Mesh *usmMeshP = static_cast<Mesh *>(sycl::malloc_shared(sizeof(Mesh), device, context)); //#decl_usmMeshP
   Mesh *usmMeshP2 = sycl::malloc_shared<Mesh>(1, device, context);                          //#decl_usmMeshP2
@@ -157,7 +154,7 @@ int something(float *fromParam) {
     // --- Captures
 
     //-- various bad pointers
-    //    all of these will cause crashes if not caught. 
+    //    all of these will cause crashes if not caught.
 
     // expected-note@#call_kernelFunc {{called by 'kernel_single_task<AName, (lambda}}
     // expected-note@#decl_mallocFloatP {{declared here}}
@@ -168,33 +165,30 @@ int something(float *fromParam) {
     // expected-error@+1 {{Illegal memory reference in SYCL device kernel. Use USM (malloc_shared, etc) instead.}}
     stackFloatP[0] = 30.0;
 
-    
-    neverInitialized[0] = 31.0;  //will crash, not caught presently. 
+    neverInitialized[0] = 31.0; //will crash, not caught presently.
 
     // expected-note@#decl_stringLiteral {{declared here}}
     // expected-error@+1 {{Illegal memory reference in SYCL device kernel. Use USM (malloc_shared, etc) instead.}}
     char x = stringLiteral[0];
 
-
-    //-- various 'unknown' pointers.  
-    // No message or error. Up to dev to ensure they don't crash.  
-    fromParam[0] = 70.0; 
+    //-- various 'unknown' pointers.
+    // No message or error. Up to dev to ensure they don't crash.
+    fromParam[0] = 70.0;
 
     apocryphal[0] = 71.0;
 
-    usmByHandle[0] = 72.0; 
+    usmByHandle[0] = 72.0;
 
     firstBadLaterGood[0] = 73.0;
 
-
     //-- struct pointers
-    //    various bad struct pointer derefs will cause crashes if not caught. 
+    //    various bad struct pointer derefs will cause crashes if not caught.
 
     // expected-note@#decl_stackMeshP {{declared here}}
     // expected-error@+1 {{Illegal memory reference in SYCL device kernel. Use USM (malloc_shared, etc) instead.}}
     float smpa = stackMeshP->a;
 
-    neverInitializedMeshP->a = 34.0; //will crash, not caught presently. 
+    neverInitializedMeshP->a = 34.0; //will crash, not caught presently.
 
     // expected-note@#decl_mallocMeshP {{declared here}}
     // expected-error@+1 {{Illegal memory reference in SYCL device kernel. Use USM (malloc_shared, etc) instead.}}
@@ -205,14 +199,13 @@ int something(float *fromParam) {
     mallocMeshP2->a = 45.0;
 
     //     unknown struct -- Nothing emitted. Up to developer to ensure it doesn't crash.
-    unknownMeshP->a = 72.0;   
+    unknownMeshP->a = 72.0;
 
     //     usm struct  -- OK
     float umpa = usmMeshP->a;
     usmMeshP2->a = 61.0;
 
-    float sma = stackMesh.a; // Struct itself is copyable, so perfectly safe to capture it. 
-
+    float sma = stackMesh.a; // Struct itself is copyable, so perfectly safe to capture it.
 
     //-- malloc
     //   all will crash if uncaught.
@@ -229,7 +222,6 @@ int something(float *fromParam) {
     // expected-error@+1 {{Illegal memory reference in SYCL device kernel. Use USM (malloc_shared, etc) instead.}}
     float someValue = *callocFloatP2;
 
-    
     // --- Only the first capture of a pointer emits anything. So these accesses will NOT emit redundant diagnostics.
     calledFromLambda(mallocFloatP);
     stackFloatP[0] = 31.0;
@@ -242,7 +234,6 @@ int something(float *fromParam) {
     mallocFloatP2[0] = 81;
     callocFloatP[0] = 81;
     float someOtherValue = *callocFloatP2;
-    
 
     // --- These captures all use USM, and should pass without any notes or errors.
     calledFromLambda(usmSharedP);
