@@ -32,6 +32,26 @@ void *buffer_impl::allocateMem(ContextImplPtr Context, bool InitFromUserData,
       BaseT::getSize(), BaseT::MInteropEvent, BaseT::MInteropContext,
       OutEventToWait);
 }
+
+
+void buffer_impl::addBufferInfo(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub ) {
+  MBufferInfoDQ.emplace_back(BuffPtr, Sz, Offset, IsSub);
+}
+
+
+
+EventImplPtr buffer_impl::copyBackSubBuffer(const void *const BuffPtr, bool Wait){
+
+
+  if(Wait)
+    //event->Wait(Event);
+    return nullptr;
+  else
+    //return Event;
+    return nullptr;
+}
+
+
 } // namespace detail
 } // namespace sycl
 } // __SYCL_INLINE_NAMESPACE(cl)
