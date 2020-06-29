@@ -115,7 +115,7 @@ public:
 
   void resize(size_t size) { BaseT::MSizeInBytes = size; }
 
-protected:
+private:
 
   template <typename T, int Dimensions, typename AllocatorT, typename Enable>
   friend class sycl::buffer;
@@ -128,7 +128,7 @@ protected:
   void addBufferInfo(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub );
   
 
-  EventImplPtr copyBackSubBuffer(detail::when now, const void *const BuffPtr, bool Wait);
+  EventImplPtr copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait);
 
 };
 

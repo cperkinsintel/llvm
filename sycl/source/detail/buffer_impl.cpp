@@ -40,16 +40,20 @@ void buffer_impl::addBufferInfo(const void *const BuffPtr, const size_t Sz, cons
 }
 
 
-static bool shouldCopyBack(detail::when now, buffer_usage& BU){
-  return true;
+static bool shouldCopyBack(detail::when_copyback now, buffer_usage& BU){
+  // when false, tests pass.  
+  // now == ~dtor will not be correct, but shouldn't be too horrible.
+  return //now == detail::when_copyback::dtor;
 }
 
-EventImplPtr buffer_impl::copyBackSubBuffer(detail::when now, const void *const BuffPtr, bool Wait){
+EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait){
+  //find record of buffer_usage
   std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage BU){
     return (BU.buffAddr == BuffPtr);
   });
   assert(it != MBufferInfoDQ.end() && "no record of subbuffer");
   buffer_usage BU = it[0];
+
   if(shouldCopyBack(now, BU)){
     const id<3> Offset{BU.BufferInfo.OffsetInBytes, 0, 0};
     const range<3> AccessRange{BU.BufferInfo.SizeInBytes, 1, 1};
@@ -58,13 +62,15 @@ EventImplPtr buffer_impl::copyBackSubBuffer(detail::when now, const void *const 
     SYCLMemObjI *SYCLMemObject = this;
     const int Dims = 1;
     const int ElemSize = 1;
+
     Requirement Req(Offset, AccessRange, MemoryRange, AccessMode, SYCLMemObject, Dims, ElemSize);
-    Req.MData = MUserPtr; //?
+    Req.MData = MUserPtr;
+
     EventImplPtr Event = Scheduler::getInstance().addCopyBack(&Req);
-      if (Event && Wait)
-        Event->wait(Event);
-      else if(Event)
-        return Event;
+    if (Event && Wait)
+      Event->wait(Event);
+    else if(Event)
+      return Event;
   }
     
   return nullptr; 

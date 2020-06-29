@@ -252,7 +252,7 @@ public:
   
   ~buffer(){
     if(IsSubBuffer)
-      impl->copyBackSubBuffer(detail::when::dtor, this, true);//
+      impl->copyBackSubBuffer(detail::when_copyback::dtor, this, true);
   }
 
   bool operator==(const buffer &rhs) const { return impl == rhs.impl; }
@@ -358,7 +358,9 @@ private:
          range<dimensions> reinterpretRange, size_t reinterpretOffset,
          bool isSubBuffer)
       : impl(Impl), Range(reinterpretRange), OffsetInBytes(reinterpretOffset),
-        IsSubBuffer(isSubBuffer){};
+        IsSubBuffer(isSubBuffer){
+          impl->addBufferInfo(((void*)this), get_size(), this->OffsetInBytes, this->IsSubBuffer );
+        };
 
   template <typename Type, int N>
   size_t getOffsetInBytes(const id<N> &offset, const range<N> &range) {

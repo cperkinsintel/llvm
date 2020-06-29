@@ -32,7 +32,7 @@ enum class settable_bool {
 //  because that function will be called from two places (dtor and immedaite)
 // acts as the 'when' parameter for shouldCopyBack(when, buff*) (dtor, immediate and undertermined)
 //  where 'undetermined' is simply "will this buffer copy back at any time?"
-enum class when {
+enum class when_copyback {
     dtor,
     immediate,
     never,
