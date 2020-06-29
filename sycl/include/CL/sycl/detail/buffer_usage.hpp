@@ -21,10 +21,22 @@ namespace sycl {
 namespace detail {
 
 // allows us to represent whether a user has set (or not) a boolean value, and, if so, to what.
-enum SettableBool { 
+enum class settable_bool { 
     set_false = -1,
     not_set,
     set_true
+};
+
+// acts as return value of whenCopyBack(buff*).  which returns dtor, immediate or never
+// acts as the 'now' parameter for copyBackSubBuffer(now, buff*), 
+//  because that function will be called from two places (dtor and immedaite)
+// acts as the 'when' parameter for shouldCopyBack(when, buff*) (dtor, immediate and undertermined)
+//  where 'undetermined' is simply "will this buffer copy back at any time?"
+enum class when {
+    dtor,
+    immediate,
+    never,
+    undetermined
 };
 
 // need to track information about a sub/buffer, 
@@ -46,7 +58,7 @@ struct buffer_usage {
     // basic info about the buffer (range, offset, isSub)
     buffer_info BufferInfo;
     // did the user set the writeback?
-    SettableBool MWriteBackSet;
+    settable_bool MWriteBackSet;
     // the list of CommandGroupHandlers used to request any write-capable accessors
     std::stack<handler*> CghWithWriteAcc;
     // the list of CommandGroupHandlers used to request any read-capable accessors
@@ -56,7 +68,7 @@ struct buffer_usage {
     bool HostHasWriteAcc;
     //ctor
     buffer_usage(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub) : 
-        buffAddr(BuffPtr) , BufferInfo(Sz, Offset, IsSub), MWriteBackSet(SettableBool::not_set),
+        buffAddr(BuffPtr) , BufferInfo(Sz, Offset, IsSub), MWriteBackSet(settable_bool::not_set),
         HostHasReadAcc(false), HostHasWriteAcc(false) {}
 };
 

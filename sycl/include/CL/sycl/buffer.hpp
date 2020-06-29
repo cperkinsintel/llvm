@@ -252,7 +252,7 @@ public:
   
   ~buffer(){
     if(IsSubBuffer)
-      impl->copyBackSubBuffer(this, true);//
+      impl->copyBackSubBuffer(detail::when::dtor, this, true);//
   }
 
   bool operator==(const buffer &rhs) const { return impl == rhs.impl; }

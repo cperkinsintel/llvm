@@ -9,6 +9,7 @@
 #include <CL/sycl/detail/buffer_impl.hpp>
 #include <CL/sycl/detail/memory_manager.hpp>
 #include <detail/context_impl.hpp>
+#include <detail/event_impl.hpp>
 #include <detail/scheduler/scheduler.hpp>
 
 __SYCL_INLINE_NAMESPACE(cl) {
@@ -39,16 +40,34 @@ void buffer_impl::addBufferInfo(const void *const BuffPtr, const size_t Sz, cons
 }
 
 
+static bool shouldCopyBack(detail::when now, buffer_usage& BU){
+  return true;
+}
 
-EventImplPtr buffer_impl::copyBackSubBuffer(const void *const BuffPtr, bool Wait){
-
-
-  if(Wait)
-    //event->Wait(Event);
-    return nullptr;
-  else
-    //return Event;
-    return nullptr;
+EventImplPtr buffer_impl::copyBackSubBuffer(detail::when now, const void *const BuffPtr, bool Wait){
+  std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage BU){
+    return (BU.buffAddr == BuffPtr);
+  });
+  assert(it != MBufferInfoDQ.end() && "no record of subbuffer");
+  buffer_usage BU = it[0];
+  if(shouldCopyBack(now, BU)){
+    const id<3> Offset{BU.BufferInfo.OffsetInBytes, 0, 0};
+    const range<3> AccessRange{BU.BufferInfo.SizeInBytes, 1, 1};
+    const range<3> MemoryRange{BU.BufferInfo.SizeInBytes, 1, 1};
+    const access::mode AccessMode = access::mode::read;
+    SYCLMemObjI *SYCLMemObject = this;
+    const int Dims = 1;
+    const int ElemSize = 1;
+    Requirement Req(Offset, AccessRange, MemoryRange, AccessMode, SYCLMemObject, Dims, ElemSize);
+    Req.MData = MUserPtr; //?
+    EventImplPtr Event = Scheduler::getInstance().addCopyBack(&Req);
+      if (Event && Wait)
+        Event->wait(Event);
+      else if(Event)
+        return Event;
+  }
+    
+  return nullptr; 
 }
 
 

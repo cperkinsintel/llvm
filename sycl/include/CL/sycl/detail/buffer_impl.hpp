@@ -115,15 +115,20 @@ public:
 
   void resize(size_t size) { BaseT::MSizeInBytes = size; }
 
+protected:
+
+  template <typename T, int Dimensions, typename AllocatorT, typename Enable>
+  friend class sycl::buffer;
+
+  //de-queue of buffer_info, if any.
+  std::deque<buffer_usage> MBufferInfoDQ;
+
   // if this MemObj is backing a buffer (and sub-buffers), provide information
   // to help with copy-back decisions.
   void addBufferInfo(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub );
   
-  EventImplPtr copyBackSubBuffer(const void *const BuffPtr, bool Wait);
 
-  protected:
-  //de-queue of buffer_info, if any.
-  std::deque<buffer_usage> MBufferInfoDQ;
+  EventImplPtr copyBackSubBuffer(detail::when now, const void *const BuffPtr, bool Wait);
 
 };
 
