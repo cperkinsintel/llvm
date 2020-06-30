@@ -43,7 +43,8 @@ void buffer_impl::addBufferInfo(const void *const BuffPtr, const size_t Sz, cons
 static bool shouldCopyBack(detail::when_copyback now, buffer_usage& BU){
   // when false, tests pass.  
   // now == ~dtor will not be correct, but shouldn't be too horrible.
-  return //now == detail::when_copyback::dtor;
+  return now == detail::when_copyback::dtor;
+  //return false;
 }
 
 EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait){
