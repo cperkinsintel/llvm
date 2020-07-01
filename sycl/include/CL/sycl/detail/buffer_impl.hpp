@@ -107,10 +107,14 @@ public:
   MemObjType getType() const override { return MemObjType::BUFFER; }
 
   ~buffer_impl() {
+    //CP  -- remove the ifdef
+  #ifdef SB_NORM
+    std::cout << "SB_NORM - ~buffer_impl -> updateHostMemory" << std::endl;
     try {
       BaseT::updateHostMemory();
     } catch (...) {
     }
+  #endif
   }
 
   void resize(size_t size) { BaseT::MSizeInBytes = size; }

@@ -273,10 +273,15 @@ void copyD2H(SYCLMemObjI *SYCLMemObj, RT::PiMem SrcMem, QueueImplPtr SrcQueue,
     DstAccessRange[0] *= DstElemSize;
     DstSize[0] *= DstElemSize;
 
+    //CP DestAccessRange unused.
+    std::cout << "copyD2H. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
+    std::cout << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
+
     if (1 == DimDst && 1 == DimSrc) {
+      unsigned int NumBytes = std::min(SrcAccessRange[0], DstAccessRange[0]);
       Plugin.call<PiApiKind::piEnqueueMemBufferRead>(
           Queue, SrcMem,
-          /*blocking_read=*/CL_FALSE, SrcOffset[0], SrcAccessRange[0],
+          /*blocking_read=*/CL_FALSE, SrcOffset[0], NumBytes,
           DstMem + DstOffset[0], DepEvents.size(), &DepEvents[0], &OutEvent);
     } else {
       size_t BufferRowPitch = (1 == DimSrc) ? 0 : SrcSize[0];

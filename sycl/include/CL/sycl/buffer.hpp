@@ -249,11 +249,17 @@ public:
 
   buffer &operator=(buffer &&rhs) = default;
 
-  
   ~buffer(){
+    //CP cleanup
+    std::cout << "~buffer : " << IsSubBuffer;
+  #ifdef SB_NEW
+    std::cout << "SB_NEW";
     if(IsSubBuffer)
       impl->copyBackSubBuffer(detail::when_copyback::dtor, this, true);
+  #endif
+    std::cout << std::endl;
   }
+  
 
   bool operator==(const buffer &rhs) const { return impl == rhs.impl; }
 

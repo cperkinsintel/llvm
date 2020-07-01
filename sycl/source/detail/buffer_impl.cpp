@@ -47,6 +47,7 @@ static bool shouldCopyBack(detail::when_copyback now, buffer_usage& BU){
   //return false;
 }
 
+
 EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait){
   //find record of buffer_usage
   std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage BU){
@@ -58,20 +59,24 @@ EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const voi
   if(shouldCopyBack(now, BU)){
     const id<3> Offset{BU.BufferInfo.OffsetInBytes, 0, 0};
     const range<3> AccessRange{BU.BufferInfo.SizeInBytes, 1, 1};
-    const range<3> MemoryRange{BU.BufferInfo.SizeInBytes, 1, 1};
+    const range<3> MemoryRange{/*BU.BufferInfo.SizeInBytes*/ 5, 1, 1}; // !!!
     const access::mode AccessMode = access::mode::read;
     SYCLMemObjI *SYCLMemObject = this;
     const int Dims = 1;
     const int ElemSize = 1;
 
     Requirement Req(Offset, AccessRange, MemoryRange, AccessMode, SYCLMemObject, Dims, ElemSize);
-    Req.MData = MUserPtr;
-
-    EventImplPtr Event = Scheduler::getInstance().addCopyBack(&Req);
-    if (Event && Wait)
-      Event->wait(Event);
-    else if(Event)
-      return Event;
+    
+    void* DataPtr = getUserPtr();  //
+    if(DataPtr != nullptr){
+      Req.MData = DataPtr;
+    
+      EventImplPtr Event = Scheduler::getInstance().addCopyBack(&Req);
+      if (Event && Wait)
+        Event->wait(Event);
+      else if(Event)
+        return Event;
+    }
   }
     
   return nullptr; 

@@ -11,9 +11,10 @@
 
 #include <CL/sycl/context.hpp>
 
-
-
 #include <stack>
+
+#define SB_NEW
+//#define SB_NORM
 
 __SYCL_INLINE_NAMESPACE(cl) {
 namespace sycl {
