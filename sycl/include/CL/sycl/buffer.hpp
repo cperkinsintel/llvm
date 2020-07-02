@@ -253,11 +253,12 @@ public:
     //CP cleanup
     std::cout << "~buffer : " << IsSubBuffer;
   #ifdef SB_NEW
-    std::cout << "SB_NEW";
+    std::cout << " SB_NEW" << std::endl;
     if(IsSubBuffer)
       impl->copyBackSubBuffer(detail::when_copyback::dtor, this, true);
-  #endif
+  #else
     std::cout << std::endl;
+  #endif
   }
   
 

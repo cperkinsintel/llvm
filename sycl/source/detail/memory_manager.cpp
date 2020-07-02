@@ -273,7 +273,7 @@ void copyD2H(SYCLMemObjI *SYCLMemObj, RT::PiMem SrcMem, QueueImplPtr SrcQueue,
     DstAccessRange[0] *= DstElemSize;
     DstSize[0] *= DstElemSize;
 
-    //CP DestAccessRange unused.
+    //CP DestAccessRange unused (until now!).
     std::cout << "copyD2H. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
     std::cout << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
 

@@ -59,13 +59,13 @@ EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const voi
   if(shouldCopyBack(now, BU)){
     const id<3> Offset{BU.BufferInfo.OffsetInBytes, 0, 0};
     const range<3> AccessRange{BU.BufferInfo.SizeInBytes, 1, 1};
-    const range<3> MemoryRange{/*BU.BufferInfo.SizeInBytes*/ 5, 1, 1}; // !!!
+    const range<3> MemoryRange{BU.BufferInfo.SizeInBytes, 1, 1}; // {5,1,1,}  // seems to not be used.
     const access::mode AccessMode = access::mode::read;
     SYCLMemObjI *SYCLMemObject = this;
     const int Dims = 1;
     const int ElemSize = 1;
 
-    Requirement Req(Offset, AccessRange, MemoryRange, AccessMode, SYCLMemObject, Dims, ElemSize);
+    Requirement Req(Offset, AccessRange, MemoryRange, AccessMode, SYCLMemObject, Dims, ElemSize, BU.BufferInfo.OffsetInBytes, true);
     
     void* DataPtr = getUserPtr();  //
     if(DataPtr != nullptr){

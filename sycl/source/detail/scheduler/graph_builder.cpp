@@ -371,8 +371,14 @@ Command *Scheduler::GraphBuilder::addCopyBack(Requirement *Req) {
   AllocaCommandBase *SrcAllocaCmd =
       findAllocaForReq(Record, Req, Record->MCurContext);
 
+  const Requirement *SrcReq = SrcAllocaCmd->getRequirement();
+  Requirement SrcReqClone(*SrcReq);
+  //when copying back, throw out any vestigial Src Offset 
+  if(Req->MIsSubBuffer && SrcReq->MIsSubBuffer && SrcReq->MOffset[0] != 0)
+    SrcReqClone.MOffset = id<3>{0,0,0};
+  
   std::unique_ptr<MemCpyCommandHost> MemCpyCmdUniquePtr(new MemCpyCommandHost(
-      *SrcAllocaCmd->getRequirement(), SrcAllocaCmd, *Req, &Req->MData,
+      SrcReqClone, SrcAllocaCmd, *Req, &Req->MData,
       SrcAllocaCmd->getQueue(), std::move(HostQueue)));
 
   if (!MemCpyCmdUniquePtr)
