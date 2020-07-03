@@ -13,8 +13,8 @@
 
 #include <stack>
 
-//#define SB_NEW
-#define SB_NORM
+#define SB_NEW
+//#define SB_NORM
 
 __SYCL_INLINE_NAMESPACE(cl) {
 namespace sycl {
@@ -34,8 +34,8 @@ enum class settable_bool {
 // acts as the 'when' parameter for shouldCopyBack(when, buff*) (dtor, immediate and undertermined)
 //  where 'undetermined' is simply "will this buffer copy back at any time?"
 enum class when_copyback {
-    dtor,
-    immediate,
+    dtor,         // addCopyBack during sub-buffer dtor
+    immediate,    // copy-back achieved by enqueued map operation 
     never,
     undetermined
 };

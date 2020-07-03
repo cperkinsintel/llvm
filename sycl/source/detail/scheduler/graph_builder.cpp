@@ -8,6 +8,7 @@
 
 #include "detail/config.hpp"
 #include <CL/sycl/access/access.hpp>
+#include <CL/sycl/detail/buffer_usage.hpp>     //CP -- REMOVE
 #include <CL/sycl/detail/memory_manager.hpp>
 #include <CL/sycl/exception.hpp>
 #include <detail/context_impl.hpp>
@@ -215,8 +216,9 @@ UpdateHostRequirementCommand *Scheduler::GraphBuilder::insertUpdateHostReqCmd(
 static Command *insertMapUnmapForLinkedCmds(AllocaCommandBase *AllocaCmdSrc,
                                             AllocaCommandBase *AllocaCmdDst,
                                             access::mode MapMode) {
-  assert(AllocaCmdSrc->MLinkedAllocaCmd == AllocaCmdDst &&
-         "Expected linked alloca commands");
+  if (AllocaCmdSrc->getType() != Command::CommandType::ALLOCA_SUB_BUF)
+    assert(AllocaCmdSrc->MLinkedAllocaCmd == AllocaCmdDst && "Expected linked alloca commands");
+
   assert(AllocaCmdSrc->MIsActive &&
          "Expected source alloca command to be active");
 
@@ -244,21 +246,36 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
                                                    const QueueImplPtr &Queue) {
 
   AllocaCommandBase *AllocaCmdDst = getOrCreateAllocaForReq(Record, Req, Queue);
+  // Sub-buffers need to check linkage via parent, but normal Alloca just use self.
+  AllocaCommandBase *LinkageAllocaCmdDst = AllocaCmdDst; 
   if (!AllocaCmdDst)
     throw runtime_error("Out of host memory", PI_OUT_OF_HOST_MEMORY);
 
   std::set<Command *> Deps =
       findDepsForReq(Record, Req, Queue->getContextImplPtr());
   Deps.insert(AllocaCmdDst);
+#ifndef SB_NEW
   // Get parent allocation of sub buffer to perform full copy of whole buffer
   if (IsSuitableSubReq(Req)) {
     if (AllocaCmdDst->getType() == Command::CommandType::ALLOCA_SUB_BUF)
       AllocaCmdDst =
           static_cast<AllocaSubBufCommand *>(AllocaCmdDst)->getParentAlloca();
   }
+#else
+  // Get parent allocation of sub buffer to confirm linkage
+  if (IsSuitableSubReq(Req)) {
+    if (AllocaCmdDst->getType() == Command::CommandType::ALLOCA_SUB_BUF)
+      LinkageAllocaCmdDst = static_cast<AllocaSubBufCommand *>(AllocaCmdDst)->getParentAlloca();
+    else
+      assert(!"Inappropriate alloca command for sub-buffer.");
+  }
+#endif
 
-  AllocaCommandBase *AllocaCmdSrc =
-      findAllocaForReq(Record, Req, Record->MCurContext);
+  AllocaCommandBase *AllocaCmdSrc = findAllocaForReq(Record, Req, Record->MCurContext);
+  // Sub-buffers need to check linkage via parent, but normal Alloca just use self.
+  AllocaCommandBase *LinkageAllocaCmdSrc = AllocaCmdSrc;  
+
+#ifndef SB_NEW
   if (!AllocaCmdSrc && IsSuitableSubReq(Req)) {
     // Since no alloca command for the sub buffer requirement was found in the
     // current context, need to find a parent alloca command for it (it must be
@@ -275,8 +292,12 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
                      Record->MAllocaCommands.end(), IsSuitableAlloca);
     AllocaCmdSrc = (Record->MAllocaCommands.end() != It) ? *It : nullptr;
   }
+#endif
+
   if (!AllocaCmdSrc)
     throw runtime_error("Cannot find buffer allocation", PI_INVALID_VALUE);
+
+#ifndef SB_NEW
   // Get parent allocation of sub buffer to perform full copy of whole buffer
   if (IsSuitableSubReq(Req)) {
     if (AllocaCmdSrc->getType() == Command::CommandType::ALLOCA_SUB_BUF)
@@ -285,10 +306,26 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
     else if (AllocaCmdSrc->getSYCLMemObj() != Req->MSYCLMemObj)
       assert(!"Inappropriate alloca command.");
   }
+#else
+  // Get parent allocation of sub buffer, so we can check linkage.
+  if (IsSuitableSubReq(Req)) {
+    if (AllocaCmdSrc->getType() == Command::CommandType::ALLOCA_SUB_BUF)
+      LinkageAllocaCmdSrc = static_cast<AllocaSubBufCommand *>(AllocaCmdSrc)->getParentAlloca();
+    else
+      assert(!"Inappropriate alloca command for sub-buffer.");
+
+    // If the operation is going to be an UNMAP, operate on the parent not the sub-buffer. 
+    // TODO: drop this limitation (rarely encountered. maybe never?)
+    if (AllocaCmdSrc->getQueue()->is_host()){
+      AllocaCmdSrc = LinkageAllocaCmdSrc;
+      AllocaCmdDst = LinkageAllocaCmdDst;
+    }
+  }
+#endif
 
   Command *NewCmd = nullptr;
 
-  if (AllocaCmdSrc->MLinkedAllocaCmd == AllocaCmdDst) {
+  if (LinkageAllocaCmdSrc->MLinkedAllocaCmd == LinkageAllocaCmdDst) {
     // Map write only as read-write
     access::mode MapMode = Req->MAccessMode;
     if (MapMode == access::mode::write)
@@ -407,6 +444,13 @@ Command *Scheduler::GraphBuilder::addHostAccessor(Requirement *Req) {
   if (MPrintOptionsArray[BeforeAddHostAcc])
     printGraphAsDot("before_addHostAccessor");
   markModifiedIfWrite(Record, Req);
+
+  //CP
+  if( Req->MIsSubBuffer){
+    std::cout << "addHostAccessor Sub Req :: AR/MR // Off/OffBytes: " 
+              << Req->MAccessRange[0] << "/" << Req->MMemoryRange[0] << " // " 
+              << Req->MOffset[0] << "/" << Req->MOffsetInBytes  << std::endl;
+  }
 
   AllocaCommandBase *HostAllocaCmd =
       getOrCreateAllocaForReq(Record, Req, HostQueue);
