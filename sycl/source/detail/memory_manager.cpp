@@ -280,6 +280,7 @@ void copyD2H(SYCLMemObjI *SYCLMemObj, RT::PiMem SrcMem, QueueImplPtr SrcQueue,
     //CP DestAccessRange unused (until now!).
     std::cout << "copyD2H. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
     std::cout << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
+    std::cout << "         SrcMem / DstMem / DM+Off: " << SrcMem << " / " << (void*)(DstMem) << " / " << (void*)(DstMem + DstOffset[0]) << std::endl;
 
     if (1 == DimDst && 1 == DimSrc) {
       unsigned int NumBytes = std::min(SrcAccessRange[0], DstAccessRange[0]); //CP  replace with assertion that AR are same?
@@ -467,7 +468,7 @@ void *MemoryManager::map(SYCLMemObjI *, void *Mem, QueueImplPtr Queue,
   cl_map_flags Flags = 0;
 
   //CP
-  std::cout << "map.  AR/AOff: " << AccessRange[0] << "/" << AccessOffset[0] << std::endl;
+  std::cout << "map.     AR/AOff: " << AccessRange[0] << "/" << AccessOffset[0] << " -- @ " << Mem << std::endl;
 
   switch (AccessMode) {
   case access::mode::read:
@@ -494,6 +495,9 @@ void *MemoryManager::map(SYCLMemObjI *, void *Mem, QueueImplPtr Queue,
 
   void *MappedPtr = nullptr;
   const size_t BytesToMap = AccessRange[0] * AccessRange[1] * AccessRange[2];
+  //CP
+  std::cout << "  adj -- AR/bytes: " << AccessRange[0] << "/" << BytesToMap << std::endl;
+
   const detail::plugin &Plugin = Queue->getPlugin();
   Plugin.call<PiApiKind::piEnqueueMemBufferMap>(
       Queue->getHandleRef(), pi::cast<RT::PiMem>(Mem), CL_FALSE, Flags,

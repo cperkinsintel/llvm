@@ -258,8 +258,7 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
   // Get parent allocation of sub buffer to perform full copy of whole buffer
   if (IsSuitableSubReq(Req)) {
     if (AllocaCmdDst->getType() == Command::CommandType::ALLOCA_SUB_BUF)
-      AllocaCmdDst =
-          static_cast<AllocaSubBufCommand *>(AllocaCmdDst)->getParentAlloca();
+      LinkageAllocaCmdDst = AllocaCmdDst = static_cast<AllocaSubBufCommand *>(AllocaCmdDst)->getParentAlloca();
   }
 #else
   // Get parent allocation of sub buffer to confirm linkage
@@ -290,7 +289,7 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
     const auto It =
         std::find_if(Record->MAllocaCommands.begin(),
                      Record->MAllocaCommands.end(), IsSuitableAlloca);
-    AllocaCmdSrc = (Record->MAllocaCommands.end() != It) ? *It : nullptr;
+    LinkageAllocaCmdSrc = AllocaCmdSrc = (Record->MAllocaCommands.end() != It) ? *It : nullptr;
   }
 #endif
 
@@ -301,8 +300,7 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
   // Get parent allocation of sub buffer to perform full copy of whole buffer
   if (IsSuitableSubReq(Req)) {
     if (AllocaCmdSrc->getType() == Command::CommandType::ALLOCA_SUB_BUF)
-      AllocaCmdSrc =
-          static_cast<AllocaSubBufCommand *>(AllocaCmdSrc)->getParentAlloca();
+      LinkageAllocaCmdSrc = AllocaCmdSrc = static_cast<AllocaSubBufCommand *>(AllocaCmdSrc)->getParentAlloca();
     else if (AllocaCmdSrc->getSYCLMemObj() != Req->MSYCLMemObj)
       assert(!"Inappropriate alloca command.");
   }
@@ -322,6 +320,9 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
     }
   }
 #endif
+
+  //CP
+  std::cout << "insertMemoryMove Alloca Src/Dst: " << AllocaCmdSrc->MMemAllocation << "/" << AllocaCmdDst->MMemAllocation << std::endl;
 
   Command *NewCmd = nullptr;
 
@@ -447,9 +448,12 @@ Command *Scheduler::GraphBuilder::addHostAccessor(Requirement *Req) {
 
   //CP
   if( Req->MIsSubBuffer){
+    SYCLMemObjT* impl = (SYCLMemObjT*)(Req->MSYCLMemObj);
     std::cout << "addHostAccessor Sub Req :: AR/MR // Off/OffBytes: " 
               << Req->MAccessRange[0] << "/" << Req->MMemoryRange[0] << " // " 
               << Req->MOffset[0] << "/" << Req->MOffsetInBytes  << std::endl;
+    std::cout << "               Req->MData: " << Req->MData 
+              << " UserPtr: " << impl->getUserPtr() << std::endl;
   }
 
   AllocaCommandBase *HostAllocaCmd =
