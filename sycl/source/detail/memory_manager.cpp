@@ -224,6 +224,10 @@ void copyH2D(SYCLMemObjI *SYCLMemObj, char *SrcMem, QueueImplPtr,
     SrcAccessRange[0] *= SrcElemSize;
     DstAccessRange[0] *= DstElemSize;
     SrcSize[0] *= SrcElemSize;
+    
+    //CP
+    std::cout << "copyH2D. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
+    std::cout << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
 
     if (1 == DimDst && 1 == DimSrc) {
       Plugin.call<PiApiKind::piEnqueueMemBufferWrite>(
@@ -278,7 +282,7 @@ void copyD2H(SYCLMemObjI *SYCLMemObj, RT::PiMem SrcMem, QueueImplPtr SrcQueue,
     std::cout << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
 
     if (1 == DimDst && 1 == DimSrc) {
-      unsigned int NumBytes = std::min(SrcAccessRange[0], DstAccessRange[0]);
+      unsigned int NumBytes = std::min(SrcAccessRange[0], DstAccessRange[0]); //CP  replace with assertion that AR are same?
       Plugin.call<PiApiKind::piEnqueueMemBufferRead>(
           Queue, SrcMem,
           /*blocking_read=*/CL_FALSE, SrcOffset[0], NumBytes,
@@ -322,6 +326,11 @@ void copyD2D(SYCLMemObjI *SYCLMemObj, RT::PiMem SrcMem, QueueImplPtr SrcQueue,
     SrcAccessRange[0] *= SrcElemSize;
     SrcSize[0] *= SrcElemSize;
     DstSize[0] *= DstElemSize;
+
+    //CP
+    std::cout << "copyD2D. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
+    std::cout << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << "unavailable" << std::endl;
+    
     if (1 == DimDst && 1 == DimSrc) {
       Plugin.call<PiApiKind::piEnqueueMemBufferCopy>(
           Queue, SrcMem, DstMem, SrcOffset[0], DstOffset[0], SrcAccessRange[0],
@@ -365,6 +374,11 @@ static void copyH2H(SYCLMemObjI *, char *SrcMem, QueueImplPtr,
 
   if (SrcMem == DstMem)
     return;
+
+  //CP
+  std::cout << "copyH2H. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
+  std::cout << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
+
 
   size_t BytesToCopy =
       SrcAccessRange[0] * SrcElemSize * SrcAccessRange[1] * SrcAccessRange[2];
@@ -451,6 +465,9 @@ void *MemoryManager::map(SYCLMemObjI *, void *Mem, QueueImplPtr Queue,
   }
 
   cl_map_flags Flags = 0;
+
+  //CP
+  std::cout << "map.  AR/AOff: " << AccessRange[0] << "/" << AccessOffset[0] << std::endl;
 
   switch (AccessMode) {
   case access::mode::read:

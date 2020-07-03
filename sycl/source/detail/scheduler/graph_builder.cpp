@@ -519,20 +519,52 @@ DepDesc Scheduler::GraphBuilder::findDepForRecord(Command *Cmd,
 
 // The function searches for the alloca command matching context and
 // requirement.
+//CP 
+//#define LOG_FIND_ALLOCA_FOR_REQ
 AllocaCommandBase *
 Scheduler::GraphBuilder::findAllocaForReq(MemObjRecord *Record,
                                           const Requirement *Req,
                                           const ContextImplPtr &Context) {
   auto IsSuitableAlloca = [&Context, Req](AllocaCommandBase *AllocaCmd) {
     bool Res = sameCtx(AllocaCmd->getQueue()->getContextImplPtr(), Context);
-    if (IsSuitableSubReq(Req)) {
+    if (Res && IsSuitableSubReq(Req)) { //CP if(Res && ...
       const Requirement *TmpReq = AllocaCmd->getRequirement();
       Res &= AllocaCmd->getType() == Command::CommandType::ALLOCA_SUB_BUF;
       Res &= TmpReq->MOffsetInBytes == Req->MOffsetInBytes;
       Res &= TmpReq->MSYCLMemObj->getSize() == Req->MSYCLMemObj->getSize();
+    #ifdef LOG_FIND_ALLOCA_FOR_REQ
+      std::cout << "          :: AllocIsSub//Off/Sz/AR//ReqIsSub=>Match!: " 
+                << (AllocaCmd->getType() == Command::CommandType::ALLOCA_SUB_BUF) << "//"
+                <<  TmpReq->MOffsetInBytes << "/" << TmpReq->MSYCLMemObj->getSize() << "/"
+                <<  TmpReq->MAccessRange[0] << "//"
+                <<  TmpReq->MIsSubBuffer << "=>" << Res << std::endl;
+    #endif
     }
     return Res;
   };
+#ifdef LOG_FIND_ALLOCA_FOR_REQ
+  if(IsSuitableSubReq(Req)){
+    // 
+      std::cout << "findAlloca:: NumCommands: "<< Record->MAllocaCommands.size() << std::endl;
+      std::cout << "  matching:: Req       //Off/Sz/AR//ReqIsSub:  "
+                <<  "//"
+                <<  Req->MOffsetInBytes << "/" << Req->MSYCLMemObj->getSize() << "/"
+                <<  Req->MAccessRange[0] << "//"
+                <<  Req->MIsSubBuffer << std::endl;
+      std::cout << "     -----:: SameCtx/AllocaIsSub//Off/Sz/AR//ReqIsSub" << std::endl;
+    std::for_each(Record->MAllocaCommands.begin(), Record->MAllocaCommands.end(),
+      [&Context, Req](AllocaCommandBase *AllocaCmd){
+        bool Res = sameCtx(AllocaCmd->getQueue()->getContextImplPtr(), Context);
+        const Requirement *TmpReq = AllocaCmd->getRequirement();
+        std::cout << "     -----:: "
+                  << Res << "/" << (AllocaCmd->getType() == Command::CommandType::ALLOCA_SUB_BUF) << "//"
+                  <<  TmpReq->MOffsetInBytes << "/" << TmpReq->MSYCLMemObj->getSize() << "/"
+                  <<  TmpReq->MAccessRange[0] << "//"
+                  <<  TmpReq->MIsSubBuffer << std::endl;
+
+    } );
+  }
+#endif
   const auto It = std::find_if(Record->MAllocaCommands.begin(),
                                Record->MAllocaCommands.end(), IsSuitableAlloca);
   return (Record->MAllocaCommands.end() != It) ? *It : nullptr;
@@ -703,6 +735,13 @@ Scheduler::GraphBuilder::addCG(std::unique_ptr<detail::CG> CommandGroup,
   for (Requirement *Req : Reqs) {
     MemObjRecord *Record = getOrInsertMemObjRecord(Queue, Req);
     markModifiedIfWrite(Record, Req);
+    
+    //CP
+    if( Req->MIsSubBuffer){
+      std::cout << "addCG Sub Req :: AR/MR // Off/OffBytes: " 
+                << Req->MAccessRange[0] << "/" << Req->MMemoryRange[0] << " // " 
+                << Req->MOffset[0] << "/" << Req->MOffsetInBytes  << std::endl;
+    }
 
     AllocaCommandBase *AllocaCmd = getOrCreateAllocaForReq(Record, Req, Queue);
     // If there is alloca command we need to check if the latest memory is in
