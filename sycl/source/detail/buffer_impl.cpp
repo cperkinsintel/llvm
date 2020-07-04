@@ -40,6 +40,8 @@ void buffer_impl::addBufferInfo(const void *const BuffPtr, const size_t Sz, cons
 }
 
 
+
+
 static bool shouldCopyBack(detail::when_copyback now, buffer_usage& BU){
   // when false, tests pass.  
   // now == ~dtor will not be correct, but shouldn't be too horrible.
@@ -51,6 +53,43 @@ bool buffer_impl::hasSubBuffers(){
   return MBufferInfoDQ.size() > 1;
 }
 
+void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mode,  handler *CGH){
+  std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage BU){
+    return (BU.buffAddr == BuffPtr);
+  });
+  assert(it != MBufferInfoDQ.end() && "no record of (sub)buffer");
+  buffer_usage BU = it[0];
+  
+  if(Mode == access::mode::read || Mode == access::mode::discard_read_write)
+    BU.CghWithReadAcc.push(CGH);
+  else if(Mode == access::mode::write)
+    BU.CghWithWriteAcc.push(CGH);
+  else if(Mode == access::mode::discard_write){
+    ; //do nothing.
+  } else {
+    BU.CghWithReadAcc.push(CGH);
+    BU.CghWithWriteAcc.push(CGH);
+  }
+}
+
+void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mode){
+  std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage BU){
+    return (BU.buffAddr == BuffPtr);
+  });
+  assert(it != MBufferInfoDQ.end() && "no record of (sub)buffer");
+  buffer_usage BU = it[0];
+  
+  if(Mode == access::mode::read || Mode == access::mode::discard_read_write)
+    BU.HostHasReadAcc = true;
+  else if(Mode == access::mode::write)
+    BU.HostHasWriteAcc = true;
+  else if(Mode == access::mode::discard_write){
+    ; //do nothing.
+  } else {
+    BU.HostHasReadAcc = true;
+    BU.HostHasWriteAcc = true;
+  }
+}
 
 EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait){
   //find record of buffer_usage

@@ -284,6 +284,7 @@ public:
             access::target Target = access::target::global_buffer>
   accessor<T, dimensions, Mode, Target, access::placeholder::false_t>
   get_access(handler &CommandGroupHandler) {
+    impl->recordAccessorUsage(this, Mode, &CommandGroupHandler);
     return accessor<T, dimensions, Mode, Target, access::placeholder::false_t>(
         *this, CommandGroupHandler);
   }
@@ -292,6 +293,7 @@ public:
   accessor<T, dimensions, mode, access::target::host_buffer,
            access::placeholder::false_t>
   get_access() {
+    impl->recordAccessorUsage(this, mode);
     return accessor<T, dimensions, mode, access::target::host_buffer,
                     access::placeholder::false_t>(*this);
   }
@@ -301,6 +303,7 @@ public:
   accessor<T, dimensions, mode, target, access::placeholder::false_t>
   get_access(handler &commandGroupHandler, range<dimensions> accessRange,
              id<dimensions> accessOffset = {}) {
+    impl->recordAccessorUsage(this, mode, &commandGroupHandler);
     return accessor<T, dimensions, mode, target, access::placeholder::false_t>(
         *this, commandGroupHandler, accessRange, accessOffset);
   }
@@ -309,6 +312,7 @@ public:
   accessor<T, dimensions, mode, access::target::host_buffer,
            access::placeholder::false_t>
   get_access(range<dimensions> accessRange, id<dimensions> accessOffset = {}) {
+    impl->recordAccessorUsage(this, mode);
     return accessor<T, dimensions, mode, access::target::host_buffer,
                     access::placeholder::false_t>(*this, accessRange,
                                                   accessOffset);
