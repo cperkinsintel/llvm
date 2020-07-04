@@ -10,6 +10,7 @@
 
 #include "CL/sycl/access/access.hpp"
 #include <CL/sycl/backend_types.hpp>
+#include <CL/sycl/detail/buffer_usage.hpp>     //CP -- REMOVE
 #include <CL/sycl/detail/cl.h>
 #include <CL/sycl/detail/kernel_desc.hpp>
 #include <CL/sycl/detail/memory_manager.hpp>
@@ -796,7 +797,11 @@ void AllocaSubBufCommand::emitInstrumentationData() {
 #endif
 }
 
+// CP  TODO:  remove this and (and decl in commands.hpp)
+//  Q: what if parent _is_ mapped? 
+//  Q: what about unmap?
 void *AllocaSubBufCommand::getMemAllocation() const {
+#ifndef SB_NEW
   // In some cases parent`s memory allocation might change (e.g., after
   // map/unmap operations). If parent`s memory allocation changes, sub-buffer
   // memory allocation should be changed as well.
@@ -805,8 +810,10 @@ void *AllocaSubBufCommand::getMemAllocation() const {
         static_cast<char *>(MParentAlloca->getMemAllocation()) +
         MRequirement.MOffsetInBytes);
   }
+#endif
   return MMemAllocation;
 }
+
 
 cl_int AllocaSubBufCommand::enqueueImp() {
   waitForPreparedHostEvents();

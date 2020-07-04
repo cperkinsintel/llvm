@@ -216,6 +216,7 @@ UpdateHostRequirementCommand *Scheduler::GraphBuilder::insertUpdateHostReqCmd(
 static Command *insertMapUnmapForLinkedCmds(AllocaCommandBase *AllocaCmdSrc,
                                             AllocaCommandBase *AllocaCmdDst,
                                             access::mode MapMode) {
+  //CP
   if (AllocaCmdSrc->getType() != Command::CommandType::ALLOCA_SUB_BUF)
     assert(AllocaCmdSrc->MLinkedAllocaCmd == AllocaCmdDst && "Expected linked alloca commands");
 
@@ -240,6 +241,7 @@ static Command *insertMapUnmapForLinkedCmds(AllocaCommandBase *AllocaCmdSrc,
 
   return MapCmd;
 }
+
 
 Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
                                                    Requirement *Req,
@@ -322,7 +324,8 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
 #endif
 
   //CP
-  std::cout << "insertMemoryMove Alloca Src/Dst: " << AllocaCmdSrc->MMemAllocation << "/" << AllocaCmdDst->MMemAllocation << std::endl;
+  CPOUT << "insertMemoryMove Alloca Src/Dst: " << AllocaCmdSrc->MMemAllocation << "/" << AllocaCmdDst->MMemAllocation << std::endl;
+  CPOUT << "                          Req @: " << (void*)(Req) << std::endl;
 
   Command *NewCmd = nullptr;
 
@@ -449,10 +452,10 @@ Command *Scheduler::GraphBuilder::addHostAccessor(Requirement *Req) {
   //CP
   if( Req->MIsSubBuffer){
     SYCLMemObjT* impl = (SYCLMemObjT*)(Req->MSYCLMemObj);
-    std::cout << "addHostAccessor Sub Req :: AR/MR // Off/OffBytes: " 
+    CPOUT << "addHostAccessor Sub Req :: AR/MR // Off/OffBytes: " 
               << Req->MAccessRange[0] << "/" << Req->MMemoryRange[0] << " // " 
               << Req->MOffset[0] << "/" << Req->MOffsetInBytes  << std::endl;
-    std::cout << "               Req->MData: " << Req->MData 
+    CPOUT << "               Req->MData: " << Req->MData 
               << " UserPtr: " << impl->getUserPtr() << std::endl;
   }
 
@@ -581,7 +584,7 @@ Scheduler::GraphBuilder::findAllocaForReq(MemObjRecord *Record,
       Res &= TmpReq->MOffsetInBytes == Req->MOffsetInBytes;
       Res &= TmpReq->MSYCLMemObj->getSize() == Req->MSYCLMemObj->getSize();
     #ifdef LOG_FIND_ALLOCA_FOR_REQ
-      std::cout << "          :: AllocIsSub//Off/Sz/AR//ReqIsSub=>Match!: " 
+          CPOUT << "          :: AllocIsSub//Off/Sz/AR//ReqIsSub=>Match!: " 
                 << (AllocaCmd->getType() == Command::CommandType::ALLOCA_SUB_BUF) << "//"
                 <<  TmpReq->MOffsetInBytes << "/" << TmpReq->MSYCLMemObj->getSize() << "/"
                 <<  TmpReq->MAccessRange[0] << "//"
@@ -593,18 +596,18 @@ Scheduler::GraphBuilder::findAllocaForReq(MemObjRecord *Record,
 #ifdef LOG_FIND_ALLOCA_FOR_REQ
   if(IsSuitableSubReq(Req)){
     // 
-      std::cout << "findAlloca:: NumCommands: "<< Record->MAllocaCommands.size() << std::endl;
-      std::cout << "  matching:: Req       //Off/Sz/AR//ReqIsSub:  "
+          CPOUT << "findAlloca:: NumCommands: "<< Record->MAllocaCommands.size() << std::endl;
+          CPOUT << "  matching:: Req       //Off/Sz/AR//ReqIsSub:  "
                 <<  "//"
                 <<  Req->MOffsetInBytes << "/" << Req->MSYCLMemObj->getSize() << "/"
                 <<  Req->MAccessRange[0] << "//"
                 <<  Req->MIsSubBuffer << std::endl;
-      std::cout << "     -----:: SameCtx/AllocaIsSub//Off/Sz/AR//ReqIsSub" << std::endl;
+          CPOUT << "     -----:: SameCtx/AllocaIsSub//Off/Sz/AR//ReqIsSub" << std::endl;
     std::for_each(Record->MAllocaCommands.begin(), Record->MAllocaCommands.end(),
       [&Context, Req](AllocaCommandBase *AllocaCmd){
         bool Res = sameCtx(AllocaCmd->getQueue()->getContextImplPtr(), Context);
         const Requirement *TmpReq = AllocaCmd->getRequirement();
-        std::cout << "     -----:: "
+            CPOUT << "     -----:: "
                   << Res << "/" << (AllocaCmd->getType() == Command::CommandType::ALLOCA_SUB_BUF) << "//"
                   <<  TmpReq->MOffsetInBytes << "/" << TmpReq->MSYCLMemObj->getSize() << "/"
                   <<  TmpReq->MAccessRange[0] << "//"
@@ -786,7 +789,7 @@ Scheduler::GraphBuilder::addCG(std::unique_ptr<detail::CG> CommandGroup,
     
     //CP
     if( Req->MIsSubBuffer){
-      std::cout << "addCG Sub Req :: AR/MR // Off/OffBytes: " 
+          CPOUT << "addCG Sub Req :: AR/MR // Off/OffBytes: " 
                 << Req->MAccessRange[0] << "/" << Req->MMemoryRange[0] << " // " 
                 << Req->MOffset[0] << "/" << Req->MOffsetInBytes  << std::endl;
     }

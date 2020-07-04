@@ -226,8 +226,8 @@ void copyH2D(SYCLMemObjI *SYCLMemObj, char *SrcMem, QueueImplPtr,
     SrcSize[0] *= SrcElemSize;
     
     //CP
-    std::cout << "copyH2D. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
-    std::cout << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
+    CPOUT << "copyH2D. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
+    CPOUT << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
 
     if (1 == DimDst && 1 == DimSrc) {
       Plugin.call<PiApiKind::piEnqueueMemBufferWrite>(
@@ -278,9 +278,9 @@ void copyD2H(SYCLMemObjI *SYCLMemObj, RT::PiMem SrcMem, QueueImplPtr SrcQueue,
     DstSize[0] *= DstElemSize;
 
     //CP DestAccessRange unused (until now!).
-    std::cout << "copyD2H. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
-    std::cout << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
-    std::cout << "         SrcMem / DstMem / DM+Off: " << SrcMem << " / " << (void*)(DstMem) << " / " << (void*)(DstMem + DstOffset[0]) << std::endl;
+    CPOUT << "copyD2H. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
+    CPOUT << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
+    CPOUT << "         SrcMem / DstMem / DM+Off: " << SrcMem << " / " << (void*)(DstMem) << " / " << (void*)(DstMem + DstOffset[0]) << std::endl;
 
     if (1 == DimDst && 1 == DimSrc) {
       unsigned int NumBytes = std::min(SrcAccessRange[0], DstAccessRange[0]); //CP  replace with assertion that AR are same?
@@ -329,8 +329,8 @@ void copyD2D(SYCLMemObjI *SYCLMemObj, RT::PiMem SrcMem, QueueImplPtr SrcQueue,
     DstSize[0] *= DstElemSize;
 
     //CP
-    std::cout << "copyD2D. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
-    std::cout << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << "unavailable" << std::endl;
+    CPOUT << "copyD2D. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
+    CPOUT << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << "unavailable" << std::endl;
     
     if (1 == DimDst && 1 == DimSrc) {
       Plugin.call<PiApiKind::piEnqueueMemBufferCopy>(
@@ -377,8 +377,8 @@ static void copyH2H(SYCLMemObjI *, char *SrcMem, QueueImplPtr,
     return;
 
   //CP
-  std::cout << "copyH2H. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
-  std::cout << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
+  CPOUT << "copyH2H. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
+  CPOUT << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
 
 
   size_t BytesToCopy =
@@ -468,7 +468,7 @@ void *MemoryManager::map(SYCLMemObjI *, void *Mem, QueueImplPtr Queue,
   cl_map_flags Flags = 0;
 
   //CP
-  std::cout << "map.     AR/AOff: " << AccessRange[0] << "/" << AccessOffset[0] << " -- @ " << Mem << std::endl;
+  CPOUT << "map.     AR/AOff: " << AccessRange[0] << "/" << AccessOffset[0] << " -- @ " << Mem << std::endl;
 
   switch (AccessMode) {
   case access::mode::read:
@@ -496,7 +496,7 @@ void *MemoryManager::map(SYCLMemObjI *, void *Mem, QueueImplPtr Queue,
   void *MappedPtr = nullptr;
   const size_t BytesToMap = AccessRange[0] * AccessRange[1] * AccessRange[2];
   //CP
-  std::cout << "  adj -- AR/bytes: " << AccessRange[0] << "/" << BytesToMap << std::endl;
+  CPOUT << "  adj -- AR/bytes: " << AccessRange[0] << "/" << BytesToMap << std::endl;
 
   const detail::plugin &Plugin = Queue->getPlugin();
   Plugin.call<PiApiKind::piEnqueueMemBufferMap>(

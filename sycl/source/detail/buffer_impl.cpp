@@ -47,6 +47,10 @@ static bool shouldCopyBack(detail::when_copyback now, buffer_usage& BU){
   //return false;
 }
 
+bool buffer_impl::hasSubBuffers(){
+  return MBufferInfoDQ.size() > 1;
+}
+
 
 EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait){
   //find record of buffer_usage

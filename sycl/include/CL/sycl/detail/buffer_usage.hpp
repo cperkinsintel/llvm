@@ -16,8 +16,12 @@
 #define SB_NEW
 #define SB_NORM
 
+//#define CPOUT  std::clog
+#define CPOUT  std::clog.rdbuf(NULL); std::clog
+
 __SYCL_INLINE_NAMESPACE(cl) {
 namespace sycl {
+
     class handler;
 namespace detail {
 
