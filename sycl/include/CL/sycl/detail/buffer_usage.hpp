@@ -60,21 +60,21 @@ struct buffer_info {
 struct buffer_usage {
     //the address of a sub/buffer is used to uniquely identify it, but is never dereferenced.
     const void *const buffAddr;
+
     // basic info about the buffer (range, offset, isSub)
     buffer_info BufferInfo;
+
     // did the user set the writeback?
     settable_bool MWriteBackSet;
-    // the list of CommandGroupHandlers used to request any write-capable accessors
-    std::stack<handler*> CghWithWriteAcc;
-    // the list of CommandGroupHandlers used to request any read-capable accessors
-    std::stack<handler*> CghWithReadAcc;
-    // did the host get a read or write accessor?
-    bool HostHasReadAcc;
-    bool HostHasWriteAcc;
+    
+    //History of accessor modes and devices. 
+    //std::stack<std::pair<sycl::device, access::mode>> MHistory;
+    std::deque<std::pair<sycl::device, access::mode>> MHistory;
+    
     //ctor
     buffer_usage(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub) : 
-        buffAddr(BuffPtr) , BufferInfo(Sz, Offset, IsSub), MWriteBackSet(settable_bool::not_set),
-        HostHasReadAcc(false), HostHasWriteAcc(false) {}
+        buffAddr(BuffPtr) , BufferInfo(Sz, Offset, IsSub), MWriteBackSet(settable_bool::not_set) {}//,
+        //HostHasReadAcc(false), HostHasWriteAcc(false) {}
 };
 
 } //namespaces 

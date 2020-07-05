@@ -39,37 +39,99 @@ void buffer_impl::addBufferInfo(const void *const BuffPtr, const size_t Sz, cons
   MBufferInfoDQ.emplace_back(BuffPtr, Sz, Offset, IsSub);
 }
 
-
-
-
-static bool shouldCopyBack(detail::when_copyback now, buffer_usage& BU){
-  // when false, tests pass.  
-  // now == ~dtor will not be correct, but shouldn't be too horrible.
-  return now == detail::when_copyback::dtor;
-  //return false;
+static bool isAReadMode(access::mode Mode){
+  if(Mode == access::mode::write || Mode == access::mode::discard_write)
+    return false;
+  else
+    return true;
 }
+
+static bool isAWriteMode(access::mode Mode){
+  if(Mode == access::mode::read || Mode == access::mode::discard_write || Mode == access::mode::discard_read_write)
+    return false;
+  else
+    return true;
+}
+
+static bool needDtorCopyBack(buffer_usage& BU){
+  using hentry = std::pair<sycl::device, access::mode>;
+
+  bool updateOnDtor = false;
+
+  find_if(BU.MHistory.begin(), BU.MHistory.end(), [&updateOnDtor](hentry HEntry){
+    // returns at first consequential entry. Set updateOnDtor by side effect
+
+    //blocking host read - end search
+    if(HEntry.first.is_host() && isAReadMode(HEntry.second))
+      return true;
+
+    //writing on device - set bool, end search.
+    if((!HEntry.first.is_host())  &&  isAWriteMode(HEntry.second)){
+      updateOnDtor = true; // 
+      return true;
+    }
+    //continue
+    return false;
+  });
+
+  return updateOnDtor; 
+}
+/*
+// when is the appropriate time for some sub/buffer to update the host memory?
+// return value of 'immediate' means when scheduling the command group (addCCG), usually via a Map operation
+// 'dtor' means during buffer destructor, by calling addCopyBack.
+// and 'never' is a possibility as well.
+static detail::when_copyback whenCopyBack(buffer_usage& BU){
+  using hentry = std::pair<sycl::device, access::mode>;
+
+  hentry HEntry = BU.MHistory.front();
+
+  //if the last operation was a blocking host read, then this copied back immediately.
+  if(HEntry.first.is_host() && isAReadMode(HEntry.second))
+    return when_copyback::immediate;
+
+  //if we find something that wrote to a device, 
+  std::deque<hentry>::iterator It = find_if(BU.MHistory.begin(), BU.MHistory.end(), [](hentry HEntry){
+      return ((!HEntry.first.is_host())  &&  isAWriteMode(HEntry.second));
+  });
+  if(It != BU.MHistory.end()){ return when_copyback::dtor; }
+  else{ return when_copyback::never; }
+}
+
+// given a now of immediate or dtor, returns a boolean.
+// give a now of 'undetermined' returns true if this copies data back at either stage
+// takes set_write_back into consideration.
+static bool shouldCopyBack(detail::when_copyback now, buffer_usage& BU){
+  assert(now != when_copyback::never);
+  
+  detail::when_copyback when = whenCopyBack(BU);
+
+  //check immediate case first. It is unaffected by set_write_back (addCG does not check WB, so neither do we)
+  if(now == when_copyback::immediate && when == when_copyback::immediate)
+    return true;
+
+  if(BU.MWriteBackSet == settable_bool::set_false)
+    return false;
+
+  if(now == when_copyback::undetermined)
+    return when != when_copyback::never; 
+  else
+    return (now == when);
+}
+*/
 
 bool buffer_impl::hasSubBuffers(){
   return MBufferInfoDQ.size() > 1;
 }
 
-void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mode,  handler *CGH){
+void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mode,  handler &CGH){
   std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage BU){
     return (BU.buffAddr == BuffPtr);
   });
   assert(it != MBufferInfoDQ.end() && "no record of (sub)buffer");
   buffer_usage BU = it[0];
-  
-  if(Mode == access::mode::read || Mode == access::mode::discard_read_write)
-    BU.CghWithReadAcc.push(CGH);
-  else if(Mode == access::mode::write)
-    BU.CghWithWriteAcc.push(CGH);
-  else if(Mode == access::mode::discard_write){
-    ; //do nothing.
-  } else {
-    BU.CghWithReadAcc.push(CGH);
-    BU.CghWithWriteAcc.push(CGH);
-  }
+
+  BU.MHistory.emplace_back(std::make_pair(getDeviceFromHandler(CGH), Mode));   //.push({dev, Mode})
 }
 
 void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mode){
@@ -78,17 +140,8 @@ void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mo
   });
   assert(it != MBufferInfoDQ.end() && "no record of (sub)buffer");
   buffer_usage BU = it[0];
-  
-  if(Mode == access::mode::read || Mode == access::mode::discard_read_write)
-    BU.HostHasReadAcc = true;
-  else if(Mode == access::mode::write)
-    BU.HostHasWriteAcc = true;
-  else if(Mode == access::mode::discard_write){
-    ; //do nothing.
-  } else {
-    BU.HostHasReadAcc = true;
-    BU.HostHasWriteAcc = true;
-  }
+
+  BU.MHistory.emplace_back(std::make_pair(device{}, Mode));
 }
 
 EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait){
@@ -99,7 +152,7 @@ EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const voi
   assert(it != MBufferInfoDQ.end() && "no record of subbuffer");
   buffer_usage BU = it[0];
 
-  if(shouldCopyBack(now, BU)){
+  if(needDtorCopyBack(BU)){   //(shouldCopyBack(now, BU)){
     const id<3> Offset{BU.BufferInfo.OffsetInBytes, 0, 0};
     const range<3> AccessRange{BU.BufferInfo.SizeInBytes, 1, 1};
     const range<3> MemoryRange{BU.BufferInfo.SizeInBytes, 1, 1}; // {5,1,1,}  // seems to not be used.

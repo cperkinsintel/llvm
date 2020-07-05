@@ -134,7 +134,7 @@ protected:
   void addBufferInfo(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub );
 
  
-  void recordAccessorUsage(const void *const BuffPtr, access::mode Mode,  handler *CGH);
+  void recordAccessorUsage(const void *const BuffPtr, access::mode Mode,  handler &CGH);
   void recordAccessorUsage(const void *const BuffPtr, access::mode Mode);
  
   
