@@ -1,4 +1,4 @@
-// XFAIL: *
+// mmAIL: *
 
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple  %s -o %t.out
 // RUN: env SYCL_PI_TRACE=2 SYCL_DEVICE_TYPE=HOST %t.out
@@ -60,7 +60,7 @@ void ensureNoUnecessaryCopyBack(queue &q){
     //  But we don't care about the write buffer. We only care that the read buffer was NOT copied-back.
     { // closure 
         //setup and clear memory
-        setup_arr(baseData);  // [1, 2, 3, ..., total]
+        setup_arr(baseData);  // [0, 1, 2,  ..., total]
         clear_arr(otherData); // [0, 0, 0, ..., 0]
         //buffers
         buffer<int, 1> readFrom(baseData, range<1>(total));  
@@ -104,7 +104,7 @@ void ensureSubBufferDtorCopyBack(queue q) {
 
     //allocate and setup memory
     int *baseData  = (int*)(malloc(total * sizeof(int)));
-    setup_arr(baseData);  // [1, 2, 3, ..., total]
+    setup_arr(baseData);  // [0, 1, 2, ..., total]
 
     // -------- sub buffer copy back on ~dtor -----------
     //  per the SYCL spec, all buffers are expected to copy back data at/before their destruction.

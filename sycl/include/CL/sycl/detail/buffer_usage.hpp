@@ -16,8 +16,8 @@
 #define SB_NEW
 #define SB_NORM
 
-//#define CPOUT  std::clog
-#define CPOUT  std::clog.rdbuf(NULL); std::clog
+#define CPOUT  std::clog
+//#define CPOUT  std::clog.rdbuf(NULL); std::clog
 
 __SYCL_INLINE_NAMESPACE(cl) {
 namespace sycl {
@@ -69,12 +69,14 @@ struct buffer_usage {
     
     //History of accessor modes and devices. 
     //std::stack<std::pair<sycl::device, access::mode>> MHistory;
-    std::deque<std::pair<sycl::device, access::mode>> MHistory;
+    std::deque<std::pair<bool, access::mode>> MHistory;
     
     //ctor
     buffer_usage(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub) : 
-        buffAddr(BuffPtr) , BufferInfo(Sz, Offset, IsSub), MWriteBackSet(settable_bool::not_set) {}//,
-        //HostHasReadAcc(false), HostHasWriteAcc(false) {}
+        buffAddr(BuffPtr) , BufferInfo(Sz, Offset, IsSub), MWriteBackSet(settable_bool::not_set) {};
+
+    buffer_usage(const buffer_usage&) = delete;
+    buffer_usage& operator=(const buffer_usage&) = delete;
 };
 
 } //namespaces 

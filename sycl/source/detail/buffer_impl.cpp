@@ -54,22 +54,22 @@ static bool isAWriteMode(access::mode Mode){
 }
 
 static bool needDtorCopyBack(buffer_usage& BU){
-  using hentry = std::pair<sycl::device, access::mode>;
+  using hentry = std::pair<bool, access::mode>;
 
   bool updateOnDtor = false;
-
+  
   find_if(BU.MHistory.begin(), BU.MHistory.end(), [&updateOnDtor](hentry HEntry){
     // returns at first consequential entry. Set updateOnDtor by side effect
 
-    //blocking host read - end search
-    if(HEntry.first.is_host() && isAReadMode(HEntry.second))
-      return true;
-
     //writing on device - set bool, end search.
-    if((!HEntry.first.is_host())  &&  isAWriteMode(HEntry.second)){
+    if(!HEntry.first  &&  isAWriteMode(HEntry.second)){
       updateOnDtor = true; // 
       return true;
     }
+    //blocking host read (was updated via map op), do not set bool, end search
+    if(HEntry.first && isAReadMode(HEntry.second))
+      return true;
+
     //continue
     return false;
   });
@@ -125,37 +125,37 @@ bool buffer_impl::hasSubBuffers(){
 }
 
 void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mode,  handler &CGH){
-  std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage BU){
+  std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage& BU){
     return (BU.buffAddr == BuffPtr);
   });
   assert(it != MBufferInfoDQ.end() && "no record of (sub)buffer");
-  buffer_usage BU = it[0];
+  buffer_usage &BU = it[0];
 
-  BU.MHistory.emplace_back(std::make_pair(getDeviceFromHandler(CGH), Mode));   //.push({dev, Mode})
+  BU.MHistory.emplace_front(false, Mode);
 }
 
 void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mode){
-  std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage BU){
+  std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage& BU){
     return (BU.buffAddr == BuffPtr);
   });
   assert(it != MBufferInfoDQ.end() && "no record of (sub)buffer");
-  buffer_usage BU = it[0];
+  buffer_usage &BU = it[0];
 
-  BU.MHistory.emplace_back(std::make_pair(device{}, Mode));
+  BU.MHistory.emplace_front(true, Mode );
 }
 
 EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait){
   //find record of buffer_usage
-  std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage BU){
+  std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage& BU){
     return (BU.buffAddr == BuffPtr);
   });
   assert(it != MBufferInfoDQ.end() && "no record of subbuffer");
-  buffer_usage BU = it[0];
+  buffer_usage &BU = it[0];
 
   if(needDtorCopyBack(BU)){   //(shouldCopyBack(now, BU)){
     const id<3> Offset{BU.BufferInfo.OffsetInBytes, 0, 0};
     const range<3> AccessRange{BU.BufferInfo.SizeInBytes, 1, 1};
-    const range<3> MemoryRange{BU.BufferInfo.SizeInBytes, 1, 1}; // {5,1,1,}  // seems to not be used.
+    const range<3> MemoryRange{BU.BufferInfo.SizeInBytes, 1, 1}; // seems to not be used.
     const access::mode AccessMode = access::mode::read;
     SYCLMemObjI *SYCLMemObject = this;
     const int Dims = 1;
