@@ -135,6 +135,7 @@ public:
 };
 
 __SYCL_EXPORT device getDeviceFromHandler(handler &);
+__SYCL_EXPORT context getContextFromHandler(handler &);
 
 #if defined(__SYCL_ID_QUERIES_FIT_IN_INT__)
 template <typename T> struct NotIntMsg;
@@ -1778,6 +1779,7 @@ private:
             access::target AccTarget, access::placeholder isPlaceholder>
   friend class accessor;
   friend device detail::getDeviceFromHandler(handler &);
+  friend context detail::getContextFromHandler(handler &);
 
   template <typename DataT, int Dimensions, access::mode AccessMode,
             access::target AccessTarget, access::placeholder IsPlaceholder>
