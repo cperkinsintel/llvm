@@ -55,6 +55,7 @@ struct buffer_info {
         SizeInBytes(sz), OffsetInBytes(offset), IsSubBuffer(IsSub) {}
 };
 
+
 // given a sub/buffer, this tracks how it was used (were there write accessors, etc.)
 
 struct buffer_usage {
@@ -69,7 +70,7 @@ struct buffer_usage {
     
     //History of accessor modes and devices. 
     //std::stack<std::pair<sycl::device, access::mode>> MHistory;
-    std::deque<std::pair<bool, access::mode>> MHistory;
+    std::deque<std::tuple<bool, access::mode, std::shared_ptr<detail::context_impl>>> MHistory;
     
     //ctor
     buffer_usage(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub) : 

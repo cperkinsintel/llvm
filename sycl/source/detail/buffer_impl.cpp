@@ -35,6 +35,8 @@ void *buffer_impl::allocateMem(ContextImplPtr Context, bool InitFromUserData,
 }
 
 
+using ContextImplPtr = std::shared_ptr<detail::context_impl>;
+
 void buffer_impl::addBufferInfo(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub ) {
   MBufferInfoDQ.emplace_back(BuffPtr, Sz, Offset, IsSub);
 }
@@ -54,7 +56,7 @@ static bool isAWriteMode(access::mode Mode){
 }
 
 static bool needDtorCopyBack(buffer_usage& BU){
-  using hentry = std::pair<bool, access::mode>;
+  using hentry = std::tuple<bool, access::mode, ContextImplPtr>;
 
   bool updateOnDtor = false;
   
@@ -62,12 +64,14 @@ static bool needDtorCopyBack(buffer_usage& BU){
     // returns at first consequential entry. Set updateOnDtor by side effect
 
     //writing on device - set bool, end search.
-    if(!HEntry.first  &&  isAWriteMode(HEntry.second)){
+    //if(!HEntry.first  &&  isAWriteMode(HEntry.second)){
+    if(!std::get<0>(HEntry) && isAWriteMode(std::get<1>(HEntry))){
       updateOnDtor = true; // 
       return true;
     }
     //blocking host read (was updated via map op), do not set bool, end search
-    if(HEntry.first && isAReadMode(HEntry.second))
+    //if(HEntry.first && isAReadMode(HEntry.second))
+    if(std::get<0>(HEntry) && isAReadMode(std::get<1>(HEntry)))
       return true;
 
     //continue
@@ -75,6 +79,21 @@ static bool needDtorCopyBack(buffer_usage& BU){
   });
 
   return updateOnDtor; 
+}
+
+static ContextImplPtr getDtorCopyBackCtxImpl(buffer_usage& BU){
+  using hentry = std::tuple<bool, access::mode, ContextImplPtr>;
+
+  ContextImplPtr theCtx = nullptr; 
+  find_if(BU.MHistory.begin(), BU.MHistory.end(), [&theCtx](hentry HEntry){
+    //same logic as needDtorCopyBack
+    if(!std::get<0>(HEntry) && isAWriteMode(std::get<1>(HEntry))){
+      theCtx = std::get<2>(HEntry);  
+      return true;
+    }
+    return false;
+  });
+  return theCtx;
 }
 /*
 // when is the appropriate time for some sub/buffer to update the host memory?
@@ -131,11 +150,9 @@ void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mo
   assert(it != MBufferInfoDQ.end() && "no record of (sub)buffer");
   buffer_usage &BU = it[0];
 
-  //CGH.MQueue->get_device().is_host(); 
   bool v = detail::getDeviceFromHandler(CGH).is_host();
-  context ctx = detail::getContextFromHandler(CGH);
-  //v = CGH.MQueue->get_context().is_host();
-  BU.MHistory.emplace_front(v, Mode);
+  ContextImplPtr ctx = detail::getContextFromHandler(CGH).impl;
+  BU.MHistory.emplace_front(v, Mode, ctx);
 }
 
 void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mode){
@@ -145,7 +162,9 @@ void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mo
   assert(it != MBufferInfoDQ.end() && "no record of (sub)buffer");
   buffer_usage &BU = it[0];
 
-  BU.MHistory.emplace_front(true, Mode );
+  //Scheduler::getInstance().getDefaultHostQueue().getContextImplPtr()
+
+  BU.MHistory.emplace_front(true, Mode, nullptr );
 }
 
 EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait){
@@ -170,12 +189,21 @@ EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const voi
     void* DataPtr = getUserPtr();  //
     if(DataPtr != nullptr){
       Req.MData = DataPtr;
+
+      //last context for the sub-buffer might not be the same as any last access to greater buffer_impl. 
+      ContextImplPtr newCtx = getDtorCopyBackCtxImpl(BU);
+      assert((newCtx != nullptr) && "sub-buffer copyback context null (or host?)");
+      auto theCtx = MRecord->MCurContext;
+      MRecord->MCurContext = newCtx;
     
       EventImplPtr Event = Scheduler::getInstance().addCopyBack(&Req);
+      
       if (Event && Wait)
         Event->wait(Event);
       else if(Event)
         return Event;
+
+      MRecord->MCurContext = theCtx; //restore
     }
   }
     
