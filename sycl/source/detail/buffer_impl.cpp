@@ -124,6 +124,8 @@ bool buffer_impl::hasSubBuffers(){
   return MBufferInfoDQ.size() > 1;
 }
 
+
+
 void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mode,  handler &CGH){
   std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage& BU){
     return (BU.buffAddr == BuffPtr);
@@ -131,7 +133,10 @@ void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mo
   assert(it != MBufferInfoDQ.end() && "no record of (sub)buffer");
   buffer_usage &BU = it[0];
 
-  BU.MHistory.emplace_front(false, Mode);
+  //CGH.MQueue->get_device().is_host(); 
+  bool v = detail::getDeviceFromHandler(CGH).is_host();
+  //v = CGH.MQueue->get_context().is_host();
+  BU.MHistory.emplace_front(v, Mode);
 }
 
 void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mode){

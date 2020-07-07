@@ -75,8 +75,10 @@ struct buffer_usage {
     buffer_usage(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub) : 
         buffAddr(BuffPtr) , BufferInfo(Sz, Offset, IsSub), MWriteBackSet(settable_bool::not_set) {};
 
-    buffer_usage(const buffer_usage&) = delete;
-    buffer_usage& operator=(const buffer_usage&) = delete;
+    //hmmm - removing copy constructors trips the thread safety test.
+    //I wonder why?    thread_safety/./ThreadSafetyTests/HostAccessorDeadLockTest.CheckThreadOrder 
+    //buffer_usage(const buffer_usage&) = delete;
+    //buffer_usage& operator=(const buffer_usage&) = delete;
 };
 
 } //namespaces 

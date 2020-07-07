@@ -246,6 +246,8 @@ static Command *insertMapUnmapForLinkedCmds(AllocaCommandBase *AllocaCmdSrc,
 Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
                                                    Requirement *Req,
                                                    const QueueImplPtr &Queue) {
+  //CP
+  CPOUT << "insertMemoryMove.  find alloca for dest" << std::endl;
 
   AllocaCommandBase *AllocaCmdDst = getOrCreateAllocaForReq(Record, Req, Queue);
   // Sub-buffers need to check linkage via parent, but normal Alloca just use self.
@@ -272,15 +274,20 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
   }
 #endif
 
+  //CP
+  CPOUT << "insertMemoryMove.  find alloca for src" << std::endl;
   AllocaCommandBase *AllocaCmdSrc = findAllocaForReq(Record, Req, Record->MCurContext);
   // Sub-buffers need to check linkage via parent, but normal Alloca just use self.
-  AllocaCommandBase *LinkageAllocaCmdSrc = AllocaCmdSrc;  
+  AllocaCommandBase *LinkageAllocaCmdSrc = AllocaCmdSrc;
+
 
 #ifndef SB_NEW
   if (!AllocaCmdSrc && IsSuitableSubReq(Req)) {
     // Since no alloca command for the sub buffer requirement was found in the
     // current context, need to find a parent alloca command for it (it must be
     // there)
+    // this indiscriminately grabs any alloca with the same context. Isn't necessarily
+    // the parent of the sub-buffer. 
     auto IsSuitableAlloca = [Record, Req](AllocaCommandBase *AllocaCmd) {
       bool Res = sameCtx(AllocaCmd->getQueue()->getContextImplPtr(),
                          Record->MCurContext) &&
@@ -295,8 +302,12 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
   }
 #endif
 
-  if (!AllocaCmdSrc)
-    throw runtime_error("Cannot find buffer allocation", PI_INVALID_VALUE);
+  if (!AllocaCmdSrc){
+    if(IsSuitableSubReq(Req))
+      return nullptr; // don't have to worry for sub-buffer. 
+    else
+      throw runtime_error("Cannot find buffer allocation", PI_INVALID_VALUE);
+  }
 
 #ifndef SB_NEW
   // Get parent allocation of sub buffer to perform full copy of whole buffer
@@ -402,6 +413,9 @@ Command *Scheduler::GraphBuilder::addCopyBack(Requirement *Req) {
   MemObjRecord *Record = getMemObjRecord(MemObj);
   if (Record && MPrintOptionsArray[BeforeAddCopyBack])
     printGraphAsDot("before_addCopyBack");
+
+  //CP
+  CPOUT << "addCopyBack" << std::endl;
 
   // Do nothing if there were no or only read operations with the memory object.
   if (nullptr == Record || !Record->MMemModified)
@@ -571,7 +585,7 @@ DepDesc Scheduler::GraphBuilder::findDepForRecord(Command *Cmd,
 // The function searches for the alloca command matching context and
 // requirement.
 //CP 
-//#define LOG_FIND_ALLOCA_FOR_REQ
+#define LOG_FIND_ALLOCA_FOR_REQ
 AllocaCommandBase *
 Scheduler::GraphBuilder::findAllocaForReq(MemObjRecord *Record,
                                           const Requirement *Req,
@@ -594,30 +608,43 @@ Scheduler::GraphBuilder::findAllocaForReq(MemObjRecord *Record,
     return Res;
   };
 #ifdef LOG_FIND_ALLOCA_FOR_REQ
-  if(IsSuitableSubReq(Req)){
+  //if(IsSuitableSubReq(Req)){
     // 
           CPOUT << "findAlloca:: NumCommands: "<< Record->MAllocaCommands.size() << std::endl;
-          CPOUT << "  matching:: Req       //Off/Sz/AR//ReqIsSub:  "
-                <<  "//"
+          CPOUT << "  matching:: Req       IsHost/CtxAddr // Off/Sz/AR // ReqIsSub:  "
+                <<  Context->is_host() << "/" << Context << " // "
                 <<  Req->MOffsetInBytes << "/" << Req->MSYCLMemObj->getSize() << "/"
-                <<  Req->MAccessRange[0] << "//"
+                <<  Req->MAccessRange[0] << " // "
                 <<  Req->MIsSubBuffer << std::endl;
-          CPOUT << "     -----:: SameCtx/AllocaIsSub//Off/Sz/AR//ReqIsSub" << std::endl;
+          CPOUT << "     -----:: SameCtx/IsHost/CtxAddr/AllocaIsSub // Off/Sz/AR // ReqIsSub" << std::endl;
     std::for_each(Record->MAllocaCommands.begin(), Record->MAllocaCommands.end(),
       [&Context, Req](AllocaCommandBase *AllocaCmd){
         bool Res = sameCtx(AllocaCmd->getQueue()->getContextImplPtr(), Context);
+        auto addr =  AllocaCmd->getQueue()->getContextImplPtr() ;
         const Requirement *TmpReq = AllocaCmd->getRequirement();
             CPOUT << "     -----:: "
-                  << Res << "/" << (AllocaCmd->getType() == Command::CommandType::ALLOCA_SUB_BUF) << "//"
+                  << Res << "/" << addr->is_host() << "/" << addr << "/" << (AllocaCmd->getType() == Command::CommandType::ALLOCA_SUB_BUF) << " // "
                   <<  TmpReq->MOffsetInBytes << "/" << TmpReq->MSYCLMemObj->getSize() << "/"
-                  <<  TmpReq->MAccessRange[0] << "//"
+                  <<  TmpReq->MAccessRange[0] << " // "
                   <<  TmpReq->MIsSubBuffer << std::endl;
 
     } );
-  }
+  //}
 #endif
   const auto It = std::find_if(Record->MAllocaCommands.begin(),
                                Record->MAllocaCommands.end(), IsSuitableAlloca);
+  //CP
+  if(Record->MAllocaCommands.end() != It){
+    auto addr =  (*It)->getQueue()->getContextImplPtr() ;
+    const Requirement *TmpReq = (*It)->getRequirement();
+    CPOUT << "FOUND=====::  IsHost/CtxAddr/AllocaIsSub // Off/Sz/AR // ReqIsSub" << std::endl;
+    CPOUT << "     -----:: "
+          << addr->is_host() << "/" << addr << "/" << ((*It)->getType() == Command::CommandType::ALLOCA_SUB_BUF) << " // "
+          <<  TmpReq->MOffsetInBytes << "/" << TmpReq->MSYCLMemObj->getSize() << "/"
+          <<  TmpReq->MAccessRange[0] << " // "
+          <<  TmpReq->MIsSubBuffer << std::endl; 
+  }else{ CPOUT << "FOUND === mullptr.   :-(  " << std::endl; }
+
   return (Record->MAllocaCommands.end() != It) ? *It : nullptr;
 }
 
@@ -775,6 +802,9 @@ Scheduler::GraphBuilder::addCG(std::unique_ptr<detail::CG> CommandGroup,
   const std::vector<detail::EventImplPtr> &Events = CommandGroup->MEvents;
   const CG::CGTYPE CGType = CommandGroup->getType();
 
+  //CP
+  CPOUT << "addCG" << std::endl;
+
   std::unique_ptr<ExecCGCommand> NewCmd(
       new ExecCGCommand(std::move(CommandGroup), Queue));
   if (!NewCmd)
@@ -806,9 +836,13 @@ Scheduler::GraphBuilder::addCG(std::unique_ptr<detail::CG> CommandGroup,
     } else {
       // Cannot directly copy memory from OpenCL device to OpenCL device -
       // create two copies: device->host and host->device.
-      if (!Queue->is_host() && !Record->MCurContext->is_host())
+      if (!Queue->is_host() && !Record->MCurContext->is_host()){
+        //CP (also added braces {})
+        CPOUT << "device->host inserMemoryMove!  Rec->MCurCtx: " << Record->MCurContext << std::endl;
         insertMemoryMove(Record, Req,
                          Scheduler::getInstance().getDefaultHostQueue());
+      }
+      CPOUT << "host->device inserMemoryMove!  Rec->MCurCtx: " << Record->MCurContext << std::endl;
       insertMemoryMove(Record, Req, Queue);
     }
     std::set<Command *> Deps =
