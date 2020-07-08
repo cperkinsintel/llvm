@@ -37,7 +37,7 @@ void *buffer_impl::allocateMem(ContextImplPtr Context, bool InitFromUserData,
 
 using ContextImplPtr = std::shared_ptr<detail::context_impl>;
 
-void buffer_impl::addBufferInfo(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub ) {
+void buffer_impl::recordBufferUsage(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub ) {
   MBufferInfoDQ.emplace_back(BuffPtr, Sz, Offset, IsSub);
 }
 
