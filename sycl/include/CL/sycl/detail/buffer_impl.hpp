@@ -139,6 +139,8 @@ protected:
  
   
   bool hasSubBuffers();
+  void set_write_back(bool flag);
+  void set_write_back(bool flag, const void *const BuffPtr);
 
   EventImplPtr copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait);
 

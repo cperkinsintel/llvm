@@ -585,7 +585,7 @@ DepDesc Scheduler::GraphBuilder::findDepForRecord(Command *Cmd,
 // The function searches for the alloca command matching context and
 // requirement.
 //CP 
-#define LOG_FIND_ALLOCA_FOR_REQ
+//#define LOG_FIND_ALLOCA_FOR_REQ
 AllocaCommandBase *
 Scheduler::GraphBuilder::findAllocaForReq(MemObjRecord *Record,
                                           const Requirement *Req,

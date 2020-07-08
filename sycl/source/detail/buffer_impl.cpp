@@ -58,19 +58,19 @@ static bool isAWriteMode(access::mode Mode){
 static bool needDtorCopyBack(buffer_usage& BU){
   using hentry = std::tuple<bool, access::mode, ContextImplPtr>;
 
+  if(BU.MWriteBackSet == settable_bool::set_false)
+    return false;
+
   bool updateOnDtor = false;
-  
   find_if(BU.MHistory.begin(), BU.MHistory.end(), [&updateOnDtor](hentry HEntry){
     // returns at first consequential entry. Set updateOnDtor by side effect
 
     //writing on device - set bool, end search.
-    //if(!HEntry.first  &&  isAWriteMode(HEntry.second)){
     if(!std::get<0>(HEntry) && isAWriteMode(std::get<1>(HEntry))){
       updateOnDtor = true; // 
       return true;
     }
     //blocking host read (was updated via map op), do not set bool, end search
-    //if(HEntry.first && isAReadMode(HEntry.second))
     if(std::get<0>(HEntry) && isAReadMode(std::get<1>(HEntry)))
       return true;
 
@@ -141,6 +141,21 @@ static bool shouldCopyBack(detail::when_copyback now, buffer_usage& BU){
 
 bool buffer_impl::hasSubBuffers(){
   return MBufferInfoDQ.size() > 1;
+}
+
+void buffer_impl::set_write_back(bool flag){
+  // called for normal buffers.
+  SYCLMemObjT::set_write_back(flag);
+}
+
+void buffer_impl::set_write_back(bool flag, const void *const BuffPtr){
+  // only called for subbuffers, we need to know if WB was set, and if so, what to.
+  std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage& BU){
+    return (BU.buffAddr == BuffPtr);
+  });
+  assert(it != MBufferInfoDQ.end() && "no record of subbuffer");
+  buffer_usage &BU = it[0];
+  BU.MWriteBackSet = flag ? settable_bool::set_true : settable_bool::set_false;
 }
 
 void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mode,  handler &CGH){

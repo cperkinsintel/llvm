@@ -323,7 +323,12 @@ public:
     impl->set_final_data(finalData);
   }
 
-  void set_write_back(bool flag = true) { impl->set_write_back(flag); }
+  void set_write_back(bool flag = true) { 
+    if(IsSubBuffer)
+      impl->set_write_back(flag, this);
+    else
+      impl->set_write_back(flag);
+  }
 
   bool is_sub_buffer() const { return IsSubBuffer; }
 

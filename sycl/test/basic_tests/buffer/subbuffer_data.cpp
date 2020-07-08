@@ -189,11 +189,34 @@ void ensureSubBufferReadDoesNOTCopyBack(queue q) {
 //CHECK-NOT: ---> piEnqueueMemBufferRead(
 //CHECK: end ensureSubBufferReadDoesNOTCopyBack
 
+
+void checkSubSetWriteBack(queue q){
+    //allocate and setup memory
+    int *baseData  = (int*)(malloc(total * sizeof(int)));
+    setup_arr(baseData);  // [0, 1, 2, 3, ..., total]
+    {
+        buffer<int, 1> base(baseData, range<1>(total));
+        buffer<int, 1> subBuff(base, id<1>(0), range<1>(subSz));
+        subBuff.set_write_back(false);
+        q.submit([&](handler &cgh) {
+            auto subBuffAcc = subBuff.get_access<access::mode::read_write>(cgh);
+            cgh.parallel_for<class checkSubSetWriteBack>(range<1>(subSz), [=](id<1> i) { 
+                subBuffAcc[i] = subBuffAcc[i] * 2;
+            });
+        });
+    }//closure
+    std::cout << "baseData[1] should stil be 1: " << baseData[1] << std::endl;
+    assert(baseData[1] == 1 && "set_write_back(false) should stop changes in subbuffer from copying back.");
+
+    free(baseData);
+}
+
 int main() {
     queue q;
     ensureNoUnecessaryCopyBack(q);
     ensureSubBufferDtorCopyBack(q);
     ensureSubBufferReadDoesNOTCopyBack(q);
+    checkSubSetWriteBack(q);
 }
 
 
