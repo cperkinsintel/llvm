@@ -50,10 +50,11 @@ enum class when_copyback {
 struct buffer_info {
     const size_t SizeInBytes;
     const size_t OffsetInBytes;
+    const size_t SrcTypeSz;
     const bool IsSubBuffer;
 
-    buffer_info(const size_t sz, const size_t offset, const bool IsSub) :
-        SizeInBytes(sz), OffsetInBytes(offset), IsSubBuffer(IsSub) {}
+    buffer_info(const size_t Sz, const size_t Offset, const size_t TypeSz, const bool IsSub) :
+        SizeInBytes(Sz), OffsetInBytes(Offset), SrcTypeSz(TypeSz), IsSubBuffer(IsSub) {}
 };
 
 
@@ -74,8 +75,8 @@ struct buffer_usage {
     std::deque<std::tuple<bool, access::mode, std::shared_ptr<detail::context_impl>>> MHistory;
     
     //ctor
-    buffer_usage(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub) : 
-        buffAddr(BuffPtr) , BufferInfo(Sz, Offset, IsSub), MWriteBackSet(settable_bool::not_set) {};
+    buffer_usage(const void *const BuffPtr, const size_t Sz, const size_t Offset, const size_t TypeSz, const bool IsSub) : 
+        buffAddr(BuffPtr) , BufferInfo(Sz, Offset, TypeSz, IsSub), MWriteBackSet(settable_bool::not_set) {};
 
     //hmmm - removing copy constructors trips the thread safety test.
     //I wonder why?    thread_safety/./ThreadSafetyTests/HostAccessorDeadLockTest.CheckThreadOrder 

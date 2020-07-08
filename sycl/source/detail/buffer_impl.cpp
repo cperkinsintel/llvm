@@ -37,8 +37,8 @@ void *buffer_impl::allocateMem(ContextImplPtr Context, bool InitFromUserData,
 
 using ContextImplPtr = std::shared_ptr<detail::context_impl>;
 
-void buffer_impl::recordBufferUsage(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub ) {
-  MBufferInfoDQ.emplace_back(BuffPtr, Sz, Offset, IsSub);
+void buffer_impl::recordBufferUsage(const void *const BuffPtr, const size_t Sz, const size_t Offset, const size_t SrcTypeSz, const bool IsSub ) {
+  MBufferInfoDQ.emplace_back(BuffPtr, Sz, Offset, SrcTypeSz, IsSub);
 }
 
 static bool isAReadMode(access::mode Mode){
@@ -258,7 +258,7 @@ void buffer_impl::copyBackAnyRemainingData(){
     CPOUT << "que raro!" << std::endl;
     std::deque<buffer_info> SpansDQ;
     //SpansDQ.push_back(buffer_info(2048, 0, true));
-    SpansDQ.push_back(buffer_info(2048, 2048, false));
+    SpansDQ.push_back(buffer_info(2048, 2048, 4, false));
     /*
     SpansDQ.push_back(baseBU.BufferInfo);
     //new sub-ranges.
