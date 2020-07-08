@@ -801,7 +801,7 @@ void AllocaSubBufCommand::emitInstrumentationData() {
 //  Q: what if parent _is_ mapped? 
 //  Q: what about unmap?
 void *AllocaSubBufCommand::getMemAllocation() const {
-#ifndef SB_NEW
+#ifndef SB_NEWMAP
   // In some cases parent`s memory allocation might change (e.g., after
   // map/unmap operations). If parent`s memory allocation changes, sub-buffer
   // memory allocation should be changed as well.

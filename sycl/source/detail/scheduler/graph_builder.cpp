@@ -258,7 +258,7 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
   std::set<Command *> Deps =
       findDepsForReq(Record, Req, Queue->getContextImplPtr());
   Deps.insert(AllocaCmdDst);
-#ifndef SB_NEW
+#ifndef SB_NEWMAP
   // Get parent allocation of sub buffer to perform full copy of whole buffer
   if (IsSuitableSubReq(Req)) {
     if (AllocaCmdDst->getType() == Command::CommandType::ALLOCA_SUB_BUF)
@@ -281,7 +281,7 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
   AllocaCommandBase *LinkageAllocaCmdSrc = AllocaCmdSrc;
 
 
-#ifndef SB_NEW
+#ifndef SB_NEWMAP
   if (!AllocaCmdSrc && IsSuitableSubReq(Req)) {
     // Since no alloca command for the sub buffer requirement was found in the
     // current context, need to find a parent alloca command for it (it must be
@@ -309,7 +309,7 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
       throw runtime_error("Cannot find buffer allocation", PI_INVALID_VALUE);
   }
 
-#ifndef SB_NEW
+#ifndef SB_NEWMAP
   // Get parent allocation of sub buffer to perform full copy of whole buffer
   if (IsSuitableSubReq(Req)) {
     if (AllocaCmdSrc->getType() == Command::CommandType::ALLOCA_SUB_BUF)

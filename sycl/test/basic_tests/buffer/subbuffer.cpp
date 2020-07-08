@@ -58,6 +58,10 @@ void checkHostAccessor(cl::sycl::queue &q) {
                "Sub buffer host accessor test failed.");
     }
   }
+  assert(data[0] == 0 && "data at 0?" );
+  assert(data[size - 1] == (size - 1) && "data at size-1?");
+  assert( data[size / 2] == (size / 2 * -100) && "data at size/2?");
+
   assert(data[0] == 0 && data[size - 1] == (size - 1) &&
          data[size / 2] == (size / 2 * -100) && "Loss of data");
 }
