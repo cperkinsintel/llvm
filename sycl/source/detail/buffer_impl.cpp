@@ -229,9 +229,9 @@ static EventImplPtr scheduleSubCopyBack(buffer_impl *impl, buffer_info Info){
   const int Dims = 1;
   const int ElemSize = 1;
 
-  Requirement Req(Offset, AccessRange, MemoryRange, AccessMode, SYCLMemObject, Dims, ElemSize, Info.OffsetInBytes, true);
+  Requirement Req(Offset, AccessRange, MemoryRange, AccessMode, SYCLMemObject, Dims, ElemSize, Info.OffsetInBytes, Info.IsSubBuffer);
   
-  void* DataPtr = impl->getUserPtr();  //
+  void* DataPtr = impl->getUserPtr();  // TODO - interface with set_final_data
   if(DataPtr != nullptr){
     Req.MData = DataPtr;
     return Scheduler::getInstance().addCopyBack(&Req);
@@ -239,11 +239,27 @@ static EventImplPtr scheduleSubCopyBack(buffer_impl *impl, buffer_info Info){
   return nullptr;
 }
 
+/*
+std::deque<buffer_info> splitAcross(std::deque<buffer_info> Spans, buffer_info Info){
+  return Spans;
+}
+*/
+
+// This is for the weird situation where the base buffer AND sub-buffer have all been performing write operations,
+//  possibly in different contexts.  
+// The sub-buffers are responsible for resolving their own data. Now the base buffer does the same. 
+// It skips any range that was already resolved by a sub-buffer.
+// Note, while this may ameliorate overlapping writes, fundamentally using overlapping buffers/sub-buffers
+// is undefined behavior. 
 void buffer_impl::copyBackAnyRemainingData(){
   buffer_usage &baseBU = MBufferInfoDQ.front();
   assert(!baseBU.BufferInfo.IsSubBuffer && "first BU should be base buffer, not subbuffer");
   if(needDtorCopyBack(baseBU)){ //if rare case base buffer ALSO used a write acc on device.
+    CPOUT << "que raro!" << std::endl;
     std::deque<buffer_info> SpansDQ;
+    //SpansDQ.push_back(buffer_info(2048, 0, true));
+    SpansDQ.push_back(buffer_info(2048, 2048, false));
+    /*
     SpansDQ.push_back(baseBU.BufferInfo);
     //new sub-ranges.
     for(unsigned i = 1; i < MBufferInfoDQ.size(); i++){ //start @ 1, first entry already gotten
@@ -252,11 +268,42 @@ void buffer_impl::copyBackAnyRemainingData(){
         SpansDQ = splitAcross(SpansDQ, BU.BufferInfo );
       }
     }
-    //
+    */
+
+    // the sub-buffers may have been used in different contexts than the base.
+    // which means whatever context the base write accessor used might have been changed since then. 
+    ContextImplPtr newCtx = getDtorCopyBackCtxImpl(baseBU);
+    assert((newCtx != nullptr) && "missing base buffer context?");
+    auto theCtx = MRecord->MCurContext;
+    MRecord->MCurContext = newCtx;
+
+    //schedule
+    std::vector<EventImplPtr> EventsVec(SpansDQ.size());
+    std::for_each(SpansDQ.begin(), SpansDQ.end(), [this, &EventsVec](buffer_info &Info){
+      EventsVec.push_back( scheduleSubCopyBack(this, Info) );   // <== PROBLEM IS HERE. 
+    });
+    //event::wait(EventsVec);
+    std::for_each(EventsVec.begin(), EventsVec.end(), [](EventImplPtr Event){
+      if(Event)
+        Event->wait(Event);
+    });
+    //restore context (we are destructing, is this even necessary?)
+    MRecord->MCurContext = theCtx;
   }
 }
+/*
+  PROBLEM
+  =======
+  When we schedule a copyback, we build up the "Dst" Requirement. Offset in memory, address, bytes, etc etc.  Great.
+  Meanwhile the "Src" Requirement is simply gotten from the memory allocation.  (FindAlloca).  It's offset is always 0 (or whatever was passed to parallel_for).
+  However, to get this to work, I need to be able to set the MSrcReq.MOffset of the MemCpyCommandHost.
+  Approach #1: add an optional argument to addCopyBack
+  Approach #2: add a garbage property to accessor_impl.cpp
 
-EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait){
+  Note: still tricky, because src data might have different element sizes.
+*/
+
+void buffer_impl::copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr){
   //find record of buffer_usage
   std::deque<buffer_usage>::iterator it = find_if(MBufferInfoDQ.begin(), MBufferInfoDQ.end(), [BuffPtr](buffer_usage& BU){
     return (BU.buffAddr == BuffPtr);
@@ -264,39 +311,20 @@ EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const voi
   assert(it != MBufferInfoDQ.end() && "no record of subbuffer");
   buffer_usage &BU = it[0];
 
-  if(needDtorCopyBack(BU)){   //(shouldCopyBack(now, BU)){
-    const id<3> Offset{BU.BufferInfo.OffsetInBytes, 0, 0};
-    const range<3> AccessRange{BU.BufferInfo.SizeInBytes, 1, 1};
-    const range<3> MemoryRange{BU.BufferInfo.SizeInBytes, 1, 1}; // seems to not be used.
-    const access::mode AccessMode = access::mode::read;
-    SYCLMemObjI *SYCLMemObject = this;
-    const int Dims = 1;
-    const int ElemSize = 1;
-
-    Requirement Req(Offset, AccessRange, MemoryRange, AccessMode, SYCLMemObject, Dims, ElemSize, BU.BufferInfo.OffsetInBytes, true);
+  if(needDtorCopyBack(BU)){
+    //last context for the sub-buffer might not be the same as any last access to greater buffer_impl. 
+    ContextImplPtr newCtx = getDtorCopyBackCtxImpl(BU);
+    assert((newCtx != nullptr) && "sub-buffer copyback context null (or host?)");
+    auto theCtx = MRecord->MCurContext;
+    MRecord->MCurContext = newCtx;
     
-    void* DataPtr = getUserPtr();  //
-    if(DataPtr != nullptr){
-      Req.MData = DataPtr;
-
-      //last context for the sub-buffer might not be the same as any last access to greater buffer_impl. 
-      ContextImplPtr newCtx = getDtorCopyBackCtxImpl(BU);
-      assert((newCtx != nullptr) && "sub-buffer copyback context null (or host?)");
-      auto theCtx = MRecord->MCurContext;
-      MRecord->MCurContext = newCtx;
-    
-      EventImplPtr Event = Scheduler::getInstance().addCopyBack(&Req);
+    EventImplPtr Event = scheduleSubCopyBack(this, BU.BufferInfo);
+    if(Event)
+      Event->wait(Event);
       
-      if (Event && Wait)
-        Event->wait(Event);
-      else if(Event)
-        return Event;
-
-      MRecord->MCurContext = theCtx; //restore
-    }
+    //restore context
+    MRecord->MCurContext = theCtx; 
   }
-    
-  return nullptr; 
 }
 
 

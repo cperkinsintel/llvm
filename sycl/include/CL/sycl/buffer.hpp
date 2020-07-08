@@ -255,7 +255,7 @@ public:
   #ifdef SB_NEW
     CPOUT << " SB_NEW" << std::endl;
     if(IsSubBuffer)
-      impl->copyBackSubBuffer(detail::when_copyback::dtor, this, true);
+      impl->copyBackSubBuffer(detail::when_copyback::dtor, this);
   #else
     CPOUT << std::endl;
   #endif

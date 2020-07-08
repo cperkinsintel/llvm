@@ -109,15 +109,16 @@ public:
   
 
   ~buffer_impl() {   
-    if(!hasSubBuffers()){
-      CPOUT << "~buffer_impl -> updateHostMemory" << std::endl;
-      try {
-        BaseT::updateHostMemory();
-      } catch (...) {
-      }
-    } else {
+    if(hasSubBuffers()){
       CPOUT << "~buffer_impl -> copyBackAnyRemainingData" << std::endl;
       copyBackAnyRemainingData();
+      //MNeedWriteBack = false; //clear this to prevent an additional copy back when we release memory below.
+    }
+    
+    try {
+      CPOUT << "~buffer_impl -> updateHostMemory()" << std::endl;
+      BaseT::updateHostMemory(); //also releases memory and handles.
+    } catch (...) {
     }
   }
 
@@ -142,7 +143,7 @@ protected:
   void set_write_back(bool flag);
   void set_write_back(bool flag, const void *const BuffPtr);
 
-  EventImplPtr copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait);
+  void copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr);
   void copyBackAnyRemainingData();
 };
 

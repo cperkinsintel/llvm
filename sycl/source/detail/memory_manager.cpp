@@ -267,6 +267,7 @@ void copyD2H(SYCLMemObjI *SYCLMemObj, RT::PiMem SrcMem, QueueImplPtr SrcQueue,
   assert(SYCLMemObj && "The SYCLMemObj is nullptr");
 
   const RT::PiQueue Queue = SrcQueue->getHandleRef();
+  CPOUT << "copyD2H. SrcSz/SrcElemSize: " << SrcSize[0] << "/" << SrcElemSize << std::endl;
   // Adjust sizes of 1 dimensions as OpenCL expects size in bytes.
   SrcSize[0] *= SrcElemSize;
   const detail::plugin &Plugin = SrcQueue->getPlugin();

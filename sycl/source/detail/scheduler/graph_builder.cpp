@@ -428,7 +428,7 @@ Command *Scheduler::GraphBuilder::addCopyBack(Requirement *Req) {
 
   const Requirement *SrcReq = SrcAllocaCmd->getRequirement();
   Requirement SrcReqClone(*SrcReq);
-  //when copying back, throw out any vestigial Src Offset 
+  //when copying back subbuffers, throw out any vestigial Src Offset 
   if(Req->MIsSubBuffer && SrcReq->MIsSubBuffer && SrcReq->MOffset[0] != 0)
     SrcReqClone.MOffset = id<3>{0,0,0};
   
