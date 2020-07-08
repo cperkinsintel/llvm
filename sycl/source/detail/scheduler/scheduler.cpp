@@ -98,10 +98,10 @@ EventImplPtr Scheduler::addCG(std::unique_ptr<detail::CG> CommandGroup,
   return NewCmd->getEvent();
 }
 
-EventImplPtr Scheduler::addCopyBack(Requirement *Req) {
+EventImplPtr Scheduler::addCopyBack(Requirement *Req, size_t SrcOffset /* = 0 */) {
   std::unique_lock<std::shared_timed_mutex> Lock(MGraphLock, std::defer_lock);
   lockSharedTimedMutex(Lock);
-  Command *NewCmd = MGraphBuilder.addCopyBack(Req);
+  Command *NewCmd = MGraphBuilder.addCopyBack(Req, SrcOffset);
   // Command was not creted because there were no operations with
   // buffer.
   if (!NewCmd)

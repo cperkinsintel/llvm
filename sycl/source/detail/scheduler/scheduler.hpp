@@ -365,8 +365,10 @@ public:
   ///
   /// \param Req is a requirement that points to the memory where data is
   /// needed.
+  /// \param SrcOffset is optional.  Will change the source offset from which
+  /// the memory copy operation occurs.
   /// \return an event object to wait on for copy finish.
-  EventImplPtr addCopyBack(Requirement *Req);
+  EventImplPtr addCopyBack(Requirement *Req, size_t SrcOffset = 0);
 
   /// Waits for the event.
   ///
@@ -467,7 +469,9 @@ protected:
     /// Enqueues a command to update memory to the latest state.
     ///
     /// \param Req is a requirement, that describes memory object.
-    Command *addCopyBack(Requirement *Req);
+    /// \param SrcOffset is optional.  Will change the source offset 
+    /// from which the memory copy operation occurs.
+    Command *addCopyBack(Requirement *Req, size_t SrcOffset = 0);
 
     /// Enqueues a command to create a host accessor.
     ///

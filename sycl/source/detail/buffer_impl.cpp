@@ -220,7 +220,7 @@ void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mo
   BU.MHistory.emplace_front(true, Mode, nullptr );
 }
 
-static EventImplPtr scheduleSubCopyBack(buffer_impl *impl, buffer_info Info){
+static EventImplPtr scheduleSubCopyBack(buffer_impl *impl, buffer_info Info, size_t SrcOffset = 0){
   const id<3> Offset{Info.OffsetInBytes, 0, 0};
   const range<3> AccessRange{Info.SizeInBytes, 1, 1};
   const range<3> MemoryRange{Info.SizeInBytes, 1, 1}; // seems to not be used.
@@ -234,7 +234,7 @@ static EventImplPtr scheduleSubCopyBack(buffer_impl *impl, buffer_info Info){
   void* DataPtr = impl->getUserPtr();  // TODO - interface with set_final_data
   if(DataPtr != nullptr){
     Req.MData = DataPtr;
-    return Scheduler::getInstance().addCopyBack(&Req);
+    return Scheduler::getInstance().addCopyBack(&Req, SrcOffset);
   }
   return nullptr;
 }
@@ -256,6 +256,7 @@ void buffer_impl::copyBackAnyRemainingData(){
   assert(!baseBU.BufferInfo.IsSubBuffer && "first BU should be base buffer, not subbuffer");
   if(needDtorCopyBack(baseBU)){ //if rare case base buffer ALSO used a write acc on device.
     CPOUT << "que raro!" << std::endl;
+    size_t SrcTypeSz = baseBU.BufferInfo.SrcTypeSz;
     std::deque<buffer_info> SpansDQ;
     //SpansDQ.push_back(buffer_info(2048, 0, true));
     SpansDQ.push_back(buffer_info(2048, 2048, 4, false));
@@ -279,8 +280,9 @@ void buffer_impl::copyBackAnyRemainingData(){
 
     //schedule
     std::vector<EventImplPtr> EventsVec(SpansDQ.size());
-    std::for_each(SpansDQ.begin(), SpansDQ.end(), [this, &EventsVec](buffer_info &Info){
-      EventsVec.push_back( scheduleSubCopyBack(this, Info) );   // <== PROBLEM IS HERE. 
+    std::for_each(SpansDQ.begin(), SpansDQ.end(), [this, SrcTypeSz, &EventsVec](buffer_info &Info){
+      size_t srcOffset = Info.OffsetInBytes / SrcTypeSz;
+      EventsVec.push_back( scheduleSubCopyBack(this, Info, srcOffset) );   // <== PROBLEM IS HERE. 
     });
     //event::wait(EventsVec);
     std::for_each(EventsVec.begin(), EventsVec.end(), [](EventImplPtr Event){

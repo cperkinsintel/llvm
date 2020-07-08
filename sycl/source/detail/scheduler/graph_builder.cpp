@@ -406,7 +406,7 @@ Command *Scheduler::GraphBuilder::remapMemoryObject(
 
 // The function adds copy operation of the up to date'st memory to the memory
 // pointed by Req.
-Command *Scheduler::GraphBuilder::addCopyBack(Requirement *Req) {
+Command *Scheduler::GraphBuilder::addCopyBack(Requirement *Req, size_t SrcOffset /* = 0 */) {
 
   QueueImplPtr HostQueue = Scheduler::getInstance().getDefaultHostQueue();
   SYCLMemObjI *MemObj = Req->MSYCLMemObj;
@@ -431,6 +431,9 @@ Command *Scheduler::GraphBuilder::addCopyBack(Requirement *Req) {
   //when copying back subbuffers, throw out any vestigial Src Offset 
   if(Req->MIsSubBuffer && SrcReq->MIsSubBuffer && SrcReq->MOffset[0] != 0)
     SrcReqClone.MOffset = id<3>{0,0,0};
+
+  if(SrcOffset)
+    SrcReqClone.MOffset[0] = SrcOffset;
   
   std::unique_ptr<MemCpyCommandHost> MemCpyCmdUniquePtr(new MemCpyCommandHost(
       SrcReqClone, SrcAllocaCmd, *Req, &Req->MData,
