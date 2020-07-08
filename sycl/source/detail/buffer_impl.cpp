@@ -54,7 +54,7 @@ static bool isAWriteMode(access::mode Mode){
   else
     return true;
 }
-
+/*
 static bool needDtorCopyBack(buffer_usage& BU){
   using hentry = std::tuple<bool, access::mode, ContextImplPtr>;
 
@@ -80,6 +80,42 @@ static bool needDtorCopyBack(buffer_usage& BU){
 
   return updateOnDtor; 
 }
+*/
+static detail::when_copyback whenDataResolves(buffer_usage& BU){
+  using hentry = std::tuple<bool, access::mode, ContextImplPtr>;
+
+  detail::when_copyback when = when_copyback::never; 
+  find_if(BU.MHistory.begin(), BU.MHistory.end(), [&when](hentry HEntry){
+    // returns at first consequential entry.
+
+    //writing on device - set bool, end search.
+    if(!std::get<0>(HEntry) && isAWriteMode(std::get<1>(HEntry))){
+      when = when_copyback::dtor;  
+      return true;
+    }
+    //blocking host read (was updated via map op), do not set bool, end search
+    if(std::get<0>(HEntry) && isAReadMode(std::get<1>(HEntry))){
+      when = when_copyback::immediate;
+      return true;
+    }
+
+    //continue
+    return false;
+  });
+  
+  //immediate map doesn't use writeback flag, return before flag check.
+  if(when == when_copyback::immediate)
+    return when;
+  
+  if(BU.MWriteBackSet == settable_bool::set_false)
+    return when_copyback::never;
+  
+  return when;
+}
+
+static bool needDtorCopyBack(buffer_usage& BU){
+  return (whenDataResolves(BU) == when_copyback::dtor);
+}
 
 static ContextImplPtr getDtorCopyBackCtxImpl(buffer_usage& BU){
   using hentry = std::tuple<bool, access::mode, ContextImplPtr>;
@@ -95,6 +131,8 @@ static ContextImplPtr getDtorCopyBackCtxImpl(buffer_usage& BU){
   });
   return theCtx;
 }
+
+
 /*
 // when is the appropriate time for some sub/buffer to update the host memory?
 // return value of 'immediate' means when scheduling the command group (addCCG), usually via a Map operation
@@ -180,6 +218,42 @@ void buffer_impl::recordAccessorUsage(const void *const BuffPtr, access::mode Mo
   //Scheduler::getInstance().getDefaultHostQueue().getContextImplPtr()
 
   BU.MHistory.emplace_front(true, Mode, nullptr );
+}
+
+static EventImplPtr scheduleSubCopyBack(buffer_impl *impl, buffer_info Info){
+  const id<3> Offset{Info.OffsetInBytes, 0, 0};
+  const range<3> AccessRange{Info.SizeInBytes, 1, 1};
+  const range<3> MemoryRange{Info.SizeInBytes, 1, 1}; // seems to not be used.
+  const access::mode AccessMode = access::mode::read;
+  SYCLMemObjI *SYCLMemObject = impl;
+  const int Dims = 1;
+  const int ElemSize = 1;
+
+  Requirement Req(Offset, AccessRange, MemoryRange, AccessMode, SYCLMemObject, Dims, ElemSize, Info.OffsetInBytes, true);
+  
+  void* DataPtr = impl->getUserPtr();  //
+  if(DataPtr != nullptr){
+    Req.MData = DataPtr;
+    return Scheduler::getInstance().addCopyBack(&Req);
+  }
+  return nullptr;
+}
+
+void buffer_impl::copyBackAnyRemainingData(){
+  buffer_usage &baseBU = MBufferInfoDQ.front();
+  assert(!baseBU.BufferInfo.IsSubBuffer && "first BU should be base buffer, not subbuffer");
+  if(needDtorCopyBack(baseBU)){ //if rare case base buffer ALSO used a write acc on device.
+    std::deque<buffer_info> SpansDQ;
+    SpansDQ.push_back(baseBU.BufferInfo);
+    //new sub-ranges.
+    for(unsigned i = 1; i < MBufferInfoDQ.size(); i++){ //start @ 1, first entry already gotten
+      buffer_usage &BU = MBufferInfoDQ[i];
+      if(whenDataResolves(BU) != when_copyback::never){
+        SpansDQ = splitAcross(SpansDQ, BU.BufferInfo );
+      }
+    }
+    //
+  }
 }
 
 EventImplPtr buffer_impl::copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait){

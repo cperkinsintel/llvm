@@ -115,8 +115,10 @@ public:
         BaseT::updateHostMemory();
       } catch (...) {
       }
+    } else {
+      CPOUT << "~buffer_impl -> copyBackAnyRemainingData" << std::endl;
+      copyBackAnyRemainingData();
     }
-    //TODO: else
   }
 
   void resize(size_t size) { BaseT::MSizeInBytes = size; }
@@ -126,24 +128,22 @@ protected:
   template <typename T, int Dimensions, typename AllocatorT, typename Enable>
   friend class sycl::buffer;
 
-  //de-queue of buffer_info, if any.
+  //deque of buffer_info, if any.
   std::deque<buffer_usage> MBufferInfoDQ;
 
   // if this MemObj is backing a buffer (and sub-buffers), provide information
   // to help with copy-back decisions.
   void addBufferInfo(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub );
 
- 
   void recordAccessorUsage(const void *const BuffPtr, access::mode Mode,  handler &CGH);
   void recordAccessorUsage(const void *const BuffPtr, access::mode Mode);
  
-  
   bool hasSubBuffers();
   void set_write_back(bool flag);
   void set_write_back(bool flag, const void *const BuffPtr);
 
   EventImplPtr copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr, bool Wait);
-
+  void copyBackAnyRemainingData();
 };
 
 } // namespace detail
