@@ -281,8 +281,9 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
   AllocaCommandBase *LinkageAllocaCmdSrc = AllocaCmdSrc;
 
 
-#ifndef SB_NEWMAP
+
   if (!AllocaCmdSrc && IsSuitableSubReq(Req)) {
+  #ifndef SB_NEWMAP
     // Since no alloca command for the sub buffer requirement was found in the
     // current context, need to find a parent alloca command for it (it must be
     // there)
@@ -295,17 +296,31 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
                  AllocaCmd->getType() == Command::CommandType::ALLOCA;
       return Res;
     };
+  #else
+    // the sub-buffer is in a different context.  Find it.
+    const bool is_host = !LinkageAllocaCmdDst->getQueue()->is_host(); //opposite of Dest //Record->MCurContext->is_host();
+    auto IsSuitableAlloca = [Record, Req, is_host](AllocaCommandBase *AllocaCmd) {
+      const Requirement *TmpReq = AllocaCmd->getRequirement();
+      bool Res =  AllocaCmd->getType() ==Command::CommandType::ALLOCA_SUB_BUF
+               && AllocaCmd->getQueue()->is_host() == is_host
+               && TmpReq->MOffsetInBytes == Req->MOffsetInBytes
+               && TmpReq->MSYCLMemObj->getSize() == Req->MSYCLMemObj->getSize()
+               && TmpReq->MAccessRange[0] == Req->MAccessRange[0];
+      return Res;
+    };
+  #endif
     const auto It =
         std::find_if(Record->MAllocaCommands.begin(),
                      Record->MAllocaCommands.end(), IsSuitableAlloca);
     LinkageAllocaCmdSrc = AllocaCmdSrc = (Record->MAllocaCommands.end() != It) ? *It : nullptr;
+    CPOUT << "Failed or Found AllocaCmdSrc? " << AllocaCmdSrc << std::endl;
   }
-#endif
+
 
   if (!AllocaCmdSrc){
-    if(IsSuitableSubReq(Req))
-      return nullptr; // don't have to worry for sub-buffer. 
-    else
+    // if(IsSuitableSubReq(Req))
+    //   return nullptr; // don't have to worry for sub-buffer. 
+    // else
       throw runtime_error("Cannot find buffer allocation", PI_INVALID_VALUE);
   }
 
