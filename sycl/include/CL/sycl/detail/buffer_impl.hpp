@@ -112,7 +112,7 @@ public:
     if(hasSubBuffers()){
       CPOUT << "~buffer_impl -> copyBackAnyRemainingData" << std::endl;
       copyBackAnyRemainingData();
-      //MNeedWriteBack = false; //clear this to prevent an additional copy back when we release memory below.
+      MNeedWriteBack = false; //clear this to prevent an additional copy back when we release memory below.
     }
     
     try {

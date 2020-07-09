@@ -71,8 +71,7 @@ void SYCLMemObjT::updateHostMemory(void *const Ptr) {
 void SYCLMemObjT::updateHostMemory() {
   if ((MUploadDataFunctor != nullptr) && MNeedWriteBack)
     MUploadDataFunctor();
-    //CP - turning off this temporarily
-/*
+    
   // If we're attached to a memory record, process the deletion of the memory
   // record. We may get detached before we do this.
   if (MRecord)
@@ -84,7 +83,6 @@ void SYCLMemObjT::updateHostMemory() {
     Plugin.call<PiApiKind::piMemRelease>(
         pi::cast<RT::PiMem>(MInteropMemObject));
   }
-  */
 }
 const plugin &SYCLMemObjT::getPlugin() const {
   assert((MInteropContext != nullptr) &&

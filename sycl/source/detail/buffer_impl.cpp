@@ -245,63 +245,39 @@ std::deque<buffer_info> splitAcross(std::deque<buffer_info> Spans, buffer_info I
 }
 */
 
-// This is for the weird situation where the base buffer AND sub-buffer have all been performing write operations,
-//  possibly in different contexts.  
-// The sub-buffers are responsible for resolving their own data. Now the base buffer does the same. 
-// It skips any range that was already resolved by a sub-buffer.
-// Note, while this may ameliorate overlapping writes, fundamentally using overlapping buffers/sub-buffers
-// is undefined behavior. 
+// This detects the weird situation where the base buffer AND sub-buffer have all been performing write operations,
+//  possibly in different contexts.  The sub-buffers take care of themselves. Here we 
+//  see if the base buffer actually needs to do anything, and if so, schedule the copy-back.
 void buffer_impl::copyBackAnyRemainingData(){
   buffer_usage &baseBU = MBufferInfoDQ.front();
   assert(!baseBU.BufferInfo.IsSubBuffer && "first BU should be base buffer, not subbuffer");
-  if(needDtorCopyBack(baseBU)){ //if rare case base buffer ALSO used a write acc on device.
-    CPOUT << "que raro!" << std::endl;
-    std::deque<buffer_info> SpansDQ;
-    //SpansDQ.push_back(buffer_info(2048, 0, true));
-    SpansDQ.push_back(buffer_info(2048, 2048, false));
-    /*
-    SpansDQ.push_back(baseBU.BufferInfo);
-    //new sub-ranges.
-    for(unsigned i = 1; i < MBufferInfoDQ.size(); i++){ //start @ 1, first entry already gotten
-      buffer_usage &BU = MBufferInfoDQ[i];
-      if(whenDataResolves(BU) != when_copyback::never){
-        SpansDQ = splitAcross(SpansDQ, BU.BufferInfo );
-      }
-    }
-    */
+  if(needDtorCopyBack(baseBU)){ //in unusual case base buffer ALSO used a write acc on device.
+    // NOTE: it's possible to measure how much of the base buffer "remains" 
+    //       and/or to count the number of discrete write-backs would be needed to resolve it
+    //       without overlapping the sub-buffers. Then decide if it should be copied back in small
+    //       pieces, rather than at once.   Have the code for this, but it also
+    //       requires small changes to the Schedule.addCopyBack() interface. 
+    //       At this moment, in this unusual case, we simply copy back the entire
+    //       base buffer. 
 
+    CPOUT << "copyBackAnyRemainingData scheduling for base" << std::endl;
     // the sub-buffers may have been used in different contexts than the base.
     // which means whatever context the base write accessor used might have been changed since then. 
     ContextImplPtr newCtx = getDtorCopyBackCtxImpl(baseBU);
-    assert((newCtx != nullptr) && "missing base buffer context?");
+    assert((newCtx != nullptr) && "missing base buffer context");
     auto theCtx = MRecord->MCurContext;
     MRecord->MCurContext = newCtx;
 
     //schedule
-    std::vector<EventImplPtr> EventsVec(SpansDQ.size());
-    std::for_each(SpansDQ.begin(), SpansDQ.end(), [this, &EventsVec](buffer_info &Info){
-      EventsVec.push_back( scheduleSubCopyBack(this, Info) );   // <== PROBLEM IS HERE. 
-    });
-    //event::wait(EventsVec);
-    std::for_each(EventsVec.begin(), EventsVec.end(), [](EventImplPtr Event){
-      if(Event)
-        Event->wait(Event);
-    });
+    EventImplPtr Event = scheduleSubCopyBack(this, baseBU.BufferInfo);
+    if(Event)
+      Event->wait(Event);
+
     //restore context (we are destructing, is this even necessary?)
     MRecord->MCurContext = theCtx;
   }
 }
-/*
-  PROBLEM
-  =======
-  When we schedule a copyback, we build up the "Dst" Requirement. Offset in memory, address, bytes, etc etc.  Great.
-  Meanwhile the "Src" Requirement is simply gotten from the memory allocation.  (FindAlloca).  It's offset is always 0 (or whatever was passed to parallel_for).
-  However, to get this to work, I need to be able to set the MSrcReq.MOffset of the MemCpyCommandHost.
-  Approach #1: add an optional argument to addCopyBack
-  Approach #2: add a garbage property to accessor_impl.cpp
 
-  Note: still tricky, because src data might have different element sizes.
-*/
 
 void buffer_impl::copyBackSubBuffer(detail::when_copyback now, const void *const BuffPtr){
   //find record of buffer_usage
