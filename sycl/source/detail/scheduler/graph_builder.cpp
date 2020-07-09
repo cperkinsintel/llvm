@@ -588,7 +588,7 @@ DepDesc Scheduler::GraphBuilder::findDepForRecord(Command *Cmd,
 // The function searches for the alloca command matching context and
 // requirement.
 //CP 
-//#define LOG_FIND_ALLOCA_FOR_REQ
+#define LOG_FIND_ALLOCA_FOR_REQ
 AllocaCommandBase *
 Scheduler::GraphBuilder::findAllocaForReq(MemObjRecord *Record,
                                           const Requirement *Req,
@@ -599,6 +599,7 @@ Scheduler::GraphBuilder::findAllocaForReq(MemObjRecord *Record,
       const Requirement *TmpReq = AllocaCmd->getRequirement();
       Res &= AllocaCmd->getType() == Command::CommandType::ALLOCA_SUB_BUF;
       Res &= TmpReq->MOffsetInBytes == Req->MOffsetInBytes;
+      //Res &= TmpReq->MAccessRange[0] == Req->MAccessRange[0]; //CP added 7/8
       Res &= TmpReq->MSYCLMemObj->getSize() == Req->MSYCLMemObj->getSize();
     #ifdef LOG_FIND_ALLOCA_FOR_REQ
           CPOUT << "          :: AllocIsSub//Off/Sz/AR//ReqIsSub=>Match!: " 

@@ -361,6 +361,9 @@ void buffer_impl::copyBackSubBuffer(detail::when_copyback now, const void *const
     assert((newCtx != nullptr) && "sub-buffer copyback context null (or host?)");
     auto theCtx = MRecord->MCurContext;
     MRecord->MCurContext = newCtx;
+    if(newCtx != theCtx)
+      CPOUT << "copyBackSubBuffer switching contexts. old: " << theCtx << "  new: " << newCtx << std::endl;
+
     
     EventImplPtr Event = scheduleSubCopyBack(this, BU.BufferInfo);
     if(Event)
