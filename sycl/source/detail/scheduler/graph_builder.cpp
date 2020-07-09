@@ -287,8 +287,6 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
     // Since no alloca command for the sub buffer requirement was found in the
     // current context, need to find a parent alloca command for it (it must be
     // there)
-    // this indiscriminately grabs any alloca with the same context. Isn't necessarily
-    // the parent of the sub-buffer. 
     auto IsSuitableAlloca = [Record, Req](AllocaCommandBase *AllocaCmd) {
       bool Res = sameCtx(AllocaCmd->getQueue()->getContextImplPtr(),
                          Record->MCurContext) &&
@@ -343,6 +341,7 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
     // If the operation is going to be an UNMAP, operate on the parent not the sub-buffer. 
     // TODO: drop this limitation (rarely encountered. maybe never?)
     if (AllocaCmdSrc->getQueue()->is_host()){
+      CPOUT << "abandoning sub-buffers, switching to parents." << std::endl;
       AllocaCmdSrc = LinkageAllocaCmdSrc;
       AllocaCmdDst = LinkageAllocaCmdDst;
     }
@@ -352,10 +351,14 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
   //CP
   CPOUT << "insertMemoryMove Alloca Src/Dst: " << AllocaCmdSrc->MMemAllocation << "/" << AllocaCmdDst->MMemAllocation << std::endl;
   CPOUT << "                          Req @: " << (void*)(Req) << std::endl;
+  CPOUT << "linked?: " << (LinkageAllocaCmdSrc->MLinkedAllocaCmd == LinkageAllocaCmdDst) 
+        << " / " << (LinkageAllocaCmdDst->MLinkedAllocaCmd == LinkageAllocaCmdSrc) << std::endl;
 
   Command *NewCmd = nullptr;
 
-  if (LinkageAllocaCmdSrc->MLinkedAllocaCmd == LinkageAllocaCmdDst) {
+  //CP - temporary predicate change
+  if (AllocaCmdDst->getQueue()->is_host()){   //LinkageAllocaCmdSrc->MLinkedAllocaCmd == LinkageAllocaCmdDst) {
+    CPOUT << "inserting MAP op" << std::endl;
     // Map write only as read-write
     access::mode MapMode = Req->MAccessMode;
     if (MapMode == access::mode::write)
@@ -363,7 +366,7 @@ Command *Scheduler::GraphBuilder::insertMemoryMove(MemObjRecord *Record,
     NewCmd = insertMapUnmapForLinkedCmds(AllocaCmdSrc, AllocaCmdDst, MapMode);
     Record->MHostAccess = MapMode;
   } else {
-
+    CPOUT << "inserting MEMCPY op" << std::endl;
     // Full copy of buffer is needed to avoid loss of data that may be caused
     // by copying specific range from host to device and backwards.
     NewCmd =
@@ -635,14 +638,14 @@ Scheduler::GraphBuilder::findAllocaForReq(MemObjRecord *Record,
                 <<  Req->MOffsetInBytes << "/" << Req->MSYCLMemObj->getSize() << "/"
                 <<  Req->MAccessRange[0] << " // "
                 <<  Req->MIsSubBuffer << std::endl;
-          CPOUT << "     -----:: SameCtx/IsHost/CtxAddr/AllocaIsSub // Off/Sz/AR // ReqIsSub" << std::endl;
+          CPOUT << "     -----:: SameCtx/IsHost/CtxAddr--AllocaMem--ReqMem // Off/Sz/AR // ReqIsSub" << std::endl;
     std::for_each(Record->MAllocaCommands.begin(), Record->MAllocaCommands.end(),
       [&Context, Req](AllocaCommandBase *AllocaCmd){
         bool Res = sameCtx(AllocaCmd->getQueue()->getContextImplPtr(), Context);
         auto addr =  AllocaCmd->getQueue()->getContextImplPtr() ;
         const Requirement *TmpReq = AllocaCmd->getRequirement();
             CPOUT << "     -----:: "
-                  << Res << "/" << addr->is_host() << "/" << addr << "/" << (AllocaCmd->getType() == Command::CommandType::ALLOCA_SUB_BUF) << " // "
+                  << Res << "/" << addr->is_host() << "/" << addr << "--" << AllocaCmd->MMemAllocation << "--" << TmpReq->MData << " // "
                   <<  TmpReq->MOffsetInBytes << "/" << TmpReq->MSYCLMemObj->getSize() << "/"
                   <<  TmpReq->MAccessRange[0] << " // "
                   <<  TmpReq->MIsSubBuffer << std::endl;
@@ -656,9 +659,9 @@ Scheduler::GraphBuilder::findAllocaForReq(MemObjRecord *Record,
   if(Record->MAllocaCommands.end() != It){
     auto addr =  (*It)->getQueue()->getContextImplPtr() ;
     const Requirement *TmpReq = (*It)->getRequirement();
-    CPOUT << "FOUND=====::  IsHost/CtxAddr/AllocaIsSub // Off/Sz/AR // ReqIsSub" << std::endl;
+    CPOUT << "FOUND=====::  IsHost/CtxAddr--AMem--RMem // Off/Sz/AR // ReqIsSub" << std::endl;
     CPOUT << "     -----:: "
-          << addr->is_host() << "/" << addr << "/" << ((*It)->getType() == Command::CommandType::ALLOCA_SUB_BUF) << " // "
+          << addr->is_host() << "/" << addr << "--" << (*It)->MMemAllocation << "--" << TmpReq->MData << " // "
           <<  TmpReq->MOffsetInBytes << "/" << TmpReq->MSYCLMemObj->getSize() << "/"
           <<  TmpReq->MAccessRange[0] << " // "
           <<  TmpReq->MIsSubBuffer << std::endl; 
