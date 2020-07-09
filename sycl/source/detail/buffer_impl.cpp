@@ -239,11 +239,53 @@ static EventImplPtr scheduleSubCopyBack(buffer_impl *impl, buffer_info Info, siz
   return nullptr;
 }
 
-/*
-std::deque<buffer_info> splitAcross(std::deque<buffer_info> Spans, buffer_info Info){
-  return Spans;
+// For a set of spans, sees if any are intersected by another
+// if not, adds it to collection. If partial, adds the non-overlapping piece.
+// To make this more performant, and interval tree should be used. 
+// But this is already well outside typical usage. This simple
+// approach should suffice for now. 
+void splitAcross(std::deque<buffer_info> &Spans, buffer_info Info, buffer_info BaseInfo){
+  int InfoLB = Info.OffsetInBytes;
+  int InfoRB = InfoLB + Info.SizeInBytes;
+  int QueueSize = Spans.size(); 
+  for(int i = 0; i < QueueSize; i++){
+    //6 possibilities.  '---' is already copied (Info) and ,___, is not yet copied (span)
+    // '---'  ,___,
+    // '--,=='__,
+    // '--,==,--'
+    // ,___,  '---'
+    // ,__'==,--'
+    // ,__'=='__,
+    // we want the __ pieces, not the == overlap (nor the -- already copied)
+
+    //Modify Spans in place. Visit once, popping off front, pushing to back (if needed). No double visits.
+    buffer_info span = Spans.front();
+    Spans.pop_front();
+    
+    int spanLB = span.OffsetInBytes;
+    int spanRB = spanLB + span.SizeInBytes;
+
+    if(InfoLB <= spanLB) { // first 3 possibilities
+      if(InfoRB < spanLB)  // '---'  ,___,
+        Spans.push_back(span);
+      else if(spanLB < InfoRB && InfoRB < spanRB) // '--,=='__,
+        Spans.push_back( buffer_info(spanRB - InfoRB, InfoRB, BaseInfo.SrcTypeSz, BaseInfo.IsSubBuffer) );
+      else if(spanLB < InfoRB && spanRB < InfoRB){ // '--,==,--'
+        ; //full enclosed, do nothing
+      }
+    } else {
+      if(spanRB < InfoLB) // ,___,  '---'
+        Spans.push_back(span);
+      else if(InfoLB < spanRB && spanRB < InfoRB) // ,__'==,--'
+        Spans.push_back( buffer_info(InfoLB - spanLB, spanLB, BaseInfo.SrcTypeSz, BaseInfo.IsSubBuffer) );
+      else if(InfoLB < spanRB && InfoRB < spanRB) { // ,__'=='__,
+        Spans.push_back( buffer_info(InfoLB - spanLB, spanLB, BaseInfo.SrcTypeSz, BaseInfo.IsSubBuffer) );
+        Spans.push_back( buffer_info(spanRB - InfoRB, InfoRB, BaseInfo.SrcTypeSz, BaseInfo.IsSubBuffer) );
+      }
+    }
+  } //for
 }
-*/
+
 
 // This is for the weird situation where the base buffer AND sub-buffer have all been performing write operations,
 //  possibly in different contexts.  
@@ -258,18 +300,18 @@ void buffer_impl::copyBackAnyRemainingData(){
     CPOUT << "que raro!" << std::endl;
     size_t SrcTypeSz = baseBU.BufferInfo.SrcTypeSz;
     std::deque<buffer_info> SpansDQ;
-    //SpansDQ.push_back(buffer_info(2048, 0, true));
-    SpansDQ.push_back(buffer_info(2048, 2048, 4, false));
-    /*
+    //SpansDQ.push_back(buffer_info(2048, 2048, 4, false));
+    
     SpansDQ.push_back(baseBU.BufferInfo);
     //new sub-ranges.
     for(unsigned i = 1; i < MBufferInfoDQ.size(); i++){ //start @ 1, first entry already gotten
       buffer_usage &BU = MBufferInfoDQ[i];
       if(whenDataResolves(BU) != when_copyback::never){
-        SpansDQ = splitAcross(SpansDQ, BU.BufferInfo );
+        splitAcross(SpansDQ, BU.BufferInfo, baseBU.BufferInfo );
       }
     }
-    */
+    CPOUT << "Num Spanz: " << SpansDQ.size() << std::endl;
+    
 
     // the sub-buffers may have been used in different contexts than the base.
     // which means whatever context the base write accessor used might have been changed since then. 
@@ -289,7 +331,7 @@ void buffer_impl::copyBackAnyRemainingData(){
       if(Event)
         Event->wait(Event);
     });
-    //restore context (we are destructing, is this even necessary?)
+    //restore context
     MRecord->MCurContext = theCtx;
   }
 }
