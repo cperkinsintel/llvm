@@ -224,10 +224,6 @@ void copyH2D(SYCLMemObjI *SYCLMemObj, char *SrcMem, QueueImplPtr,
     SrcAccessRange[0] *= SrcElemSize;
     DstAccessRange[0] *= DstElemSize;
     SrcSize[0] *= SrcElemSize;
-    
-    //CP
-    CPOUT << "copyH2D. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
-    CPOUT << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
 
     if (1 == DimDst && 1 == DimSrc) {
       Plugin.call<PiApiKind::piEnqueueMemBufferWrite>(
@@ -267,7 +263,6 @@ void copyD2H(SYCLMemObjI *SYCLMemObj, RT::PiMem SrcMem, QueueImplPtr SrcQueue,
   assert(SYCLMemObj && "The SYCLMemObj is nullptr");
 
   const RT::PiQueue Queue = SrcQueue->getHandleRef();
-  CPOUT << "copyD2H. SrcSz/SrcElemSize: " << SrcSize[0] << "/" << SrcElemSize << std::endl;
   // Adjust sizes of 1 dimensions as OpenCL expects size in bytes.
   SrcSize[0] *= SrcElemSize;
   const detail::plugin &Plugin = SrcQueue->getPlugin();
@@ -278,16 +273,10 @@ void copyD2H(SYCLMemObjI *SYCLMemObj, RT::PiMem SrcMem, QueueImplPtr SrcQueue,
     DstAccessRange[0] *= DstElemSize;
     DstSize[0] *= DstElemSize;
 
-    //CP DestAccessRange unused (until now!).
-    CPOUT << "copyD2H. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
-    CPOUT << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
-    CPOUT << "         SrcMem / DstMem / DM+Off: " << SrcMem << " / " << (void*)(DstMem) << " / " << (void*)(DstMem + DstOffset[0]) << std::endl;
-
     if (1 == DimDst && 1 == DimSrc) {
-      unsigned int NumBytes = std::min(SrcAccessRange[0], DstAccessRange[0]); //CP  replace with assertion that AR are same?
       Plugin.call<PiApiKind::piEnqueueMemBufferRead>(
           Queue, SrcMem,
-          /*blocking_read=*/CL_FALSE, SrcOffset[0], NumBytes,
+          /*blocking_read=*/CL_FALSE, SrcOffset[0], SrcAccessRange[0],
           DstMem + DstOffset[0], DepEvents.size(), &DepEvents[0], &OutEvent);
     } else {
       size_t BufferRowPitch = (1 == DimSrc) ? 0 : SrcSize[0];
@@ -328,11 +317,6 @@ void copyD2D(SYCLMemObjI *SYCLMemObj, RT::PiMem SrcMem, QueueImplPtr SrcQueue,
     SrcAccessRange[0] *= SrcElemSize;
     SrcSize[0] *= SrcElemSize;
     DstSize[0] *= DstElemSize;
-
-    //CP
-    CPOUT << "copyD2D. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
-    CPOUT << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << "unavailable" << std::endl;
-    
     if (1 == DimDst && 1 == DimSrc) {
       Plugin.call<PiApiKind::piEnqueueMemBufferCopy>(
           Queue, SrcMem, DstMem, SrcOffset[0], DstOffset[0], SrcAccessRange[0],
@@ -376,11 +360,6 @@ static void copyH2H(SYCLMemObjI *, char *SrcMem, QueueImplPtr,
 
   if (SrcMem == DstMem)
     return;
-
-  //CP
-  CPOUT << "copyH2H. Src (Sz)/Off/AR: " << SrcSize[0] << "/" << SrcOffset[0] << "/" << SrcAccessRange[0] << std::endl;
-  CPOUT << "         Dst (Sz)/Off/AR: " << DstSize[0] << "/" << DstOffset[0] << "/" << DstAccessRange[0] << std::endl;
-
 
   size_t BytesToCopy =
       SrcAccessRange[0] * SrcElemSize * SrcAccessRange[1] * SrcAccessRange[2];
@@ -468,9 +447,6 @@ void *MemoryManager::map(SYCLMemObjI *, void *Mem, QueueImplPtr Queue,
 
   cl_map_flags Flags = 0;
 
-  //CP
-  CPOUT << "map.     AR/AOff: " << AccessRange[0] << "/" << AccessOffset[0] << " -- @ " << Mem << std::endl;
-
   switch (AccessMode) {
   case access::mode::read:
     Flags |= CL_MAP_READ;
@@ -496,9 +472,6 @@ void *MemoryManager::map(SYCLMemObjI *, void *Mem, QueueImplPtr Queue,
 
   void *MappedPtr = nullptr;
   const size_t BytesToMap = AccessRange[0] * AccessRange[1] * AccessRange[2];
-  //CP
-  CPOUT << "  adj -- AR/bytes: " << AccessRange[0] << "/" << BytesToMap << std::endl;
-
   const detail::plugin &Plugin = Queue->getPlugin();
   Plugin.call<PiApiKind::piEnqueueMemBufferMap>(
       Queue->getHandleRef(), pi::cast<RT::PiMem>(Mem), CL_FALSE, Flags,
