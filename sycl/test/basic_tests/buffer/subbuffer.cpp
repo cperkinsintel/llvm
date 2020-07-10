@@ -116,9 +116,16 @@ void check1DSubBuffer(cl::sycl::queue &q) {
     assert(false && "Exception was caught");
   }
 
-  for (int i = offset; i < subbuf_size; ++i)
-    assert(vec[i] == (i > 34 ? i * 10 : i * -10) &&
-           "Invalid result in 1d sub buffer");
+  for(int i =0; i < size; ++i){
+    if(i < offset)
+      assert(vec[i] == i && "untouched part of buffer incorrect");
+    else if(i >= offset && i < offset + offset_inside_subbuf )
+      assert(vec[i] == i * 10 && "first three entries of buffer covered by subuffer should be times 10");
+    else if( i >= offset + offset_inside_subbuf && i < offset + subbuf_size)
+      assert(vec[i] == i * -10 && "last seven entries of buffer covered by subbuffer should be times -10");
+    else
+      assert(vec[i] == i && "untouched part of buffer incorrect");
+  }
 
   for (int i = 0; i < subbuf_size; ++i)
     assert(vec2[i] == (i < 3 ? (32 + i) : (32 + i) * -1) &&
