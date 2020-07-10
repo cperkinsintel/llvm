@@ -371,15 +371,16 @@ Command *Scheduler::GraphBuilder::addCopyBack(Requirement *Req) {
   AllocaCommandBase *SrcAllocaCmd =
       findAllocaForReq(Record, Req, Record->MCurContext);
 
-  // When copying back subbuffers, throw out any vestigial Src Offset. 
+  // When copying back subbuffers, throw out any vestigial Src Offset.
   const Requirement *SrcReq = SrcAllocaCmd->getRequirement();
   std::unique_ptr<Requirement> SrcReqClone(new Requirement(*SrcReq));
-  if(Req->MIsSubBuffer && SrcReqClone->MIsSubBuffer && SrcReqClone->MOffset[0] != 0)
-    SrcReqClone->MOffset = id<3>{0,0,0};
-  
-  std::unique_ptr<MemCpyCommandHost> MemCpyCmdUniquePtr(new MemCpyCommandHost(
-      *SrcReqClone, SrcAllocaCmd, *Req, &Req->MData,
-      SrcAllocaCmd->getQueue(), std::move(HostQueue)));
+  if (Req->MIsSubBuffer && SrcReqClone->MIsSubBuffer &&
+      SrcReqClone->MOffset[0] != 0)
+    SrcReqClone->MOffset = id<3>{0, 0, 0};
+
+  std::unique_ptr<MemCpyCommandHost> MemCpyCmdUniquePtr(
+      new MemCpyCommandHost(*SrcReqClone, SrcAllocaCmd, *Req, &Req->MData,
+                            SrcAllocaCmd->getQueue(), std::move(HostQueue)));
 
   if (!MemCpyCmdUniquePtr)
     throw runtime_error("Out of host memory", PI_OUT_OF_HOST_MEMORY);

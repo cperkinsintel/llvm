@@ -64,7 +64,7 @@ public:
     impl = std::make_shared<detail::buffer_impl>(
         SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)), propList,
         make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT>>());
-    impl->recordBufferUsage(((void*)this), SizeInBytes, 0, false );
+    impl->recordBufferUsage(((void *)this), SizeInBytes, 0, false);
   }
 
   buffer(const range<dimensions> &bufferRange, AllocatorT allocator,
@@ -75,7 +75,7 @@ public:
         SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)), propList,
         make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT>>(
             allocator));
-    impl->recordBufferUsage(((void*)this), SizeInBytes, 0, false );
+    impl->recordBufferUsage(((void *)this), SizeInBytes, 0, false);
   }
 
   buffer(T *hostData, const range<dimensions> &bufferRange,
@@ -83,10 +83,9 @@ public:
       : Range(bufferRange) {
     size_t SizeInBytes = get_count() * sizeof(T);
     impl = std::make_shared<detail::buffer_impl>(
-        hostData, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)),
-        propList,
+        hostData, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)), propList,
         make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT>>());
-    impl->recordBufferUsage(((void*)this), SizeInBytes, 0, false );
+    impl->recordBufferUsage(((void *)this), SizeInBytes, 0, false);
   }
 
   buffer(T *hostData, const range<dimensions> &bufferRange,
@@ -94,11 +93,10 @@ public:
       : Range(bufferRange) {
     size_t SizeInBytes = get_count() * sizeof(T);
     impl = std::make_shared<detail::buffer_impl>(
-        hostData, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)),
-        propList,
+        hostData, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)), propList,
         make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT>>(
             allocator));
-    impl->recordBufferUsage(((void*)this), SizeInBytes, 0, false );
+    impl->recordBufferUsage(((void *)this), SizeInBytes, 0, false);
   }
 
   template <typename _T = T>
@@ -108,10 +106,9 @@ public:
       : Range(bufferRange) {
     size_t SizeInBytes = get_count() * sizeof(T);
     impl = std::make_shared<detail::buffer_impl>(
-        hostData, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)),
-        propList,
+        hostData, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)), propList,
         make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT>>());
-    impl->recordBufferUsage(((void*)this), SizeInBytes, 0, false );
+    impl->recordBufferUsage(((void *)this), SizeInBytes, 0, false);
   }
 
   template <typename _T = T>
@@ -121,11 +118,10 @@ public:
       : Range(bufferRange) {
     size_t SizeInBytes = get_count() * sizeof(T);
     impl = std::make_shared<detail::buffer_impl>(
-        hostData, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)),
-        propList,
+        hostData, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)), propList,
         make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT>>(
             allocator));
-    impl->recordBufferUsage(((void*)this), SizeInBytes, 0, false );
+    impl->recordBufferUsage(((void *)this), SizeInBytes, 0, false);
   }
 
   buffer(const shared_ptr_class<T> &hostData,
@@ -134,11 +130,10 @@ public:
       : Range(bufferRange) {
     size_t SizeInBytes = get_count() * sizeof(T);
     impl = std::make_shared<detail::buffer_impl>(
-        hostData, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)),
-        propList,
+        hostData, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)), propList,
         make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT>>(
             allocator));
-    impl->recordBufferUsage(((void*)this), SizeInBytes, 0, false );
+    impl->recordBufferUsage(((void *)this), SizeInBytes, 0, false);
   }
 
   buffer(const shared_ptr_class<T> &hostData,
@@ -147,10 +142,9 @@ public:
       : Range(bufferRange) {
     size_t SizeInBytes = get_count() * sizeof(T);
     impl = std::make_shared<detail::buffer_impl>(
-        hostData, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)),
-        propList,
+        hostData, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)), propList,
         make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT>>());
-    impl->recordBufferUsage(((void*)this), SizeInBytes, 0, false );
+    impl->recordBufferUsage(((void *)this), SizeInBytes, 0, false);
   }
 
   template <class InputIterator, int N = dimensions,
@@ -161,11 +155,11 @@ public:
       : Range(range<1>(std::distance(first, last))) {
     size_t SizeInBytes = get_count() * sizeof(T);
     impl = std::make_shared<detail::buffer_impl>(
-        first, last, SizeInBytes,
-        detail::getNextPowerOfTwo(sizeof(T)), propList,
+        first, last, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)),
+        propList,
         make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT>>(
             allocator));
-    impl->recordBufferUsage(((void*)this), SizeInBytes, 0, false );
+    impl->recordBufferUsage(((void *)this), SizeInBytes, 0, false);
   }
 
   template <class InputIterator, int N = dimensions,
@@ -176,10 +170,10 @@ public:
       : Range(range<1>(std::distance(first, last))) {
     size_t SizeInBytes = get_count() * sizeof(T);
     impl = std::make_shared<detail::buffer_impl>(
-        first, last, SizeInBytes,
-        detail::getNextPowerOfTwo(sizeof(T)), propList,
+        first, last, SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)),
+        propList,
         make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT>>());
-    impl->recordBufferUsage(((void*)this), SizeInBytes, 0, false );
+    impl->recordBufferUsage(((void *)this), SizeInBytes, 0, false);
   }
 
   // This constructor is a prototype for a future SYCL specification
@@ -191,11 +185,11 @@ public:
       : Range(range<1>(container.size())) {
     size_t SizeInBytes = get_count() * sizeof(T);
     impl = std::make_shared<detail::buffer_impl>(
-        container.data(), container.data() + container.size(),
-        SizeInBytes, detail::getNextPowerOfTwo(sizeof(T)), propList,
+        container.data(), container.data() + container.size(), SizeInBytes,
+        detail::getNextPowerOfTwo(sizeof(T)), propList,
         make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT>>(
             allocator));
-    impl->recordBufferUsage(((void*)this), SizeInBytes, 0, false );
+    impl->recordBufferUsage(((void *)this), SizeInBytes, 0, false);
   }
 
   // This constructor is a prototype for a future SYCL specification
@@ -222,7 +216,8 @@ public:
       throw cl::sycl::invalid_object_error(
           "Requested sub-buffer region is not contiguous", PI_INVALID_VALUE);
 
-    impl->recordBufferUsage(((void*)this), get_size(), this->OffsetInBytes, this->IsSubBuffer );
+    impl->recordBufferUsage(((void *)this), get_size(), this->OffsetInBytes,
+                            this->IsSubBuffer);
   }
 
   template <int N = dimensions, typename = EnableIfOneDimension<N>>
@@ -238,7 +233,7 @@ public:
         MemObject, SyclContext, BufSize,
         make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT>>(),
         AvailableEvent);
-    impl->recordBufferUsage(((void*)this), BufSize, 0, false );
+    impl->recordBufferUsage(((void *)this), BufSize, 0, false);
   }
 
   buffer(const buffer &rhs) = default;
@@ -249,8 +244,8 @@ public:
 
   buffer &operator=(buffer &&rhs) = default;
 
-  ~buffer(){
-    if(IsSubBuffer)
+  ~buffer() {
+    if (IsSubBuffer)
       impl->copyBackSubBuffer(detail::when_copyback::dtor, this);
   }
 
@@ -315,8 +310,8 @@ public:
     impl->set_final_data(finalData);
   }
 
-  void set_write_back(bool flag = true) { 
-    if(IsSubBuffer)
+  void set_write_back(bool flag = true) {
+    if (IsSubBuffer)
       impl->set_write_back(flag, this);
     else
       impl->set_write_back(flag);
@@ -366,9 +361,10 @@ private:
          range<dimensions> reinterpretRange, size_t reinterpretOffset,
          bool isSubBuffer)
       : impl(Impl), Range(reinterpretRange), OffsetInBytes(reinterpretOffset),
-        IsSubBuffer(isSubBuffer){
-          impl->recordBufferUsage(((void*)this), get_size(), this->OffsetInBytes, this->IsSubBuffer );
-        };
+        IsSubBuffer(isSubBuffer) {
+    impl->recordBufferUsage(((void *)this), get_size(), this->OffsetInBytes,
+                            this->IsSubBuffer);
+  };
 
   template <typename Type, int N>
   size_t getOffsetInBytes(const id<N> &offset, const range<N> &range) {
