@@ -106,17 +106,12 @@ public:
 
   MemObjType getType() const override { return MemObjType::BUFFER; }
 
-  
-
   ~buffer_impl() {   
     if(hasSubBuffers()){
-      CPOUT << "~buffer_impl -> copyBackAnyRemainingData" << std::endl;
       copyBackAnyRemainingData();
       MNeedWriteBack = false; //clear this to prevent an additional copy back when we release memory below.
     }
-    
     try {
-      CPOUT << "~buffer_impl -> updateHostMemory()" << std::endl;
       BaseT::updateHostMemory(); //also releases memory and handles.
     } catch (...) {
     }
@@ -130,12 +125,11 @@ protected:
   friend class sycl::buffer;
 
   //deque of buffer_info, if any.
-  std::deque<buffer_usage> MBufferInfoDQ;
+  std::deque<buffer_usage> MBufferUsageDQ;
 
   // if this MemObj is backing a buffer (and sub-buffers), provide information
   // to help with copy-back decisions.
   void recordBufferUsage(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub );
-
   void recordAccessorUsage(const void *const BuffPtr, access::mode Mode,  handler &CGH);
   void recordAccessorUsage(const void *const BuffPtr, access::mode Mode);
  

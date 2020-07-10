@@ -8,17 +8,9 @@
 
 #pragma once
 
-
 #include <CL/sycl/context.hpp>
 
-#include <stack>
-
-#define SB_NEW
-//#define SB_NEWMAP
-#define SB_NORM
-
-//#define CPOUT  std::clog
-#define CPOUT  std::clog.rdbuf(NULL); std::clog
+#include <deque>
 
 __SYCL_INLINE_NAMESPACE(cl) {
 namespace sycl {
@@ -41,8 +33,7 @@ enum class settable_bool {
 enum class when_copyback {
     dtor,         // addCopyBack during sub-buffer dtor
     immediate,    // copy-back achieved by enqueued map operation 
-    never,
-    undetermined
+    never
 };
 
 // need to track information about a sub/buffer, 
@@ -56,9 +47,7 @@ struct buffer_info {
         SizeInBytes(sz), OffsetInBytes(offset), IsSubBuffer(IsSub) {}
 };
 
-
 // given a sub/buffer, this tracks how it was used (were there write accessors, etc.)
-
 struct buffer_usage {
     //the address of a sub/buffer is used to uniquely identify it, but is never dereferenced.
     const void *const buffAddr;
@@ -70,17 +59,11 @@ struct buffer_usage {
     settable_bool MWriteBackSet;
     
     //History of accessor modes and devices. 
-    //std::stack<std::pair<sycl::device, access::mode>> MHistory;
     std::deque<std::tuple<bool, access::mode, std::shared_ptr<detail::context_impl>>> MHistory;
     
     //ctor
     buffer_usage(const void *const BuffPtr, const size_t Sz, const size_t Offset, const bool IsSub) : 
         buffAddr(BuffPtr) , BufferInfo(Sz, Offset, IsSub), MWriteBackSet(settable_bool::not_set) {};
-
-    //hmmm - removing copy constructors trips the thread safety test.
-    //I wonder why?    thread_safety/./ThreadSafetyTests/HostAccessorDeadLockTest.CheckThreadOrder 
-    //buffer_usage(const buffer_usage&) = delete;
-    //buffer_usage& operator=(const buffer_usage&) = delete;
 };
 
 } //namespaces 

@@ -250,17 +250,9 @@ public:
   buffer &operator=(buffer &&rhs) = default;
 
   ~buffer(){
-    //CP cleanup
-    CPOUT << "~buffer : " << IsSubBuffer;
-  #ifdef SB_NEW
-    CPOUT << " SB_NEW" << std::endl;
     if(IsSubBuffer)
       impl->copyBackSubBuffer(detail::when_copyback::dtor, this);
-  #else
-    CPOUT << std::endl;
-  #endif
   }
-  
 
   bool operator==(const buffer &rhs) const { return impl == rhs.impl; }
 
