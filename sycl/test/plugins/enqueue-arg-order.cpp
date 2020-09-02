@@ -89,8 +89,7 @@ void remind() {
   // incorrect
 }
 
-
-
+// ----------- BUFFERS
 
 void testcopyD2HBuffer() {
   std::cout << "start copyD2H-buffer" << std::endl;
@@ -295,173 +294,252 @@ void testFill_Buffer(){
   std::cout << "end testFill Buffer" << std::endl;
 }
 
+// ----------- IMAGES
 
-void testCopy_1D_D2HImage() {
-  // copyD2H
-  std::cout << "start 1D copyD2H-Image" << std::endl;
-  // image with write accessor to it in kernel
-  const sycl::image_channel_order ChanOrder = sycl::image_channel_order::rgba;
-  const sycl::image_channel_type ChanType = sycl::image_channel_type::fp32;
-
-  constexpr auto SYCLRead = sycl::access::mode::read;
-  constexpr auto SYCLWrite = sycl::access::mode::write;
-
-  const sycl::range<1> Img1Size(width);
-  const sycl::range<1> Img2Size(width);
-
-  std::vector<sycl::float4> Img1HostData(Img1Size.size(), {1, 2, 3, 4});
-  std::vector<sycl::float4> Img2HostData(Img2Size.size(), {0, 0, 0, 0});
-
-  {
-    sycl::image<1> Img1(Img1HostData.data(), ChanOrder, ChanType, Img1Size);
-    sycl::image<1> Img2(Img2HostData.data(), ChanOrder, ChanType, Img2Size);
-    queue Q;
-    Q.submit([&](sycl::handler &CGH) {
-      auto Img1Acc = Img1.get_access<sycl::float4, SYCLRead>(CGH);
-      auto Img2Acc = Img2.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.parallel_for<class ImgCopy_1D>(Img1Size, [=](sycl::item<1> Item) {
-        sycl::float4 Data = Img1Acc.read(int(Item[0])); // , Item[1], Item[2]});
-        Img2Acc.write(int(Item[0]), Data);
-      });
-    });
-  } // ~image
-  std::cout << "end 1D copyD2H-Image" << std::endl;
-}
-
-
-
-void testCopy_2D_D2HImage() {
-  // copyD2H
+void testcopyD2HImage(){
+   // copyD2H
   std::cout << "start copyD2H-Image" << std::endl;
   // image with write accessor to it in kernel
   const sycl::image_channel_order ChanOrder = sycl::image_channel_order::rgba;
   const sycl::image_channel_type ChanType = sycl::image_channel_type::fp32;
-
   constexpr auto SYCLRead = sycl::access::mode::read;
   constexpr auto SYCLWrite = sycl::access::mode::write;
 
-  const sycl::range<2> Img1Size(height, width);
-  const sycl::range<2> Img2Size(height, width);
+  const sycl::range<1> ImgSize_1D(width);
+  const sycl::range<2> ImgSize_2D(height, width);
+  const sycl::range<3> ImgSize_3D(depth, height, width);
 
-  std::vector<sycl::float4> Img1HostData(Img1Size.size(), {1, 2, 3, 4});
-  std::vector<sycl::float4> Img2HostData(Img2Size.size(), {0, 0, 0, 0});
+  std::vector<sycl::float4> data_from_1D(ImgSize_1D.size(), {1, 2, 3, 4});
+  std::vector<sycl::float4> data_to_1D(ImgSize_1D.size(), {0, 0, 0, 0});
+  std::vector<sycl::float4> data_from_2D(ImgSize_2D.size(), {7, 7, 7, 7});
+  std::vector<sycl::float4> data_to_2D(ImgSize_2D.size(), {0, 0, 0, 0});
+  std::vector<sycl::float4> data_from_3D(ImgSize_3D.size(), {11, 11, 11, 11});
+  std::vector<sycl::float4> data_to_3D(ImgSize_3D.size(), {0, 0, 0, 0});
 
   {
-    sycl::image<2> Img1(Img1HostData.data(), ChanOrder, ChanType, Img1Size);
-    sycl::image<2> Img2(Img2HostData.data(), ChanOrder, ChanType, Img2Size);
+    sycl::image<1> image_from_1D(data_from_1D.data(), ChanOrder, ChanType, ImgSize_1D);
+    sycl::image<1> image_to_1D(data_to_1D.data(), ChanOrder, ChanType, ImgSize_1D);
     queue Q;
     Q.submit([&](sycl::handler &CGH) {
-      auto Img1Acc = Img1.get_access<sycl::float4, SYCLRead>(CGH);
-      auto Img2Acc = Img2.get_access<sycl::float4, SYCLWrite>(CGH);
+      auto readAcc = image_from_1D.get_access<sycl::float4, SYCLRead>(CGH);
+      auto writeAcc = image_to_1D.get_access<sycl::float4, SYCLWrite>(CGH);
 
-      CGH.parallel_for<class ImgCopy>(Img1Size, [=](sycl::item<2> Item) {
-        sycl::float4 Data = Img1Acc.read(sycl::int2{Item[0], Item[1]});
-        Img2Acc.write(sycl::int2{Item[0], Item[1]}, Data);
+      CGH.parallel_for<class ImgCopyD2H_1D>(ImgSize_1D, [=](sycl::item<1> Item) {
+        sycl::float4 Data = readAcc.read(int(Item[0]));
+        writeAcc.write(int(Item[0]), Data);
       });
     });
-  } // ~image
+  } // ~image 1D
+
+  {
+    sycl::image<2> image_from_2D(data_from_2D.data(), ChanOrder, ChanType, ImgSize_2D);
+    sycl::image<2> image_to_2D(data_to_2D.data(), ChanOrder, ChanType, ImgSize_2D);
+    queue Q;
+    Q.submit([&](sycl::handler &CGH) {
+      auto readAcc = image_from_2D.get_access<sycl::float4, SYCLRead>(CGH);
+      auto writeAcc = image_to_2D.get_access<sycl::float4, SYCLWrite>(CGH);
+
+      CGH.parallel_for<class ImgCopyD2H_2D>(ImgSize_2D, [=](sycl::item<2> Item) {
+        sycl::float4 Data = readAcc.read(sycl::int2{Item[0], Item[1]});
+        writeAcc.write(sycl::int2{Item[0], Item[1]}, Data);
+      });
+    });
+  } // ~image 2D
+
+  {
+    sycl::image<3> image_from_3D(data_from_3D.data(), ChanOrder, ChanType, ImgSize_3D);
+    sycl::image<3> image_to_3D(data_to_3D.data(), ChanOrder, ChanType, ImgSize_3D);
+    queue Q;
+    Q.submit([&](sycl::handler &CGH) {
+      auto readAcc = image_from_3D.get_access<sycl::float4, SYCLRead>(CGH);
+      auto writeAcc = image_to_3D.get_access<sycl::float4, SYCLWrite>(CGH);
+
+      CGH.parallel_for<class ImgCopyD2H_3D>(ImgSize_3D, [=](sycl::item<3> Item) {
+        sycl::float4 Data = readAcc.read(sycl::int4{Item[0], Item[1], Item[2],0});
+        writeAcc.write(sycl::int4{Item[0], Item[1], Item[2],0}, Data);
+      });
+    });
+  } // ~image 3D
+  
   std::cout << "end copyD2H-Image" << std::endl;
 }
 
+void testcopyH2DImage() {
+  // copy between two queues triggers a copyH2D, followed by a copyD2H
+  // Here we only care about checking copyH2D
+  std::cout << "start copyH2D-image" << std::endl;
 
-void testCopy_3D_D2HImage() {
-  // copyD2H
-  std::cout << "start 3D copyD2H-Image" << std::endl;
-  // image with write accessor to it in kernel
   const sycl::image_channel_order ChanOrder = sycl::image_channel_order::rgba;
   const sycl::image_channel_type ChanType = sycl::image_channel_type::fp32;
-
   constexpr auto SYCLRead = sycl::access::mode::read;
   constexpr auto SYCLWrite = sycl::access::mode::write;
 
-  const sycl::range<3> Img1Size(depth, height, width);
-  const sycl::range<3> Img2Size(depth, height, width);
+  const sycl::range<1> ImgSize_1D(width);
+  const sycl::range<2> ImgSize_2D(height, width);
+  const sycl::range<3> ImgSize_3D(depth, height, width);
 
-  std::vector<sycl::float4> Img1HostData(Img1Size.size(), {1, 2, 3, 4});
-  std::vector<sycl::float4> Img2HostData(Img2Size.size(), {0, 0, 0, 0});
+  std::vector<sycl::float4> data_from_1D(ImgSize_1D.size(), {1, 2, 3, 4});
+  std::vector<sycl::float4> data_to_1D(ImgSize_1D.size(), {0, 0, 0, 0});
+  std::vector<sycl::float4> data_from_2D(ImgSize_2D.size(), {7, 7, 7, 7});
+  std::vector<sycl::float4> data_to_2D(ImgSize_2D.size(), {0, 0, 0, 0});
+  std::vector<sycl::float4> data_from_3D(ImgSize_3D.size(), {11, 11, 11, 11});
+  std::vector<sycl::float4> data_to_3D(ImgSize_3D.size(), {0, 0, 0, 0});
 
+  // 1D 
   {
-    sycl::image<3> Img1(Img1HostData.data(), ChanOrder, ChanType, Img1Size);
-    sycl::image<3> Img2(Img2HostData.data(), ChanOrder, ChanType, Img2Size);
-    queue Q;
-    Q.submit([&](sycl::handler &CGH) {
-      auto Img1Acc = Img1.get_access<sycl::float4, SYCLRead>(CGH);
-      auto Img2Acc = Img2.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.parallel_for<class ImgCopy_3D>(Img1Size, [=](sycl::item<3> Item) {
-        sycl::float4 Data = Img1Acc.read(sycl::int4{Item[0], Item[1], Item[2],0});
-        Img2Acc.write(sycl::int4{Item[0], Item[1], Item[2], 0}, Data);
-      });
-    });
-  } // ~image
-  std::cout << "end 3D copyD2H-Image" << std::endl;
-}
-
-
-void testCopyTwiceImage() {
-  // copyD2H and copyH2D
-  std::cout << "start copyTwiceImage" << std::endl;
-  // image with write accessor to it in kernel
-  const sycl::image_channel_order ChanOrder = sycl::image_channel_order::rgba;
-  const sycl::image_channel_type ChanType = sycl::image_channel_type::fp32;
-
-  constexpr auto SYCLRead = sycl::access::mode::read;
-  constexpr auto SYCLWrite = sycl::access::mode::write;
-
-  const sycl::range<2> Img1Size(height, width);
-  const sycl::range<2> Img2Size(height, width);
-
-  std::vector<sycl::float4> Img1HostData(Img1Size.size(), {1, 2, 3, 4});
-  std::vector<sycl::float4> Img2HostData(Img2Size.size(), {0, 0, 0, 0});
-
-  {
-    sycl::image<2> Img1(Img1HostData.data(), ChanOrder, ChanType, Img1Size);
-    sycl::image<2> Img2(Img2HostData.data(), ChanOrder, ChanType, Img2Size);
+    sycl::image<1> image_from_1D(data_from_1D.data(), ChanOrder, ChanType, ImgSize_1D);
+    sycl::image<1> image_to_1D(data_to_1D.data(), ChanOrder, ChanType, ImgSize_1D);
     queue Q;
     queue otherQueue;
-
-    // first op
+    //first op
     Q.submit([&](sycl::handler &CGH) {
-      auto Img1Acc = Img1.get_access<sycl::float4, SYCLRead>(CGH);
-      auto Img2Acc = Img2.get_access<sycl::float4, SYCLWrite>(CGH);
+      auto readAcc = image_from_1D.get_access<sycl::float4, SYCLRead>(CGH);
+      auto writeAcc = image_to_1D.get_access<sycl::float4, SYCLWrite>(CGH);
 
-      CGH.parallel_for<class ImgCopyTwice0>(Img1Size, [=](sycl::item<2> Item) {
-        sycl::float4 Data = Img1Acc.read(sycl::int2{Item[0], Item[1]});
-        Img2Acc.write(sycl::int2{Item[0], Item[1]}, Data);
+      CGH.parallel_for<class ImgCopyH2D_1D>(ImgSize_1D, [=](sycl::item<1> Item) {
+        sycl::float4 Data = readAcc.read(int(Item[0]));
+        writeAcc.write(int(Item[0]), Data);
       });
     });
-
-    // second op
+    //second op
     otherQueue.submit([&](sycl::handler &CGH) {
-      auto Img1Acc = Img2.get_access<sycl::float4, SYCLRead>(CGH);
-      auto Img2Acc = Img1.get_access<sycl::float4, SYCLWrite>(CGH);
+      auto readAcc = image_from_1D.get_access<sycl::float4, SYCLRead>(CGH);
+      auto writeAcc = image_to_1D.get_access<sycl::float4, SYCLWrite>(CGH);
 
-      CGH.parallel_for<class ImgCopyTwice1>(Img1Size, [=](sycl::item<2> Item) {
-        sycl::float4 Data = Img1Acc.read(sycl::int2{Item[0], Item[1]});
-        Img2Acc.write(sycl::int2{Item[0], Item[1]}, Data);
+      CGH.parallel_for<class ImgCopyH2D_1D_2nd>(ImgSize_1D, [=](sycl::item<1> Item) {
+        sycl::float4 Data = readAcc.read(int(Item[0]));
+        writeAcc.write(int(Item[0]), Data);
       });
     });
-  } // ~image
-  std::cout << "end copyTwiceImage" << std::endl;
+  } // ~image 1D
+
+  //2D
+  {
+    sycl::image<2> image_from_2D(data_from_2D.data(), ChanOrder, ChanType, ImgSize_2D);
+    sycl::image<2> image_to_2D(data_to_2D.data(), ChanOrder, ChanType, ImgSize_2D);
+    queue Q;
+    queue otherQueue;
+    Q.submit([&](sycl::handler &CGH) {
+      auto readAcc = image_from_2D.get_access<sycl::float4, SYCLRead>(CGH);
+      auto writeAcc = image_to_2D.get_access<sycl::float4, SYCLWrite>(CGH);
+
+      CGH.parallel_for<class ImgCopyH2D_2D>(ImgSize_2D, [=](sycl::item<2> Item) {
+        sycl::float4 Data = readAcc.read(sycl::int2{Item[0], Item[1]});
+        writeAcc.write(sycl::int2{Item[0], Item[1]}, Data);
+      });
+    });
+    otherQueue.submit([&](sycl::handler &CGH) {
+      auto readAcc = image_from_2D.get_access<sycl::float4, SYCLRead>(CGH);
+      auto writeAcc = image_to_2D.get_access<sycl::float4, SYCLWrite>(CGH);
+
+      CGH.parallel_for<class ImgCopyH2D_2D_2nd>(ImgSize_2D, [=](sycl::item<2> Item) {
+        sycl::float4 Data = readAcc.read(sycl::int2{Item[0], Item[1]});
+        writeAcc.write(sycl::int2{Item[0], Item[1]}, Data);
+      });
+    });
+  } // ~image 2D
+
+  //3D
+  {
+    sycl::image<3> image_from_3D(data_from_3D.data(), ChanOrder, ChanType, ImgSize_3D);
+    sycl::image<3> image_to_3D(data_to_3D.data(), ChanOrder, ChanType, ImgSize_3D);
+    queue Q;
+    queue otherQueue;
+    Q.submit([&](sycl::handler &CGH) {
+      auto readAcc = image_from_3D.get_access<sycl::float4, SYCLRead>(CGH);
+      auto writeAcc = image_to_3D.get_access<sycl::float4, SYCLWrite>(CGH);
+
+      CGH.parallel_for<class ImgCopyH2D_3D>(ImgSize_3D, [=](sycl::item<3> Item) {
+        sycl::float4 Data = readAcc.read(sycl::int4{Item[0], Item[1], Item[2],0});
+        writeAcc.write(sycl::int4{Item[0], Item[1], Item[2],0}, Data);
+      });
+    });
+    otherQueue.submit([&](sycl::handler &CGH) {
+      auto readAcc = image_from_3D.get_access<sycl::float4, SYCLRead>(CGH);
+      auto writeAcc = image_to_3D.get_access<sycl::float4, SYCLWrite>(CGH);
+
+      CGH.parallel_for<class ImgCopyH2D_3D_2nd>(ImgSize_3D, [=](sycl::item<3> Item) {
+        sycl::float4 Data = readAcc.read(sycl::int4{Item[0], Item[1], Item[2],0});
+        writeAcc.write(sycl::int4{Item[0], Item[1], Item[2],0}, Data);
+      });
+    });
+  } // ~image 3D
+
+  std::cout << "end copyH2D-image" << std::endl;
 }
+
+void testcopyD2DImage(){
+   // copyD2D
+  std::cout << "start copyD2D-Image" << std::endl;
+  // image with write accessor to it in kernel
+  const sycl::image_channel_order ChanOrder = sycl::image_channel_order::rgba;
+  const sycl::image_channel_type ChanType = sycl::image_channel_type::fp32;
+  constexpr auto SYCLRead = sycl::access::mode::read;
+  constexpr auto SYCLWrite = sycl::access::mode::write;
+
+  const sycl::range<1> ImgSize_1D(width);
+  const sycl::range<2> ImgSize_2D(height, width);
+  const sycl::range<3> ImgSize_3D(depth, height, width);
+
+  std::vector<sycl::float4> data_from_1D(ImgSize_1D.size(), {1, 2, 3, 4});
+  std::vector<sycl::float4> data_to_1D(ImgSize_1D.size(), {0, 0, 0, 0});
+  std::vector<sycl::float4> data_from_2D(ImgSize_2D.size(), {7, 7, 7, 7});
+  std::vector<sycl::float4> data_to_2D(ImgSize_2D.size(), {0, 0, 0, 0});
+  std::vector<sycl::float4> data_from_3D(ImgSize_3D.size(), {11, 11, 11, 11});
+  std::vector<sycl::float4> data_to_3D(ImgSize_3D.size(), {0, 0, 0, 0});
+
+  {
+    sycl::image<1> image_from_1D(data_from_1D.data(), ChanOrder, ChanType, ImgSize_1D);
+    sycl::image<1> image_to_1D(data_to_1D.data(), ChanOrder, ChanType, ImgSize_1D);
+    sycl::image<2> image_from_2D(data_from_2D.data(), ChanOrder, ChanType, ImgSize_2D);
+    sycl::image<2> image_to_2D(data_to_2D.data(), ChanOrder, ChanType, ImgSize_2D);
+    sycl::image<3> image_from_3D(data_from_3D.data(), ChanOrder, ChanType, ImgSize_3D);
+    sycl::image<3> image_to_3D(data_to_3D.data(), ChanOrder, ChanType, ImgSize_3D);
+
+    queue Q;
+    auto e1 = Q.submit([&](sycl::handler &CGH) {
+      auto readAcc = image_from_1D.get_access<sycl::float4, SYCLRead>(CGH);
+      auto writeAcc = image_to_1D.get_access<sycl::float4, SYCLWrite>(CGH);
+
+      CGH.copy(readAcc, writeAcc);
+    });
+    auto e2 = Q.submit([&](sycl::handler &CGH) {
+      //CGH.depends_on(e1);
+      auto readAcc = image_from_2D.get_access<sycl::float4, SYCLRead>(CGH);
+      auto writeAcc = image_to_2D.get_access<sycl::float4, SYCLWrite>(CGH);
+
+      CGH.copy(readAcc, writeAcc);
+    });
+    auto e3 = Q.submit([&](sycl::handler &CGH) {
+      //CGH.depends_on(e2);
+      auto readAcc = image_from_3D.get_access<sycl::float4, SYCLRead>(CGH);
+      auto writeAcc = image_to_3D.get_access<sycl::float4, SYCLWrite>(CGH);
+
+      CGH.copy(readAcc, writeAcc);
+    });
+  } // ~images
+
+  std::cout << "end copyD2D-Image" << std::endl;
+}
+
+// --------------
 
 int main() {
     remind();
         
-    //testcopyD2HBuffer();
+    testcopyD2HBuffer();
     testcopyH2DBuffer();
-    //testcopyD2DBuffer();
-    // testFill_Buffer();
+    testcopyD2DBuffer();
+    testFill_Buffer();
     
 
-    // testCopy_1D_D2HImage();
-    // testCopy_2D_D2HImage();
-    // testCopyTwiceImage();
-    // testCopy_3D_D2HImage();
-    
+    testcopyD2HImage();
+    testcopyH2DImage();
+    testcopyD2DImage();
+       
 }
 
+// ----------- BUFFERS
 
 //CHECK: start copyD2H-buffer
 //CHECK: ---> piEnqueueMemBufferRead(
@@ -491,8 +569,6 @@ int main() {
 //CHECK-NEXT: <unknown> : 320
 //CHECK: end copyH2D-buffer
 
-
-
 //CHECK: start copyD2D-buffer
 //CHECK: ---> piEnqueueMemBufferCopy(
 //CHECK: <unknown> : 64
@@ -516,30 +592,46 @@ int main() {
 //CHECK-NEXT: <unknown> : 64
 //CHECK: end testFill Buffer
 
-
-//CHECK: start 1D copyD2H-Image
-//CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/1/1
-//CHECK: end 1D copyD2H-Image
+// ----------- IMAGES
 
 //CHECK: start copyD2H-Image
 //CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/5/1
-//CHECK: <unknown> : 256
-//CHECK: end copyD2H-Image
-
-//CHECK: start copyTwiceImage
+//CHECK: pi_image_region width/height/depth : 16/1/1
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/5/1
-//CHECK: <unknown> : 256
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/5/1
-//CHECK: <unknown> : 256
-//CHECK: end copyTwiceImage
-
-//CHECK: start 3D copyD2H-Image
+//CHECK-NEXT: <unknown> : 256
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/5/3
-//CHECK: <unknown> : 256
-//CHECK: <unknown> : 1280
-//CHECK: end 3D copyD2H-Image
+//CHECK-NEXT: <unknown> : 256
+//CHECK-NEXT: <unknown> : 1280
+//CHECK: end copyD2H-Image
+
+//CHECK: start copyH2D-image
+//CHECK: ---> piEnqueueMemImageWrite(
+//CHECK: pi_image_region width/height/depth : 16/1/1
+//CHECK: ---> piEnqueueMemImageWrite(
+//CHECK: pi_image_region width/height/depth : 16/1/1
+//CHECK: ---> piEnqueueMemImageWrite(
+//CHECK: pi_image_region width/height/depth : 16/5/1
+//CHECK-NEXT: <unknown> : 256
+//CHECK: ---> piEnqueueMemImageWrite(
+//CHECK: pi_image_region width/height/depth : 16/5/1
+//CHECK-NEXT: <unknown> : 256
+//CHECK: ---> piEnqueueMemImageWrite(
+//CHECK: pi_image_region width/height/depth : 16/5/3
+//CHECK-NEXT: <unknown> : 256
+//CHECK-NEXT: <unknown> : 1280
+//CHECK: ---> piEnqueueMemImageWrite(
+//CHECK: pi_image_region width/height/depth : 16/5/3
+//CHECK-NEXT: <unknown> : 256
+//CHECK-NEXT: <unknown> : 1280
+//CHECK: end copyH2D-image
+
+//CHECK: start copyD2D-Image
+//CHECK: end copyD2D-Image
+
+// ----------- 
+
+
+
+
