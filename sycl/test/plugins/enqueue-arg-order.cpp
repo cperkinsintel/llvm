@@ -51,7 +51,7 @@ void remind() {
   */
   std::cout << "For BUFFERS" << std::endl;
   std::cout << "         Region SHOULD be : " << width * sizeof(float) << "/"
-            << height << "/" << 1 << std::endl; // 64/5/1
+            << height << "/" << depth << std::endl; // 64/5/3
   std::cout << "  RowPitch SHOULD be 0 or : " << width * sizeof(float)
             << std::endl; // 0 or 64
   std::cout << "SlicePitch SHOULD be 0 or : " << width * sizeof(float) * height
@@ -78,7 +78,7 @@ void remind() {
 
   std::cout << "For IMAGES" << std::endl;
   std::cout << "           Region SHOULD be : " << width << "/" << height << "/"
-            << 1 << std::endl; // 16/5/1
+            << depth << std::endl; // 16/5/3
   std::cout << "   row_pitch SHOULD be 0 or : " << width * sizeof(sycl::float4)
             << std::endl; // 0 or 256
   std::cout << " slice_pitch SHOULD be 0 or : "
@@ -89,93 +89,210 @@ void remind() {
   // incorrect
 }
 
-void testCopy_1D_D2HBuffer() {
-  // copyD2H
-  std::cout << "start 1D copyD2H-Buffer" << std::endl;
-  std::vector<float> data(total, 0);
+
+
+
+void testcopyD2HBuffer() {
+  std::cout << "start copyD2H-buffer" << std::endl;
+  std::vector<float> data_from_1D(width, 13);
+  std::vector<float> data_to_1D(width, 0);
+  std::vector<float> data_from_2D(total, 7);
+  std::vector<float> data_to_2D(total, 0);
+  std::vector<float> data_from_3D(total3D, 17);
+  std::vector<float> data_to_3D(total3D, 0);
+
   {
-    buffer<float, 1> base(data.data(), range<1>(total));
+    buffer<float, 1> buffer_from_1D(data_from_1D.data(), range<1>(width));
+    buffer<float, 1> buffer_to_1D(data_to_1D.data(), range<1>(width));
     queue myQueue;
     myQueue.submit([&](handler &cgh) {
-      auto acc = base.get_access<access::mode::read_write>(cgh);
-      cgh.parallel_for<class copyD2H_1D>(base.get_range(), [=](id<1> index) {
-        float term = (float)(index[0]);
-        acc[index] = term;
+      auto read  = buffer_from_1D.get_access<access::mode::read>(cgh);
+      auto write = buffer_to_1D.get_access<access::mode::write>(cgh);
+      cgh.parallel_for<class copyD2H_1D>(buffer_from_1D.get_range(), [=](id<1> index) {
+        write[index] = read[index] * -1;
       });
     });
-  } // ~buffer
-  std::cout << "end 1D copyD2H-Buffer" << std::endl;
-}
+  } // ~buffer 1D
 
-void testCopy_2D_D2HBuffer() {
-  // copyD2H
-  std::cout << "start copyD2H-Buffer" << std::endl;
-  std::vector<float> data(total, 0);
   {
-    buffer<float, 2> base(data.data(), range<2>(height, width));
+    buffer<float, 2> buffer_from_2D(data_from_2D.data(), range<2>(height, width));
+    buffer<float, 2> buffer_to_2D(data_to_2D.data(), range<2>(height, width));
     queue myQueue;
     myQueue.submit([&](handler &cgh) {
-      auto acc = base.get_access<access::mode::read_write>(cgh);
-      cgh.parallel_for<class copyD2H>(base.get_range(), [=](id<2> index) {
-        float y_term = (float)(index[0]);
-        float x_term = (float)(index[1]);
-        acc[index] = x_term + (y_term / 10);
+      auto read  = buffer_from_2D.get_access<access::mode::read>(cgh);
+      auto write = buffer_to_2D.get_access<access::mode::write>(cgh);
+      cgh.parallel_for<class copyD2H_2D>(buffer_from_2D.get_range(), [=](id<2> index) {
+        write[index] = read[index] * -1;
       });
     });
-  } // ~buffer
-  std::cout << "end copyD2H-Buffer" << std::endl;
-}
+  } // ~buffer 2D
 
-void testCopy_3D_D2HBuffer() {
-  // copyD2H
-  std::cout << "start 3D copyD2H-Buffer" << std::endl;
-  std::vector<float> data(total3D, 0);
   {
-    buffer<float, 3> base(data.data(), range<3>(depth, height, width));
+    buffer<float, 3> buffer_from_3D(data_from_3D.data(), range<3>(depth, height, width));
+    buffer<float, 3> buffer_to_3D(data_to_3D.data(), range<3>(depth, height, width));
     queue myQueue;
     myQueue.submit([&](handler &cgh) {
-      auto acc = base.get_access<access::mode::read_write>(cgh);
-      cgh.parallel_for<class copyD2H_3D>(base.get_range(), [=](id<3> index) {
-        float z_term = (float)(index[0]);
-        float y_term = (float)(index[1]);
-        float x_term = (float)(index[2]);
-        acc[index] = x_term + (y_term / 10) + z_term;
+      auto read  = buffer_from_3D.get_access<access::mode::read>(cgh);
+      auto write = buffer_to_3D.get_access<access::mode::write>(cgh);
+      cgh.parallel_for<class copyD2H_3D>(buffer_from_3D.get_range(), [=](id<3> index) {
+        write[index] = read[index] * -1;
       });
     });
-  } // ~buffer
-  std::cout << "end 3D copyD2H-Buffer" << std::endl;
+  } // ~buffer 3D
+  
+  std::cout << "end copyD2H-buffer" << std::endl;
 }
 
-void testcopyTwiceBuffer() {
+void testcopyH2DBuffer() {
   // copy between two queues triggers a piEnqueueMemBufferMap followed by
-  // copyH2D, followed by a copyD2H, followed by a piEnqueueMemUnmap this may
-  // change in the future. Here we only care that the 2D offset and region args
-  // are passed in the right order to copyH2D and copyD2H
+  // copyH2D, followed by a copyD2H, followed by a piEnqueueMemUnmap 
+  // Here we only care about checking copyH2D
 
-  std::cout << "start copyTwice-buffer" << std::endl;
-  std::vector<float> data(total, 0);
+  std::cout << "start copyH2D-buffer" << std::endl;
+  std::vector<float> data_from_1D(width, 13);
+  std::vector<float> data_to_1D(width, 0);
+  std::vector<float> data_from_2D(total, 7);
+  std::vector<float> data_to_2D(total, 0);
+  std::vector<float> data_from_3D(total3D, 17);
+  std::vector<float> data_to_3D(total3D, 0);
+
   {
-    // initialize buffer with data
-    buffer<float, 2> base(data.data(), range<2>(height, width));
-
-    // first op
+    buffer<float, 1> buffer_from_1D(data_from_1D.data(), range<1>(width));
+    buffer<float, 1> buffer_to_1D(data_to_1D.data(), range<1>(width));
     queue myQueue;
     queue otherQueue;
     myQueue.submit([&](handler &cgh) {
-      auto acc = base.get_access<access::mode::read_write>(cgh);
-      cgh.parallel_for<class copyH2D0>(
-          base.get_range(), [=](id<2> index) { acc[index] = acc[index] * -1; });
+      auto read  = buffer_from_1D.get_access<access::mode::read>(cgh);
+      auto write = buffer_to_1D.get_access<access::mode::write>(cgh);
+      cgh.parallel_for<class copyH2D_1D>(buffer_from_1D.get_range(), [=](id<1> index) {
+        write[index] = read[index] * -1;
+      });
     });
     myQueue.wait();
 
     otherQueue.submit([&](handler &cgh) {
-      auto acc = base.get_access<access::mode::read_write>(cgh);
-      cgh.parallel_for<class copyH2D1>(
-          base.get_range(), [=](id<2> index) { acc[index] = acc[index] * -1; });
+      auto read  = buffer_from_1D.get_access<access::mode::read>(cgh);
+      auto write = buffer_to_1D.get_access<access::mode::write>(cgh);
+      cgh.parallel_for<class copyH2D_1D_2nd>(buffer_from_1D.get_range(), [=](id<1> index) {
+          write[index] = read[index] * 10; 
+      });
+    });
+  } // ~buffer 1D
+
+  {
+    buffer<float, 2> buffer_from_2D(data_from_2D.data(), range<2>(height, width));
+    buffer<float, 2> buffer_to_2D(data_to_2D.data(), range<2>(height, width));
+    queue myQueue;
+    queue otherQueue;
+    myQueue.submit([&](handler &cgh) {
+      auto read  = buffer_from_2D.get_access<access::mode::read>(cgh);
+      auto write = buffer_to_2D.get_access<access::mode::write>(cgh);
+      cgh.parallel_for<class copyH2D_2D>(buffer_from_2D.get_range(), [=](id<2> index) {
+        write[index] = read[index] * -1;
+      });
     });
 
+    otherQueue.submit([&](handler &cgh) {
+      auto read  = buffer_from_2D.get_access<access::mode::read>(cgh);
+      auto write = buffer_to_2D.get_access<access::mode::write>(cgh);
+      cgh.parallel_for<class copyH2D_2D_2nd>(buffer_from_2D.get_range(), [=](id<2> index) {
+          write[index] = read[index] * 10; 
+      });
+    });
+  } // ~buffer 22
+
+  {
+    buffer<float, 3> buffer_from_3D(data_from_3D.data(), range<3>(depth, height, width));
+    buffer<float, 3> buffer_to_3D(data_to_3D.data(), range<3>(depth, height, width));
+    queue myQueue;
+    queue otherQueue;
+    myQueue.submit([&](handler &cgh) {
+      auto read  = buffer_from_3D.get_access<access::mode::read>(cgh);
+      auto write = buffer_to_3D.get_access<access::mode::write>(cgh);
+      cgh.parallel_for<class copyH2D_3D>(buffer_from_3D.get_range(), [=](id<3> index) {
+        write[index] = read[index] * -1;
+      });
+    });
+
+    otherQueue.submit([&](handler &cgh) {
+      auto read  = buffer_from_3D.get_access<access::mode::read>(cgh);
+      auto write = buffer_to_3D.get_access<access::mode::write>(cgh);
+      cgh.parallel_for<class copyH2D_3D_2nd>(buffer_from_3D.get_range(), [=](id<3> index) {
+          write[index] = read[index] * 10; 
+      });
+    });
+  } // ~buffer 3D
+
+  std::cout << "end copyH2D-buffer" << std::endl;
+}
+
+void testcopyD2DBuffer() {
+  std::cout << "start copyD2D-buffer" << std::endl;
+  std::vector<float> data_from_1D(width, 13);
+  std::vector<float> data_to_1D(width, 0);
+  std::vector<float> data_from_2D(total, 7);
+  std::vector<float> data_to_2D(total, 0);
+  std::vector<float> data_from_3D(total3D, 17);
+  std::vector<float> data_to_3D(total3D, 0);
+  {
+    buffer<float, 1> buffer_from_1D(data_from_1D.data(), range<1>(width));
+    buffer<float, 1> buffer_to_1D(data_to_1D.data(), range<1>(width));
+    buffer<float, 2> buffer_from_2D(data_from_2D.data(), range<2>(height, width));
+    buffer<float, 2> buffer_to_2D(data_to_2D.data(), range<2>(height, width));
+    buffer<float, 3> buffer_from_3D(data_from_3D.data(), range<3>(depth, height, width));
+    buffer<float, 3> buffer_to_3D(data_to_3D.data(), range<3>(depth, height, width));
+
+    queue myQueue;
+    auto e1 = myQueue.submit([&](handler &cgh) {
+      auto read  = buffer_from_1D.get_access<access::mode::read>(cgh);
+      auto write = buffer_to_1D.get_access<access::mode::write>(cgh);
+      cgh.copy(read, write);
+    });
+    auto e2 = myQueue.submit([&](handler &cgh) {
+      cgh.depends_on(e1);
+      auto read  = buffer_from_2D.get_access<access::mode::read>(cgh);
+      auto write = buffer_to_2D.get_access<access::mode::write>(cgh);
+      cgh.copy(read, write);
+    });
+    auto e3 = myQueue.submit([&](handler &cgh) {
+      cgh.depends_on(e2);
+      auto read  = buffer_from_3D.get_access<access::mode::read>(cgh);
+      auto write = buffer_to_3D.get_access<access::mode::write>(cgh);
+      cgh.copy(read, write);
+    });
+    
+
   } // ~buffer
-  std::cout << "end copyTwice-buffer" << std::endl;
+  std::cout << "end copyD2D-buffer" << std::endl;
+}
+
+void testFill_Buffer(){
+  std::cout << "start testFill Buffer" << std::endl;
+  std::vector<float> data_1D(width, 0);
+  std::vector<float> data_2D(total, 0);
+  std::vector<float> data_3D(total3D, 0);
+  {
+    buffer<float, 1> buffer_1D(data_1D.data(), range<1>(width));
+    buffer<float, 2> buffer_2D(data_2D.data(), range<2>(height, width));
+    buffer<float, 3> buffer_3D(data_3D.data(), range<3>(depth, height, width));
+
+    queue myQueue;
+    auto e1 = myQueue.submit([&](handler &cgh) {
+      auto acc1D = buffer_1D.get_access<cl::sycl::access::mode::write>(cgh);
+      cgh.fill(acc1D, float{1});
+    });
+    auto e2 = myQueue.submit([&](handler &cgh) {
+      cgh.depends_on(e1);  
+      auto acc2D = buffer_2D.get_access<cl::sycl::access::mode::write>(cgh);
+      cgh.fill(acc2D, float{2});
+    });
+    auto e3 = myQueue.submit([&](handler &cgh) {
+      cgh.depends_on(e2); 
+      auto acc3D = buffer_3D.get_access<cl::sycl::access::mode::write>(cgh);
+      cgh.fill(acc3D, float{3});
+    });
+  }// ~buffer
+  std::cout << "end testFill Buffer" << std::endl;
 }
 
 
@@ -330,12 +447,13 @@ void testCopyTwiceImage() {
 }
 
 int main() {
-
-    // testCopy_1D_D2HBuffer();
-     remind();
-    // testCopy_2D_D2HBuffer();
-     testcopyTwiceBuffer();
-    // testCopy_3D_D2HBuffer();
+    remind();
+        
+    //testcopyD2HBuffer();
+    testcopyH2DBuffer();
+    //testcopyD2DBuffer();
+    // testFill_Buffer();
+    
 
     // testCopy_1D_D2HImage();
     // testCopy_2D_D2HImage();
@@ -344,35 +462,60 @@ int main() {
     
 }
 
-//CHECK: start 1D copyD2H-Buffer
+
+//CHECK: start copyD2H-buffer
 //CHECK: ---> piEnqueueMemBufferRead(
-//CHECK: <unknown> : 320
-//CHECK: ) --->        pi_result : PI_SUCCESS
-//CHECK: end 1D copyD2H-Buffer
-
-//CHECK: start copyD2H-Buffer
-//CHECK: ---> piEnqueueMemBufferReadRect(
-//CHECK: pi_buff_rect_region width_bytes/height/depth : 64/5/1
-//CHECK: <unknown> : 64
-//CHECK: end copyD2H-Buffer
-
-//CHECK: start copyTwice-buffer
-//CHECK:  ---> piEnqueueMemBufferWriteRect(
-//CHECK: pi_buff_rect_region width_bytes/height/depth : 64/5/1
-//CHECK: <unknown> : 64
-//CHECK: <unknown> : 0
 //CHECK: <unknown> : 64
 //CHECK: ---> piEnqueueMemBufferReadRect(
 //CHECK: pi_buff_rect_region width_bytes/height/depth : 64/5/1
-//CHECK: <unknown> : 64
-//CHECK: end copyTwice-buffer
-
-//CHECK: start 3D copyD2H-Buffer
+//CHECK-NEXT: <unknown> : 64
 //CHECK: ---> piEnqueueMemBufferReadRect(
 //CHECK: pi_buff_rect_region width_bytes/height/depth : 64/5/3
+//CHECK-NEXT: <unknown> : 64
+//CHECK-NEXT: <unknown> : 320
+//CHECK: end copyD2H-buffer
+
+//CHECK: start copyH2D-buffer
+//CHECK: ---> piEnqueueMemBufferWrite(
 //CHECK: <unknown> : 64
-//CHECK: <unknown> : 320
-//CHECK: end 3D copyD2H-Buffer
+//CHECK:  ---> piEnqueueMemBufferWriteRect(
+//CHECK: pi_buff_rect_region width_bytes/height/depth : 64/5/1
+//CHECK-NEXT: <unknown> : 64
+//CHECK-NEXT: <unknown> : 0
+//CHECK-NEXT: <unknown> : 64
+//CHECK:  ---> piEnqueueMemBufferWriteRect(
+//CHECK: pi_buff_rect_region width_bytes/height/depth : 64/5/3
+//CHECK-NEXT: <unknown> : 64
+//CHECK-NEXT: <unknown> : 320
+//CHECK-NEXT: <unknown> : 64
+//CHECK-NEXT: <unknown> : 320
+//CHECK: end copyH2D-buffer
+
+
+
+//CHECK: start copyD2D-buffer
+//CHECK: ---> piEnqueueMemBufferCopy(
+//CHECK: <unknown> : 64
+//CHECK: ---> piEnqueueMemBufferCopyRect(
+//CHECK: pi_buff_rect_region width_bytes/height/depth : 64/5/1
+//CHECK-NEXT: <unknown> : 64
+//CHECK-NEXT: <unknown> : 320
+//CHECK-NEXT: <unknown> : 64
+//CHECK-NEXT: <unknown> : 320
+//CHECK: pi_buff_rect_region width_bytes/height/depth : 64/5/3
+//CHECK-NEXT: <unknown> : 64
+//CHECK-NEXT: <unknown> : 320
+//CHECK-NEXT: <unknown> : 64
+//CHECK-NEXT: <unknown> : 320
+//CHECK: end copyD2D-buffer
+
+//CHECK: start testFill Buffer
+//CHECK: ---> piEnqueueMemBufferFill(
+//CHECK: <unknown> : 4
+//CHECK-NEXT: <unknown> : 0
+//CHECK-NEXT: <unknown> : 64
+//CHECK: end testFill Buffer
+
 
 //CHECK: start 1D copyD2H-Image
 //CHECK: ---> piEnqueueMemImageRead(
