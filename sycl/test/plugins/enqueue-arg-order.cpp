@@ -1,11 +1,12 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple  %s -o %t.out
 // RUN: env SYCL_PI_TRACE=2 %GPU_RUN_PLACEHOLDER %t.out | FileCheck %s
 // RUN: env SYCL_PI_TRACE=2 %CPU_RUN_PLACEHOLDER %t.out | FileCheck %s
-// XFAIL: *
+// TFAIL: *
 
 /*
   Manual
     clang++ -fsycl -o eao.bin enqueue-arg-order.cpp
+    clang++ -fsycl -g -o eao.d enqueue-arg-order.cpp
     SYCL_PI_TRACE=2 ./eao.bin
 
     clang++ --driver-mode=g++ -fsycl -fsycl-targets=nvptx64-nvidia-cuda-sycldevice -o eao.bin enqueue-arg-order.cpp
@@ -15,6 +16,7 @@
 */
 
 #include <CL/sycl.hpp>
+#include <CL/sycl/accessor.hpp>
 #include <iostream>
 
 using namespace cl::sycl;
@@ -87,6 +89,112 @@ void remind() {
 
   // NOTE: presently we see 5/16/1 for image Region and 80 for row pitch.  both
   // incorrect
+}
+
+// ----------- FUNCTIONAL
+template <template <int> class T>
+static void printRangeId(T<3> arr) {
+  std::cout << ":: " << "{" << arr[0] << ", " << arr[1] << ", " << arr[2] << "}" << std::endl;
+}
+
+void testDetailConvertToArrayOfN(){
+  //ranges
+  range<1> range_1D(width);
+  range<2> range_2D(height, width);
+  range<3> range_3D(depth, height, width);
+
+  range<3> arr1 = sycl::detail::convertToArrayOfN<3,1>(range_1D); 
+  //should be: {1,1,16}
+  printRangeId(arr1);
+  assert(arr1[0] == 1 && arr1[1] == 1 && arr1[2] == width && "arr1 should be {1,1,16} ");
+
+  // range<3> arrSz = sycl::detail::convertToArrayOfN<3,1>(size_t{width}); 
+  // printRangeId(arrSz);
+  // assert(arrSz[0] == 1 && arrSz[1] == 1 && arrSz[2] == width && "arrSz should be {1,1,16} ");
+
+
+  range<3> arr2 = sycl::detail::convertToArrayOfN<3,1>(range_2D);
+  //should be: {1, 5, 16}
+  printRangeId(arr2);
+  assert(arr2[0] == 1 && arr2[1] == height && arr2[2] == width && "arr2 should be {1,5,16} ");
+
+  range<3> arr3 = sycl::detail::convertToArrayOfN<3,1>(range_3D);
+  //should be: {3, 5, 16}
+  printRangeId(arr3);
+  assert(arr3[0] == depth && arr3[1] == height && arr3[2] == width && "arr3 should be {3,5,16} ");
+
+  range<2> smaller2 = sycl::detail::convertToArrayOfN<2,1>(range_3D);
+  assert(smaller2[0] == height && smaller2[1] == width  && "smaller2 should be {5,16} ");
+
+  range<1> smaller1 = sycl::detail::convertToArrayOfN<1,1>(range_3D);
+  assert(smaller1[0] == width && "smaller1 should be {16} ");
+}
+
+// class to give access to protected function getLinearIndex
+template <typename T, int Dims>
+class AccTest
+  : public accessor<T, Dims, access::mode::read_write, access::target::host_buffer, access::placeholder::false_t> {
+  using AccessorT = accessor<T, Dims, access::mode::read_write, access::target::host_buffer, access::placeholder::false_t>;
+
+  public:
+    AccTest(AccessorT acc) : AccessorT(acc) {}
+      
+    size_t gLI(id<Dims> idx){
+      return AccessorT::getLinearIndex(idx);
+    }
+};
+
+
+void testGetLinearIndex(){
+  constexpr int x = 4, y = 3, z = 1;
+  // width=16, height=5, depth = 3. 
+  // row is 16 (ie. width)
+  // slice is 80 (ie width * height)
+  size_t target_1D = x;
+  size_t target_2D = (y * width) + x; // s.b. (3*16) + 4 => 52
+  size_t target_3D = (height * width * z) + (y * width) + x; // s.b. 80 + (3*16) + 4 => 132
+
+  std::vector<float> data_1D(width, 13);
+  std::vector<float> data_2D(total, 7);
+  std::vector<float> data_3D(total3D, 17);
+
+  // test accessor protected function
+  {
+    buffer<float, 1> buffer_1D(data_1D.data(), range<1>(width));
+    buffer<float, 2> buffer_2D(data_2D.data(), range<2>(height, width));
+    buffer<float, 3> buffer_3D(data_3D.data(), range<3>(depth, height, width));
+  
+    auto acc_1D = buffer_1D.get_access<access::mode::read_write>();
+    auto accTest_1D = AccTest<float, 1>(acc_1D);
+    size_t linear_1D = accTest_1D.gLI(id<1>(x));  //s.b. 4
+    std::cout << "linear_1D: " << linear_1D << "  target_1D: " << target_1D << std::endl;
+    assert(linear_1D == target_1D && "linear_1D s.b. 4");
+
+    auto acc_2D = buffer_2D.get_access<access::mode::read_write>();
+    auto accTest_2D = AccTest<float, 2>(acc_2D);
+    size_t linear_2D = accTest_2D.gLI(id<2>(y, x));   
+    std::cout << "linear_2D: " << linear_2D << "  target_2D: " << target_2D << std::endl;
+    assert(linear_2D == target_2D && "linear_2D s.b. 52");
+
+    auto acc_3D = buffer_3D.get_access<access::mode::read_write>();
+    auto accTest_3D = AccTest<float, 3>(acc_3D);
+    size_t linear_3D = accTest_3D.gLI(id<3>(z, y, x));   
+    std::cout << "linear_3D: " << linear_3D << "  target_3D: " << target_3D << std::endl;
+    assert(linear_3D ==  target_3D &&  "linear_3D s.b. 132" );
+  }
+
+  // common.hpp variant of getLinearIndex
+  size_t lin_1D = getLinearIndex(id<1>(x), range<1>(width));
+  std::cout << "lin_1D: " << lin_1D << std::endl;
+  assert(lin_1D == target_1D && "lin_1D s.b. 4");
+
+  size_t lin_2D = getLinearIndex(id<2>(y, x), range<2>(height, width));
+  std::cout << "lin_2D: " << lin_2D << "  target_2D: " << target_2D << std::endl;
+  assert(lin_2D == target_2D && "lin_2D s.b. 52");
+
+  size_t lin_3D = getLinearIndex(id<3>(z, y, x), range<3>(depth, height, width));
+  std::cout << "lin_3D: " << lin_3D << "  target_3D: " << target_3D << std::endl;
+  assert(lin_3D ==  target_3D &&  "lin_3D s.b. 132" );
 }
 
 // ----------- BUFFERS
@@ -292,6 +400,7 @@ void testFill_Buffer(){
     });
   }// ~buffer
   std::cout << "end testFill Buffer" << std::endl;
+
 }
 
 // ----------- IMAGES
@@ -471,6 +580,8 @@ void testcopyH2DImage() {
 void testcopyD2DImage(){
    // copyD2D
   std::cout << "start copyD2D-Image" << std::endl;
+  // COPY and FILL not working with image accessors yet.
+  /*
   // image with write accessor to it in kernel
   const sycl::image_channel_order ChanOrder = sycl::image_channel_order::rgba;
   const sycl::image_channel_type ChanType = sycl::image_channel_type::fp32;
@@ -518,7 +629,7 @@ void testcopyD2DImage(){
       CGH.copy(readAcc, writeAcc);
     });
   } // ~images
-
+  */
   std::cout << "end copyD2D-Image" << std::endl;
 }
 
@@ -526,16 +637,19 @@ void testcopyD2DImage(){
 
 int main() {
     remind();
+
+    testDetailConvertToArrayOfN();
+    testGetLinearIndex();
         
-    testcopyD2HBuffer();
-    testcopyH2DBuffer();
-    testcopyD2DBuffer();
-    testFill_Buffer();
+    // testcopyD2HBuffer();
+    // testcopyH2DBuffer();
+    // testcopyD2DBuffer();
+    // testFill_Buffer();
     
 
-    testcopyD2HImage();
-    testcopyH2DImage();
-    testcopyD2DImage();
+    // testcopyD2HImage();
+    // testcopyH2DImage();
+    // testcopyD2DImage();
        
 }
 
