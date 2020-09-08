@@ -1,18 +1,19 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple  %s -o %t.out
 // RUN: env SYCL_PI_TRACE=2 %GPU_RUN_PLACEHOLDER %t.out | FileCheck %s
 // RUN: env SYCL_PI_TRACE=2 %CPU_RUN_PLACEHOLDER %t.out | FileCheck %s
+
 // TFAIL: *
 
 /*
   Manual
-    clang++ -fsycl -o eao.bin enqueue-arg-order.cpp
-    clang++ -fsycl -g -o eao.d enqueue-arg-order.cpp
-    SYCL_PI_TRACE=2 ./eao.bin
+    clang++ -fsycl -o eaob.bin enqueue-arg-order-buffer.cpp
+    clang++ -fsycl -g -o eaob.d enqueue-arg-order-buffer.cpp
+    SYCL_PI_TRACE=2 ./eaob.bin
 
-    clang++ --driver-mode=g++ -fsycl -fsycl-targets=nvptx64-nvidia-cuda-sycldevice -o eao.bin enqueue-arg-order.cpp
-    SYCL_PI_TRACE=2 SYCL_BE=PI_CUDA ./eao.bin
+    clang++ --driver-mode=g++ -fsycl -fsycl-targets=nvptx64-nvidia-cuda-sycldevice -o eaob.bin enqueue-arg-order-buffer.cpp
+    SYCL_PI_TRACE=2 SYCL_BE=PI_CUDA ./eaob.bin
 
-    llvm-lit --param SYCL_BE=PI_CUDA -v enqueue-arg-order.cpp
+    llvm-lit --param SYCL_BE=PI_CUDA -v enqueue-arg-order-buffer.cpp
 */
 
 #include <CL/sycl.hpp>
@@ -63,34 +64,7 @@ void remind() {
   // NOTE: presently we see 20/16/1 for Region and 20 for row pitch.  both
   // incorrect.
 
-  /*
-    https://www.khronos.org/registry/OpenCL/sdk/2.2/docs/man/html/clEnqueueReadImage.html
-
-    row_pitch in clEnqueueReadImage and input_row_pitch in clEnqueueWriteImage
-    is the length of each row in bytes. This value must be greater than or equal
-    to the element size in bytes × width. If row_pitch (or input_row_pitch) is
-    set to 0, the appropriate row pitch is calculated based on the size of each
-    element in bytes multiplied by width.
-
-    slice_pitch in clEnqueueReadImage and input_slice_pitch in
-    clEnqueueWriteImage is the size in bytes of the 2D slice of the 3D region of
-    a 3D image or each image of a 1D or 2D image array being read or written
-    respectively.
-  */
-
-  std::cout << "For IMAGES" << std::endl;
-  std::cout << "           Region SHOULD be : " << width << "/" << height << "/"
-            << depth << std::endl; // 16/5/3
-  std::cout << "   row_pitch SHOULD be 0 or : " << width * sizeof(sycl::float4)
-            << std::endl; // 0 or 256
-  std::cout << " slice_pitch SHOULD be 0 or : "
-            << width * sizeof(sycl::float4) * height << std::endl
-            << std::endl; // 0 or 1280
-
-  // NOTE: presently we see 5/16/1 for image Region and 80 for row pitch.  both
-  // incorrect
 }
-
 // ----------- FUNCTIONAL
 template <template <int> class T>
 static void printRangeId(T<3> arr) {
@@ -106,28 +80,23 @@ void testDetailConvertToArrayOfN(){
   range<3> arr1 = sycl::detail::convertToArrayOfN<3,1>(range_1D); 
   //should be: {1,1,16}
   printRangeId(arr1);
-  assert(arr1[0] == 1 && arr1[1] == 1 && arr1[2] == width && "arr1 should be {1,1,16} ");
-
-  // range<3> arrSz = sycl::detail::convertToArrayOfN<3,1>(size_t{width}); 
-  // printRangeId(arrSz);
-  // assert(arrSz[0] == 1 && arrSz[1] == 1 && arrSz[2] == width && "arrSz should be {1,1,16} ");
-
+  //assert(arr1[0] == 1 && arr1[1] == 1 && arr1[2] == width && "arr1 should be {1,1,16} ");
 
   range<3> arr2 = sycl::detail::convertToArrayOfN<3,1>(range_2D);
   //should be: {1, 5, 16}
   printRangeId(arr2);
-  assert(arr2[0] == 1 && arr2[1] == height && arr2[2] == width && "arr2 should be {1,5,16} ");
+  //assert(arr2[0] == 1 && arr2[1] == height && arr2[2] == width && "arr2 should be {1,5,16} ");
 
   range<3> arr3 = sycl::detail::convertToArrayOfN<3,1>(range_3D);
   //should be: {3, 5, 16}
   printRangeId(arr3);
-  assert(arr3[0] == depth && arr3[1] == height && arr3[2] == width && "arr3 should be {3,5,16} ");
+  //assert(arr3[0] == depth && arr3[1] == height && arr3[2] == width && "arr3 should be {3,5,16} ");
 
   range<2> smaller2 = sycl::detail::convertToArrayOfN<2,1>(range_3D);
-  assert(smaller2[0] == height && smaller2[1] == width  && "smaller2 should be {5,16} ");
+  //assert(smaller2[0] == height && smaller2[1] == width  && "smaller2 should be {5,16} ");
 
   range<1> smaller1 = sycl::detail::convertToArrayOfN<1,1>(range_3D);
-  assert(smaller1[0] == width && "smaller1 should be {16} ");
+  //assert(smaller1[0] == width && "smaller1 should be {16} ");
 }
 
 // class to give access to protected function getLinearIndex
@@ -403,235 +372,7 @@ void testFill_Buffer(){
 
 }
 
-// ----------- IMAGES
 
-void testcopyD2HImage(){
-   // copyD2H
-  std::cout << "start copyD2H-Image" << std::endl;
-  // image with write accessor to it in kernel
-  const sycl::image_channel_order ChanOrder = sycl::image_channel_order::rgba;
-  const sycl::image_channel_type ChanType = sycl::image_channel_type::fp32;
-  constexpr auto SYCLRead = sycl::access::mode::read;
-  constexpr auto SYCLWrite = sycl::access::mode::write;
-
-  const sycl::range<1> ImgSize_1D(width);
-  const sycl::range<2> ImgSize_2D(height, width);
-  const sycl::range<3> ImgSize_3D(depth, height, width);
-
-  std::vector<sycl::float4> data_from_1D(ImgSize_1D.size(), {1, 2, 3, 4});
-  std::vector<sycl::float4> data_to_1D(ImgSize_1D.size(), {0, 0, 0, 0});
-  std::vector<sycl::float4> data_from_2D(ImgSize_2D.size(), {7, 7, 7, 7});
-  std::vector<sycl::float4> data_to_2D(ImgSize_2D.size(), {0, 0, 0, 0});
-  std::vector<sycl::float4> data_from_3D(ImgSize_3D.size(), {11, 11, 11, 11});
-  std::vector<sycl::float4> data_to_3D(ImgSize_3D.size(), {0, 0, 0, 0});
-
-  {
-    sycl::image<1> image_from_1D(data_from_1D.data(), ChanOrder, ChanType, ImgSize_1D);
-    sycl::image<1> image_to_1D(data_to_1D.data(), ChanOrder, ChanType, ImgSize_1D);
-    queue Q;
-    Q.submit([&](sycl::handler &CGH) {
-      auto readAcc = image_from_1D.get_access<sycl::float4, SYCLRead>(CGH);
-      auto writeAcc = image_to_1D.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.parallel_for<class ImgCopyD2H_1D>(ImgSize_1D, [=](sycl::item<1> Item) {
-        sycl::float4 Data = readAcc.read(int(Item[0]));
-        writeAcc.write(int(Item[0]), Data);
-      });
-    });
-  } // ~image 1D
-
-  {
-    sycl::image<2> image_from_2D(data_from_2D.data(), ChanOrder, ChanType, ImgSize_2D);
-    sycl::image<2> image_to_2D(data_to_2D.data(), ChanOrder, ChanType, ImgSize_2D);
-    queue Q;
-    Q.submit([&](sycl::handler &CGH) {
-      auto readAcc = image_from_2D.get_access<sycl::float4, SYCLRead>(CGH);
-      auto writeAcc = image_to_2D.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.parallel_for<class ImgCopyD2H_2D>(ImgSize_2D, [=](sycl::item<2> Item) {
-        sycl::float4 Data = readAcc.read(sycl::int2{Item[0], Item[1]});
-        writeAcc.write(sycl::int2{Item[0], Item[1]}, Data);
-      });
-    });
-  } // ~image 2D
-
-  {
-    sycl::image<3> image_from_3D(data_from_3D.data(), ChanOrder, ChanType, ImgSize_3D);
-    sycl::image<3> image_to_3D(data_to_3D.data(), ChanOrder, ChanType, ImgSize_3D);
-    queue Q;
-    Q.submit([&](sycl::handler &CGH) {
-      auto readAcc = image_from_3D.get_access<sycl::float4, SYCLRead>(CGH);
-      auto writeAcc = image_to_3D.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.parallel_for<class ImgCopyD2H_3D>(ImgSize_3D, [=](sycl::item<3> Item) {
-        sycl::float4 Data = readAcc.read(sycl::int4{Item[0], Item[1], Item[2],0});
-        writeAcc.write(sycl::int4{Item[0], Item[1], Item[2],0}, Data);
-      });
-    });
-  } // ~image 3D
-  
-  std::cout << "end copyD2H-Image" << std::endl;
-}
-
-void testcopyH2DImage() {
-  // copy between two queues triggers a copyH2D, followed by a copyD2H
-  // Here we only care about checking copyH2D
-  std::cout << "start copyH2D-image" << std::endl;
-
-  const sycl::image_channel_order ChanOrder = sycl::image_channel_order::rgba;
-  const sycl::image_channel_type ChanType = sycl::image_channel_type::fp32;
-  constexpr auto SYCLRead = sycl::access::mode::read;
-  constexpr auto SYCLWrite = sycl::access::mode::write;
-
-  const sycl::range<1> ImgSize_1D(width);
-  const sycl::range<2> ImgSize_2D(height, width);
-  const sycl::range<3> ImgSize_3D(depth, height, width);
-
-  std::vector<sycl::float4> data_from_1D(ImgSize_1D.size(), {1, 2, 3, 4});
-  std::vector<sycl::float4> data_to_1D(ImgSize_1D.size(), {0, 0, 0, 0});
-  std::vector<sycl::float4> data_from_2D(ImgSize_2D.size(), {7, 7, 7, 7});
-  std::vector<sycl::float4> data_to_2D(ImgSize_2D.size(), {0, 0, 0, 0});
-  std::vector<sycl::float4> data_from_3D(ImgSize_3D.size(), {11, 11, 11, 11});
-  std::vector<sycl::float4> data_to_3D(ImgSize_3D.size(), {0, 0, 0, 0});
-
-  // 1D 
-  {
-    sycl::image<1> image_from_1D(data_from_1D.data(), ChanOrder, ChanType, ImgSize_1D);
-    sycl::image<1> image_to_1D(data_to_1D.data(), ChanOrder, ChanType, ImgSize_1D);
-    queue Q;
-    queue otherQueue;
-    //first op
-    Q.submit([&](sycl::handler &CGH) {
-      auto readAcc = image_from_1D.get_access<sycl::float4, SYCLRead>(CGH);
-      auto writeAcc = image_to_1D.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.parallel_for<class ImgCopyH2D_1D>(ImgSize_1D, [=](sycl::item<1> Item) {
-        sycl::float4 Data = readAcc.read(int(Item[0]));
-        writeAcc.write(int(Item[0]), Data);
-      });
-    });
-    //second op
-    otherQueue.submit([&](sycl::handler &CGH) {
-      auto readAcc = image_from_1D.get_access<sycl::float4, SYCLRead>(CGH);
-      auto writeAcc = image_to_1D.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.parallel_for<class ImgCopyH2D_1D_2nd>(ImgSize_1D, [=](sycl::item<1> Item) {
-        sycl::float4 Data = readAcc.read(int(Item[0]));
-        writeAcc.write(int(Item[0]), Data);
-      });
-    });
-  } // ~image 1D
-
-  //2D
-  {
-    sycl::image<2> image_from_2D(data_from_2D.data(), ChanOrder, ChanType, ImgSize_2D);
-    sycl::image<2> image_to_2D(data_to_2D.data(), ChanOrder, ChanType, ImgSize_2D);
-    queue Q;
-    queue otherQueue;
-    Q.submit([&](sycl::handler &CGH) {
-      auto readAcc = image_from_2D.get_access<sycl::float4, SYCLRead>(CGH);
-      auto writeAcc = image_to_2D.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.parallel_for<class ImgCopyH2D_2D>(ImgSize_2D, [=](sycl::item<2> Item) {
-        sycl::float4 Data = readAcc.read(sycl::int2{Item[0], Item[1]});
-        writeAcc.write(sycl::int2{Item[0], Item[1]}, Data);
-      });
-    });
-    otherQueue.submit([&](sycl::handler &CGH) {
-      auto readAcc = image_from_2D.get_access<sycl::float4, SYCLRead>(CGH);
-      auto writeAcc = image_to_2D.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.parallel_for<class ImgCopyH2D_2D_2nd>(ImgSize_2D, [=](sycl::item<2> Item) {
-        sycl::float4 Data = readAcc.read(sycl::int2{Item[0], Item[1]});
-        writeAcc.write(sycl::int2{Item[0], Item[1]}, Data);
-      });
-    });
-  } // ~image 2D
-
-  //3D
-  {
-    sycl::image<3> image_from_3D(data_from_3D.data(), ChanOrder, ChanType, ImgSize_3D);
-    sycl::image<3> image_to_3D(data_to_3D.data(), ChanOrder, ChanType, ImgSize_3D);
-    queue Q;
-    queue otherQueue;
-    Q.submit([&](sycl::handler &CGH) {
-      auto readAcc = image_from_3D.get_access<sycl::float4, SYCLRead>(CGH);
-      auto writeAcc = image_to_3D.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.parallel_for<class ImgCopyH2D_3D>(ImgSize_3D, [=](sycl::item<3> Item) {
-        sycl::float4 Data = readAcc.read(sycl::int4{Item[0], Item[1], Item[2],0});
-        writeAcc.write(sycl::int4{Item[0], Item[1], Item[2],0}, Data);
-      });
-    });
-    otherQueue.submit([&](sycl::handler &CGH) {
-      auto readAcc = image_from_3D.get_access<sycl::float4, SYCLRead>(CGH);
-      auto writeAcc = image_to_3D.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.parallel_for<class ImgCopyH2D_3D_2nd>(ImgSize_3D, [=](sycl::item<3> Item) {
-        sycl::float4 Data = readAcc.read(sycl::int4{Item[0], Item[1], Item[2],0});
-        writeAcc.write(sycl::int4{Item[0], Item[1], Item[2],0}, Data);
-      });
-    });
-  } // ~image 3D
-
-  std::cout << "end copyH2D-image" << std::endl;
-}
-
-void testcopyD2DImage(){
-   // copyD2D
-  std::cout << "start copyD2D-Image" << std::endl;
-  // COPY and FILL not working with image accessors yet.
-  /*
-  // image with write accessor to it in kernel
-  const sycl::image_channel_order ChanOrder = sycl::image_channel_order::rgba;
-  const sycl::image_channel_type ChanType = sycl::image_channel_type::fp32;
-  constexpr auto SYCLRead = sycl::access::mode::read;
-  constexpr auto SYCLWrite = sycl::access::mode::write;
-
-  const sycl::range<1> ImgSize_1D(width);
-  const sycl::range<2> ImgSize_2D(height, width);
-  const sycl::range<3> ImgSize_3D(depth, height, width);
-
-  std::vector<sycl::float4> data_from_1D(ImgSize_1D.size(), {1, 2, 3, 4});
-  std::vector<sycl::float4> data_to_1D(ImgSize_1D.size(), {0, 0, 0, 0});
-  std::vector<sycl::float4> data_from_2D(ImgSize_2D.size(), {7, 7, 7, 7});
-  std::vector<sycl::float4> data_to_2D(ImgSize_2D.size(), {0, 0, 0, 0});
-  std::vector<sycl::float4> data_from_3D(ImgSize_3D.size(), {11, 11, 11, 11});
-  std::vector<sycl::float4> data_to_3D(ImgSize_3D.size(), {0, 0, 0, 0});
-
-  {
-    sycl::image<1> image_from_1D(data_from_1D.data(), ChanOrder, ChanType, ImgSize_1D);
-    sycl::image<1> image_to_1D(data_to_1D.data(), ChanOrder, ChanType, ImgSize_1D);
-    sycl::image<2> image_from_2D(data_from_2D.data(), ChanOrder, ChanType, ImgSize_2D);
-    sycl::image<2> image_to_2D(data_to_2D.data(), ChanOrder, ChanType, ImgSize_2D);
-    sycl::image<3> image_from_3D(data_from_3D.data(), ChanOrder, ChanType, ImgSize_3D);
-    sycl::image<3> image_to_3D(data_to_3D.data(), ChanOrder, ChanType, ImgSize_3D);
-
-    queue Q;
-    auto e1 = Q.submit([&](sycl::handler &CGH) {
-      auto readAcc = image_from_1D.get_access<sycl::float4, SYCLRead>(CGH);
-      auto writeAcc = image_to_1D.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.copy(readAcc, writeAcc);
-    });
-    auto e2 = Q.submit([&](sycl::handler &CGH) {
-      //CGH.depends_on(e1);
-      auto readAcc = image_from_2D.get_access<sycl::float4, SYCLRead>(CGH);
-      auto writeAcc = image_to_2D.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.copy(readAcc, writeAcc);
-    });
-    auto e3 = Q.submit([&](sycl::handler &CGH) {
-      //CGH.depends_on(e2);
-      auto readAcc = image_from_3D.get_access<sycl::float4, SYCLRead>(CGH);
-      auto writeAcc = image_to_3D.get_access<sycl::float4, SYCLWrite>(CGH);
-
-      CGH.copy(readAcc, writeAcc);
-    });
-  } // ~images
-  */
-  std::cout << "end copyD2D-Image" << std::endl;
-}
 
 // --------------
 
@@ -641,16 +382,11 @@ int main() {
     testDetailConvertToArrayOfN();
     testGetLinearIndex();
         
-    // testcopyD2HBuffer();
-    // testcopyH2DBuffer();
-    // testcopyD2DBuffer();
-    // testFill_Buffer();
-    
-
-    // testcopyD2HImage();
-    // testcopyH2DImage();
-    // testcopyD2DImage();
-       
+    testcopyD2HBuffer();
+    testcopyH2DBuffer();
+    testcopyD2DBuffer();
+    testFill_Buffer();
+  
 }
 
 // ----------- BUFFERS
@@ -689,9 +425,9 @@ int main() {
 //CHECK: ---> piEnqueueMemBufferCopyRect(
 //CHECK: pi_buff_rect_region width_bytes/height/depth : 64/5/1
 //CHECK-NEXT: <unknown> : 64
-//CHECK-NEXT: <unknown> : 320
+//CHECK-NEXT: <unknown> : 0
 //CHECK-NEXT: <unknown> : 64
-//CHECK-NEXT: <unknown> : 320
+//CHECK-NEXT: <unknown> : 0
 //CHECK: pi_buff_rect_region width_bytes/height/depth : 64/5/3
 //CHECK-NEXT: <unknown> : 64
 //CHECK-NEXT: <unknown> : 320
@@ -706,43 +442,8 @@ int main() {
 //CHECK-NEXT: <unknown> : 64
 //CHECK: end testFill Buffer
 
-// ----------- IMAGES
 
-//CHECK: start copyD2H-Image
-//CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/1/1
-//CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/5/1
-//CHECK-NEXT: <unknown> : 256
-//CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/5/3
-//CHECK-NEXT: <unknown> : 256
-//CHECK-NEXT: <unknown> : 1280
-//CHECK: end copyD2H-Image
 
-//CHECK: start copyH2D-image
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/1/1
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/1/1
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/5/1
-//CHECK-NEXT: <unknown> : 256
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/5/1
-//CHECK-NEXT: <unknown> : 256
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/5/3
-//CHECK-NEXT: <unknown> : 256
-//CHECK-NEXT: <unknown> : 1280
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/5/3
-//CHECK-NEXT: <unknown> : 256
-//CHECK-NEXT: <unknown> : 1280
-//CHECK: end copyH2D-image
-
-//CHECK: start copyD2D-Image
-//CHECK: end copyD2D-Image
 
 // ----------- 
 
