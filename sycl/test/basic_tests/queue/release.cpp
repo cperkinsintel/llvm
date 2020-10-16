@@ -3,6 +3,8 @@
 // RUN: env SYCL_PI_TRACE=2 %CPU_RUN_PLACEHOLDER %t.out %CPU_CHECK_PLACEHOLDER
 // RUN: env SYCL_PI_TRACE=2 %ACC_RUN_PLACEHOLDER %t.out %ACC_CHECK_PLACEHOLDER
 
+//TEST1
+
 #include <CL/sycl.hpp>
 int main() {
   sycl::queue q;
