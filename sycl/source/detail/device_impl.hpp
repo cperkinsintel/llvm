@@ -12,6 +12,8 @@
 #include <CL/sycl/detail/pi.hpp>
 #include <CL/sycl/stl.hpp>
 #include <detail/device_info.hpp>
+//CP
+#include <detail/global_handler.hpp>
 #include <detail/platform_impl.hpp>
 
 #include <memory>
@@ -27,6 +29,8 @@ namespace detail {
 // Forward declaration
 class platform_impl;
 using PlatformImplPtr = std::shared_ptr<platform_impl>;
+//CP
+using PlatformImplWeakPtr = std::weak_ptr<detail::platform_impl>;
 
 // TODO: Make code thread-safe
 class device_impl {
@@ -119,7 +123,15 @@ public:
   platform get_platform() const;
 
   /// \return the associated plugin with this device.
-  const plugin &getPlugin() const { return MPlatform->getPlugin(); }
+  const plugin &getPlugin() const { 
+    //CP
+    //return MPlatform->getPlugin(); 
+    if(PlatformImplPtr Platform = MPlatform.lock())
+      return Platform->getPlugin(); //return whatever plugin the platform has
+      
+    return *MPlugin; // return the plugin with which this device was initialized
+  }
+
 
   /// Check SYCL extension support by device
   ///
@@ -229,7 +241,11 @@ private:
   RT::PiDeviceType MType;
   bool MIsRootDevice = false;
   bool MIsHostDevice;
-  PlatformImplPtr MPlatform;
+  //CP
+  // PlatformImplPtr MPlatform;
+  PlatformImplWeakPtr MPlatform;
+  std::shared_ptr<plugin>  MPlugin;
+
 }; // class device_impl
 
 } // namespace detail

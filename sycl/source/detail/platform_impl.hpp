@@ -30,7 +30,7 @@ class device_impl;
 class platform_impl {
 public:
   /// Constructs platform_impl for a SYCL host platform.
-  platform_impl() : MHostPlatform(true) {}
+  platform_impl() : MHostPlatform(true) { CPOUT << "platform_impl ctor - HOST" << std::endl; }
 
   /// Constructs platform_impl from a plug-in interoperability platform
   /// handle.
@@ -38,13 +38,26 @@ public:
   /// \param APlatform is a raw plug-in platform handle.
   /// \param APlugin is a plug-in handle.
   explicit platform_impl(RT::PiPlatform APlatform, const plugin &APlugin)
-      : MPlatform(APlatform), MPlugin(std::make_shared<plugin>(APlugin)) {}
+      : MPlatform(APlatform), MPlugin(std::make_shared<plugin>(APlugin)) { 
+        CPOUT << "platform_impl ctor #2" << std::endl;
+         }
 
   explicit platform_impl(RT::PiPlatform APlatform,
                          std::shared_ptr<plugin> APlugin)
-      : MPlatform(APlatform), MPlugin(APlugin) {}
+      : MPlatform(APlatform), MPlugin(APlugin) { 
+        CPOUT << "platform_impl ctor #3" << std::endl;
+         }
 
-  ~platform_impl() = default;
+  //CP
+  //~platform_impl() = default;
+  ~platform_impl(){
+    CPOUT << "~platform_impl Host:  " << MHostPlatform  << std::endl; // << "  MDeviceCache: " << MDeviceCache.size()  << std::endl;
+  }
+
+  int getMDeviceCacheSize(){
+    CPOUT  << MDeviceCache[0].use_count() << " -- ";
+    return MDeviceCache.size(); 
+  }
 
   /// Checks if this platform supports extension.
   ///

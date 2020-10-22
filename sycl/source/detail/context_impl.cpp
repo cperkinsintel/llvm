@@ -30,6 +30,7 @@ context_impl::context_impl(const device &Device, async_handler AsyncHandler,
     : MAsyncHandler(AsyncHandler), MDevices(1, Device), MContext(nullptr),
       MPlatform(), MPropList(PropList), MHostContext(Device.is_host()) {
   MKernelProgramCache.setContextPtr(this);
+  CPOUT << "context_impl ctor. MPlatform unset. Host: " << MHostContext << std::endl;
 }
 
 context_impl::context_impl(const vector_class<cl::sycl::device> Devices,
@@ -64,6 +65,7 @@ context_impl::context_impl(const vector_class<cl::sycl::device> Devices,
   }
 
   MKernelProgramCache.setContextPtr(this);
+  CPOUT << "context_impl ctor. Host: " << MHostContext << " MPlatform.use_count: " << MPlatform.use_count() << std::endl; 
 }
 
 context_impl::context_impl(RT::PiContext PiContext, async_handler AsyncHandler,
@@ -97,6 +99,8 @@ context_impl::context_impl(RT::PiContext PiContext, async_handler AsyncHandler,
   // care of when creating device object.
   getPlugin().call<PiApiKind::piContextRetain>(MContext);
   MKernelProgramCache.setContextPtr(this);
+
+  CPOUT << "context_impl ctor. Host: " << MHostContext << " MPlatform.use_count: " << MPlatform.use_count() << std::endl;
 }
 
 cl_context context_impl::get() const {
@@ -113,6 +117,7 @@ cl_context context_impl::get() const {
 bool context_impl::is_host() const { return MHostContext; }
 
 context_impl::~context_impl() {
+  CPOUT << "~context_impl host?: " << MHostContext << " MPlatform.use_count: " << MPlatform.use_count() << std::endl;
   for (auto LibProg : MCachedLibPrograms) {
     assert(LibProg.second && "Null program must not be kept in the cache");
     getPlugin().call<PiApiKind::piProgramRelease>(LibProg.second);

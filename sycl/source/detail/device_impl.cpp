@@ -17,7 +17,7 @@ namespace sycl {
 namespace detail {
 
 device_impl::device_impl()
-    : MIsHostDevice(true), MPlatform(platform_impl::getHostPlatformImpl()) {}
+    : MIsHostDevice(true), MPlatform(platform_impl::getHostPlatformImpl()) { CPOUT << "device_impl ctor HOST - no retain" << std::endl; }
 
 device_impl::device_impl(pi_native_handle InteropDeviceHandle,
                          const plugin &Plugin)
@@ -70,9 +70,15 @@ device_impl::device_impl(pi_native_handle InteropDeviceHandle,
     Platform = platform_impl::getPlatformFromPiDevice(MDevice, Plugin);
   }
   MPlatform = Platform;
+
+  MPlugin = std::make_shared<plugin>(Plugin);
+
+  //CP
+  CPOUT << "device_impl ctor DEVICE. MPlatform.use_count: " << MPlatform.use_count() <<  std::endl;
 }
 
 device_impl::~device_impl() {
+  CPOUT << "~device_impl. Host: " << MIsHostDevice << " MPlatform.use_count: " << MPlatform.use_count() << std::endl;
   if (!MIsHostDevice) {
     // TODO catch an exception and put it to list of asynchronous exceptions
     const detail::plugin &Plugin = getPlugin();
@@ -101,7 +107,12 @@ cl_device_id device_impl::get() const {
 }
 
 platform device_impl::get_platform() const {
-  return createSyclObjFromImpl<platform>(MPlatform);
+  //CP
+  //return createSyclObjFromImpl<platform>(MPlatform);
+  if(PlatformImplPtr Platform = MPlatform.lock())
+    return createSyclObjFromImpl<platform>(Platform);
+  else
+    return platform(); //temp 
 }
 
 bool device_impl::has_extension(const string_class &ExtensionName) const {
@@ -139,12 +150,15 @@ device_impl::create_sub_devices(const cl_device_partition_property *Properties,
   // times with the same arguments?
   //
   vector_class<device> res;
-  std::for_each(SubDevices.begin(), SubDevices.end(),
-                [&res, this](const RT::PiDevice &a_pi_device) {
-                  device sycl_device = detail::createSyclObjFromImpl<device>(
-                      MPlatform->getOrMakeDeviceImpl(a_pi_device, MPlatform));
-                  res.push_back(sycl_device);
-                });
+  //CP 
+  if(PlatformImplPtr Platform = MPlatform.lock()){
+    std::for_each(SubDevices.begin(), SubDevices.end(),
+                  [&res, this, &Platform](const RT::PiDevice &a_pi_device) {
+                    device sycl_device = detail::createSyclObjFromImpl<device>(
+                        Platform->getOrMakeDeviceImpl(a_pi_device, Platform));
+                    res.push_back(sycl_device);
+                  });
+  }
   return res;
 }
 

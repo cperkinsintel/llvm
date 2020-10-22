@@ -16,3 +16,7 @@
 
 #include <CL/cl.h>
 #include <CL/cl_ext.h>
+
+//CP
+//#define CPOUT  std::clog
+#define CPOUT  std::clog.rdbuf(NULL); std::clog

@@ -53,6 +53,11 @@ public:
 
   platform(platform &&rhs) = default;
 
+  //CP
+  ~platform(){
+    CPOUT << "~platform " << "impl.use_count: " << impl.use_count() << std::endl; 
+  }
+
   platform &operator=(const platform &rhs) = default;
 
   platform &operator=(platform &&rhs) = default;

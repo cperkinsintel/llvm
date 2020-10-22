@@ -106,6 +106,9 @@ device device_selector::select_device() const {
     }
   }
 
+  //CP
+  CPOUT << "how many device_impls? " << devices.size() << std::endl;
+
   if (res != nullptr) {
     if (detail::pi::trace(detail::pi::TraceLevel::PI_TRACE_BASIC)) {
       string_class PlatformName = res->get_info<info::device::platform>()

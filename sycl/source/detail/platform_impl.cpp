@@ -51,6 +51,7 @@ PlatformImplPtr platform_impl::getOrMakePlatformImpl(RT::PiPlatform PiPlatform,
     // Otherwise make the impl
     Result = std::make_shared<platform_impl>(PiPlatform, Plugin);
     PlatformCache.emplace_back(Result);
+    CPOUT << "getOrMakePlatformImpl global PlatformCache: " << PlatformCache.size() << "  and Result(PlatformImpl).use_count: " << Result.use_count() << std::endl;
   }
 
   return Result;
@@ -305,6 +306,7 @@ std::shared_ptr<device_impl> platform_impl::getOrMakeDeviceImpl(
       return Device;
   }
 
+  CPOUT << "platform_impl making and cacheing device" << std::endl;
   // Otherwise make the impl
   std::shared_ptr<device_impl> Result =
       std::make_shared<device_impl>(PiDevice, PlatformImpl);
@@ -346,13 +348,14 @@ platform_impl::get_devices(info::device_type DeviceType) const {
     filterAllowList(PiDevices, MPlatform, this->getPlugin());
 
   PlatformImplPtr PlatformImpl = getOrMakePlatformImpl(MPlatform, *MPlugin);
+  CPOUT << "get_devices 1. PlatformImpl use_count: " << PlatformImpl.use_count() << std::endl;
   std::transform(
       PiDevices.begin(), PiDevices.end(), std::back_inserter(Res),
       [this, PlatformImpl](const RT::PiDevice &PiDevice) -> device {
         return detail::createSyclObjFromImpl<device>(
             PlatformImpl->getOrMakeDeviceImpl(PiDevice, PlatformImpl));
       });
-
+  CPOUT << "get_devices 2. PlatformImpl use_count: " << PlatformImpl.use_count() << std::endl;
   return Res;
 }
 

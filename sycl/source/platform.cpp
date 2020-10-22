@@ -16,15 +16,16 @@
 __SYCL_INLINE_NAMESPACE(cl) {
 namespace sycl {
 
-platform::platform() : impl(detail::platform_impl::getHostPlatformImpl()) {}
+platform::platform() : impl(detail::platform_impl::getHostPlatformImpl()) { CPOUT << "platform ctor HOST" << std::endl; }
 
 platform::platform(cl_platform_id PlatformId)
     : impl(std::make_shared<detail::platform_impl>(
           detail::pi::cast<detail::RT::PiPlatform>(PlatformId),
-          RT::getPlugin<backend::opencl>())) {}
+          RT::getPlugin<backend::opencl>())) { CPOUT << "platform ctor #2" << std::endl; }
 
 platform::platform(const device_selector &dev_selector) {
   *this = dev_selector.select_device().get_platform();
+  CPOUT << "platform ctor #3" << std::endl;
 }
 
 cl_platform_id platform::get() const { return impl->get(); }

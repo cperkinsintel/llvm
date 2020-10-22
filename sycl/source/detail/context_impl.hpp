@@ -70,7 +70,6 @@ public:
                const plugin &Plugin);
 
   ~context_impl();
-
   /// Checks if this context_impl has a property of type propertyT.
   ///
   /// \return true if this context_impl has a property of type propertyT.

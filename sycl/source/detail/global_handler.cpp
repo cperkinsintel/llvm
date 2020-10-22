@@ -23,8 +23,20 @@
 __SYCL_INLINE_NAMESPACE(cl) {
 namespace sycl {
 namespace detail {
-GlobalHandler::GlobalHandler() = default;
-GlobalHandler::~GlobalHandler() = default;
+//CP
+//GlobalHandler::GlobalHandler() = default;
+//GlobalHandler::~GlobalHandler() = default;
+GlobalHandler::GlobalHandler(){ 
+  CPOUT << "GlobalHandler ctor" << std::endl;
+}
+
+GlobalHandler::~GlobalHandler(){
+  CPOUT << "~GlobalHandler: " << MPlatformCache->size() << std::endl;
+  for(auto sp : *MPlatformCache){
+    CPOUT << "sp.use_count " << sp.use_count() << " -- " << sp->getMDeviceCacheSize() << std::endl;
+    
+  }
+}
 
 GlobalHandler &GlobalHandler::instance() {
   static GlobalHandler *SyclGlobalObjectsHandler = new GlobalHandler();
