@@ -237,8 +237,14 @@ public:
             Ptr);
     cl_int TmpVal = __spirv_AtomicLoad(
         TmpPtr, SpirvScope, detail::getSPIRVMemorySemanticsMask(Order));
-    cl_float ResVal;
-    detail::memcpy(&ResVal, &TmpVal, sizeof(TmpVal));
+        
+    //cl_float ResVal;
+    //detail::memcpy(&ResVal, &TmpVal, sizeof(TmpVal));
+
+    //CP
+    //static_assert(sizeof(cl_float) == sizeof(cl_int), "Mismatched type size");
+    cl_float ResVal = *reinterpret_cast<const cl_float *>(&TmpVal);
+
     return ResVal;
   }
 #else

@@ -306,7 +306,8 @@ public:
   T fetch_add(T operand, memory_order order = default_read_modify_write_order,
               memory_scope scope = default_scope) const noexcept {
 #ifdef __SYCL_DEVICE_ONLY__
-    return detail::spirv::AtomicIAdd(ptr, scope, order, operand);
+    T return_value = detail::spirv::AtomicIAdd(ptr, scope, order, operand);
+    return return_value;
 #else
     (void)scope;
     return ptr->fetch_add(operand, detail::getStdMemoryOrder(order));
@@ -448,10 +449,48 @@ public:
   using atomic_ref_base<T, DefaultOrder, DefaultScope,
                         AddressSpace>::atomic_ref_base;
   using atomic_ref_base<T, DefaultOrder, DefaultScope, AddressSpace>::load;
-  using atomic_ref_base<T, DefaultOrder, DefaultScope,
-                        AddressSpace>::compare_exchange_weak;
+  using atomic_ref_base<T, DefaultOrder, DefaultScope, AddressSpace>::compare_exchange_weak;
+  //CP
+  using atomic_ref_base<T, DefaultOrder, DefaultScope, AddressSpace>::compare_exchange_strong;
 
-  T fetch_add(T operand, memory_order order = default_read_modify_write_order,
+  template<typename U = T>
+  detail::enable_if_t<sizeof(U) == sizeof(int), T>
+  fetch_add(T operand, memory_order order = default_read_modify_write_order,
+              memory_scope scope = default_scope) const noexcept {
+
+    // ORIGINAL
+    auto load_order = detail::getLoadOrder(order);
+    T expected;// = load(load_order, scope);
+    T desired; //= expected + operand;
+    do {
+      expected = load(load_order, scope);
+      desired = expected + operand;
+    } 
+    while (!compare_exchange_weak(expected, desired, order, scope));
+    return expected;
+/*
+    // -- using integer directly - fail
+#ifdef __SYCL_DEVICE_ONLY__
+    T* originalAddr = reinterpret_cast<T *>(ptr.get());
+    multi_ptr<int, AddressSpace> tempMulti(reinterpret_cast<int *>(originalAddr));
+
+    __spirv_AtomicLoad(Ptr, SpirvScope, detail::getSPIRVMemorySemanticsMask(Order));
+
+
+    int result =  detail::spirv::AtomicIAdd<int, AddressSpace>(tempMulti, scope, order, operand);
+     T final_value = *reinterpret_cast<const T *>(&result);
+    //*originalAddr = final_value;
+    return  final_value;
+#else
+    // insert original
+#endif
+*/
+
+  }
+
+  template<typename U = T>
+  detail::enable_if_t<sizeof(U) != sizeof(int), T>   
+  fetch_add(T operand, memory_order order = default_read_modify_write_order,
               memory_scope scope = default_scope) const noexcept {
     auto load_order = detail::getLoadOrder(order);
     T expected = load(load_order, scope);
