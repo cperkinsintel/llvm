@@ -143,12 +143,14 @@ template<class Container>
 
 //CP
 #if defined(_MSC_VER)
-#    define _LIBCPP_PUSH_MACROS    \
-       __pragma(push_macro("min")) \
-       __pragma(push_macro("max"))
-#    define _LIBCPP_POP_MACROS     \
-       __pragma(pop_macro("min"))  \
-       __pragma(pop_macro("max"))
+// #    define _LIBCPP_PUSH_MACROS    \
+       // __pragma(push_macro("min")) \
+       // __pragma(push_macro("max"))
+// #    define _LIBCPP_POP_MACROS     \
+       // __pragma(pop_macro("min"))  \
+       // __pragma(pop_macro("max"))
+#    define _LIBCPP_PUSH_MACROS
+#    define _LIBCPP_POP_MACROS
 #else
 #    define _LIBCPP_PUSH_MACROS        \
        _Pragma("push_macro(\"min\")")  \
@@ -168,7 +170,7 @@ _LIBCPP_PUSH_MACROS
 
 //CP
 //#include <__undef_macros>
-#include "libcxx_undefmacros.hpp"
+//#include "libcxx_undefmacros.hpp"
 
 //CP adjust namespace declaration
 //_LIBCPP_BEGIN_NAMESPACE_STD
@@ -204,7 +206,7 @@ using std::is_const_v;
 
 
 //CP - PROBLEM - works standalone. 
-inline constexpr size_t dynamic_extent = 1000;//SIZE_MAX; // numeric_limits<size_t>::max();
+inline constexpr size_t dynamic_extent = SIZE_MAX;//numeric_limits<size_t>::max(); //1000;//SIZE_MAX; // numeric_limits<size_t>::max();
 template <typename _Tp, size_t _Extent = dynamic_extent> class span;
 
 
@@ -282,7 +284,8 @@ public:
     _LIBCPP_INLINE_VISIBILITY constexpr explicit span(pointer __f, pointer __l) : __data{__f}
         { (void)__l;     _LIBCPP_ASSERT(_Extent == distance(__f, __l), "size mismatch in span's constructor (ptr, ptr)"); }
 
-    _LIBCPP_INLINE_VISIBILITY constexpr span(element_type (&__arr)[_Extent])          noexcept : __data{__arr} {}
+	//CP - remove because I dum
+    //_LIBCPP_INLINE_VISIBILITY constexpr span(element_type (&__arr)[_Extent])          noexcept : __data{__arr} {}
 
     template <class _OtherElementType,
               enable_if_t<is_convertible_v<_OtherElementType(*)[], element_type (*)[]>, nullptr_t> = nullptr>
