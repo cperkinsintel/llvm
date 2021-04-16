@@ -38,7 +38,7 @@ class span {
 public:
     // constants and types
     using element_type = ElementType;
-    using value_type = remove_cv_t<ElementType>;
+    using value_type = std::remove_cv_t<ElementType>;
     using size_type = size_t;
     using difference_type = ptrdiff_t;
     using pointer = element_type*;
@@ -188,21 +188,21 @@ using byte = unsigned char;
 
 //CP
 
-using std::numeric_limits;
-using std::true_type;
-using std::false_type;
-using std::remove_cv_t;
-using std::enable_if;
-using std::enable_if_t;
-using std::array;
-using std::void_t;
-using std::nullptr_t;
-using std::is_array_v;
-using std::declval;
-using std::is_convertible_v;
-using std::remove_pointer_t;
-using std::reverse_iterator;
-using std::is_const_v;
+//using std::numeric_limits;
+//using std::true_type;
+//using std::false_type;
+//using std::remove_cv_t;
+//using std::enable_if;
+//using std::enable_if_t;
+//using std::array;
+//using std::void_t;
+//using std::nullptr_t;
+//using std::is_array_v;
+//using std::declval;
+//using std::is_convertible_v;
+//using std::remove_pointer_t;
+//using std::reverse_iterator;
+//using std::is_const_v;
 
 
 //CP - PROBLEM - works standalone. 
@@ -211,45 +211,45 @@ template <typename _Tp, size_t _Extent = dynamic_extent> class span;
 
 
 template <class _Tp>
-struct __is_span_impl : public false_type {};
+struct __is_span_impl : public std::false_type {};
 
 template <class _Tp, size_t _Extent>
-struct __is_span_impl<span<_Tp, _Extent>> : public true_type {};
+struct __is_span_impl<span<_Tp, _Extent>> : public std::true_type {};
 
 template <class _Tp>
-struct __is_span : public __is_span_impl<remove_cv_t<_Tp>> {};
+struct __is_span : public __is_span_impl<std::remove_cv_t<_Tp>> {};
 
 template <class _Tp>
-struct __is_std_array_impl : public false_type {};
+struct __is_std_array_impl : public std::false_type {};
 
 template <class _Tp, size_t _Sz>
-struct __is_std_array_impl<array<_Tp, _Sz>> : public true_type {};
+struct __is_std_array_impl<std::array<_Tp, _Sz>> : public std::true_type {};
 
 template <class _Tp>
-struct __is_std_array : public __is_std_array_impl<remove_cv_t<_Tp>> {};
+struct __is_std_array : public __is_std_array_impl<std::remove_cv_t<_Tp>> {};
 
 template <class _Tp, class _ElementType, class = void>
-struct __is_span_compatible_container : public false_type {};
+struct __is_span_compatible_container : public std::false_type {};
 
 template <class _Tp, class _ElementType>
 struct __is_span_compatible_container<_Tp, _ElementType,
-        void_t<
+        std::void_t<
         // is not a specialization of span
-            typename enable_if<!__is_span<_Tp>::value, nullptr_t>::type,
+            typename std::enable_if<!__is_span<_Tp>::value, std::nullptr_t>::type,
         // is not a specialization of array
-            typename enable_if<!__is_std_array<_Tp>::value, nullptr_t>::type,
+            typename std::enable_if<!__is_std_array<_Tp>::value, std::nullptr_t>::type,
         // is_array_v<Container> is false,
-            typename enable_if<!is_array_v<_Tp>, nullptr_t>::type,
+            typename std::enable_if<!std::is_array_v<_Tp>, std::nullptr_t>::type,
         // data(cont) and size(cont) are well formed
-            decltype(data(declval<_Tp>())),
-            decltype(size(declval<_Tp>())),
+            decltype(data(std::declval<_Tp>())),
+            decltype(size(std::declval<_Tp>())),
         // remove_pointer_t<decltype(data(cont))>(*)[] is convertible to ElementType(*)[]
-            typename enable_if<
-                is_convertible_v<remove_pointer_t<decltype(data(declval<_Tp &>()))>(*)[],
+            typename std::enable_if<
+                std::is_convertible_v<std::remove_pointer_t<decltype(data(std::declval<_Tp &>()))>(*)[],
                                  _ElementType(*)[]>,
-                nullptr_t>::type
+                std::nullptr_t>::type
         >>
-    : public true_type {};
+    : public std::true_type {};
 
 
 template <typename _Tp, size_t _Extent>
@@ -257,7 +257,7 @@ class _LIBCPP_TEMPLATE_VIS span {
 public:
 //  constants and types
     using element_type           = _Tp;
-    using value_type             = remove_cv_t<_Tp>;
+    using value_type             = std::remove_cv_t<_Tp>;
     using size_type              = size_t;
     using difference_type        = ptrdiff_t;
     using pointer                = _Tp *;
@@ -268,12 +268,12 @@ public:
     //using iterator               =  __wrap_iter<pointer>;
     using iterator               = pointer;
     //using reverse_iterator       = _VSTD::reverse_iterator<iterator>;
-    using rev_iterator           = reverse_iterator<pointer>;
+    using rev_iterator           = std::reverse_iterator<pointer>;
 
     static constexpr size_type extent = _Extent;
 
 // [span.cons], span constructors, copy, assignment, and destructor
-    template <size_t _Sz = _Extent, enable_if_t<_Sz == 0, nullptr_t> = nullptr>
+    template <size_t _Sz = _Extent, std::enable_if_t<_Sz == 0, std::nullptr_t> = nullptr>
     _LIBCPP_INLINE_VISIBILITY constexpr span() noexcept : __data{nullptr} {}
 
     constexpr span           (const span&) noexcept = default;
@@ -288,19 +288,19 @@ public:
     //_LIBCPP_INLINE_VISIBILITY constexpr span(element_type (&__arr)[_Extent])          noexcept : __data{__arr} {}
 
     template <class _OtherElementType,
-              enable_if_t<is_convertible_v<_OtherElementType(*)[], element_type (*)[]>, nullptr_t> = nullptr>
+              std::enable_if_t<std::is_convertible_v<_OtherElementType(*)[], element_type (*)[]>, std::nullptr_t> = nullptr>
     _LIBCPP_INLINE_VISIBILITY
-    constexpr span(array<_OtherElementType, _Extent>& __arr) noexcept : __data{__arr.data()} {}
+    constexpr span(std::array<_OtherElementType, _Extent>& __arr) noexcept : __data{__arr.data()} {}
 
     template <class _OtherElementType,
-              enable_if_t<is_convertible_v<const _OtherElementType(*)[], element_type (*)[]>, nullptr_t> = nullptr>
+              std::enable_if_t<std::is_convertible_v<const _OtherElementType(*)[], element_type (*)[]>, std::nullptr_t> = nullptr>
     _LIBCPP_INLINE_VISIBILITY
-    constexpr span(const array<_OtherElementType, _Extent>& __arr) noexcept : __data{__arr.data()} {}
+    constexpr span(const std::array<_OtherElementType, _Extent>& __arr) noexcept : __data{__arr.data()} {}
 
     template <class _Container>
     _LIBCPP_INLINE_VISIBILITY
         constexpr explicit span(      _Container& __c,
-            enable_if_t<__is_span_compatible_container<_Container, _Tp>::value, nullptr_t> = nullptr)
+            std::enable_if_t<__is_span_compatible_container<_Container, _Tp>::value, std::nullptr_t> = nullptr)
         : __data{_VSTD::data(__c)} {  
             _LIBCPP_ASSERT(_Extent == _VSTD::size(__c), "size mismatch in span's constructor (range)");
         }
@@ -308,7 +308,7 @@ public:
     template <class _Container>
     _LIBCPP_INLINE_VISIBILITY
         constexpr explicit span(const _Container& __c,
-            enable_if_t<__is_span_compatible_container<const _Container, _Tp>::value, nullptr_t> = nullptr)
+            std::enable_if_t<__is_span_compatible_container<const _Container, _Tp>::value, std::nullptr_t> = nullptr)
         : __data{_VSTD::data(__c)} {
             _LIBCPP_ASSERT(_Extent == _VSTD::size(__c), "size mismatch in span's constructor (range)");
         }
@@ -316,9 +316,9 @@ public:
     template <class _OtherElementType>
     _LIBCPP_INLINE_VISIBILITY
         constexpr span(const span<_OtherElementType, _Extent>& __other,
-                       enable_if_t<
-                          is_convertible_v<_OtherElementType(*)[], element_type (*)[]>,
-                          nullptr_t> = nullptr)
+                       std::enable_if_t<
+                          std::is_convertible_v<_OtherElementType(*)[], element_type (*)[]>,
+                          std::nullptr_t> = nullptr)
         : __data{__other.data()} {}
 		
 		
@@ -327,9 +327,9 @@ public:
     template <class _OtherElementType>
     _LIBCPP_INLINE_VISIBILITY
         constexpr explicit span(const span<_OtherElementType, dynamic_extent>& __other,
-                       enable_if_t<
-                          is_convertible_v<_OtherElementType(*)[], element_type (*)[]>,
-                          nullptr_t> = nullptr) noexcept
+                       std::enable_if_t<
+                          std::is_convertible_v<_OtherElementType(*)[], element_type (*)[]>,
+                          std::nullptr_t> = nullptr) noexcept
         : __data{__other.data()} { _LIBCPP_ASSERT(_Extent == __other.size(), "size mismatch in span's constructor (other span)"); }
 */
 
@@ -439,7 +439,7 @@ private:
 public:
 //  constants and types
     using element_type           = _Tp;
-    using value_type             = remove_cv_t<_Tp>;
+    using value_type             = std::remove_cv_t<_Tp>;
     using size_type              = size_t;
     using difference_type        = ptrdiff_t;
     using pointer                = _Tp *;
@@ -451,7 +451,7 @@ public:
     //using iterator               =  __wrap_iter<pointer>;
     using iterator               = pointer;
     //using reverse_iterator       = _VSTD::reverse_iterator<iterator>;
-    using rev_iterator           = reverse_iterator<pointer>;
+    using rev_iterator           = std::reverse_iterator<pointer>;
 
     static constexpr size_type extent = dynamic_extent;
 
@@ -469,34 +469,34 @@ public:
     constexpr span(element_type (&__arr)[_Sz])          noexcept : __data{__arr}, __size{_Sz} {}
 
     template <class _OtherElementType, size_t _Sz,
-              enable_if_t<is_convertible_v<_OtherElementType(*)[], element_type (*)[]>, nullptr_t> = nullptr>
+              std::enable_if_t<std::is_convertible_v<_OtherElementType(*)[], element_type (*)[]>, std::nullptr_t> = nullptr>
     _LIBCPP_INLINE_VISIBILITY
-    constexpr span(array<_OtherElementType, _Sz>& __arr) noexcept : __data{__arr.data()}, __size{_Sz} {}
+    constexpr span(std::array<_OtherElementType, _Sz>& __arr) noexcept : __data{__arr.data()}, __size{_Sz} {}
 
     template <class _OtherElementType, size_t _Sz,
-              enable_if_t<is_convertible_v<const _OtherElementType(*)[], element_type (*)[]>, nullptr_t> = nullptr>
+              std::enable_if_t<std::is_convertible_v<const _OtherElementType(*)[], element_type (*)[]>, std::nullptr_t> = nullptr>
     _LIBCPP_INLINE_VISIBILITY
-    constexpr span(const array<_OtherElementType, _Sz>& __arr) noexcept : __data{__arr.data()}, __size{_Sz} {}
+    constexpr span(const std::array<_OtherElementType, _Sz>& __arr) noexcept : __data{__arr.data()}, __size{_Sz} {}
 
     template <class _Container>
     _LIBCPP_INLINE_VISIBILITY
         constexpr span(      _Container& __c,
-            enable_if_t<__is_span_compatible_container<_Container, _Tp>::value, nullptr_t> = nullptr)
+            std::enable_if_t<__is_span_compatible_container<_Container, _Tp>::value, std::nullptr_t> = nullptr)
         : __data{_VSTD::data(__c)}, __size{(size_type) _VSTD::size(__c)} {}
 
     template <class _Container>
     _LIBCPP_INLINE_VISIBILITY
         constexpr span(const _Container& __c,
-            enable_if_t<__is_span_compatible_container<const _Container, _Tp>::value, nullptr_t> = nullptr)
+            std::enable_if_t<__is_span_compatible_container<const _Container, _Tp>::value, std::nullptr_t> = nullptr)
         : __data{_VSTD::data(__c)}, __size{(size_type) _VSTD::size(__c)} {}
 
 
     template <class _OtherElementType, size_t _OtherExtent>
     _LIBCPP_INLINE_VISIBILITY
         constexpr span(const span<_OtherElementType, _OtherExtent>& __other,
-                       enable_if_t<
-                          is_convertible_v<_OtherElementType(*)[], element_type (*)[]>,
-                          nullptr_t> = nullptr) noexcept
+                       std::enable_if_t<
+                          std::is_convertible_v<_OtherElementType(*)[], element_type (*)[]>,
+                          std::nullptr_t> = nullptr) noexcept
         : __data{__other.data()}, __size{__other.size()} {}
 
 //    ~span() noexcept = default;
@@ -604,7 +604,7 @@ auto as_bytes(span<_Tp, _Extent> __s) noexcept
 template <class _Tp, size_t _Extent>
 _LIBCPP_INLINE_VISIBILITY
 auto as_writable_bytes(span<_Tp, _Extent> __s) noexcept
--> enable_if_t<!is_const_v<_Tp>, decltype(__s.__as_writable_bytes())>
+-> std::enable_if_t<!std::is_const_v<_Tp>, decltype(__s.__as_writable_bytes())>
 { return __s.__as_writable_bytes(); }
 
 //  Deduction guides
@@ -612,10 +612,10 @@ template<class _Tp, size_t _Sz>
     span(_Tp (&)[_Sz]) -> span<_Tp, _Sz>;
 
 template<class _Tp, size_t _Sz>
-    span(array<_Tp, _Sz>&) -> span<_Tp, _Sz>;
+    span(std::array<_Tp, _Sz>&) -> span<_Tp, _Sz>;
 
 template<class _Tp, size_t _Sz>
-    span(const array<_Tp, _Sz>&) -> span<const _Tp, _Sz>;
+    span(const std::array<_Tp, _Sz>&) -> span<const _Tp, _Sz>;
 
 template<class _Container>
     span(_Container&) -> span<typename _Container::value_type>;
