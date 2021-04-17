@@ -143,14 +143,12 @@ template<class Container>
 
 //CP
 #if defined(_MSC_VER)
-// #    define _LIBCPP_PUSH_MACROS    \
-       // __pragma(push_macro("min")) \
-       // __pragma(push_macro("max"))
-// #    define _LIBCPP_POP_MACROS     \
-       // __pragma(pop_macro("min"))  \
-       // __pragma(pop_macro("max"))
-#    define _LIBCPP_PUSH_MACROS
-#    define _LIBCPP_POP_MACROS
+#    define _LIBCPP_PUSH_MACROS    \
+       __pragma(push_macro("min")) \
+       __pragma(push_macro("max"))
+#    define _LIBCPP_POP_MACROS     \
+       __pragma(pop_macro("min"))  \
+       __pragma(pop_macro("max"))
 #else
 #    define _LIBCPP_PUSH_MACROS        \
        _Pragma("push_macro(\"min\")")  \
@@ -206,7 +204,7 @@ using byte = unsigned char;
 
 
 //CP - PROBLEM - works standalone. 
-inline constexpr size_t dynamic_extent = SIZE_MAX;//numeric_limits<size_t>::max(); //1000;//SIZE_MAX; // numeric_limits<size_t>::max();
+inline constexpr size_t dynamic_extent = std::numeric_limits<size_t>::max(); //1000;//SIZE_MAX; // numeric_limits<size_t>::max();
 template <typename _Tp, size_t _Extent = dynamic_extent> class span;
 
 
