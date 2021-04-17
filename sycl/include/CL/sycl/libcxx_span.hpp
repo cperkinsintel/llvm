@@ -133,25 +133,6 @@ template<class Container>
 #include <type_traits>  // for remove_cv, etc
 
 
-#if defined(_MSC_VER)
-#    define _SYCLSPAN_PUSH_MACROS    \
-       __pragma(push_macro("min")) \
-       __pragma(push_macro("max"))
-#    define _SYCLSPAN_POP_MACROS     \
-       __pragma(pop_macro("min"))  \
-       __pragma(pop_macro("max"))
-#else
-#    define _SYCLSPAN_PUSH_MACROS        \
-       _Pragma("push_macro(\"min\")")  \
-       _Pragma("push_macro(\"max\")")
-#    define _SYCLSPAN_POP_MACROS         \
-       _Pragma("pop_macro(\"min\")")   \
-       _Pragma("pop_macro(\"max\")")
-#endif
-
-_SYCLSPAN_PUSH_MACROS
-
-
 #    define _SYCLSPAN_TEMPLATE_VIS
 #    define _SYCLSPAN_INLINE_VISIBILITY inline
 
@@ -167,7 +148,7 @@ using byte = unsigned char;
 #define _SYCLSPAN_ASSERT(x, m) ((void)0)
 
 
-inline constexpr size_t dynamic_extent = std::numeric_limits<size_t>::max();
+inline constexpr size_t dynamic_extent = SIZE_MAX;
 template <typename _Tp, size_t _Extent = dynamic_extent> class span;
 
 
@@ -565,7 +546,5 @@ template<class _Container>
 
 } // namespace sycl
 } // __SYCL_INLINE_NAMESPACE(cl)
-
-_SYCLSPAN_POP_MACROS
 
 #endif // _SYCL_SPAN

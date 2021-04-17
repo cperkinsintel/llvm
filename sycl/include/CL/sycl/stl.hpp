@@ -11,6 +11,7 @@
 // 4.5 C++ Standard library classes required for the interface
 
 #include <CL/sycl/detail/defines.hpp>
+#include <CL/sycl/libcxx_span.hpp>
 
 #include <exception>
 #include <functional>
@@ -18,7 +19,6 @@
 #include <mutex>
 #include <string>
 #include <vector>
-#include "libcxx_span.hpp"
 
 __SYCL_INLINE_NAMESPACE(cl) {
 namespace sycl {
