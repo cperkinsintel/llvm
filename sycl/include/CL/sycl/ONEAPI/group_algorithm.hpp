@@ -555,10 +555,10 @@ joint_reduce(Group g, Ptr first, Ptr last, BinaryOperation binary_op) {
            std::is_same<decltype(binary_op(*first, *first)), float>::value),
       "Result type of binary_op must match reduction accumulation type.");
 #ifdef __SYCL_DEVICE_ONLY__
-  T partial = *first; 
+  T partial = sycl::detail::identity<T, BinaryOperation>::value; 
   sycl::detail::for_each(g, first, last,
                          [&](const T &x) { partial = binary_op(partial, x); });
-  return partial;
+  return sycl::reduce_over_group(g, partial, binary_op);
 #else
   (void)g;
   (void)last;
@@ -585,12 +585,12 @@ joint_reduce(Group g, Ptr first, Ptr last, T init, BinaryOperation binary_op) {
            std::is_same<decltype(binary_op(init, *first)), float>::value),
       "Result type of binary_op must match reduction accumulation type.");
 #ifdef __SYCL_DEVICE_ONLY__
-  T partial = *first;
+  T partial = sycl::detail::identity<T, BinaryOperation>::value;
   sycl::detail::for_each(
       g, first, last, [&](const typename detail::remove_pointer<Ptr>::type &x) {
         partial = binary_op(partial, x);
       });
-  return partial;
+  return sycl::reduce_over_group(g, partial, binary_op);
 #else
   (void)g;
   (void)last;
