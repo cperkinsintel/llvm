@@ -870,11 +870,11 @@ struct get_reduction_aux_kernel_name_t {
 /// Implements a command group function that enqueues a kernel that calls
 /// user's lambda function KernelFunc and also does one iteration of reduction
 /// of elements computed in user's lambda function.
-/// This version uses ONEAPI::reduce() algorithm to reduce elements in each
+/// This version uses sycl::reduce() algorithm to reduce elements in each
 /// of work-groups, then it calls fast SYCL atomic operations to update
 /// the given reduction variable \p Out.
 ///
-/// Briefly: calls user's lambda, ONEAPI::reduce() + atomic, INT + ADD/MIN/MAX.
+/// Briefly: calls user's lambda, sycl::reduce() + atomic, INT + ADD/MIN/MAX.
 template <typename KernelName, typename KernelType, int Dims, class Reduction,
           bool IsPow2WG>
 enable_if_t<Reduction::has_fast_reduce && Reduction::has_fast_atomics>
@@ -888,7 +888,7 @@ reduCGFuncImpl(handler &CGH, KernelType KernelFunc, const nd_range<Dims> &Range,
     KernelFunc(NDIt, Reducer);
 
     typename Reduction::binary_operation BOp;
-    Reducer.MValue = ONEAPI::reduce(NDIt.get_group(), Reducer.MValue, BOp);
+    Reducer.MValue = sycl::reduce_over_group(NDIt.get_group(), Reducer.MValue, BOp);
     if (NDIt.get_local_linear_id() == 0)
       Reducer.atomic_combine(Reduction::getOutPointer(Out));
   });
@@ -987,7 +987,7 @@ reduCGFunc(handler &CGH, KernelType KernelFunc, const nd_range<Dims> &Range,
 /// Implements a command group function that enqueues a kernel that
 /// calls user's lambda function and does one iteration of reduction
 /// of elements in each of work-groups.
-/// This version uses ONEAPI::reduce() algorithm to reduce elements in each
+/// This version uses sycl::reduce() algorithm to reduce elements in each
 /// of work-groups. At the end of each work-groups the partial sum is written
 /// to a global buffer.
 ///
@@ -1013,7 +1013,7 @@ reduCGFuncImpl(handler &CGH, KernelType KernelFunc, const nd_range<Dims> &Range,
     size_t WGID = NDIt.get_group_linear_id();
     typename Reduction::result_type PSum = Reducer.MValue;
     typename Reduction::binary_operation BOp;
-    PSum = ONEAPI::reduce(NDIt.get_group(), PSum, BOp);
+    PSum = sycl::reduce_over_group(NDIt.get_group(), PSum, BOp);
     if (NDIt.get_local_linear_id() == 0) {
       if (IsUpdateOfUserVar)
         PSum = BOp(*(Reduction::getOutPointer(Out)), PSum);
@@ -1113,7 +1113,7 @@ reduCGFunc(handler &CGH, KernelType KernelFunc, const nd_range<Dims> &Range,
 
 /// Implements a command group function that enqueues a kernel that does one
 /// iteration of reduction of elements in each of work-groups.
-/// This version uses ONEAPI::reduce() algorithm to reduce elements in each
+/// This version uses sycl::reduce() algorithm to reduce elements in each
 /// of work-groups. At the end of each work-groups the partial sum is written
 /// to a global buffer.
 ///
@@ -1137,7 +1137,7 @@ reduAuxCGFuncImpl(handler &CGH, size_t NWorkItems, size_t NWorkGroups,
         (UniformWG || (GID < NWorkItems))
             ? In[GID]
             : Reduction::reducer_type::getIdentity();
-    PSum = ONEAPI::reduce(NDIt.get_group(), PSum, BOp);
+    PSum = sycl::reduce_over_group(NDIt.get_group(), PSum, BOp);
     if (NDIt.get_local_linear_id() == 0) {
       if (IsUpdateOfUserVar)
         PSum = BOp(*(Reduction::getOutPointer(Out)), PSum);

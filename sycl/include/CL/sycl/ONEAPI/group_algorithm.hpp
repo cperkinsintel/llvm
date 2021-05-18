@@ -147,7 +147,6 @@ Function for_each(Group g, Ptr first, Ptr last, Function f) {
 
 } // namespace detail
 
-namespace ONEAPI {
 
 // EnableIf shorthands for algorithms that depend only on type
 template <typename T>
@@ -418,7 +417,7 @@ detail::enable_if_t<(detail::is_generic_group<Group>::value &&
                      detail::is_scalar_arithmetic<T>::value &&
                      detail::is_native_op<T, BinaryOperation>::value),
                     T>
-reduce(Group, T x, BinaryOperation binary_op) {
+reduce_over_group(Group, T x, BinaryOperation binary_op) {
   // FIXME: Do not special-case for half precision
   static_assert(
       std::is_same<decltype(binary_op(x, x)), T>::value ||
@@ -440,7 +439,7 @@ detail::enable_if_t<(detail::is_generic_group<Group>::value &&
                      detail::is_vector_arithmetic<T>::value &&
                      detail::is_native_op<T, BinaryOperation>::value),
                     T>
-reduce(Group g, T x, BinaryOperation binary_op) {
+reduce_over_group(Group g, T x, BinaryOperation binary_op) {
   // FIXME: Do not special-case for half precision
   static_assert(
       std::is_same<decltype(binary_op(x[0], x[0])),
@@ -450,7 +449,7 @@ reduce(Group g, T x, BinaryOperation binary_op) {
       "Result type of binary_op must match reduction accumulation type.");
   T result;
   for (int s = 0; s < x.get_size(); ++s) {
-    result[s] = reduce(g, x[s], binary_op);
+    result[s] = reduce_over_group(g, x[s], binary_op);
   }
   return result;
 }
@@ -461,7 +460,7 @@ detail::enable_if_t<(detail::is_sub_group<Group>::value &&
                      (!detail::is_arithmetic<T>::value ||
                       !detail::is_native_op<T, BinaryOperation>::value)),
                     T>
-reduce(Group g, T x, BinaryOperation op) {
+reduce_over_group(Group g, T x, BinaryOperation op) {
   T result = x;
   for (int mask = 1; mask < g.get_max_local_range()[0]; mask *= 2) {
     T tmp = g.shuffle_xor(result, id<1>(mask));
@@ -479,7 +478,7 @@ detail::enable_if_t<(detail::is_generic_group<Group>::value &&
                      detail::is_native_op<V, BinaryOperation>::value &&
                      detail::is_native_op<T, BinaryOperation>::value),
                     T>
-reduce(Group g, V x, T init, BinaryOperation binary_op) {
+reduce_over_group(Group g, V x, T init, BinaryOperation binary_op) {
   // FIXME: Do not special-case for half precision
   static_assert(
       std::is_same<decltype(binary_op(init, x)), T>::value ||
@@ -487,7 +486,7 @@ reduce(Group g, V x, T init, BinaryOperation binary_op) {
            std::is_same<decltype(binary_op(init, x)), float>::value),
       "Result type of binary_op must match reduction accumulation type.");
 #ifdef __SYCL_DEVICE_ONLY__
-  return binary_op(init, reduce(g, x, binary_op));
+  return binary_op(init, reduce_over_group(g, x, binary_op));
 #else
   (void)g;
   throw runtime_error("Group algorithms are not supported on host device.",
@@ -502,7 +501,7 @@ detail::enable_if_t<(detail::is_generic_group<Group>::value &&
                      detail::is_native_op<V, BinaryOperation>::value &&
                      detail::is_native_op<T, BinaryOperation>::value),
                     T>
-reduce(Group g, V x, T init, BinaryOperation binary_op) {
+reduce_over_group(Group g, V x, T init, BinaryOperation binary_op) {
   // FIXME: Do not special-case for half precision
   static_assert(
       std::is_same<decltype(binary_op(init[0], x[0])),
@@ -513,7 +512,7 @@ reduce(Group g, V x, T init, BinaryOperation binary_op) {
 #ifdef __SYCL_DEVICE_ONLY__
   T result = init;
   for (int s = 0; s < x.get_size(); ++s) {
-    result[s] = binary_op(init[s], reduce(g, x[s], binary_op));
+    result[s] = binary_op(init[s], reduce_over_group(g, x[s], binary_op));
   }
   return result;
 #else
@@ -531,7 +530,7 @@ detail::enable_if_t<(detail::is_sub_group<Group>::value &&
                       !detail::is_arithmetic<V>::value ||
                       !detail::is_native_op<T, BinaryOperation>::value)),
                     T>
-reduce(Group g, V x, T init, BinaryOperation op) {
+reduce_over_group(Group g, V x, T init, BinaryOperation op) {
   T result = x;
   for (int mask = 1; mask < g.get_max_local_range()[0]; mask *= 2) {
     T tmp = g.shuffle_xor(result, id<1>(mask));
@@ -547,7 +546,7 @@ detail::enable_if_t<
     (detail::is_generic_group<Group>::value && detail::is_pointer<Ptr>::value &&
      detail::is_arithmetic<typename detail::remove_pointer<Ptr>::type>::value),
     typename detail::remove_pointer<Ptr>::type>
-reduce(Group g, Ptr first, Ptr last, BinaryOperation binary_op) {
+joint_reduce(Group g, Ptr first, Ptr last, BinaryOperation binary_op) {
   using T = typename detail::remove_pointer<Ptr>::type;
   // FIXME: Do not special-case for half precision
   static_assert(
@@ -556,11 +555,10 @@ reduce(Group g, Ptr first, Ptr last, BinaryOperation binary_op) {
            std::is_same<decltype(binary_op(*first, *first)), float>::value),
       "Result type of binary_op must match reduction accumulation type.");
 #ifdef __SYCL_DEVICE_ONLY__
-  typename Ptr::element_type partial =
-      sycl::detail::identity<T, BinaryOperation>::value;
+  T partial = *first; 
   sycl::detail::for_each(g, first, last,
                          [&](const T &x) { partial = binary_op(partial, x); });
-  return reduce(g, partial, binary_op);
+  return partial;
 #else
   (void)g;
   (void)last;
@@ -579,7 +577,7 @@ detail::enable_if_t<
                           BinaryOperation>::value &&
      detail::is_native_op<T, BinaryOperation>::value),
     T>
-reduce(Group g, Ptr first, Ptr last, T init, BinaryOperation binary_op) {
+joint_reduce(Group g, Ptr first, Ptr last, T init, BinaryOperation binary_op) {
   // FIXME: Do not special-case for half precision
   static_assert(
       std::is_same<decltype(binary_op(init, *first)), T>::value ||
@@ -587,12 +585,12 @@ reduce(Group g, Ptr first, Ptr last, T init, BinaryOperation binary_op) {
            std::is_same<decltype(binary_op(init, *first)), float>::value),
       "Result type of binary_op must match reduction accumulation type.");
 #ifdef __SYCL_DEVICE_ONLY__
-  T partial = sycl::detail::identity<T, BinaryOperation>::value;
+  T partial = *first;
   sycl::detail::for_each(
       g, first, last, [&](const typename detail::remove_pointer<Ptr>::type &x) {
         partial = binary_op(partial, x);
       });
-  return reduce(g, partial, init, binary_op);
+  return partial;
 #else
   (void)g;
   (void)last;
@@ -948,7 +946,6 @@ leader(Group g) {
 #endif
 }
 
-} // namespace ONEAPI
 } // namespace sycl
 } // __SYCL_INLINE_NAMESPACE(cl)
 #endif // __DISABLE_SYCL_ONEAPI_GROUP_ALGORITHMS__
