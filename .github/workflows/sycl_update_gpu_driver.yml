@@ -15,15 +15,13 @@ jobs:
       run: |
         version="$(python3 devops/scripts/update_drivers.py linux)"
         echo 'NEW_DRIVER_VERSION='$version >> $GITHUB_ENV
-        export NDV=$version
     - name: Create Pull Request
       env:
-        BRANCH: ci/update_gpu_driver-linux-$NDV
+        BRANCH: ci/update_gpu_driver-linux-${{$NEW_DRIVER_VERSION}}
         LLVMBOT_TOKEN: ${{ secrets.LLVM_MAIN_SYNC_BBSYCL_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         echo NewDrV: $NEW_DRIVER_VERSION
-        echo NDV: $NDV
         cd $GITHUB_WORKSPACE
         # Set fake identity to fulfil git requirements
         # git config --global user.name "iclsrc"
@@ -52,7 +50,7 @@ jobs:
         echo 'NEW_DRIVER_VERSION='$version >> $GITHUB_ENV
     - name: Create Pull Request
       env:
-        BRANCH: ci/update_gpu_driver-linux_staging-$NEW_DRIVER_VERSION
+        BRANCH: ci/update_gpu_driver-linux_staging-${{$NEW_DRIVER_VERSION}}
         LLVMBOT_TOKEN: ${{ secrets.LLVM_MAIN_SYNC_BBSYCL_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
