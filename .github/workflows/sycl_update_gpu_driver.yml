@@ -8,7 +8,7 @@ on:
 jobs:
   update_driver_linux:
     runs-on: ubuntu-latest
-    if: github.repository == 'intel/llvm'
+    #if: github.repository == 'intel/llvm'
     steps:
     - uses: actions/checkout@v2
     - name: Update dependencies file
@@ -23,17 +23,17 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE
         # Set fake identity to fulfil git requirements
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
+        git config --global user.name "cperkinsintel"
+        git config --global user.email "chris.perkins@intel.com"
         git checkout -B $BRANCH
         git add -u
         git commit -m "[GHA] Uplift GPU RT version for Linux CI" || exit 0   # exit if commit is empty
         git push https://$LLVMBOT_TOKEN@github.com/${{ github.repository }} ${BRANCH}
-        gh pr create --head $BRANCH --title "[GHA] Uplift GPU RT version for Linux CI" --body "Uplift GPU RT version for Linux to $NEW_DRIVER_VERSION" --assignee @intel/dpcpp-devops-reviewers
+        gh pr create --head $BRANCH --title "[GHA] Uplift GPU RT version for Linux CI" --body "Uplift GPU RT version for Linux to $NEW_DRIVER_VERSION"
 
   update_driver_linux_staging:
     runs-on: ubuntu-latest
-    if: github.repository == 'intel/llvm'
+    #if: github.repository == 'intel/llvm'
     steps:
     - uses: actions/checkout@v2
     - name: Update dependencies file
@@ -48,11 +48,11 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE
         # Set fake identity to fulfil git requirements
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
+        git config --global user.name "cperkinsintel"
+        git config --global user.email "chris.perkins@intel.com"
         git checkout -B $BRANCH
         git add -u
-        git commit -m "[GHA] Uplift GPU RT version for Linux CI" || exit 0   # exit if commit is empty
+        git commit -m "[GHA] Uplift GPU RT version for Nightly runs" || exit 0   # exit if commit is empty
         git push https://$LLVMBOT_TOKEN@github.com/${{ github.repository }} ${BRANCH}
-        gh pr create --head $BRANCH --title "[GHA] Uplift GPU RT version for Linux CI" --body "Uplift GPU RT version for Linux to $NEW_DRIVER_VERSION" --assignee @intel/dpcpp-devops-reviewers
+        gh pr create --head $BRANCH --title "[GHA] Uplift GPU RT version for Nightly runs" --body "Uplift GPU RT version for Linux to $NEW_DRIVER_VERSION"
 
