@@ -101,8 +101,9 @@ __SYCL_EXPORT std::vector<device> getDevices(const context &SyclContext);
 template <typename DeviceSelector,
           typename = std::enable_if_t<
               std::is_invocable_r<int, DeviceSelector &, device &>::value>>
-device select_device(DeviceSelector DeviceSelectorInvocable,
-                     std::vector<device> &devices) {
+const device &select_device(DeviceSelector DeviceSelectorInvocable,
+                            std::vector<device> &devices) {
+
   int score = REJECT_DEVICE_SCORE;
   const device *res = nullptr;
 
@@ -144,7 +145,7 @@ device select_device(DeviceSelector DeviceSelectorInvocable,
 template <typename DeviceSelector,
           typename = std::enable_if_t<
               std::is_invocable_r<int, DeviceSelector &, device &>::value>>
-device select_device(DeviceSelector DeviceSelectorInvocable) {
+const device &select_device(DeviceSelector DeviceSelectorInvocable) {
   std::vector<device> devices = getDevices();
 
   return select_device(DeviceSelectorInvocable, devices);
@@ -154,11 +155,19 @@ device select_device(DeviceSelector DeviceSelectorInvocable) {
 template <typename DeviceSelector,
           typename = std::enable_if_t<
               std::is_invocable_r<int, DeviceSelector &, device &>::value>>
-device select_device(DeviceSelector DeviceSelectorInvocable,
-                     const context &SyclContext) {
+const device &select_device(DeviceSelector DeviceSelectorInvocable,
+                            const context &SyclContext) {
   std::vector<device> devices = getDevices(SyclContext);
+  // return select_device(DeviceSelectorInvocable, devices);
+  //  original logic frmo queue.cpp.  Not relevant.
+  auto Comp = [&DeviceSelectorInvocable](const device &d1, const device &d2) {
+    return std::invoke(DeviceSelectorInvocable, d1) <
+           std::invoke(DeviceSelectorInvocable, d2);
+  };
 
-  return select_device(DeviceSelectorInvocable, devices);
+  const device &SyclDevice =
+      *std::max_element(devices.begin(), devices.end(), Comp);
+  return SyclDevice;
 }
 #endif
 } // namespace detail

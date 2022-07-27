@@ -125,6 +125,7 @@ public:
   /// takes a device and returns an int
   /// \param AsyncHandler is a SYCL asynchronous exception handler.
   /// \param PropList is a list of properties for queue construction.
+  /*
   template <typename DeviceSelector,
             typename = std::enable_if_t<
                 std::is_invocable_r<int, DeviceSelector &, device &>::value>>
@@ -133,6 +134,7 @@ public:
                  const property_list &PropList = {})
       : queue(sycl::detail::select_device(deviceSelector), AsyncHandler,
               PropList) {}
+  */
 
   /// Constructs a SYCL queue instance using the device identified by the
   /// device selector provided.
@@ -153,7 +155,7 @@ public:
   /// \param DeviceSelector is SYCL 2020 Device Selector, a simple callable that
   /// takes a device and returns an int
   /// \param PropList is a list of properties for queue construction.
-
+/*
   template <typename DeviceSelector,
             typename = std::enable_if_t<
                 std::is_invocable_r<int, DeviceSelector &, device &>::value>>
@@ -181,7 +183,7 @@ public:
       : queue(syclContext,
               sycl::detail::select_device(deviceSelector, syclContext),
               AsyncHandler, propList) {}
-
+*/
 #endif
 
   /// Constructs a SYCL queue instance using the device returned by the

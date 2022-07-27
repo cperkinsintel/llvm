@@ -13,8 +13,7 @@
 #include <sycl/detail/backend_traits.hpp>
 #include <sycl/detail/common.hpp>
 #include <sycl/detail/export.hpp>
-// #include <sycl/device.hpp>
-#include <sycl/device_selector.hpp>
+// #include <sycl/device_selector.hpp>
 #include <sycl/stl.hpp>
 
 // 4.6.2 Platform class
