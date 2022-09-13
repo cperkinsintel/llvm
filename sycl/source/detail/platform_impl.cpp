@@ -153,60 +153,64 @@ std::vector<platform> platform_impl::get_platforms() {
 // device_type, and device_num. The device_filter and ods_target structs pun for
 // each other, as do device_filter_list and ods_target_list.
 template <typename ListT, typename FilterT>
-static void filterDeviceFilter(std::vector<RT::PiDevice> &PiDevices,
-                               RT::PiPlatform Platform, ListT *FilterList) {
+static std::vector<device>
+filterDeviceFilter(std::vector<RT::PiDevice> &PiDevices,
+                   PlatformImplPtr PlatformImpl, RT::PiPlatform Platform,
+                   ListT *FilterList) {
+  std::vector<device> Res;
+  if (FilterList) {
+    plugin Plugin = PlatformImpl->getPlugin();
+    backend Backend = Plugin.getBackend();
 
-  std::vector<plugin> &Plugins = RT::initialize();
-  auto It =
-      std::find_if(Plugins.begin(), Plugins.end(), [Platform](plugin &Plugin) {
-        return Plugin.containsPiPlatform(Platform);
-      });
-  if (It == Plugins.end())
-    return;
+    int InsertIDx = 0;
+    // DeviceIds should be given consecutive numbers across platforms in the
+    // same backend
+    std::lock_guard<std::mutex> Guard(*Plugin.getPluginMutex());
+    int DeviceNum = Plugin.getStartingDeviceId(Platform);
+    for (RT::PiDevice Device : PiDevices) {
+      RT::PiDeviceType PiDevType;
+      Plugin.call<PiApiKind::piDeviceGetInfo>(Device, PI_DEVICE_INFO_TYPE,
+                                              sizeof(RT::PiDeviceType),
+                                              &PiDevType, nullptr);
+      // Assumption here is that there is 1-to-1 mapping between PiDevType and
+      // Sycl device type for GPU, CPU, and ACC.
+      info::device_type DeviceType = pi::cast<info::device_type>(PiDevType);
 
-  plugin &Plugin = *It;
-  backend Backend = Plugin.getBackend();
-  int InsertIDx = 0;
-  // DeviceIds should be given consecutive numbers across platforms in the same
-  // backend
-  std::lock_guard<std::mutex> Guard(*Plugin.getPluginMutex());
-  int DeviceNum = Plugin.getStartingDeviceId(Platform);
-  for (RT::PiDevice Device : PiDevices) {
-    RT::PiDeviceType PiDevType;
-    Plugin.call<PiApiKind::piDeviceGetInfo>(Device, PI_DEVICE_INFO_TYPE,
-                                            sizeof(RT::PiDeviceType),
-                                            &PiDevType, nullptr);
-    // Assumption here is that there is 1-to-1 mapping between PiDevType and
-    // Sycl device type for GPU, CPU, and ACC.
-    info::device_type DeviceType = pi::cast<info::device_type>(PiDevType);
-
-    for (const FilterT &Filter : FilterList->get()) {
-      backend FilterBackend = Filter.Backend;
-      // First, match the backend entry
-      if (FilterBackend == Backend || FilterBackend == backend::all) {
-        info::device_type FilterDevType = Filter.DeviceType;
-        // Next, match the device_type entry
-        if (FilterDevType == info::device_type::all) {
-          // Last, match the device_num entry
-          if (!Filter.HasDeviceNum || DeviceNum == Filter.DeviceNum) {
-            PiDevices[InsertIDx++] = Device;
-            break;
-          }
-        } else if (FilterDevType == DeviceType) {
-          if (!Filter.HasDeviceNum || DeviceNum == Filter.DeviceNum) {
-            PiDevices[InsertIDx++] = Device;
-            break;
+      for (const FilterT &Filter : FilterList->get()) {
+        backend FilterBackend = Filter.Backend;
+        // First, match the backend entry
+        if (FilterBackend == Backend || FilterBackend == backend::all) {
+          info::device_type FilterDevType = Filter.DeviceType;
+          // Next, match the device_type entry
+          if (FilterDevType == info::device_type::all) {
+            // Last, match the device_num entry
+            if (!Filter.HasDeviceNum || DeviceNum == Filter.DeviceNum) {
+              PiDevices[InsertIDx++] = Device;
+              break;
+            }
+          } else if (FilterDevType == DeviceType) {
+            if (!Filter.HasDeviceNum || DeviceNum == Filter.DeviceNum) {
+              PiDevices[InsertIDx++] = Device;
+              break;
+            }
           }
         }
       }
+      DeviceNum++;
     }
-    DeviceNum++;
+    PiDevices.resize(InsertIDx);
+    // remember the last backend that has gone through this filter function
+    // to assign a unique device id number across platforms that belong to
+    // the same backend. For example, opencl:cpu:0, opencl:acc:1, opencl:gpu:2
+    Plugin.setLastDeviceId(Platform, DeviceNum);
   }
-  PiDevices.resize(InsertIDx);
-  // remember the last backend that has gone through this filter function
-  // to assign a unique device id number across platforms that belong to
-  // the same backend. For example, opencl:cpu:0, opencl:acc:1, opencl:gpu:2
-  Plugin.setLastDeviceId(Platform, DeviceNum);
+  std::transform(
+      PiDevices.begin(), PiDevices.end(), std::back_inserter(Res),
+      [PlatformImpl](const RT::PiDevice &PiDevice) -> device {
+        return detail::createSyclObjFromImpl<device>(
+            PlatformImpl->getOrMakeDeviceImpl(PiDevice, PlatformImpl));
+      });
+  return Res;
 }
 
 std::shared_ptr<device_impl> platform_impl::getOrMakeDeviceImpl(
@@ -257,6 +261,7 @@ supports_partition_property(const device &dev,
   return false;
 }
 
+/*
 static std::vector<device>
 amendDeviceAndSubDevices(backend PlatformBackend,
                          std::vector<device> DeviceList,
@@ -279,15 +284,22 @@ amendDeviceAndSubDevices(backend PlatformBackend,
     }
   }
 }
+*/
 
 std::vector<device>
 platform_impl::get_devices(info::device_type DeviceType) const {
   std::vector<device> Res;
+  // Will we be filtering with SYCL_DEVICE_FILTER or ONEAPI_DEVICE_SELECTOR ?
+  // We do NOT attempt to support both simultaneously.
+  ods_target_list *OdsTargetList = SYCLConfig<ONEAPI_DEVICE_SELECTOR>::get();
+  device_filter_list *FilterList = SYCLConfig<SYCL_DEVICE_FILTER>::get();
+
   if (is_host() && (DeviceType == info::device_type::host ||
                     DeviceType == info::device_type::all)) {
     // If SYCL_DEVICE_FILTER is set, check if filter contains host.
-    device_filter_list *FilterList = SYCLConfig<SYCL_DEVICE_FILTER>::get();
-    if (!FilterList || FilterList->containsHost()) {
+    if ((!FilterList && !OdsTargetList) ||
+        (OdsTargetList && OdsTargetList->containsHost()) ||
+        (FilterList && FilterList->containsHost())) {
       Res.push_back(
           createSyclObjFromImpl<device>(device_impl::getHostDeviceImpl()));
     }
@@ -332,29 +344,27 @@ platform_impl::get_devices(info::device_type DeviceType) const {
   if (SYCLConfig<SYCL_DEVICE_ALLOWLIST>::get())
     applyAllowList(PiDevices, MPlatform, Plugin);
 
-  // Will we be filtering with SYCL_DEVICE_FILTER or ONEAPI_DEVICE_SELECTOR ?
-  // We do NOT attempt to support both simultaneously.
-  ods_target_list *OdsTargetList = SYCLConfig<ONEAPI_DEVICE_SELECTOR>::get();
-  device_filter_list *FilterList = SYCLConfig<SYCL_DEVICE_FILTER>::get();
+  PlatformImplPtr PlatformImpl = getOrMakePlatformImpl(MPlatform, Plugin);
 
-  // The first step is to filter out devices that are not compatible with
-  // SYCL_DEVICE_FILTER or ONEAPI_DEVICE_SELECTOR
-  if (OdsTargetList) {
-    if (FilterList) {
+  // Filter out devices that are not compatible with SYCL_DEVICE_FILTER or
+  // ONEAPI_DEVICE_SELECTOR
+  if (FilterList) {
+    if (OdsTargetList) {
       throw sycl::exception(sycl::make_error_code(errc::invalid),
                             "ONEAPI_DEVICE_SELECTOR cannot be used in "
                             "conjunction with SYCL_DEVICE_FILTER");
     }
-    filterDeviceFilter<ods_target_list, ods_target>(PiDevices, MPlatform,
-                                                    OdsTargetList);
-
-  } else if (FilterList) {
-    filterDeviceFilter<device_filter_list, device_filter>(PiDevices, MPlatform,
-                                                          FilterList);
+    return filterDeviceFilter<device_filter_list, device_filter>(
+        PiDevices, PlatformImpl, MPlatform, FilterList);
+  } else {
+    // OdsTargetList may be null. We ALWAYS enter this filter.
+    return filterDeviceFilter<ods_target_list, ods_target>(
+        PiDevices, PlatformImpl, MPlatform, OdsTargetList);
   }
 
   // The next step is to inflate the PIDevices we've filtered into SYCL Device
   // classes.
+  /*
   PlatformImplPtr PlatformImpl = getOrMakePlatformImpl(MPlatform, Plugin);
   std::transform(
       PiDevices.begin(), PiDevices.end(), std::back_inserter(Res),
@@ -366,12 +376,13 @@ platform_impl::get_devices(info::device_type DeviceType) const {
   // If we aren't using ONEAPI_DEVICE_SELECTOR, then we are done.
   if (!OdsTargetList)
     return Res;
+ */
 
   // Otherwise, our last step is to re-screen the devices, possibly replacing
   // them with subdevices (which have been ignored until now)
-  backend Backend = getPlugin().getBackend();
-  std::vector<device> FinalResult =
-      amendDeviceAndSubDevices(Backend, Res, OdsTargetList);
+  // backend Backend = getPlugin().getBackend();
+  // std::vector<device> FinalResult =
+  //     amendDeviceAndSubDevices(Backend, Res, OdsTargetList);
 
   // Lastly, if using the ONEAPI_DEVICE_SELECTOR then we may
   /*

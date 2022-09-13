@@ -182,6 +182,19 @@ ods_target_list::ods_target_list(const std::string &envStr) {
   TargetList = Parse_ONEAPI_DEVICE_SELECTOR(envStr);
 }
 
+bool ods_target_list::containsHost() {
+  for (const ods_target &Target : TargetList) {
+    if (Target.Backend == backend::host || Target.Backend == backend::all)
+      if (Target.DeviceType == info::device_type::host ||
+          Target.DeviceType == info::device_type::all)
+        // SYCL RT never creates more than one HOST device.
+        // All device numbers other than 0 are rejected.
+        if (!Target.HasDeviceNum || Target.DeviceNum == 0)
+          return true;
+  }
+  return false;
+}
+
 // ---------------------------------------
 // SYCL_DEVICE_FILTER support
 
