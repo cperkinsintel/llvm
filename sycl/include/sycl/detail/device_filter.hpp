@@ -15,6 +15,9 @@
 
 #include <string>
 
+//#define CPOUT  std::clog
+#define CPOUT  std::clog.rdbuf(NULL); std::clog
+
 namespace sycl {
 __SYCL_INLINE_VER_NAMESPACE(_V1) {
 namespace detail {

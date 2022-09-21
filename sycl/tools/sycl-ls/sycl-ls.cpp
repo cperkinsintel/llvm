@@ -18,6 +18,7 @@
 //
 #include <sycl/sycl.hpp>
 
+
 #include <cstdlib>
 #include <iostream>
 #include <map>
@@ -135,6 +136,13 @@ int main(int argc, char **argv) {
     backend Backend = Platform.get_backend();
     auto PlatformName = Platform.get_info<info::platform::name>();
     const auto &Devices = Platform.get_devices();
+
+    // the counting is wrong.  Need to get the plugin, the piPlatform, and then 
+    // call plugin.getStartingDeviceId(piPlatform) for each platform, and then count up
+    // devices from there.  This here trips on empty or banned platforms. 
+    //   auto piPlatform = Platform.getNative();
+
+    
     for (const auto &Device : Devices) {
       std::cout << "[" << Backend << ":" << getDeviceTypeName(Device) << ":"
                 << DeviceNums[Backend] << "] ";

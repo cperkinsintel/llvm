@@ -68,6 +68,9 @@ PlatformImplPtr platform_impl::getPlatformFromPiDevice(RT::PiDevice PiDevice,
 }
 
 static bool IsBannedPlatform(platform Platform) {
+  // CP - banning is messing up device count.
+  return false;
+  /*
   // The NVIDIA OpenCL platform is currently not compatible with DPC++
   // since it is only 1.2 but gets selected by default in many systems
   // There is also no support on the PTX backend for OpenCL consumption,
@@ -92,6 +95,7 @@ static bool IsBannedPlatform(platform Platform) {
     return IsCUDAOCL;
   };
   return IsNVIDIAOpenCL(Platform);
+  */
 }
 
 std::vector<platform> platform_impl::get_platforms() {
@@ -121,7 +125,7 @@ std::vector<platform> platform_impl::get_platforms() {
           Plugin.getPlatformId(PiPlatform);
         }
         // Skip platforms which do not contain requested device types
-        std::cout << "-- qualifying platforms" << std::endl;
+        CPOUT << "-- qualifying platforms" << std::endl;
         if (!Platform.get_devices(ForcedType).empty() &&
             !IsBannedPlatform(Platform))
           Platforms.push_back(Platform);
@@ -512,7 +516,7 @@ platform_impl::get_devices(info::device_type DeviceType) const {
   if (!OdsTargetList || Res.size() == 0)
     return Res;
 
-  std::cout << "about to Amend.  Current Device count: " << Res.size()
+  CPOUT << "about to Amend.  Current Device count: " << Res.size()
             << "  platformindex: " << PlatformDeviceIndex << std::endl;
 
   // Otherwise, our last step is to revisit the devices, possibly replacing
