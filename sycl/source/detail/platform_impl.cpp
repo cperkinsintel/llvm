@@ -68,9 +68,6 @@ PlatformImplPtr platform_impl::getPlatformFromPiDevice(RT::PiDevice PiDevice,
 }
 
 static bool IsBannedPlatform(platform Platform) {
-  // CP - banning is messing up device count.
-  return false;
-  /*
   // The NVIDIA OpenCL platform is currently not compatible with DPC++
   // since it is only 1.2 but gets selected by default in many systems
   // There is also no support on the PTX backend for OpenCL consumption,
@@ -95,9 +92,10 @@ static bool IsBannedPlatform(platform Platform) {
     return IsCUDAOCL;
   };
   return IsNVIDIAOpenCL(Platform);
-  */
 }
 
+// This routine has the side effect of registering each platform's last device
+// id into each plugin, which is used for device counting.
 std::vector<platform> platform_impl::get_platforms() {
   std::vector<platform> Platforms;
   std::vector<plugin> &Plugins = RT::initialize();
@@ -119,15 +117,18 @@ std::vector<platform> platform_impl::get_platforms() {
       for (const auto &PiPlatform : PiPlatforms) {
         platform Platform = detail::createSyclObjFromImpl<platform>(
             getOrMakePlatformImpl(PiPlatform, Plugin));
+        if (IsBannedPlatform(Platform)) {
+          continue; // bail as early as possible, otherwise banned platforms may
+                    // mess up device counting
+        }
+
         {
           std::lock_guard<std::mutex> Guard(*Plugin.getPluginMutex());
           // insert PiPlatform into the Plugin
           Plugin.getPlatformId(PiPlatform);
         }
         // Skip platforms which do not contain requested device types
-        CPOUT << "-- qualifying platforms" << std::endl;
-        if (!Platform.get_devices(ForcedType).empty() &&
-            !IsBannedPlatform(Platform))
+        if (!Platform.get_devices(ForcedType).empty())
           Platforms.push_back(Platform);
       }
     }
@@ -515,9 +516,6 @@ platform_impl::get_devices(info::device_type DeviceType) const {
   // with subdevices.
   if (!OdsTargetList || Res.size() == 0)
     return Res;
-
-  CPOUT << "about to Amend.  Current Device count: " << Res.size()
-            << "  platformindex: " << PlatformDeviceIndex << std::endl;
 
   // Otherwise, our last step is to revisit the devices, possibly replacing
   // them with subdevices (which have been ignored until now)

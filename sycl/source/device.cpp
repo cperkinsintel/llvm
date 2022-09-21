@@ -50,7 +50,6 @@ device::device(const device_selector &deviceSelector) {
 
 std::vector<device> device::get_devices(info::device_type deviceType) {
   std::vector<device> devices;
-  CPOUT << "device::get_devices() ----------" << std::endl;
   detail::device_filter_list *FilterList =
       detail::SYCLConfig<detail::SYCL_DEVICE_FILTER>::get();
   detail::ods_target_list *OdsTargetList =
@@ -74,7 +73,6 @@ std::vector<device> device::get_devices(info::device_type deviceType) {
   if (detail::match_types(deviceType, forced_type)) {
     detail::force_type(deviceType, forced_type);
     auto thePlatforms = platform::get_platforms();
-    CPOUT << "thePlatforms.size: " << thePlatforms.size() << std::endl;
     for (const auto &plt : thePlatforms) {
       // If SYCL_BE is set then skip platforms which doesn't have specified
       // backend.
@@ -97,16 +95,14 @@ std::vector<device> device::get_devices(info::device_type deviceType) {
           devices.insert(devices.end(), host_device.begin(), host_device.end());
       } else {
         std::vector<device> found_devices(plt.get_devices(deviceType));
-        CPOUT << "get_devices() found_devices sz: " << found_devices.size()
-                  << std::endl;
+
         if (!found_devices.empty())
           devices.insert(devices.end(), found_devices.begin(),
                          found_devices.end());
       }
     }
   }
-  CPOUT << "devices::get_device() returning: " << devices.size()
-            << std::endl;
+
   return devices;
 }
 
