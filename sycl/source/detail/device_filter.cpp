@@ -222,6 +222,18 @@ bool ods_target_list::containsHost() {
   return false;
 }
 
+// Backend is compatible with the SYCL_DEVICE_FILTER in the following cases.
+// 1. Filter backend is '*' which means ANY backend.
+// 2. Filter backend match exactly with the given 'Backend'
+bool ods_target_list::backendCompatible(backend Backend) {
+  for (const ods_target &Target : TargetList) {
+    backend TargetBackend = Target.Backend.value_or(backend::all);
+    if (TargetBackend == Backend || TargetBackend == backend::all)
+      return true;
+  }
+  return false;
+}
+
 // ---------------------------------------
 // SYCL_DEVICE_FILTER support
 

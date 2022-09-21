@@ -56,6 +56,7 @@ public:
   ods_target_list(const std::string &FilterString);
   std::vector<ods_target> &get() { return TargetList; }
   bool containsHost();
+  bool backendCompatible(backend Backend);
 };
 
 std::ostream &operator<<(std::ostream &Out, const ods_target &Target);

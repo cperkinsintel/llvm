@@ -50,8 +50,11 @@ device::device(const device_selector &deviceSelector) {
 
 std::vector<device> device::get_devices(info::device_type deviceType) {
   std::vector<device> devices;
+  std::cout << "device::get_devices() ----------" << std::endl;
   detail::device_filter_list *FilterList =
       detail::SYCLConfig<detail::SYCL_DEVICE_FILTER>::get();
+  detail::ods_target_list *OdsTargetList =
+      detail::SYCLConfig<detail::ONEAPI_DEVICE_SELECTOR>::get();
   // Host device availability should depend on the forced type
   bool includeHost = false;
   // If SYCL_DEVICE_FILTER is set, we don't automatically include it.
@@ -65,11 +68,14 @@ std::vector<device> device::get_devices(info::device_type deviceType) {
   } else {
     includeHost = detail::match_types(deviceType, info::device_type::host);
   }
-  info::device_type forced_type = detail::get_forced_type();
+  info::device_type forced_type =
+      detail::get_forced_type(); // almost always ::all
   // Exclude devices which do not match requested device type
   if (detail::match_types(deviceType, forced_type)) {
     detail::force_type(deviceType, forced_type);
-    for (const auto &plt : platform::get_platforms()) {
+    auto thePlatforms = platform::get_platforms();
+    std::cout << "thePlatforms.size: " << thePlatforms.size() << std::endl;
+    for (const auto &plt : thePlatforms) {
       // If SYCL_BE is set then skip platforms which doesn't have specified
       // backend.
       backend *ForcedBackend = detail::SYCLConfig<detail::SYCL_BE>::get();
@@ -78,7 +84,10 @@ std::vector<device> device::get_devices(info::device_type deviceType) {
           continue;
       // If SYCL_DEVICE_FILTER is set, skip platforms that is incompatible
       // with the filter specification.
-      if (FilterList && !FilterList->backendCompatible(plt.get_backend()))
+      backend platformBackend = plt.get_backend();
+      if (FilterList && !FilterList->backendCompatible(platformBackend))
+        continue;
+      if (OdsTargetList && !OdsTargetList->backendCompatible(platformBackend))
         continue;
 
       if (includeHost && plt.is_host()) {
@@ -88,12 +97,16 @@ std::vector<device> device::get_devices(info::device_type deviceType) {
           devices.insert(devices.end(), host_device.begin(), host_device.end());
       } else {
         std::vector<device> found_devices(plt.get_devices(deviceType));
+        std::cout << "get_devices() found_devices sz: " << found_devices.size()
+                  << std::endl;
         if (!found_devices.empty())
           devices.insert(devices.end(), found_devices.begin(),
                          found_devices.end());
       }
     }
   }
+  std::cout << "devices::get_device() returning: " << devices.size()
+            << std::endl;
   return devices;
 }
 

@@ -121,6 +121,7 @@ std::vector<platform> platform_impl::get_platforms() {
           Plugin.getPlatformId(PiPlatform);
         }
         // Skip platforms which do not contain requested device types
+        std::cout << "-- qualifying platforms" << std::endl;
         if (!Platform.get_devices(ForcedType).empty() &&
             !IsBannedPlatform(Platform))
           Platforms.push_back(Platform);
@@ -187,9 +188,8 @@ static int filterDeviceFilter(std::vector<RT::PiDevice> &PiDevices,
           Filter.Backend ? Filter.Backend.value() : backend::all;
       // First, match the backend entry
       if (FilterBackend == Backend || FilterBackend == backend::all) {
-        info::device_type FilterDevType = Filter.DeviceType
-                                              ? Filter.DeviceType.value()
-                                              : info::device_type::all;
+        info::device_type FilterDevType =
+            Filter.DeviceType.value_or(info::device_type::all);
         // Next, match the device_type entry
         if (FilterDevType == info::device_type::all) {
           // Last, match the device_num entry
@@ -507,8 +507,13 @@ platform_impl::get_devices(info::device_type DeviceType) const {
       });
 
   // If we aren't using ONEAPI_DEVICE_SELECTOR, then we are done.
-  if (!OdsTargetList)
+  // and if there are no devices so far, there won't be any need to replace them
+  // with subdevices.
+  if (!OdsTargetList || Res.size() == 0)
     return Res;
+
+  std::cout << "about to Amend.  Current Device count: " << Res.size()
+            << "  platformindex: " << PlatformDeviceIndex << std::endl;
 
   // Otherwise, our last step is to revisit the devices, possibly replacing
   // them with subdevices (which have been ignored until now)
