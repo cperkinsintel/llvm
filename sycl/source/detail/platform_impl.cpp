@@ -275,8 +275,7 @@ static std::vector<device> amendDeviceAndSubDevices(
     device &dev = DeviceList[i];
     bool deviceAdded = false;
     for (ods_target target : OdsTargetList->get()) {
-      backend TargetBackend =
-          target.Backend ? target.Backend.value() : backend::all;
+      backend TargetBackend = target.Backend.value_or(backend::all);
       if (PlatformBackend == TargetBackend || TargetBackend == backend::all) {
         bool deviceMatch = target.HasDeviceWildCard; // opencl:*
         if (target.DeviceType) {                     // opencl:gpu
@@ -323,14 +322,17 @@ static std::vector<device> amendDeviceAndSubDevices(
               auto subDevicesToPartition = dev.create_sub_devices<
                   info::partition_property::partition_by_affinity_domain>(
                   affinityDomain);
-              if (subDevicesToPartition.size() > target.SubDeviceNum.value()) {
-                subDevicesToPartition[0] =
-                    subDevicesToPartition[target.SubDeviceNum.value()];
-                subDevicesToPartition.resize(1);
-              } else {
-                std::cout << "subdevice index out of bounds: " << target
-                          << std::endl;
-                continue;
+              if (target.SubDeviceNum) {
+                if (subDevicesToPartition.size() >
+                    target.SubDeviceNum.value()) {
+                  subDevicesToPartition[0] =
+                      subDevicesToPartition[target.SubDeviceNum.value()];
+                  subDevicesToPartition.resize(1);
+                } else {
+                  std::cout << "subdevice index out of bounds: " << target
+                            << std::endl;
+                  continue;
+                }
               }
               for (device subDev : subDevicesToPartition) {
                 bool supportsSubSubPartitioning =
