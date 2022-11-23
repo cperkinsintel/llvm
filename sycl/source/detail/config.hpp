@@ -312,7 +312,8 @@ template <> class SYCLConfig<SYCL_ENABLE_DEFAULT_CONTEXTS> {
 public:
   static bool get() {
 #ifdef WIN32
-    constexpr bool DefaultValue = false;
+    constexpr bool DefaultValue = false; //changing to true leads to some test failures and exit code 3221226505 ( stack ocrruption)
+                                         // when we .reset() memory in global_handler.cpp:113
 #else
     constexpr bool DefaultValue = true;
 #endif

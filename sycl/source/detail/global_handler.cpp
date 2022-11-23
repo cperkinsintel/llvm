@@ -100,6 +100,8 @@ ThreadPool &GlobalHandler::getHostTaskThreadPool() {
 }
 
 void releaseDefaultContexts() {
+  // CP
+  std::cout << "releaseDefaultContext" << std::endl;
   // Release shared-pointers to SYCL objects.
 #ifndef _WIN32
   GlobalHandler::instance().MPlatformToDefaultContextCache.Inst.reset(nullptr);
@@ -110,11 +112,16 @@ void releaseDefaultContexts() {
   // cache. This will prevent destructors from being called, thus no PI cleanup
   // routines will be called in the end.
   GlobalHandler::instance().MPlatformToDefaultContextCache.Inst.release();
+  //GlobalHandler::instance().MPlatformToDefaultContextCache.Inst.reset(nullptr);
 #endif
 }
 
 struct DefaultContextReleaseHandler {
-  ~DefaultContextReleaseHandler() { releaseDefaultContexts(); }
+  ~DefaultContextReleaseHandler() {
+    // CP
+    std::cout << "~DefaultContextReleaseHandler" << std::endl;
+    releaseDefaultContexts();
+  }
 };
 
 void GlobalHandler::registerDefaultContextReleaseHandler() {
@@ -124,6 +131,7 @@ void GlobalHandler::registerDefaultContextReleaseHandler() {
 // Note: Split from shutdown so it is available to the unittests for ensuring
 //       that the mock plugin is the lone plugin.
 void GlobalHandler::unloadPlugins() {
+  std::cout << "unloadPlugins()" << std::endl;
   // Call to GlobalHandler::instance().getPlugins() initializes plugins. If
   // user application has loaded SYCL runtime, and never called any APIs,
   // there's no need to load and unload plugins.
@@ -142,6 +150,8 @@ void GlobalHandler::unloadPlugins() {
 }
 
 void shutdown() {
+  // CP
+  std::cout << "shutdown() called" << std::endl;
   // Ensure neither host task is working so that no default context is accessed
   // upon its release
   if (GlobalHandler::instance().MHostTaskThreadPool.Inst)
@@ -175,8 +185,11 @@ extern "C" __SYCL_EXPORT BOOL WINAPI DllMain(HINSTANCE hinstDLL,
   // Perform actions based on the reason for calling.
   switch (fdwReason) {
   case DLL_PROCESS_DETACH:
-    if (!lpReserved)
-      shutdown();
+    // CP
+    std::cout << "DLL_PROCESS_DETACH " << lpReserved << std::endl;
+    shutdown();
+    //if (!lpReserved)
+    //  shutdown();
     break;
   case DLL_PROCESS_ATTACH:
   case DLL_THREAD_ATTACH:
