@@ -110,9 +110,9 @@ void releaseDefaultContexts() {
   // cache. This will prevent destructors from being called, thus no PI cleanup
   // routines will be called in the end.
   
-  std::cout << "releaseDefaultContexts()" << std::endl;
-  //GlobalHandler::instance().MPlatformToDefaultContextCache.Inst.release();
-  GlobalHandler::instance().MPlatformToDefaultContextCache.Inst.reset(nullptr);
+  std::cout << "releaseDefaultContexts() - leaks" << std::endl;
+  GlobalHandler::instance().MPlatformToDefaultContextCache.Inst.release();
+  //GlobalHandler::instance().MPlatformToDefaultContextCache.Inst.reset(nullptr);
 #endif
 }
 
