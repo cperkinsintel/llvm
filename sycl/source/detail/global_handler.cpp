@@ -117,7 +117,8 @@ void releaseDefaultContexts() {
 }
 
 struct DefaultContextReleaseHandler {
-  ~DefaultContextReleaseHandler() { releaseDefaultContexts(); }
+  // CP - we call releaseDefaultContext() from shutdown. That's enough.
+  //~DefaultContextReleaseHandler() { releaseDefaultContexts(); }
 };
 
 void GlobalHandler::registerDefaultContextReleaseHandler() {
@@ -171,6 +172,8 @@ void shutdown() {
 
   // Release the rest of global resources.
   delete &GlobalHandler::instance();
+
+  std::cout << "~shutdown() completed successfully" << std::endl;
 }
 
 #ifdef _WIN32
@@ -180,7 +183,7 @@ extern "C" __SYCL_EXPORT BOOL WINAPI DllMain(HINSTANCE hinstDLL,
   // Perform actions based on the reason for calling.
   switch (fdwReason) {
   case DLL_PROCESS_DETACH:
-    std::cout << "PROCESS DETACH! - calling shutdown()" << std::endl;
+    std::cout << "SYCL PROCESS DETACH! - calling shutdown()" << std::endl;
     shutdown();
     break;
   case DLL_PROCESS_ATTACH:

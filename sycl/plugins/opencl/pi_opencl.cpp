@@ -31,6 +31,8 @@
 #include <string>
 #include <vector>
 
+//#include <windows.h>
+
 #define CHECK_ERR_SET_NULL_RET(err, ptr, reterr)                               \
   if (err != CL_SUCCESS) {                                                     \
     if (ptr != nullptr)                                                        \
@@ -1506,6 +1508,7 @@ pi_result piextKernelGetNativeHandle(pi_kernel kernel,
 // pi_level_zero.cpp for reference) Currently this is just a NOOP.
 pi_result piTearDown(void *PluginParameter) {
   (void)PluginParameter;
+  printf("piTearDown\n"); // CP - 
   return PI_SUCCESS;
 }
 
@@ -1646,6 +1649,27 @@ pi_result piPluginInit(pi_plugin *PluginInit) {
 #undef _PI_CL
 
   return PI_SUCCESS;
+}
+
+  #include <windows.h>
+  BOOL WINAPI DllMain(HINSTANCE hinstDLL, // handle to DLL module
+                    DWORD fdwReason,    // reason for calling function
+                    LPVOID lpReserved)  // reserved
+{
+  //TCHAR dllFilePath[512 + 1] = { 0 };
+  switch (fdwReason) {
+  case DLL_PROCESS_ATTACH:
+    //GetModuleFileNameA(hinstDLL, dllFilePath, 512);
+    //printf(">> Module   load: %s\n", dllFilePath);
+    std::cout << "pi_opencl.dll process_attach" << std::endl;
+    break;
+  case DLL_PROCESS_DETACH:
+    //GetModuleFileNameA(hinstDLL, dllFilePath, 512);
+    //printf(">> Module Unload: %s\n", dllFilePath);
+    std::cout << "pi_opencl.dll  process_detach" << std::endl;
+    break;
+  }
+  return TRUE; // Successful DLL_PROCESS_ATTACH.
 }
 
 } // end extern 'C'
