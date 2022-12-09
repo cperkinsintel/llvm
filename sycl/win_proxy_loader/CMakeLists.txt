@@ -1,6 +1,6 @@
 
 project(win_proxy_loader)
-add_library(win_proxy_loader SHARED  win_proxy_loader.cpp
+add_library(win_proxy_loader SHARED  win_proxy_loader.cpp)
 
 if (MSVC)
   # MSVC provides two incompatible build variants for its CRT: release and debug
