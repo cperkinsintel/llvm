@@ -33,8 +33,9 @@ void *loadOsLibrary(const std::string &PluginPath) {
   if (!SetDllDirectoryA("")) {
     assert(false && "Failed to update DLL search path");
   }
-  //auto Result = (void *)LoadLibraryA(PluginPath.c_str());
-  auto Result = preserve_lib(PluginPath);
+  // win_proxy_loader.dll will have loaded our plugins already
+  // we get them from it.
+  auto Result = getPreloadedPlugin(PluginPath); 
   (void)SetErrorMode(SavedMode);
   if (!SetDllDirectoryA(nullptr)) {
     assert(false && "Failed to restore DLL search path");

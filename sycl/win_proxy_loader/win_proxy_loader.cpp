@@ -22,6 +22,8 @@
 
 #ifdef _WIN32
 
+// ------------------------------------
+
 static constexpr const char *DirSep = "\\";
 using OSModuleHandle = intptr_t;
 /// Module handle for the executable module - it is assumed there is always
@@ -79,7 +81,7 @@ std::string getCurrentDSODir() {
 
   return Path;
 }
-#endif //WIN32
+
   
 
 // these are cribbed from sycl/detail/pi.hpp
@@ -87,30 +89,46 @@ std::string getCurrentDSODir() {
 #define __SYCL_LEVEL_ZERO_PLUGIN_NAME "pi_level_zero.dll"
 #define __SYCL_CUDA_PLUGIN_NAME "pi_cuda.dll"
 #define __SYCL_ESIMD_EMULATOR_PLUGIN_NAME "pi_esimd_emulator.dll"
-#define __SYCL_HIP_PLUGIN_NAME "libpi_hip.dll" 
+#define __SYCL_HIP_PLUGIN_NAME "libpi_hip.dll"
 
+// ------------------------------------
+
+
+static std::map<std::string, void*> dllMap;
+
+/// load the five libraries and store them in a map.
 void preloadLibraries(){
   // this path duplicates sycl/detail/pi.cpp:initializePlugins
   const std::string LibSYCLDir =  getCurrentDSODir() + DirSep;
 
+  std::string ocl_path = LibSYCLDir + __SYCL_OPENCL_PLUGIN_NAME;
+  dllMap.emplace(ocl_path, LoadLibraryA(ocl_path.c_str()));
+  
+  std::string l0_path = LibSYCLDir + __SYCL_LEVEL_ZERO_PLUGIN_NAME;
+  dllMap.emplace(l0_path, LoadLibraryA(l0_path.c_str()));
+  
+  std::string cuda_path = LibSYCLDir + __SYCL_CUDA_PLUGIN_NAME;
+  dllMap.emplace(cuda_path, LoadLibraryA(cuda_path.c_str()));
+  
+  std::string esimd_path = LibSYCLDir + __SYCL_ESIMD_EMULATOR_PLUGIN_NAME;
+  dllMap.emplace(esimd_path, LoadLibraryA(esimd_path.c_str()));
+  
+  std::string hip_path = LibSYCLDir + __SYCL_HIP_PLUGIN_NAME;
+  dllMap.emplace(hip_path, LoadLibraryA(hip_path.c_str()));
 }
 
 
-static void* oclPtr = nullptr;
-static void* l0Ptr  = nullptr;
+/// windows_pi.cpp:loadOsLibrary() calls this to get the DLL we loaded earlier.
+__declspec(dllexport) void* getPreloadedPlugin(const std::string &PluginPath) {
 
-static std::map<std::string, void*> dllMap;
-
-__declspec(dllexport) void* preserve_lib(const std::string &PluginPath) {
-  std::cout << "preserve_lib: " << PluginPath <<  std::endl;
-  if(PluginPath.find("opencl.dll") != std::string::npos){
-    return oclPtr;
+  auto match  = dllMap.find(PluginPath); // result might be nullptr, which is perfectly valid.
+  if(match == dllMap.end()){
+    // but asking for something we don't know about at all, is an issue.
+    std::cout << "unknown plugin: " << PluginPath << std::endl;
+    assert(false && "getPreloadedPlugin was given an unknown plugin path.");
+    return nullptr;
   }
-  if(PluginPath.find("level_zero.dll") != std::string::npos){
-    return l0Ptr;
-  }
-  return nullptr;
-
+  return match->second;
 }
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, // handle to DLL module
@@ -119,17 +137,17 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, // handle to DLL module
 {
   switch (fdwReason) {
   case DLL_PROCESS_ATTACH:
-    std::cout << "win_proxy_loader process_attach" << std::endl;
-    oclPtr = LoadLibraryA("C:\\iusers\\cperkins\\sycl_workspace\\build\\bin\\pi_opencl.dll");
-    ////oclPtr = LoadLibraryA("C:\\iusers\\cperkins\\sycl_workspace\\junk-drawer\\dll_unload\\xmain\\deploy\\win_prod\\bin\\pi_opencl.dll");
-    l0Ptr = LoadLibraryA("C:\\iusers\\cperkins\\sycl_workspace\\build\\bin\\pi_level_zero.dll");
+    std::cout << "win_proxy_loader  process_attach" << std::endl;
+    preloadLibraries();
+    
     break;
   case DLL_PROCESS_DETACH:
     std::cout << "win_proxy_loader  process_detach" << std::endl;
     
     break;
   }
-  return TRUE; // Successful DLL_PROCESS_ATTACH.
+  return TRUE;
 }
 
+#endif //WIN32
 

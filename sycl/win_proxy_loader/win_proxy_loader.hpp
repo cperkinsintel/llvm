@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef _WIN32
 #include <string>
 
-__declspec(dllexport) void * preserve_lib(const std::string &PluginPath);
+__declspec(dllexport) void * getPreloadedPlugin(const std::string &PluginPath);
+#endif
