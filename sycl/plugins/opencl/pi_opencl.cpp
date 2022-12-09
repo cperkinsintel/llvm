@@ -1650,26 +1650,5 @@ pi_result piPluginInit(pi_plugin *PluginInit) {
 
   return PI_SUCCESS;
 }
-
-  #include <windows.h>
-  BOOL WINAPI DllMain(HINSTANCE hinstDLL, // handle to DLL module
-                    DWORD fdwReason,    // reason for calling function
-                    LPVOID lpReserved)  // reserved
-{
-  //TCHAR dllFilePath[512 + 1] = { 0 };
-  switch (fdwReason) {
-  case DLL_PROCESS_ATTACH:
-    //GetModuleFileNameA(hinstDLL, dllFilePath, 512);
-    //printf(">> Module   load: %s\n", dllFilePath);
-    std::cout << "pi_opencl.dll process_attach" << std::endl;
-    break;
-  case DLL_PROCESS_DETACH:
-    //GetModuleFileNameA(hinstDLL, dllFilePath, 512);
-    //printf(">> Module Unload: %s\n", dllFilePath);
-    std::cout << "pi_opencl.dll  process_detach" << std::endl;
-    break;
-  }
-  return TRUE; // Successful DLL_PROCESS_ATTACH.
-}
-
 } // end extern 'C'
+
