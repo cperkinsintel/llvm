@@ -1,10 +1,11 @@
 #include <iostream>
+#include <map>
 
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
-#include "win_unload.hpp"
+#include "win_proxy_loader.hpp"
 
 // 100% this only works if the Manually loaded DLL are loaded before. 
 #define LOAD_BEFORE 1
@@ -15,6 +16,8 @@
 
 static void* oclPtr = nullptr;
 static void* l0Ptr  = nullptr;
+
+static std::map<std::string, void*> dllMap;
 
 __declspec(dllexport) void* preserve_lib(const std::string &PluginPath) {
   std::cout << "preserve_lib: " << PluginPath <<  std::endl;
@@ -36,13 +39,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, // handle to DLL module
                     DWORD fdwReason,    // reason for calling function
                     LPVOID lpReserved)  // reserved
 {
-  //TCHAR dllFilePath[512 + 1] = { 0 };
   switch (fdwReason) {
   case DLL_PROCESS_ATTACH:
-    //GetModuleFileNameA(hinstDLL, dllFilePath, 512);
-    //printf(">> Module   load: %s\n", dllFilePath);
-
-    std::cout << "win_unload process_attach" << std::endl;
+    std::cout << "win_proxy_loader process_attach" << std::endl;
 #ifdef LOAD_BEFORE 
     oclPtr = LoadLibraryA("C:\\iusers\\cperkins\\sycl_workspace\\build\\bin\\pi_opencl.dll");
     ////oclPtr = LoadLibraryA("C:\\iusers\\cperkins\\sycl_workspace\\junk-drawer\\dll_unload\\xmain\\deploy\\win_prod\\bin\\pi_opencl.dll");
@@ -50,7 +49,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, // handle to DLL module
 #endif   
     break;
   case DLL_PROCESS_DETACH:
-    std::cout << "win_unload  process_detach" << std::endl;
+    std::cout << "win_proxy_loader  process_detach" << std::endl;
     
     break;
   }

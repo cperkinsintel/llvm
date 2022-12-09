@@ -54,12 +54,12 @@ function(add_sycl_rt_library LIB_NAME LIB_OBJ_NAME)
     target_link_libraries(${LIB_NAME} PRIVATE ${ARG_XPTI_LIB})
   endif()
 
-  # win_unload
-  include_directories(${LLVM_EXTERNAL_SYCL_SOURCE_DIR}/win_unload)
+  # win_proxy_loader
+  include_directories(${LLVM_EXTERNAL_SYCL_SOURCE_DIR}/win_proxy_loader)
   if(WIN_DUPE)
-    target_link_libraries(${LIB_NAME} PUBLIC win_unloadd) # private -> public
+    target_link_libraries(${LIB_NAME} PUBLIC win_proxy_loaderd)
   else()
-    target_link_libraries(${LIB_NAME} PUBLIC win_unload)
+    target_link_libraries(${LIB_NAME} PUBLIC win_proxy_loader)
   endif()
 
   target_compile_definitions(${LIB_OBJ_NAME} PRIVATE __SYCL_INTERNAL_API )

@@ -334,7 +334,7 @@ add_subdirectory( plugins )
 
 add_subdirectory(tools)
 
-add_subdirectory(win_unload)
+add_subdirectory(win_proxy_loader)
 
 if(SYCL_INCLUDE_TESTS)
   if(NOT LLVM_INCLUDE_TESTS)
