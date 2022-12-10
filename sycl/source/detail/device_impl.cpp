@@ -81,7 +81,6 @@ device_impl::device_impl(pi_native_handle InteropDeviceHandle,
 device_impl::~device_impl() {
   if (!MIsHostDevice) {
     // TODO catch an exception and put it to list of asynchronous exceptions
-    std::cout << "~device_impl call piDeviceRelease" << std::endl;
     const detail::plugin &Plugin = getPlugin();
     RT::PiResult Err = Plugin.call_nocheck<PiApiKind::piDeviceRelease>(MDevice);
     __SYCL_CHECK_OCL_CODE_NO_EXC(Err);

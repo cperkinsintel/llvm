@@ -132,6 +132,7 @@ std::vector<platform> platform_impl::get_platforms() {
     }
   }
 
+  /*
   // Register default context release handler after plugins have been loaded and
   // after the first calls to each plugin. This initializes a function-local
   // variable that should be destroyed before any global variables in the
@@ -141,6 +142,7 @@ std::vector<platform> platform_impl::get_platforms() {
   // guaranteed to be destroyed before function-local static variables as they
   // may be initialized after.
   GlobalHandler::registerDefaultContextReleaseHandler();
+  */
 
   return Platforms;
 }
