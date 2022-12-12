@@ -137,13 +137,12 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, // handle to DLL module
 {
   switch (fdwReason) {
   case DLL_PROCESS_ATTACH:
-    std::cout << "win_proxy_loader  process_attach" << std::endl;
     preloadLibraries();
     
     break;
   case DLL_PROCESS_DETACH:
-    std::cout << "win_proxy_loader  process_detach" << std::endl;
-    
+  case DLL_THREAD_ATTACH:
+  case DLL_THREAD_DETACH:    
     break;
   }
   return TRUE;

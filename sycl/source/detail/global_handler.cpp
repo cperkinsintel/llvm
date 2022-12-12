@@ -130,8 +130,6 @@ void GlobalHandler::registerDefaultContextReleaseHandler() {
 // Note: Split from shutdown so it is available to the unittests for ensuring
 //       that the mock plugin is the lone plugin.
 void GlobalHandler::unloadPlugins() {
-  std::cout << "unloadPlugins() " << std::endl;
-  
   // Call to GlobalHandler::instance().getPlugins() initializes plugins. If
   // user application has loaded SYCL runtime, and never called any APIs,
   // there's no need to load and unload plugins.
@@ -174,8 +172,6 @@ void shutdown() {
 
   // Release the rest of global resources.
   delete &GlobalHandler::instance();
-
-  std::cout << "~shutdown() completed successfully" << std::endl;
 }
 
 #ifdef _WIN32
@@ -185,15 +181,9 @@ extern "C" __SYCL_EXPORT BOOL WINAPI DllMain(HINSTANCE hinstDLL,
   // Perform actions based on the reason for calling.
   switch (fdwReason) {
   case DLL_PROCESS_DETACH:
-    std::cout << "SYCL PROCESS DETACH! - calling shutdown()" << std::endl;
     shutdown();
     break;
   case DLL_PROCESS_ATTACH:
-    std::cout << "SYCL PROCESS ATTACH" << std::endl;
-    //LoadLibraryA("C:\\iusers\\cperkins\\sycl_workspace\\build\\bin\\pi_opencl.dll");
-    //LoadLibraryA("C:\\iusers\\cperkins\\sycl_workspace\\build\\bin\\pi_level_zero.dll");
-    //LoadLibraryA("C:\\iusers\\cperkins\\sycl_workspace\\build\\bin\\win_unload.dll");
-    break;
   case DLL_THREAD_ATTACH:
   case DLL_THREAD_DETACH:
     break;

@@ -1508,7 +1508,6 @@ pi_result piextKernelGetNativeHandle(pi_kernel kernel,
 // pi_level_zero.cpp for reference) Currently this is just a NOOP.
 pi_result piTearDown(void *PluginParameter) {
   (void)PluginParameter;
-  printf("piTearDown\n"); // CP - 
   return PI_SUCCESS;
 }
 
