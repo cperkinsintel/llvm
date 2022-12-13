@@ -84,7 +84,8 @@ std::string getCurrentDSODir() {
 
   
 
-// these are cribbed from sycl/detail/pi.hpp
+// these are cribbed from include/sycl/detail/pi.hpp
+// a new plugin must be added to both places.
 #define __SYCL_OPENCL_PLUGIN_NAME "pi_opencl.dll"
 #define __SYCL_LEVEL_ZERO_PLUGIN_NAME "pi_level_zero.dll"
 #define __SYCL_CUDA_PLUGIN_NAME "pi_cuda.dll"
@@ -123,7 +124,11 @@ __declspec(dllexport) void* getPreloadedPlugin(const std::string &PluginPath) {
 
   auto match  = dllMap.find(PluginPath); // result might be nullptr, which is perfectly valid.
   if(match == dllMap.end()){
-    // but asking for something we don't know about at all, is an issue.
+    // unit testing? Just return nullptr.
+    if(PluginPath.find("unittests") != std::string::npos) 
+      return nullptr;
+    
+    // Otherwise, asking for something we don't know about at all, is an issue.
     std::cout << "unknown plugin: " << PluginPath << std::endl;
     assert(false && "getPreloadedPlugin was given an unknown plugin path.");
     return nullptr;
