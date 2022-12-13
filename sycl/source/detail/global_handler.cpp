@@ -116,16 +116,6 @@ void releaseDefaultContexts() {
   GlobalHandler::instance().MPlatformToDefaultContextCache.Inst.release();
 #endif
 }
-  /*
-struct DefaultContextReleaseHandler {
-  // CP - we call releaseDefaultContext() from shutdown. That's enough.
-  //~DefaultContextReleaseHandler() { releaseDefaultContexts(); }
-};
-
-void GlobalHandler::registerDefaultContextReleaseHandler() {
-  static DefaultContextReleaseHandler handler{};
-}
-  */
 
 // Note: Split from shutdown so it is available to the unittests for ensuring
 //       that the mock plugin is the lone plugin.
