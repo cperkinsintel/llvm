@@ -47,8 +47,9 @@ public:
       return;
 
     MCounter--;
-    if (!MCounter && MObj)
-      MObj->releaseResources();
+    //CP
+    //if (!MCounter && MObj)
+    //  MObj->releaseResources();
   }
 
 private:
@@ -82,8 +83,9 @@ T &GlobalHandler::getOrCreate(InstWithLock<T> &IWL, Types... Args) {
 void GlobalHandler::attachScheduler(Scheduler *Scheduler) {
   // The method is used in unit tests only. Do not protect with lock since
   // releaseResources will cause dead lock due to host queue release
-  if (MScheduler.Inst)
-    MScheduler.Inst->releaseResources();
+  //CP
+  //if (MScheduler.Inst)
+  //  MScheduler.Inst->releaseResources();
   MScheduler.Inst.reset(Scheduler);
 }
 
