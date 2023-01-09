@@ -66,8 +66,11 @@ class ThreadPool {
 
 public:
   void drain() {
+    std::cout << "drain() : " << MJobsInPool << std::endl;
     while (MJobsInPool != 0)
       std::this_thread::yield();
+
+    std::cout << "drain() complete!" << std::endl;
   }
 
   ThreadPool(unsigned int ThreadCount = 1) : MThreadCount(ThreadCount) {
@@ -86,19 +89,22 @@ public:
         Thread.join();
   }
 
-  template <typename T> void submit(T &&Func) {
+  template <typename T> void submitWork(T &&Func) {
+    std::cout << "submiTWork T &&Func" << std::endl;
     {
       std::lock_guard<std::mutex> Lock(MJobQueueMutex);
-      MJobQueue.emplace([F = std::move(Func)]() { F(); });
+      //MJobQueue.emplace([F = std::move(Func)]() { F(); }); // <-- does this invoke? no
+      MJobQueue.emplace(std::move(Func));
     }
     MJobsInPool++;
     MDoSmthOrStop.notify_one();
   }
 
-  void submit(std::function<void()> &&Func) {
+  void submitWork(std::function<void()> &&Func) {
+    std::cout << "submitWork <function> &&Func" << std::endl;
     {
       std::lock_guard<std::mutex> Lock(MJobQueueMutex);
-      MJobQueue.emplace(Func);
+      MJobQueue.emplace(Func);  // <-- this does not
     }
     MJobsInPool++;
     MDoSmthOrStop.notify_one();

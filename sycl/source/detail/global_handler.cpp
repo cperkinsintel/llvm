@@ -205,11 +205,18 @@ void shutdown() {
   // Ensure neither host task is working so that no default context is accessed
   // upon its release
 
+  std::cout << "shutdown() entered" << std::endl;
+
   if (GlobalHandler::instance().MScheduler.Inst)
     GlobalHandler::instance().MScheduler.Inst->releaseResources();
+  std::cout << "releaseResources() completed." << std::endl;
+
+  GlobalHandler::instance().MScheduler.Inst.reset(nullptr);
+  std::cout << "MScheduler reset" << std::endl;
 
   if (GlobalHandler::instance().MHostTaskThreadPool.Inst)
     GlobalHandler::instance().MHostTaskThreadPool.Inst->finishAndWait();
+  std::cout << "MHostTaskThreadPool finished (or skipped)" << std::endl;
 
   // If default contexts are requested after the first default contexts have
   // been released there may be a new default context. These must be released
@@ -217,19 +224,26 @@ void shutdown() {
   // Note: Releasing a default context here may cause failures in plugins with
   // global state as the global state may have been released.
   GlobalHandler::instance().releaseDefaultContexts();
+  std::cout << "defaultContext released" << std::endl;
 
   // First, release resources, that may access plugins.
   GlobalHandler::instance().MPlatformCache.Inst.reset(nullptr);
-  GlobalHandler::instance().MScheduler.Inst.reset(nullptr);
+  std::cout << "MPlatformCache reset" << std::endl;
+
   GlobalHandler::instance().MProgramManager.Inst.reset(nullptr);
+  std::cout << "MProgramManager reset" << std::endl;
+  std::cout << "resources cleared" << std::endl;
 
   // Clear the plugins and reset the instance if it was there.
   GlobalHandler::instance().unloadPlugins();
   if (GlobalHandler::instance().MPlugins.Inst)
     GlobalHandler::instance().MPlugins.Inst.reset(nullptr);
+  std::cout << "plugins unloaded" << std::endl;
 
   // Release the rest of global resources.
   delete &GlobalHandler::instance();
+
+  std::cout << "instance deleted and we are done with shutdown()" << std::endl;
 }
 
 #ifdef _WIN32

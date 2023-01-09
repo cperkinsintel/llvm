@@ -157,6 +157,7 @@ public:
 
   ~buffer_impl() {
     try {
+      std::cout << "~buffer_impl says hi. about to updateHostMemory" << std::endl;
       BaseT::updateHostMemory();
     } catch (...) {
     }

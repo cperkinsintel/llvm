@@ -2535,8 +2535,8 @@ pi_int32 ExecCGCommand::enqueueImp() {
       std::for_each(std::begin(HandlerReq), std::end(HandlerReq), ReqToMemConv);
       std::sort(std::begin(ReqToMem), std::end(ReqToMem));
     }
-
-    MQueue->getThreadPool().submit<DispatchHostTask>(
+    //CP
+    MQueue->getThreadPool().submitWork<DispatchHostTask>(
         DispatchHostTask(this, std::move(ReqToMem)));
 
     MShouldCompleteEventIfPossible = false;

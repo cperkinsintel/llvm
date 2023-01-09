@@ -261,6 +261,8 @@ public:
 
   queue(queue &&RHS) = default;
 
+  //~queue(){ /*std::cout << "~queue destructor" << std::endl;*/ }
+
   queue &operator=(const queue &RHS) = default;
 
   queue &operator=(queue &&RHS) = default;

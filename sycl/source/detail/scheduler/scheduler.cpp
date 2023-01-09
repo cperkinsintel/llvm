@@ -209,6 +209,7 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
 }
 
 EventImplPtr Scheduler::addCopyBack(Requirement *Req) {
+  std::cout << "Scheduler::addCopyBack says hi" << std::endl;
   std::vector<Command *> AuxiliaryCmds;
   Command *NewCmd = nullptr;
   {
@@ -241,8 +242,10 @@ EventImplPtr Scheduler::addCopyBack(Requirement *Req) {
   } catch (...) {
     NewCmd->getQueue()->reportAsyncException(std::current_exception());
   }
+  std::cout << "addCopyBack almost made it" << std::endl;
   EventImplPtr NewEvent = NewCmd->getEvent();
   cleanupCommands(ToCleanUp);
+  std::cout << "addCOpyBack says chau!" << std::endl;
   return NewEvent;
 }
 
@@ -388,21 +391,38 @@ Scheduler::Scheduler() {
                      /*PropList=*/{}));
 }
 
-Scheduler::~Scheduler() { DefaultHostQueue.reset(); }
+Scheduler::~Scheduler() {
+  std::cout << "~Scheduler says goodbye!" << std::endl;
+  //#ifndef _WIN32
+  //DefaultHostQueue.reset();
+  //#endif
+}
 
 void Scheduler::releaseResources() {
-#ifndef _WIN32
+  std::cout << "scheduler::releaseResources entered" << std::endl;
+  
+  
+  
+  //#ifndef _WIN32
   if (DefaultHostQueue) {
     DefaultHostQueue->wait();
   }
+  std::cout << "defaultHostQueue->wait() done" << std::endl;
+
+  //#ifndef _WIN32 // host tasks seemingly never drain on Win
   GlobalHandler::instance().drainThreadPool();
+  std::cout << "drainThreadPool done" << std::endl;
+  //#endif
 
   //  There might be some commands scheduled for post enqueue cleanup that
   //  haven't been freed because of the graph mutex being locked at the time,
   //  clean them up now.
   cleanupCommands({});
+  std::cout << "commands cleaned up" << std::endl;
 
   cleanupAuxiliaryResources(BlockingT::BLOCKING);
+  std::cout << "cleanupAuxillaryResources" << std::endl;
+
   // We need loop since sometimes we may need new objects to be added to
   // deferred mem objects storage during cleanup. Known example is: we cleanup
   // existing deferred mem objects under write lock, during this process we
@@ -412,7 +432,9 @@ void Scheduler::releaseResources() {
   // added to deferred mem obj storage. So we may end up with leak.
   while (!isDeferredMemObjectsEmpty())
     cleanupDeferredMemObjects(BlockingT::BLOCKING);
-#endif
+  std::cout << "deferredMemObjects cleaned" << std::endl;
+  
+  //#endif
 }
 
 MemObjRecord *Scheduler::getMemObjRecord(const Requirement *const Req) {
