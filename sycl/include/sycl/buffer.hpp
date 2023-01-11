@@ -466,7 +466,7 @@ public:
 
   buffer &operator=(buffer &&rhs) = default;
 
-  ~buffer() { buffer_plain::handleRelease();  std::cout << "~buffer destructor" << std::endl; }
+  ~buffer() { buffer_plain::handleRelease();  /*std::cout << "~buffer destructor" << std::endl;*/ }
 
   bool operator==(const buffer &rhs) const { return impl == rhs.impl; }
 

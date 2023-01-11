@@ -28,17 +28,18 @@ namespace sycl {
 __SYCL_INLINE_VER_NAMESPACE(_V1) {
 namespace detail {
 
+using LockGuard = std::lock_guard<SpinLock>;
+SpinLock GlobalHandler::MSyclGlobalHandlerProtector{};
+
 // Utility class to track references on object.
-// Used for Scheduler now and created as thread_local object.
-// Origin idea is to track usage of Scheduler from main and other used threads -
-// they increment MCounter; and to use but not add extra reference by our
-// thread_pool threads. For this control MIncrementCounter class member is used.
-template <class ResourceHandler> class ObjectUsageCounter {
+// Used for GlobalHandler now and created as thread_local object on the first
+// Scheduler usage. Origin idea is to track usage of Scheduler from main and
+// other used threads - they increment MCounter; and to use but not add extra
+// reference by our thread_pool threads. For this control MIncrementCounter
+// class member is used.
+class ObjectUsageCounter {
 public:
-  // Note: -Wctad-maybe-unsupported may generate warning if no ResourceHandler
-  // type explicitly declared.
-  ObjectUsageCounter(std::unique_ptr<ResourceHandler> &Obj, bool ModifyCounter)
-      : MModifyCounter(ModifyCounter), MObj(Obj) {
+  ObjectUsageCounter(bool ModifyCounter) : MModifyCounter(ModifyCounter) {
     if (MModifyCounter)
       MCounter++;
   }
@@ -47,27 +48,36 @@ public:
       return;
 
     MCounter--;
-    //CP
-    //if (!MCounter && MObj)
-    //  MObj->releaseResources();
+    
+    if (!MCounter) {
+      LockGuard Guard(GlobalHandler::MSyclGlobalHandlerProtector);
+      GlobalHandler *RTGlobalObjHandler = GlobalHandler::getInstancePtr();
+      if (RTGlobalObjHandler) {
+        RTGlobalObjHandler->drainThreadPool();
+        if (RTGlobalObjHandler->MScheduler.Inst)
+          RTGlobalObjHandler->MScheduler.Inst->releaseResources();
+      }
+    }
   }
 
 private:
   static std::atomic_uint MCounter;
   bool MModifyCounter;
-  std::unique_ptr<ResourceHandler> &MObj;
 };
-template <class ResourceHandler>
-std::atomic_uint ObjectUsageCounter<ResourceHandler>::MCounter{0};
-
-using LockGuard = std::lock_guard<SpinLock>;
+std::atomic_uint ObjectUsageCounter::MCounter{0};
 
 GlobalHandler::GlobalHandler() = default;
 GlobalHandler::~GlobalHandler() = default;
 
+GlobalHandler *&GlobalHandler::getInstancePtr() {
+  static GlobalHandler *RTGlobalObjHandler = new GlobalHandler();
+  return RTGlobalObjHandler;
+}
+
 GlobalHandler &GlobalHandler::instance() {
-  static GlobalHandler *SyclGlobalObjectsHandler = new GlobalHandler();
-  return *SyclGlobalObjectsHandler;
+  GlobalHandler *RTGlobalObjHandler = GlobalHandler::getInstancePtr();
+  assert(RTGlobalObjHandler && "Handler must not be deallocated earlier");
+  return *RTGlobalObjHandler;
 }
 
 template <typename T, typename... Types>
@@ -96,8 +106,7 @@ Scheduler &GlobalHandler::getScheduler() {
 }
 
 void GlobalHandler::registerSchedulerUsage(bool ModifyCounter) {
-  thread_local ObjectUsageCounter<Scheduler> SchedulerCounter(MScheduler.Inst,
-                                                              ModifyCounter);
+  thread_local ObjectUsageCounter SchedulerCounter(ModifyCounter);
 }
 
 ProgramManager &GlobalHandler::getProgramManager() {
@@ -153,20 +162,26 @@ ThreadPool &GlobalHandler::getHostTaskThreadPool() {
 void GlobalHandler::releaseDefaultContexts() {
   // Release shared-pointers to SYCL objects.
 #ifndef _WIN32
-  GlobalHandler::instance().MPlatformToDefaultContextCache.Inst.reset(nullptr);
+  MPlatformToDefaultContextCache.Inst.reset(nullptr);
 #else
   // Windows does not maintain dependencies between dynamically loaded libraries
   // and can unload SYCL runtime dependencies before sycl.dll's DllMain has
   // finished. To avoid calls to nowhere, intentionally leak platform to device
   // cache. This will prevent destructors from being called, thus no PI cleanup
   // routines will be called in the end.
+
   // Update: the win_proxy_loader addresses this for SYCL's own dependencies,
   // but the GPU device dlls seem to manually load yet another DLL which may
   // have been released when this function is called. So we still release() and
   // leak until that is addressed. context destructs fine on CPU device.
-  GlobalHandler::instance().MPlatformToDefaultContextCache.Inst.release();
+  //GlobalHandler::instance().MPlatformToDefaultContextCache.Inst.release();
+  MPlatformToDefaultContextCache.Inst.release();
 #endif
 }
+
+/*
+//CP - Hip was needing this code before, but now it's invalidated again.
+       No complaints from me, I guess. But not sure what the hip people will do.
 
 struct DefaultContextReleaseHandler {
   ~DefaultContextReleaseHandler() {
@@ -177,6 +192,7 @@ struct DefaultContextReleaseHandler {
 void GlobalHandler::registerDefaultContextReleaseHandler() {
   static DefaultContextReleaseHandler handler{};
 }
+*/
 
 // Note: Split from shutdown so it is available to the unittests for ensuring
 //       that the mock plugin is the lone plugin.
@@ -184,8 +200,8 @@ void GlobalHandler::unloadPlugins() {
   // Call to GlobalHandler::instance().getPlugins() initializes plugins. If
   // user application has loaded SYCL runtime, and never called any APIs,
   // there's no need to load and unload plugins.
-  if (GlobalHandler::instance().MPlugins.Inst) {
-    for (plugin &Plugin : GlobalHandler::instance().getPlugins()) {
+  if (MPlugins.Inst) {
+    for (plugin &Plugin : getPlugins()) {
       // PluginParameter is reserved for future use that can control
       // some parameters in the plugin tear-down process.
       // Currently, it is not used.
@@ -195,55 +211,67 @@ void GlobalHandler::unloadPlugins() {
     }
   }
   // Clear after unload to avoid uses after unload.
-  GlobalHandler::instance().getPlugins().clear();
+  getPlugins().clear();
 }
 
 void GlobalHandler::drainThreadPool() {
+#ifndef _WIN32
   if (MHostTaskThreadPool.Inst)
     MHostTaskThreadPool.Inst->drain();
+#endif
 }
 
 void shutdown() {
+  std::cout << "shutdown() entered" << std::endl;
+  
+  const LockGuard Lock{GlobalHandler::MSyclGlobalHandlerProtector};
+  GlobalHandler *&Handler = GlobalHandler::getInstancePtr();
+  if (!Handler)
+    return;
+
   // Ensure neither host task is working so that no default context is accessed
   // upon its release
+  Handler->drainThreadPool();
+  std::cout << "drainThreadPool completed (does nothing on Win)" << std::endl;
+  
+  if (Handler->MScheduler.Inst)
+    Handler->MScheduler.Inst->releaseResources();
+  std::cout << "releaseResources() completed (does nothing on Win)" << std::endl;
 
-  std::cout << "shutdown() entered" << std::endl;
 
-  if (GlobalHandler::instance().MScheduler.Inst)
-    GlobalHandler::instance().MScheduler.Inst->releaseResources();
-  std::cout << "releaseResources() completed." << std::endl;
-
-  GlobalHandler::instance().MScheduler.Inst.reset(nullptr);
-  std::cout << "MScheduler reset" << std::endl;
-
-  if (GlobalHandler::instance().MHostTaskThreadPool.Inst)
-    GlobalHandler::instance().MHostTaskThreadPool.Inst->finishAndWait();
+  if (Handler->MHostTaskThreadPool.Inst)
+    Handler->MHostTaskThreadPool.Inst->finishAndWait();
   std::cout << "MHostTaskThreadPool finished (or skipped)" << std::endl;
+  
 
   // If default contexts are requested after the first default contexts have
   // been released there may be a new default context. These must be released
   // prior to closing the plugins.
   // Note: Releasing a default context here may cause failures in plugins with
   // global state as the global state may have been released.
-  GlobalHandler::instance().releaseDefaultContexts();
+
+  Handler->releaseDefaultContexts();
   std::cout << "defaultContext released" << std::endl;
 
   // First, release resources, that may access plugins.
-  GlobalHandler::instance().MPlatformCache.Inst.reset(nullptr);
+  Handler->MPlatformCache.Inst.reset(nullptr);
   std::cout << "MPlatformCache reset" << std::endl;
-
-  GlobalHandler::instance().MProgramManager.Inst.reset(nullptr);
+  
+  Handler->MScheduler.Inst.reset(nullptr);
+  std::cout << "MScheduler reset" << std::endl;
+  
+  Handler->MProgramManager.Inst.reset(nullptr);
   std::cout << "MProgramManager reset" << std::endl;
-  std::cout << "resources cleared" << std::endl;
 
   // Clear the plugins and reset the instance if it was there.
-  GlobalHandler::instance().unloadPlugins();
-  if (GlobalHandler::instance().MPlugins.Inst)
-    GlobalHandler::instance().MPlugins.Inst.reset(nullptr);
+  Handler->unloadPlugins();
+  if (Handler->MPlugins.Inst)
+    Handler->MPlugins.Inst.reset(nullptr);
   std::cout << "plugins unloaded" << std::endl;
 
   // Release the rest of global resources.
-  delete &GlobalHandler::instance();
+  delete Handler;
+  Handler = nullptr;
 
   std::cout << "instance deleted and we are done with shutdown()" << std::endl;
 }

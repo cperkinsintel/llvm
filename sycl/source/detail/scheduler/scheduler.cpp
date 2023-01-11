@@ -137,6 +137,7 @@ EventImplPtr Scheduler::addCG(std::unique_ptr<detail::CG> CommandGroup,
       NewEvent = Result.NewEvent;
       ShouldEnqueue = Result.ShouldEnqueue;
     }
+    NewEvent->setSubmissionTime();
   }
 
   if (ShouldEnqueue) {
@@ -400,19 +401,9 @@ Scheduler::~Scheduler() {
 
 void Scheduler::releaseResources() {
   std::cout << "scheduler::releaseResources entered" << std::endl;
-  
-  
-  
-  //#ifndef _WIN32
-  if (DefaultHostQueue) {
-    DefaultHostQueue->wait();
-  }
-  std::cout << "defaultHostQueue->wait() done" << std::endl;
+  std::cout << "does nothing on Win32" << std::endl;
 
-  //#ifndef _WIN32 // host tasks seemingly never drain on Win
-  GlobalHandler::instance().drainThreadPool();
-  std::cout << "drainThreadPool done" << std::endl;
-  //#endif
+#ifndef _WIN32
 
   //  There might be some commands scheduled for post enqueue cleanup that
   //  haven't been freed because of the graph mutex being locked at the time,
@@ -434,7 +425,7 @@ void Scheduler::releaseResources() {
     cleanupDeferredMemObjects(BlockingT::BLOCKING);
   std::cout << "deferredMemObjects cleaned" << std::endl;
   
-  //#endif
+#endif
 }
 
 MemObjRecord *Scheduler::getMemObjRecord(const Requirement *const Req) {
