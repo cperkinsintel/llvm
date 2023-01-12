@@ -395,7 +395,7 @@ Scheduler::Scheduler() {
 Scheduler::~Scheduler() {
   std::cout << "~Scheduler says goodbye!" << std::endl;
   //#ifndef _WIN32
-  //DefaultHostQueue.reset();
+  DefaultHostQueue.reset();
   //#endif
 }
 
@@ -403,7 +403,7 @@ void Scheduler::releaseResources() {
   std::cout << "scheduler::releaseResources entered" << std::endl;
   std::cout << "does nothing on Win32" << std::endl;
 
-#ifndef _WIN32
+  #ifndef _WIN32
 
   //  There might be some commands scheduled for post enqueue cleanup that
   //  haven't been freed because of the graph mutex being locked at the time,
@@ -425,7 +425,7 @@ void Scheduler::releaseResources() {
     cleanupDeferredMemObjects(BlockingT::BLOCKING);
   std::cout << "deferredMemObjects cleaned" << std::endl;
   
-#endif
+  #endif
 }
 
 MemObjRecord *Scheduler::getMemObjRecord(const Requirement *const Req) {
@@ -508,6 +508,7 @@ inline bool Scheduler::isDeferredMemObjectsEmpty() {
 }
 
 void Scheduler::cleanupDeferredMemObjects(BlockingT Blocking) {
+  //std::cout << "Scheduler::cleanupDeferredMemObjects - blocking: " << Blocking << std::endl;
   if (isDeferredMemObjectsEmpty())
     return;
   if (Blocking == BlockingT::BLOCKING) {

@@ -85,9 +85,12 @@ void SYCLMemObjT::updateHostMemory(void *const Ptr) {
 }
 
 void SYCLMemObjT::updateHostMemory() {
-  if ((MUploadDataFunctor != nullptr) && MNeedWriteBack)
+  std::cout << "updateHostMemory()  - MNeedWriteBack/MRecord/MOpenCLInterop: " << MNeedWriteBack << "/" << MRecord << "/" << MOpenCLInterop  << std::endl;
+  if ((MUploadDataFunctor != nullptr) && MNeedWriteBack){
+    std::cout << "about to call MUploadFunctor()" << std::endl;
     MUploadDataFunctor();
-
+  }
+  
   // If we're attached to a memory record, process the deletion of the memory
   // record. We may get detached before we do this.
   if (MRecord) {
@@ -97,13 +100,18 @@ void SYCLMemObjT::updateHostMemory() {
         Result &&
         "removeMemoryObject should not return false in mem object destructor");
   }
+  std::cout << "finished removeMemoryObject(this) for " << MRecord << std::endl;
+
   releaseHostMem(MShadowCopy);
+  std::cout << "releaseHostMem(MShadowCopy) completed" << std::endl;
 
   if (MOpenCLInterop) {
     const plugin &Plugin = getPlugin();
     Plugin.call<PiApiKind::piMemRelease>(
         pi::cast<RT::PiMem>(MInteropMemObject));
+    std::cout << "openclinterop released memory" << std::endl;
   }
+ 
 }
 const plugin &SYCLMemObjT::getPlugin() const {
   assert((MInteropContext != nullptr) &&
@@ -155,6 +163,8 @@ void SYCLMemObjT::determineHostPtr(const ContextImplPtr &Context,
 
 void SYCLMemObjT::detachMemoryObject(
     const std::shared_ptr<SYCLMemObjT> &Self) const {
+  //CP
+#ifndef _WIN32
   // Check MRecord without read lock because at this point we expect that no
   // commands that operate on the buffer can be created. MRecord is nullptr on
   // buffer creation and set to meaningfull
@@ -165,6 +175,8 @@ void SYCLMemObjT::detachMemoryObject(
   // ForceDeferredMemObjRelease in scheduler.
   if (MRecord && (!MHostPtrProvided || Scheduler::ForceDeferredMemObjRelease))
     Scheduler::getInstance().deferMemObjRelease(Self);
+
+#endif
 }
 
 } // namespace detail

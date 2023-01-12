@@ -93,8 +93,7 @@ public:
     std::cout << "submiTWork T &&Func" << std::endl;
     {
       std::lock_guard<std::mutex> Lock(MJobQueueMutex);
-      //MJobQueue.emplace([F = std::move(Func)]() { F(); }); // <-- does this invoke? no
-      MJobQueue.emplace(std::move(Func));
+      MJobQueue.emplace([F = std::move(Func)]() { F(); }); // <-- does this invoke? no
     }
     MJobsInPool++;
     MDoSmthOrStop.notify_one();
