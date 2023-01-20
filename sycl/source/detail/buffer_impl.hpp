@@ -156,6 +156,7 @@ public:
   MemObjType getType() const override { return MemObjType::Buffer; }
 
   ~buffer_impl() {
+    std::cout << "~buffer_impl" << std::endl;
     try {
       BaseT::updateHostMemory();
     } catch (...) {
