@@ -92,7 +92,7 @@ public:
         Thread.join();
   }
 
-  template <typename T> void submit(T &&Func) {
+  template <typename T> void submitWork(T &&Func) {
     {
       std::cout << "ThreadPool::submit() MJobsInPool/MThreadCount: " << MJobsInPool << "/" << MThreadCount << std::endl;
       std::lock_guard<std::mutex> Lock(MJobQueueMutex);
@@ -102,7 +102,7 @@ public:
     MDoSmthOrStop.notify_one();
   }
 
-  void submit(std::function<void()> &&Func) {
+  void submitWork(std::function<void()> &&Func) {
     {
       std::cout << "ThreadPool::submit std::function() MJobsInPool/MThreadCount: " << MJobsInPool << "/" << MThreadCount << std::endl;
       std::lock_guard<std::mutex> Lock(MJobQueueMutex);
