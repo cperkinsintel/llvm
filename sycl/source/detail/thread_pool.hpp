@@ -47,7 +47,9 @@ class ThreadPool {
       MJobQueue.pop();
       Lock.unlock();
 
+      std::cout << "start Job()" << std::endl;
       Job();
+      std::cout << "end Job()" << std::endl;
 
       Lock.lock();
 
