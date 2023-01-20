@@ -67,6 +67,7 @@ void SYCLMemObjT::releaseMem(ContextImplPtr Context, void *MemAllocation) {
 }
 
 void SYCLMemObjT::updateHostMemory(void *const Ptr) {
+  std::cout << "updateHostMmemory(Ptr)" << std::endl;
   const id<3> Offset{0, 0, 0};
   const range<3> AccessRange{MSizeInBytes, 1, 1};
   const range<3> MemoryRange{MSizeInBytes, 1, 1};
@@ -85,6 +86,7 @@ void SYCLMemObjT::updateHostMemory(void *const Ptr) {
 }
 
 void SYCLMemObjT::updateHostMemory() {
+  std::cout << "updateHostMmemory() MRecord: " << MRecord << std::endl;
   if ((MUploadDataFunctor != nullptr) && MNeedWriteBack)
     MUploadDataFunctor();
 

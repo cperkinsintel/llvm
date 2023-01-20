@@ -33,6 +33,7 @@ class ThreadPool {
   std::atomic_uint MJobsInPool;
 
   void worker() {
+    std::cout << "ThreadPool::worker() MJobsInPool/MThreadCount: " << MJobsInPool << "/" << MThreadCount << std::endl;
     GlobalHandler::instance().registerSchedulerUsage(/*ModifyCounter*/ false);
     std::unique_lock<std::mutex> Lock(MJobQueueMutex);
     while (true) {
@@ -55,6 +56,7 @@ class ThreadPool {
   }
 
   void start() {
+    std::cout << "ThreadPool::start() MJobsInPool/MThreadCount: " << MJobsInPool << "/" << MThreadCount << std::endl;
     MLaunchedThreads.reserve(MThreadCount);
 
     MStop.store(false);
@@ -66,6 +68,7 @@ class ThreadPool {
 
 public:
   void drain() {
+    std::cout << "ThreadPool::drain() MJobsInPool/MThreadCount: " << MJobsInPool << "/" << MThreadCount << std::endl;
     while (MJobsInPool != 0)
       std::this_thread::yield();
   }
@@ -77,6 +80,7 @@ public:
   ~ThreadPool() { finishAndWait(); }
 
   void finishAndWait() {
+    std::cout << "ThreadPool::finishAndWait() MJobsInPool/MThreadCount: " << MJobsInPool << "/" << MThreadCount << std::endl;
     MStop.store(true);
 
     MDoSmthOrStop.notify_all();
@@ -88,6 +92,7 @@ public:
 
   template <typename T> void submit(T &&Func) {
     {
+      std::cout << "ThreadPool::submit() MJobsInPool/MThreadCount: " << MJobsInPool << "/" << MThreadCount << std::endl;
       std::lock_guard<std::mutex> Lock(MJobQueueMutex);
       MJobQueue.emplace([F = std::move(Func)]() { F(); });
     }
@@ -97,6 +102,7 @@ public:
 
   void submit(std::function<void()> &&Func) {
     {
+      std::cout << "ThreadPool::submit std::function() MJobsInPool/MThreadCount: " << MJobsInPool << "/" << MThreadCount << std::endl;
       std::lock_guard<std::mutex> Lock(MJobQueueMutex);
       MJobQueue.emplace(Func);
     }
