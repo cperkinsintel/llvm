@@ -157,7 +157,9 @@ void SYCLMemObjT::determineHostPtr(const ContextImplPtr &Context,
 
 void SYCLMemObjT::detachMemoryObject(
     const std::shared_ptr<SYCLMemObjT> &Self) const {
+  std::cout << "detachMemortyObject called - but nothing" << std::endl;
 #ifdef __SYCL_DEFER_MEM_OBJ_DESTRUCTION
+  std::cout << "detachMemoryObject() MRecord: " << MRecord << std::endl;
   // Check MRecord without read lock because at this point we expect that no
   // commands that operate on the buffer can be created. MRecord is nullptr on
   // buffer creation and set to meaningfull
