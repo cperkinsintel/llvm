@@ -202,11 +202,13 @@ void GlobalHandler::prepareSchedulerToRelease() {
 }
 
 void GlobalHandler::drainThreadPool() {
+  std::cout << "drainThreadPool " << (bool)(MHostTaskThreadPool.Inst) << std::endl;
   if (MHostTaskThreadPool.Inst)
     MHostTaskThreadPool.Inst->drain();
 }
 
 void shutdown() {
+  std::cout << "shutdown()" << std::endl;
   const LockGuard Lock{GlobalHandler::MSyclGlobalHandlerProtector};
   GlobalHandler *&Handler = GlobalHandler::getInstancePtr();
   if (!Handler)

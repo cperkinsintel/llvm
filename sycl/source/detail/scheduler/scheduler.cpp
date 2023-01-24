@@ -389,7 +389,10 @@ Scheduler::Scheduler() {
                      /*PropList=*/{}));
 }
 
-Scheduler::~Scheduler() { DefaultHostQueue.reset(); }
+Scheduler::~Scheduler() { 
+  std::cout << "~Scheduler(). about to call DefaultHostQueue.reset()" << std::endl;
+  DefaultHostQueue.reset(); 
+  }
 
 void Scheduler::releaseResources() {
 #ifdef __SYCL_DEFER_MEM_OBJ_DESTRUCTION

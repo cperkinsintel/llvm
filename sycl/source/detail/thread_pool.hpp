@@ -97,8 +97,9 @@ public:
       std::cout << "ThreadPool::submit() MJobsInPool/MThreadCount: " << MJobsInPool << "/" << MThreadCount << std::endl;
       std::lock_guard<std::mutex> Lock(MJobQueueMutex);
       MJobQueue.emplace([F = std::move(Func)]() { F(); });
+      MJobsInPool++;
     }
-    MJobsInPool++;
+   // MJobsInPool++;
     MDoSmthOrStop.notify_one();
   }
 
@@ -107,8 +108,9 @@ public:
       std::cout << "ThreadPool::submit std::function() MJobsInPool/MThreadCount: " << MJobsInPool << "/" << MThreadCount << std::endl;
       std::lock_guard<std::mutex> Lock(MJobQueueMutex);
       MJobQueue.emplace(Func);
+      MJobsInPool++;
     }
-    MJobsInPool++;
+    //MJobsInPool++;
     MDoSmthOrStop.notify_one();
   }
 };

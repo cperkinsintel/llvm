@@ -243,6 +243,7 @@ public:
   }
 
   ~queue_impl() {
+    std::cout << "~queue_impl" << std::endl;
     // The trace event created in the constructor should be active through the
     // lifetime of the queue object as member variables when ABI breakage is
     // allowed. This example shows MTraceEvent as a member variable.
