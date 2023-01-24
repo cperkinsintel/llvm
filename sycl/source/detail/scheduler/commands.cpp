@@ -290,9 +290,12 @@ class DispatchHostTask {
 public:
   DispatchHostTask(ExecCGCommand *ThisCmd,
                    std::vector<interop_handle::ReqToMem> ReqToMem)
-      : MThisCmd{ThisCmd}, MReqToMem(std::move(ReqToMem)) {}
+      : MThisCmd{ThisCmd}, MReqToMem(std::move(ReqToMem)) {
+        std::cout << "DispatchHostTask constructor" << std::endl;
+      }
 
   void operator()() const {
+    std::cout << "DispatchHostTask operator()" << std::endl;
     assert(MThisCmd->getCG().getType() == CG::CGTYPE::CodeplayHostTask);
 
     CGHostTask &HostTask = static_cast<CGHostTask &>(MThisCmd->getCG());
