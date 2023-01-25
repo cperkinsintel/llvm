@@ -189,7 +189,7 @@ using CommandPtr = std::unique_ptr<Command>;
 using FusionList = std::unique_ptr<KernelFusionCommand>;
 using FusionMap = std::unordered_map<QueueIdT, FusionList>;
 
-#ifndef _WIN32
+  //#ifndef _WIN32
 // Windows and Linux both call shutdown, but threading differences
 // mean we don't defer mem object destruction on Windows, because
 // their destruction may occur AFTER the Scheduler is destroyed,
@@ -199,7 +199,7 @@ using FusionMap = std::unordered_map<QueueIdT, FusionList>;
 // TODO: re-enable both thread-pool draining and deferredMemObj
 // destruction on Windows.
 #define __SYCL_DEFER_MEM_OBJ_DESTRUCTION 1
-#endif
+  //#endif
 
 /// Memory Object Record
 ///

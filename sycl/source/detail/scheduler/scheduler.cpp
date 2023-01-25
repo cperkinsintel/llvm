@@ -392,11 +392,17 @@ Scheduler::Scheduler() {
 Scheduler::~Scheduler() { DefaultHostQueue.reset(); }
 
 void Scheduler::releaseResources() {
+
 #ifdef __SYCL_DEFER_MEM_OBJ_DESTRUCTION
   BlockingT blockValue = BlockingT::BLOCKING;
 #else
   BlockingT blockValue = BlockingT::NON_BLOCKING;
 #endif
+  //#ifdef _WIN32
+  // BlockingT blockValue = BlockingT::NON_BLOCKING;
+  //#else
+  //BlockingT blockValue = BlockingT::BLOCKING;
+  //#endif
 
   //  There might be some commands scheduled for post enqueue cleanup that
   //  haven't been freed because of the graph mutex being locked at the time,
