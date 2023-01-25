@@ -203,11 +203,15 @@ void GlobalHandler::prepareSchedulerToRelease() {
 }
 
 void GlobalHandler::drainThreadPool() {
+  std::cout << "START: drainThreadPool" << std::endl;
   if (MHostTaskThreadPool.Inst)
     MHostTaskThreadPool.Inst->drain();
+
+  std::cout << "END: drainThreadPool" << std::endl;
 }
 
 void shutdown() {
+  std::cout << "shutdown() start" << std::endl;
   const LockGuard Lock{GlobalHandler::MSyclGlobalHandlerProtector};
   GlobalHandler *&Handler = GlobalHandler::getInstancePtr();
   if (!Handler)
@@ -240,6 +244,8 @@ void shutdown() {
   // Release the rest of global resources.
   delete Handler;
   Handler = nullptr;
+
+  std::cout << "shutdown() end" << std::endl;
 }
 
 #ifdef _WIN32

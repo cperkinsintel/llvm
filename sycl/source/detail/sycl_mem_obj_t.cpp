@@ -85,6 +85,7 @@ void SYCLMemObjT::updateHostMemory(void *const Ptr) {
 }
 
 void SYCLMemObjT::updateHostMemory() {
+  std::cout << "START: updateHostMemory() - MRecord: " << MRecord << " MNeedWriteBack: " << MNeedWriteBack << std::endl;
   if ((MUploadDataFunctor != nullptr) && MNeedWriteBack)
     MUploadDataFunctor();
 
@@ -104,6 +105,7 @@ void SYCLMemObjT::updateHostMemory() {
     Plugin.call<PiApiKind::piMemRelease>(
         pi::cast<RT::PiMem>(MInteropMemObject));
   }
+  std::cout << "END: updateHostMemory()" << std::endl;
 }
 const plugin &SYCLMemObjT::getPlugin() const {
   assert((MInteropContext != nullptr) &&

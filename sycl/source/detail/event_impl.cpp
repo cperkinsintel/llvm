@@ -80,6 +80,7 @@ void event_impl::waitInternal() {
 
 void event_impl::setComplete() {
   if (MHostEvent || !MEvent) {
+    std::cout << "event_impl::setComplete()" << std::endl;
     {
       std::unique_lock<std::mutex> lock(MMutex);
 #ifndef NDEBUG
