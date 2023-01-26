@@ -45,8 +45,9 @@ class ThreadPool {
       std::function<void()> Job = std::move(MJobQueue.front());
       MJobQueue.pop();
       Lock.unlock();
-
+      std::cout << "start Job() id: " << std::this_thread::get_id() << std::endl;
       Job();
+      std::cout << "end Job()" << std::endl;
 
       Lock.lock();
 
@@ -66,8 +67,13 @@ class ThreadPool {
 
 public:
   void drain() {
-    while (MJobsInPool != 0)
-      std::this_thread::yield();
+    std::cout << "ThreadPool::drain() MJobsInPool: " << MJobsInPool << " MThreadCount: (" << MThreadCount << ")" 
+              << "id: " << std::this_thread::get_id() << std::endl;
+
+    while (MJobsInPool > 0)
+      std::this_thread::yield(); 
+
+    std::cout << "~drain() completed" << std::endl;
   }
 
   ThreadPool(unsigned int ThreadCount = 1) : MThreadCount(ThreadCount) {
@@ -77,6 +83,7 @@ public:
   ~ThreadPool() { finishAndWait(); }
 
   void finishAndWait() {
+    std::cout << "finishAndWait() id: " << std::this_thread::get_id() << std::endl;
     MStop.store(true);
 
     MDoSmthOrStop.notify_all();

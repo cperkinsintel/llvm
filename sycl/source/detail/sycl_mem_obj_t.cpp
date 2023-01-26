@@ -13,6 +13,8 @@
 #include <detail/scheduler/scheduler.hpp>
 #include <detail/sycl_mem_obj_t.hpp>
 
+#include <thread>
+
 namespace sycl {
 __SYCL_INLINE_VER_NAMESPACE(_V1) {
 namespace detail {
@@ -85,7 +87,8 @@ void SYCLMemObjT::updateHostMemory(void *const Ptr) {
 }
 
 void SYCLMemObjT::updateHostMemory() {
-  std::cout << "START: updateHostMemory() - MRecord: " << MRecord << " MNeedWriteBack: " << MNeedWriteBack << std::endl;
+  std::cout << "START: updateHostMemory() - MRecord: " << MRecord << " MNeedWriteBack: " << MNeedWriteBack
+            << " id: " << std::this_thread::get_id()  << std::endl;
   if ((MUploadDataFunctor != nullptr) && MNeedWriteBack)
     MUploadDataFunctor();
 

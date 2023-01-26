@@ -22,6 +22,7 @@
 #include <windows.h>
 #endif
 
+#include <thread> //CP
 #include <vector>
 
 namespace sycl {
@@ -211,7 +212,7 @@ void GlobalHandler::drainThreadPool() {
 }
 
 void shutdown() {
-  std::cout << "shutdown() start" << std::endl;
+  std::cout << "shutdown() start id:" << std::this_thread::get_id() << std::endl;
   const LockGuard Lock{GlobalHandler::MSyclGlobalHandlerProtector};
   GlobalHandler *&Handler = GlobalHandler::getInstancePtr();
   if (!Handler)
