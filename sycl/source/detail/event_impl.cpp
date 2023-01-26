@@ -69,10 +69,12 @@ void event_impl::waitInternal() {
         make_error_code(errc::invalid),
         "waitInternal method cannot be used for a discarded event.");
   } else if (MState == HES_Complete){
-    std::cout << "event_impl.waitInternal - no need to wait.  id: " << std::this_thread::get_id() << std::endl; 
+    std::cout << "event_impl.waitInternal - no need to wait.  id: " << std::this_thread::get_id()
+              << "  event_impl: " << (unsigned)(this)  << std::endl; 
   } else if (MState != HES_Complete) {
     // Wait for the host event
-    std::cout << "event_impl.waitInternal id: " << std::this_thread::get_id() << std::endl;
+    std::cout << "event_impl.waitInternal WAIT id: " << std::this_thread::get_id()
+	      << " event_impl: " << (unsigned)(this) << std::endl;
     std::unique_lock<std::mutex> lock(MMutex);
     cv.wait(lock, [this] { return MState == HES_Complete; });
     std::cout << "event_impl.waitInternal - done waiting" << std::endl;
@@ -85,7 +87,8 @@ void event_impl::waitInternal() {
 
 void event_impl::setComplete() {
   if (MHostEvent || !MEvent) {
-    std::cout << "event_impl::setComplete() - id: " << std::this_thread::get_id() << std::endl;
+    std::cout << "event_impl::setComplete() - id: " << std::this_thread::get_id()
+	      << " event_impl: " << (unsigned)(this) << std::endl;
     {
       std::unique_lock<std::mutex> lock(MMutex);
 #ifndef NDEBUG

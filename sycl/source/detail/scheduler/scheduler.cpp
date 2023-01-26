@@ -387,6 +387,9 @@ Scheduler::Scheduler() {
       new queue_impl(detail::getSyclObjImpl(HostDevice),
                      detail::getSyclObjImpl(HostContext), /*AsyncHandler=*/{},
                      /*PropList=*/{}));
+  #ifdef _WIN32
+  DefaultHostQueue->getAssertHappenedBuffer().set_final_data();
+  #endif
 }
 
 Scheduler::~Scheduler() { DefaultHostQueue.reset(); }
@@ -481,6 +484,7 @@ void Scheduler::NotifyHostTaskCompletion(Command *Cmd) {
     {
       std::lock_guard<std::mutex> Guard(Cmd->MBlockedUsersMutex);
       // update self-event status
+      std::cout << "Scheduler::NotifyHostTaskCompletion calling setComplete()" << std::endl;
       Cmd->getEvent()->setComplete();
     }
     Scheduler::enqueueUnblockedCommands(Cmd->MBlockedUsers, Lock, ToCleanUp);

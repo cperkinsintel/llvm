@@ -45,6 +45,8 @@ public:
       MCounter++;
   }
   ~ObjectUsageCounter() {
+    std::cout << "~ObjectUsageCounter. MModifyCOunter: " << MModifyCounter << " MCounter: " << MCounter << std::endl;
+    
     if (!MModifyCounter)
       return;
 
@@ -103,7 +105,7 @@ Scheduler &GlobalHandler::getScheduler() {
 }
 
 void GlobalHandler::registerSchedulerUsage(bool ModifyCounter) {
-  thread_local ObjectUsageCounter SchedulerCounter(ModifyCounter);
+  thread_local static ObjectUsageCounter SchedulerCounter(ModifyCounter);
 }
 
 ProgramManager &GlobalHandler::getProgramManager() {
@@ -196,9 +198,9 @@ void GlobalHandler::unloadPlugins() {
 
 void GlobalHandler::prepareSchedulerToRelease() {
   //#ifdef __SYCL_DEFER_MEM_OBJ_DESTRUCTION
-#ifndef _WIN32
+  //#ifndef _WIN32
   drainThreadPool();
-#endif
+  //#endif
   if (MScheduler.Inst)
     MScheduler.Inst->releaseResources();
 }
@@ -278,7 +280,9 @@ extern "C" __SYCL_EXPORT BOOL WINAPI DllMain(HINSTANCE hinstDLL,
     if (PrintPiTrace)
       std::cout << "---> DLL_PROCESS_ATTACH syclx.dll\n" << std::endl;
   case DLL_THREAD_ATTACH:
+    break;
   case DLL_THREAD_DETACH:
+    std::cout << "DLL_THREAD_DETACH: " << std::this_thread::get_id() << std::endl;
     break;
   }
   return TRUE; // Successful DLL_PROCESS_ATTACH.

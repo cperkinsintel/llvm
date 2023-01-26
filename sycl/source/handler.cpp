@@ -210,8 +210,10 @@ event handler::finalize() {
         if (PI_SUCCESS != EnqueueKernel())
           throw runtime_error("Enqueue process failed.",
                               PI_ERROR_INVALID_OPERATION);
-        else if (NewEvent->is_host() || NewEvent->getHandleRef() == nullptr)
+        else if (NewEvent->is_host() || NewEvent->getHandleRef() == nullptr){
+	  std::cout << "handler::finalize() calling setComplete()" << std::endl;
           NewEvent->setComplete();
+	}
 
         MLastEvent = detail::createSyclObjFromImpl<event>(NewEvent);
       }

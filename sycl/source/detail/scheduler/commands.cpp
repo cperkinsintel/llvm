@@ -293,12 +293,14 @@ public:
       : MThisCmd{ThisCmd}, MReqToMem(std::move(ReqToMem)) {}
 
   void operator()() const {
-    assert(MThisCmd->getCG().getType() == CG::CGTYPE::CodeplayHostTask);
+    //std::cout << "DispatchHostTask operator() " << std::this_thread::get_id() << std::endl;
+    //assert(MThisCmd->getCG().getType() == CG::CGTYPE::CodeplayHostTask);
 
     CGHostTask &HostTask = static_cast<CGHostTask &>(MThisCmd->getCG());
 
     pi_result WaitResult = waitForEvents();
     if (WaitResult != PI_SUCCESS) {
+      //std::cout << "DispatchHostTask operator() early exit. != PI_SUCCESS" << std::endl;
       std::exception_ptr EPtr = std::make_exception_ptr(sycl::runtime_error(
           std::string("Couldn't wait for host-task's dependencies"),
           WaitResult));
@@ -320,6 +322,7 @@ public:
       } else
         HostTask.MHostTask->call();
     } catch (...) {
+      //std::cout << "DispatchHostTask operator() catch() " << std::endl;
       HostTask.MQueue->reportAsyncException(std::current_exception());
     }
 
@@ -749,8 +752,10 @@ bool Command::enqueue(EnqueueResultT &EnqueueResult, BlockingT Blocking,
         EnqueueResultT(EnqueueResultT::SyclEnqueueFailed, this, Res);
   else {
     if (MShouldCompleteEventIfPossible &&
-        (MEvent->is_host() || MEvent->getHandleRef() == nullptr))
+        (MEvent->is_host() || MEvent->getHandleRef() == nullptr)){
+      std::cout << "command::enqueue calling setComplete()" << std::endl;
       MEvent->setComplete();
+    }
 
     // Consider the command is successfully enqueued if return code is
     // PI_SUCCESS

@@ -39,19 +39,27 @@ class ThreadPool {
       MDoSmthOrStop.wait(
           Lock, [this]() { return !MJobQueue.empty() || MStop.load(); });
 
-      if (MStop.load())
+      //we have the lock.  
+      if (MStop.load()){
+	Lock.unlock(); //<--probably not necessary
         break;
+      }
 
+      MJobsInPool--;
       std::function<void()> Job = std::move(MJobQueue.front());
       MJobQueue.pop();
-      Lock.unlock();
+      Lock.unlock(); // allow MJobQueue or MJobsInPool to be updated while the Job runs.
+      
       std::cout << "start Job() id: " << std::this_thread::get_id() << std::endl;
       Job();
       std::cout << "end Job()" << std::endl;
 
-      Lock.lock();
-
-      MJobsInPool--;
+      
+      //Lock.lock(); // lock and update MJobsInPool
+      //MJobsInPool--;
+      
+      //Lock.unlock(); // free lock again, allowing updates to MJobQueue or MJobsInPool
+      MDoSmthOrStop.notify_one();
     }
   }
 
@@ -71,7 +79,8 @@ public:
               << "id: " << std::this_thread::get_id() << std::endl;
 
     while (MJobsInPool > 0)
-      std::this_thread::yield(); 
+      std::this_thread::yield();
+    //finishAndWait();
 
     std::cout << "~drain() completed" << std::endl;
   }
@@ -84,21 +93,25 @@ public:
 
   void finishAndWait() {
     std::cout << "finishAndWait() id: " << std::this_thread::get_id() << std::endl;
-    MStop.store(true);
-
+    MStop.store(true); // <-- prevents Job() from running. ? 
     MDoSmthOrStop.notify_all();
 
-    for (std::thread &Thread : MLaunchedThreads)
+    std::cout << "finishAndWait, MLaunchedThreads.size(): " << MLaunchedThreads.size() << std::endl;
+
+    for (std::thread &Thread : MLaunchedThreads){
+      std::cout << "Thread: " << Thread.get_id() << std::endl;
       if (Thread.joinable())
         Thread.join();
+    }
   }
 
   template <typename T> void submit(T &&Func) {
     {
       std::lock_guard<std::mutex> Lock(MJobQueueMutex);
       MJobQueue.emplace([F = std::move(Func)]() { F(); });
+      MJobsInPool++;
     }
-    MJobsInPool++;
+    //MJobsInPool++;
     MDoSmthOrStop.notify_one();
   }
 
@@ -106,8 +119,9 @@ public:
     {
       std::lock_guard<std::mutex> Lock(MJobQueueMutex);
       MJobQueue.emplace(Func);
+      MJobsInPool++;
     }
-    MJobsInPool++;
+    //MJobsInPool++;
     MDoSmthOrStop.notify_one();
   }
 };
