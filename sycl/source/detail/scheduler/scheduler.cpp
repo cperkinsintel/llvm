@@ -412,7 +412,9 @@ void Scheduler::releaseResources() {
   // queue_impl, ~queue_impl is called and buffer for assert (which is created
   // with size only so all confitions for deferred release are satisfied) is
   // added to deferred mem obj storage. So we may end up with leak.
+#ifndef _WIN32
   while (!isDeferredMemObjectsEmpty())
+#endif
     cleanupDeferredMemObjects(blockValue);
 }
 
@@ -506,6 +508,7 @@ void Scheduler::cleanupDeferredMemObjects(BlockingT Blocking) {
     }
     // if any objects in TempStorage exist - it is leaving scope and being
     // deleted
+    return;
   }
 
   std::vector<std::shared_ptr<SYCLMemObjI>> ObjsReadyToRelease;
