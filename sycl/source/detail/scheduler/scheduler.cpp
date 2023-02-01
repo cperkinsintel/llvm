@@ -407,8 +407,10 @@ void Scheduler::releaseResources() {
   // existing deferred mem objects under write lock, during this process we
   // cleanup commands related to this record, command may have last reference to
   // queue_impl, ~queue_impl is called and buffer for assert (which is created
-  // with size only so all confitions for deferred release are satisfied) is
+  // with size only so all conditions for deferred release are satisfied) is
   // added to deferred mem obj storage. So we may end up with leak.
+  // Windows: once we are shutting down, we can't rely on thread completion.
+  // So we clean up the deferred mem objects, but don't loop.
 #ifndef _WIN32
   while (!isDeferredMemObjectsEmpty())
 #endif

@@ -45,10 +45,9 @@ public:
       MCounter++;
   }
   ~ObjectUsageCounter() {
-#ifdef XPTI_ENABLE_INSTRUMENTATION
+#if defined(XPTI_ENABLE_INSTRUMENTATION) && defined(_WIN32)
       if (xptiTraceEnabled())
-	return; // When doing xpti tracing, we can't safely call shutdown.
-                       // TODO: figure out what XPTI is doing that prevents release.
+	return; // When doing xpti tracing, we can't safely perform some shutdown ops.
 #endif
     if (!MModifyCounter)
       return;
