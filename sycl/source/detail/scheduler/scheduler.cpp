@@ -501,6 +501,7 @@ void Scheduler::cleanupDeferredMemObjects(BlockingT Blocking) {
   if (isDeferredMemObjectsEmpty())
     return;
   if (Blocking == BlockingT::BLOCKING) {
+    this->isShuttingDown = true;
     std::vector<std::shared_ptr<SYCLMemObjI>> TempStorage;
     {
       std::lock_guard<std::mutex> LockDef{MDeferredMemReleaseMutex};

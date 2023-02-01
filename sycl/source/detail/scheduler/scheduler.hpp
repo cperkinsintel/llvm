@@ -511,6 +511,7 @@ protected:
 
   // May lock graph with read and write modes during execution.
   void cleanupDeferredMemObjects(BlockingT Blocking);
+  bool isShuttingDown = false;
 
   // POD struct to convey some additional information from GraphBuilder::addCG
   // to the Scheduler to support kernel fusion.
