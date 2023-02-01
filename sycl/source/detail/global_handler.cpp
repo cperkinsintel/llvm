@@ -200,7 +200,6 @@ void GlobalHandler::unloadPlugins() {
 }
 
 void GlobalHandler::prepareSchedulerToRelease() {
-  //#ifdef __SYCL_DEFER_MEM_OBJ_DESTRUCTION
 #ifndef _WIN32
   drainThreadPool();
 #endif
