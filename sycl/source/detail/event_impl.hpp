@@ -9,6 +9,7 @@
 #pragma once
 
 #include <detail/plugin.hpp>
+#include <detail/twinlock.hpp>
 #include <sycl/detail/cl.h>
 #include <sycl/detail/common.hpp>
 #include <sycl/detail/host_profiling_info.hpp>
@@ -245,7 +246,8 @@ public:
   bool isCompleted();
 
   void attachEventToComplete(const EventImplPtr &Event) {
-    std::lock_guard<std::mutex> Lock(MMutex);
+    //std::lock_guard<std::mutex> Lock(MMutex);
+    std::lock_guard<TwinLock> Lock(MMutex);
     MPostCompleteEvents.push_back(Event);
   }
 
@@ -291,7 +293,8 @@ protected:
   // HostEventState enum.
   std::atomic<int> MState;
 
-  std::mutex MMutex;
+  //std::mutex MMutex;  //CP
+  TwinLock MMutex;
   std::condition_variable cv;
 
   friend std::vector<RT::PiEvent>

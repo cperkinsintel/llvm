@@ -8,7 +8,8 @@
 
 #pragma once
 
-#include <sycl/detail/spinlock.hpp>
+//#include <sycl/detail/spinlock.hpp>
+#include <detail/twinlock.hpp>
 #include <sycl/detail/util.hpp>
 
 #include <memory>
@@ -86,7 +87,7 @@ private:
   friend void shutdown();
   friend class ObjectUsageCounter;
   static GlobalHandler *&getInstancePtr();
-  static SpinLock MSyclGlobalHandlerProtector;
+  static TwinLock MSyclGlobalHandlerProtector;
 
   // Constructor and destructor are declared out-of-line to allow incomplete
   // types as template arguments to unique_ptr.
@@ -95,7 +96,7 @@ private:
 
   template <typename T> struct InstWithLock {
     std::unique_ptr<T> Inst;
-    SpinLock Lock;
+    TwinLock Lock;
   };
 
   template <typename T, typename... Types>

@@ -192,6 +192,7 @@ set(SYCL_SOURCES
     "detail/scheduler/graph_builder.cpp"
     "detail/spec_constant_impl.cpp"
     "detail/sycl_mem_obj_t.cpp"
+    "detail/twinlock.cpp"
     "detail/usm/usm_impl.cpp"
     "detail/util.cpp"
     "detail/xpti_registry.cpp"

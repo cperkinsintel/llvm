@@ -11,6 +11,7 @@
 #include <detail/plugin.hpp>
 #include <detail/queue_impl.hpp>
 #include <detail/scheduler/scheduler.hpp>
+#include <detail/twinlock.hpp>
 #include <sycl/context.hpp>
 #include <sycl/device_selector.hpp>
 

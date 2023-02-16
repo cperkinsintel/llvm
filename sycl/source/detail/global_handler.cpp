@@ -18,10 +18,11 @@
 #include <detail/program_manager/program_manager.hpp>
 #include <detail/scheduler/scheduler.hpp>
 #include <detail/thread_pool.hpp>
+#include <detail/twinlock.hpp>
 #include <detail/xpti_registry.hpp>
 #include <sycl/detail/device_filter.hpp>
 #include <sycl/detail/pi.hpp>
-#include <sycl/detail/spinlock.hpp>
+//#include <sycl/detail/spinlock.hpp>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -33,8 +34,8 @@ namespace sycl {
 __SYCL_INLINE_VER_NAMESPACE(_V1) {
 namespace detail {
 
-using LockGuard = std::lock_guard<SpinLock>;
-SpinLock GlobalHandler::MSyclGlobalHandlerProtector{};
+using LockGuard = std::lock_guard<TwinLock>;
+TwinLock GlobalHandler::MSyclGlobalHandlerProtector{};
 
 // Utility class to track references on object.
 // Used for GlobalHandler now and created as thread_local object on the first
@@ -198,7 +199,9 @@ struct DefaultContextReleaseHandler {
 };
 
 void GlobalHandler::registerDefaultContextReleaseHandler() {
+  #ifndef _WIN32
   static DefaultContextReleaseHandler handler{};
+  #endif
 }
 
 // Note: Split from shutdown so it is available to the unittests for ensuring
@@ -276,7 +279,7 @@ extern "C" __SYCL_EXPORT BOOL WINAPI DllMain(HINSTANCE hinstDLL,
   // Perform actions based on the reason for calling.
   switch (fdwReason) {
   case DLL_PROCESS_DETACH:
-    if (!lpReserved)
+    //if (!lpReserved)  //CP
       shutdown();
     break;
   case DLL_PROCESS_ATTACH:
