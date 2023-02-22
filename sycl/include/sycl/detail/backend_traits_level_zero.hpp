@@ -159,6 +159,22 @@ struct BackendReturn<backend::ext_oneapi_level_zero,
   using type = void *;
 };
 
+template <int Dimensions, typename AllocatorT>
+struct BackendInput<backend::ext_oneapi_level_zero,
+                    image<Dimensions, AllocatorT>> {
+  struct type {
+    void *NativeHandle;
+    ext::oneapi::level_zero::ownership Ownership{
+        ext::oneapi::level_zero::ownership::transfer};
+  };
+};
+
+template <int Dimensions, typename AllocatorT>
+struct BackendReturn<backend::ext_oneapi_level_zero,
+                     image<Dimensions, AllocatorT>> {
+  using type = void *;
+};
+
 template <> struct BackendReturn<backend::ext_oneapi_level_zero, queue> {
   using type = ze_command_queue_handle_t;
 };
@@ -207,6 +223,7 @@ template <> struct InteropFeatureSupportMap<backend::ext_oneapi_level_zero> {
   static constexpr bool MakeKernelBundle = true;
   static constexpr bool MakeKernel = true;
   static constexpr bool MakeBuffer = true;
+  static constexpr bool MakeImage = true;
 };
 
 } // namespace detail
