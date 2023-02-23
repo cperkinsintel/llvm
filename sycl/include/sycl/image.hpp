@@ -121,12 +121,12 @@ protected:
               uint8_t Dimensions, const property_list &PropList,
               bool IsConstPtr);
 
-#ifdef __SYCL_INTERNAL_API
+  //#ifdef __SYCL_INTERNAL_API
   image_plain(cl_mem ClMemObject, const context &SyclContext,
               event AvailableEvent,
               std::unique_ptr<SYCLMemObjAllocator> Allocator,
               uint8_t Dimensions);
-#endif
+  //#endif
 
   template <typename propertyT> bool has_property() const noexcept;
 
@@ -328,14 +328,14 @@ public:
                 detail::SYCLMemObjAllocatorHolder<AllocatorT, byte>>(Allocator),
             Dimensions, PropList, /*IsConstPtr*/ false) {}
 
-#ifdef __SYCL_INTERNAL_API
+  //#ifdef __SYCL_INTERNAL_API
   image(cl_mem ClMemObject, const context &SyclContext,
         event AvailableEvent = {})
       : image_plain(ClMemObject, SyclContext, AvailableEvent,
                     make_unique_ptr<
                         detail::SYCLMemObjAllocatorHolder<AllocatorT, byte>>(),
                     Dimensions) {}
-#endif
+  //#endif
 
   /* -- common interface members -- */
 
