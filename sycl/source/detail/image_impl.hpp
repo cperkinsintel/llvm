@@ -196,6 +196,10 @@ public:
 
   size_t getSlicePitch() const { return MSlicePitch; }
 
+  pi_native_handle getNative() const {
+    return pi::cast<pi_native_handle>(BaseT::MInteropMemObject);
+  }
+
   ~image_impl() {
     try {
       BaseT::updateHostMemory();

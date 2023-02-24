@@ -150,6 +150,14 @@ auto get_native(const buffer<DataT, Dimensions, AllocatorT> &Obj)
   return detail::get_native_buffer<BackendName>(Obj);
 }
 
+template <backend BackendName, int Dimensions, typename AllocatorT>
+auto get_native(const image<Dimensions, AllocatorT> &Obj)
+    -> backend_return_t<BackendName, image<Dimensions, AllocatorT>> {
+  using imageT = image<Dimensions, AllocatorT>;
+  return reinterpret_cast<backend_return_t<BackendName, imageT>>(
+      Obj.getNative());
+}
+
 #if SYCL_BACKEND_OPENCL
 template <>
 inline backend_return_t<backend::opencl, event>

@@ -206,15 +206,11 @@ typename std::enable_if<Backend == backend::ext_oneapi_level_zero,
 make_image(const backend_input_t<backend::ext_oneapi_level_zero,
                                  image<Dimensions, AllocatorT>> &BackendObject,
            const context &TargetContext, event AvailableEvent = {}) {
-  return image<Dimensions, AllocatorT>(
-      static_cast<cl_mem>(BackendObject.NativeHandle), TargetContext,
-      AvailableEvent);
-
-  //   return detail::make_buffer_helper<T, Dimensions, AllocatorT>(
-  //       detail::pi::cast<pi_native_handle>(BackendObject.NativeHandle),
-  //       TargetContext, AvailableEvent,
-  //       !(BackendObject.Ownership ==
-  //       ext::oneapi::level_zero::ownership::keep));
+  // in SYCL2020 (un)sampled_image has a constructor that takes pi_native_handle
+  // however, those are not being pursued. SYCL 1.2.1 images only have cl_mem.
+  // Thus, we cast in the interim.
+  return image<Dimensions, AllocatorT>(reinterpret_cast<cl_mem>(BackendObject),
+                                       TargetContext, AvailableEvent);
 }
 
 namespace __SYCL2020_DEPRECATED("use 'ext::oneapi::level_zero' instead")

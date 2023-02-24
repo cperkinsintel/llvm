@@ -22,7 +22,12 @@
 namespace sycl {
 __SYCL_INLINE_VER_NAMESPACE(_V1) {
 
+// Forward declarations
 class handler;
+
+template <backend BackendName, class SyclImageT>
+auto get_native(const SyclImageT &Obj)
+    -> backend_return_t<BackendName, SyclImageT>;
 
 enum class image_channel_order : unsigned int {
   a = 0,
@@ -159,6 +164,8 @@ protected:
   image_channel_order getChannelOrder() const;
 
   image_channel_type getChannelType() const;
+
+  pi_native_handle getNative() const;
 
   std::shared_ptr<detail::image_impl> impl;
 };
@@ -486,6 +493,12 @@ private:
 
   template <class Obj>
   friend decltype(Obj::impl) detail::getSyclObjImpl(const Obj &SyclObject);
+
+  template <backend BackendName, int D, typename A>
+  friend auto get_native(const image<D, A> &Obj)
+      -> backend_return_t<BackendName, image<D, A>>;
+
+  pi_native_handle getNative() const { return image_plain::getNative(); }
 
   template <typename DataT, int Dims, access::mode AccMode,
             access::target AccTarget, access::placeholder IsPlaceholder,
