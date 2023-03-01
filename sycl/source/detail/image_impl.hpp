@@ -197,7 +197,16 @@ public:
   size_t getSlicePitch() const { return MSlicePitch; }
 
   pi_native_handle getNative() const {
+    //
+    //if(BaseT::MInteropMemObject)
     return pi::cast<pi_native_handle>(BaseT::MInteropMemObject);
+
+    // auto Plugin = getPlugin(Backend);
+    // pi_native_handle Handle;
+    // Plugin.call<detail::PiApiKind::piextMemGetNativeHandle>(MRecord, &Handle);
+
+    // return Handle;
+    
   }
 
   ~image_impl() {
