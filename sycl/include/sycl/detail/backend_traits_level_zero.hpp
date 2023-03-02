@@ -168,7 +168,7 @@ struct BackendInput<backend::ext_oneapi_level_zero,
 template <int Dimensions, typename AllocatorT>
 struct BackendReturn<backend::ext_oneapi_level_zero,
                      image<Dimensions, AllocatorT>> {
-  using type = ze_image_handle_t;
+  using type = pi_native_handle; // ze_image_handle_t;
 };
 
 template <> struct BackendReturn<backend::ext_oneapi_level_zero, queue> {
