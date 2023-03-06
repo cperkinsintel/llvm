@@ -133,6 +133,15 @@ protected:
               uint8_t Dimensions);
   //#endif
 
+  // image_plain(std::shared_ptr<detail::image_impl> impl) :
+  // impl{std::move(impl)} {}
+  image_plain(pi_native_handle MemObject, const context &SyclContext,
+              event AvailableEvent,
+              std::unique_ptr<SYCLMemObjAllocator> Allocator,
+              uint8_t Dimensions, image_channel_order Order,
+              image_channel_type Type, bool OwnNativeHandle,
+              range<3> Range3WithZeros);
+
   template <typename propertyT> bool has_property() const noexcept;
 
   template <typename propertyT> propertyT get_property() const;
@@ -474,6 +483,20 @@ public:
   void set_write_back(bool flag = true) { image_plain::set_write_back(flag); }
 
 private:
+  // image(std::shared_ptr<detail::image_impl> impl) :
+  // image_plain{std::move(impl)} {}
+  image(
+      pi_native_handle MemObject, const context &SyclContext,
+      event AvailableEvent,
+      std::unique_ptr<SYCLMemObjAllocator> Allocator, /* uint8_t Dimensions, */
+      image_channel_order Order, image_channel_type Type, bool OwnNativeHandle,
+      range<3> Range3WithZeros)
+      : image_plain(MemObject, SyclContext, AvailableEvent,
+                    /*make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT,
+                       byte>>()*/
+                    Allocator, Dimensions, Order, Type, OwnNativeHandle,
+                    Range3WithZeros) {}
+
   // This utility api is currently used by accessor to get the element size of
   // the image. Element size is dependent on num of channels and channel type.
   // This information is not accessible from the image using any public API.

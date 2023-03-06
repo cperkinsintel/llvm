@@ -297,6 +297,22 @@ image_impl::image_impl(cl_mem MemObject, const context &SyclContext,
   }
 }
 
+image_impl::image_impl(pi_native_handle MemObject, const context &SyclContext,
+                       event AvailableEvent,
+                       std::unique_ptr<SYCLMemObjAllocator> Allocator,
+                       uint8_t Dimensions, image_channel_order Order,
+                       image_channel_type Type, bool OwnNativeHandle,
+                       range<3> Range3WithZeros)
+    : BaseT(MemObject, SyclContext, OwnNativeHandle, std::move(AvailableEvent),
+            std::move(Allocator), MemObjType::Image),
+      MDimensions(Dimensions), MRange(Range3WithZeros) {
+  MOrder = Order;
+  MType = Type;
+  MNumChannels = getImageNumberChannels(MOrder);
+  MElementSize = getImageElementSize(MNumChannels, Type);
+  setPitches(); // sets MRowPitch, MSlice and BaseT::MSizeInBytes
+}
+
 void *image_impl::allocateMem(ContextImplPtr Context, bool InitFromUserData,
                               void *HostPtr, RT::PiEvent &OutEventToWait) {
   bool HostPtrReadOnly = false;

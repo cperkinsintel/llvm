@@ -9,6 +9,7 @@
 #pragma once
 
 #include <sycl/backend.hpp>
+#include <sycl/detail/sycl_mem_obj_allocator.hpp>
 
 #include <vector>
 
@@ -212,12 +213,33 @@ make_image(const backend_input_t<backend::ext_oneapi_level_zero,
   // return image<Dimensions, AllocatorT>(reinterpret_cast<cl_mem>(ptr),
   // TargetContext, AvailableEvent);
 
+  bool OwnNativeHandle =
+      (BackendObject.Ownership == ext::oneapi::level_zero::ownership::transfer);
+  range<3> Range3WithZeros =
+      detail::convertToArrayOfN<3, 0>(BackendObject.Range);
+
+  return image<Dimensions, AllocatorT>(
+      BackendObject.ZeImageHandle, TargetContext, AvailableEvent,
+      make_unique_ptr<detail::SYCLMemObjAllocatorHolder<
+          AllocatorT, byte>>(), /* Dimensions, */
+      BackendObject.ChanOrder, BackendObject.ChanType, OwnNativeHandle,
+      Range3WithZeros);
+
+  //   detail::image_impl impl =
+  //   std::make_shared<detail::image_impl>(BackendObject.ZeImageHandle,
+  //   TargetContext, AvailableEvent,
+  //              make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT,
+  //              byte>>(), Dimensions, BackendObject.ChanOrder,
+  //              BackendObject.ChanType, OwnNativeHandle, Range3WithZeros);
+
+  //   return image<Dimensions, AllocatorT>(impl);
+
   // if we do this, we don't need piextImgCreateWithNativeHandle
   // and will instead end up in piMemImageCreate which calls zeImageCreate
   // also doesn't respect ownerhip.
-  return image<Dimensions, AllocatorT>(
-      BackendObject.ZeImageHandle, BackendObject.ChanOrder,
-      BackendObject.ChanType, BackendObject.Range);
+  // return image<Dimensions, AllocatorT>(
+  //    BackendObject.ZeImageHandle, BackendObject.ChanOrder,
+  //   BackendObject.ChanType, BackendObject.Range);
 }
 
 namespace __SYCL2020_DEPRECATED("use 'ext::oneapi::level_zero' instead")
