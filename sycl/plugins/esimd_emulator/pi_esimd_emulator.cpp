@@ -1296,6 +1296,11 @@ pi_result piextMemCreateWithNativeHandle(pi_native_handle, pi_context, bool,
   DIE_NO_IMPLEMENTATION;
 }
 
+pi_result piextImgCreateWithNativeHandle(pi_native_handle, pi_context, bool,
+                                         pi_mem *) {
+  DIE_NO_IMPLEMENTATION;
+}
+
 pi_result piProgramCreate(pi_context, const void *, size_t, pi_program *) {
   DIE_NO_IMPLEMENTATION;
 }

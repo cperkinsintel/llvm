@@ -209,8 +209,15 @@ make_image(const backend_input_t<backend::ext_oneapi_level_zero,
   // in SYCL2020 (un)sampled_image has a constructor that takes pi_native_handle
   // however, those are not being pursued. SYCL 1.2.1 images only have cl_mem.
   // Thus, we cast in the interim.
-  return image<Dimensions, AllocatorT>(reinterpret_cast<cl_mem>(BackendObject),
-                                       TargetContext, AvailableEvent);
+  // return image<Dimensions, AllocatorT>(reinterpret_cast<cl_mem>(ptr),
+  // TargetContext, AvailableEvent);
+
+  // if we do this, we don't need piextImgCreateWithNativeHandle
+  // and will instead end up in piMemImageCreate which calls zeImageCreate
+  // also doesn't respect ownerhip.
+  return image<Dimensions, AllocatorT>(
+      BackendObject.ZeImageHandle, BackendObject.ChanOrder,
+      BackendObject.ChanType, BackendObject.Range);
 }
 
 namespace __SYCL2020_DEPRECATED("use 'ext::oneapi::level_zero' instead")

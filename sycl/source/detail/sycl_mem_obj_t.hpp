@@ -66,18 +66,21 @@ public:
 
   SYCLMemObjT(pi_native_handle MemObject, const context &SyclContext,
               const size_t SizeInBytes, event AvailableEvent,
-              std::unique_ptr<SYCLMemObjAllocator> Allocator);
+              std::unique_ptr<SYCLMemObjAllocator> Allocator,
+              MemObjType NativeObjType = MemObjType::Undefined);
 
   SYCLMemObjT(cl_mem MemObject, const context &SyclContext,
               event AvailableEvent,
-              std::unique_ptr<SYCLMemObjAllocator> Allocator)
+              std::unique_ptr<SYCLMemObjAllocator> Allocator,
+              MemObjType NativeObjType = MemObjType::Undefined)
       : SYCLMemObjT(pi::cast<pi_native_handle>(MemObject), SyclContext,
                     /*SizeInBytes*/ (size_t)0, AvailableEvent,
-                    std::move(Allocator)) {}
+                    std::move(Allocator), NativeObjType) {}
 
   SYCLMemObjT(pi_native_handle MemObject, const context &SyclContext,
               bool OwmNativeHandle, event AvailableEvent,
-              std::unique_ptr<SYCLMemObjAllocator> Allocator);
+              std::unique_ptr<SYCLMemObjAllocator> Allocator,
+              MemObjType NativeObjType = MemObjType::Undefined);
 
   virtual ~SYCLMemObjT() = default;
 

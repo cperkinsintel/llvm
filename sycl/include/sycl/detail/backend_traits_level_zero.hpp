@@ -162,13 +162,23 @@ struct BackendReturn<backend::ext_oneapi_level_zero,
 template <int Dimensions, typename AllocatorT>
 struct BackendInput<backend::ext_oneapi_level_zero,
                     image<Dimensions, AllocatorT>> {
-  using type = ze_image_handle_t;
+  // CP
+  // using type = ze_image_handle_t;
+  struct type {
+    ze_image_handle_t ZeImageHandle;
+    sycl::image_channel_order ChanOrder;
+    sycl::image_channel_type ChanType;
+    range<Dimensions> Range;
+    ext::oneapi::level_zero::ownership Ownership{
+        ext::oneapi::level_zero::ownership::transfer};
+  };
 };
 
 template <int Dimensions, typename AllocatorT>
 struct BackendReturn<backend::ext_oneapi_level_zero,
                      image<Dimensions, AllocatorT>> {
-  using type = pi_native_handle; // ze_image_handle_t;
+  // CP
+  using type = ze_image_handle_t; // pi_native_handle; //
 };
 
 template <> struct BackendReturn<backend::ext_oneapi_level_zero, queue> {

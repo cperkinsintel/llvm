@@ -3030,8 +3030,10 @@ pi_result piMemBufferCreate(pi_context Context, pi_mem_flags Flags, size_t Size,
 pi_result piMemGetInfo(pi_mem Mem, pi_mem_info ParamName, size_t ParamValueSize,
                        void *ParamValue, size_t *ParamValueSizeRet) {
   PI_ASSERT(Mem, PI_ERROR_INVALID_VALUE);
-  // piMemImageGetInfo must be used for images
-  PI_ASSERT(!Mem->isImage(), PI_ERROR_INVALID_VALUE);
+  // piMemImageGetInfo must be used for images, except for shared params (like
+  // Context, AccessMode, etc)
+  PI_ASSERT(ParamName == PI_MEM_CONTEXT || !Mem->isImage(),
+            PI_ERROR_INVALID_VALUE);
 
   std::shared_lock<pi_shared_mutex> Lock(Mem->Mutex);
   ReturnHelper ReturnValue(ParamValueSize, ParamValue, ParamValueSizeRet);
@@ -3380,6 +3382,31 @@ pi_result piextMemCreateWithNativeHandle(pi_native_handle NativeHandle,
     ZE_CALL(zeCommandListAppendMemoryCopy,
             (Context->ZeCommandListInit, ZeHandleDst, Ptr, Size, nullptr, 0,
              nullptr));
+  }
+
+  return PI_SUCCESS;
+}
+
+// CP
+pi_result piextImgCreateWithNativeHandle(pi_native_handle NativeHandle,
+                                         pi_context Context,
+                                         bool ownNativeHandle,
+                                         pi_mem *RetImage) {
+
+  PI_ASSERT(RetImage, PI_ERROR_INVALID_VALUE);
+  PI_ASSERT(NativeHandle, PI_ERROR_INVALID_VALUE);
+  PI_ASSERT(Context, PI_ERROR_INVALID_CONTEXT);
+
+  std::shared_lock<pi_shared_mutex> Lock(Context->Mutex);
+  ze_image_handle_t ZeHImage = pi_cast<ze_image_handle_t>(NativeHandle);
+  try {
+    auto ZePIImage = new _pi_image(Context, ZeHImage);
+    *RetImage = ZePIImage;
+
+  } catch (const std::bad_alloc &) {
+    return PI_ERROR_OUT_OF_HOST_MEMORY;
+  } catch (...) {
+    return PI_ERROR_UNKNOWN;
   }
 
   return PI_SUCCESS;

@@ -265,7 +265,7 @@ image_impl::image_impl(cl_mem MemObject, const context &SyclContext,
                        std::unique_ptr<SYCLMemObjAllocator> Allocator,
                        uint8_t Dimensions)
     : BaseT(MemObject, SyclContext, std::move(AvailableEvent),
-            std::move(Allocator)),
+            std::move(Allocator), MemObjType::Image),
       MDimensions(Dimensions), MRange({0, 0, 0}) {
   RT::PiMem Mem = pi::cast<RT::PiMem>(BaseT::MInteropMemObject);
   const ContextImplPtr Context = getSyclObjImpl(SyclContext);

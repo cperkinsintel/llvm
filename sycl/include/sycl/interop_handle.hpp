@@ -199,7 +199,8 @@ private:
   template <backend Backend, int Dims>
   backend_return_t<Backend, image<Dims>>
   getMemImpl(detail::AccessorImplHost *Req) const {
-    return getNativeMem(Req);
+    using image_return_t = backend_return_t<Backend, image<Dims>>;
+    return reinterpret_cast<image_return_t>(getNativeMem(Req));
   }
 
   __SYCL_EXPORT pi_native_handle
