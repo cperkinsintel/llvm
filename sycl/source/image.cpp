@@ -94,10 +94,10 @@ image_plain::image_plain(pi_native_handle MemObject, const context &SyclContext,
                          std::unique_ptr<SYCLMemObjAllocator> Allocator,
                          uint8_t Dimensions, image_channel_order Order,
                          image_channel_type Type, bool OwnNativeHandle,
-                         range<3> Range3WithZeros) {
+                         range<3> Range3WithOnes) {
   impl = std::make_shared<detail::image_impl>(
-      MemObject, SyclContext, AvailableEvent, Allocator, Dimensions, Order,
-      Type, OwnNativeHandle, Range3WithZeros);
+      MemObject, SyclContext, AvailableEvent, std::move(Allocator), Dimensions,
+      Order, Type, OwnNativeHandle, Range3WithOnes);
 }
 
 #define __SYCL_PARAM_TRAITS_SPEC(param_type)                                   \

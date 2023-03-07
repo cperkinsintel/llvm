@@ -44,11 +44,12 @@ SYCLMemObjT::SYCLMemObjT(pi_native_handle MemObject, const context &SyclContext,
   const plugin &Plugin = getPlugin();
 
   if (NativeObjType == MemObjType::Image) {
-    // throw sycl::exception(sycl::errc::runtime, "Dude!");
     Plugin.call<detail::PiApiKind::piextImgCreateWithNativeHandle>(
         MemObject, MInteropContext->getHandleRef(), OwnNativeHandle,
         &MInteropMemObject);
-    // piMemImageGetInfo not implemented
+    // piMemGetInfo doesn't work with images, iMemImageGetInfo not yet
+    // implemented The image_impl parent class bears the responsibility of
+    // correctly setting MSizeInBytes in the meantime.
   } else {
     Plugin.call<detail::PiApiKind::piextMemCreateWithNativeHandle>(
         MemObject, MInteropContext->getHandleRef(), OwnNativeHandle,

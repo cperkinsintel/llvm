@@ -29,6 +29,14 @@ template <backend BackendName, class SyclImageT>
 auto get_native(const SyclImageT &Obj)
     -> backend_return_t<BackendName, SyclImageT>;
 
+// template <backend Backend, class SyclImageT>
+// SyclImageT make_image(const backend_input_t<Backend, SyclImageT>
+// &BackendObject, const context &TargetContext, event AvailableEvent);
+
+// template <typename T, class SyclImageT>
+// SyclImageT make_image(const T &BackendObject, const context &TargetContext,
+// event AvailableEvent);
+
 enum class image_channel_order : unsigned int {
   a = 0,
   r = 1,
@@ -126,21 +134,19 @@ protected:
               uint8_t Dimensions, const property_list &PropList,
               bool IsConstPtr);
 
-  //#ifdef __SYCL_INTERNAL_API
+#ifdef __SYCL_INTERNAL_API
   image_plain(cl_mem ClMemObject, const context &SyclContext,
               event AvailableEvent,
               std::unique_ptr<SYCLMemObjAllocator> Allocator,
               uint8_t Dimensions);
-  //#endif
+#endif
 
-  // image_plain(std::shared_ptr<detail::image_impl> impl) :
-  // impl{std::move(impl)} {}
   image_plain(pi_native_handle MemObject, const context &SyclContext,
               event AvailableEvent,
               std::unique_ptr<SYCLMemObjAllocator> Allocator,
               uint8_t Dimensions, image_channel_order Order,
               image_channel_type Type, bool OwnNativeHandle,
-              range<3> Range3WithZeros);
+              range<3> Range3WithOnes);
 
   template <typename propertyT> bool has_property() const noexcept;
 
@@ -344,14 +350,14 @@ public:
                 detail::SYCLMemObjAllocatorHolder<AllocatorT, byte>>(Allocator),
             Dimensions, PropList, /*IsConstPtr*/ false) {}
 
-  //#ifdef __SYCL_INTERNAL_API
+#ifdef __SYCL_INTERNAL_API
   image(cl_mem ClMemObject, const context &SyclContext,
         event AvailableEvent = {})
       : image_plain(ClMemObject, SyclContext, AvailableEvent,
                     make_unique_ptr<
                         detail::SYCLMemObjAllocatorHolder<AllocatorT, byte>>(),
                     Dimensions) {}
-  //#endif
+#endif
 
   /* -- common interface members -- */
 
@@ -482,21 +488,15 @@ public:
 
   void set_write_back(bool flag = true) { image_plain::set_write_back(flag); }
 
-private:
-  // image(std::shared_ptr<detail::image_impl> impl) :
-  // image_plain{std::move(impl)} {}
-  image(
-      pi_native_handle MemObject, const context &SyclContext,
-      event AvailableEvent,
-      std::unique_ptr<SYCLMemObjAllocator> Allocator, /* uint8_t Dimensions, */
-      image_channel_order Order, image_channel_type Type, bool OwnNativeHandle,
-      range<3> Range3WithZeros)
+  image(pi_native_handle MemObject, const context &SyclContext,
+        event AvailableEvent, image_channel_order Order,
+        image_channel_type Type, bool OwnNativeHandle, range<3> Range3WithOnes)
       : image_plain(MemObject, SyclContext, AvailableEvent,
-                    /*make_unique_ptr<detail::SYCLMemObjAllocatorHolder<AllocatorT,
-                       byte>>()*/
-                    Allocator, Dimensions, Order, Type, OwnNativeHandle,
-                    Range3WithZeros) {}
+                    make_unique_ptr<
+                        detail::SYCLMemObjAllocatorHolder<AllocatorT, byte>>(),
+                    Dimensions, Order, Type, OwnNativeHandle, Range3WithOnes) {}
 
+private:
   // This utility api is currently used by accessor to get the element size of
   // the image. Element size is dependent on num of channels and channel type.
   // This information is not accessible from the image using any public API.
@@ -516,6 +516,19 @@ private:
 
   template <class Obj>
   friend decltype(Obj::impl) detail::getSyclObjImpl(const Obj &SyclObject);
+
+  // None Working
+  // template <backend Backend, int D, typename A>
+  // friend image<D,A> make_image(const backend_input_t<Backend, image<D, A>>
+  // &BackendObject, const context &TargetContext, event AvailableEvent);
+
+  // template <backend Backend, class SyclImageT>
+  // friend SyclImageT make_image(const backend_input_t<Backend, SyclImageT>
+  // &BackendObject, const context &TargetContext, event AvailableEvent);
+
+  // template <typename T>
+  // friend image make_image(const T &BackendObject, const context
+  // &TargetContext, event AvailableEvent);
 
   template <backend BackendName, int D, typename A>
   friend auto get_native(const image<D, A> &Obj)
