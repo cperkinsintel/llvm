@@ -71,7 +71,6 @@ public:
 #endif
   }
 
-  // CP
   /// Receives a SYCL accessor that has been defined as a requirement for the
   /// command group, and returns the underlying OpenCL memory object that is
   /// used by the SYCL runtime. If the accessor passed as parameter is not part
@@ -86,10 +85,6 @@ public:
       const detail::image_accessor<DataT, Dims, Mode,
                                    /*access::target::image*/ Target,
                                    IsPlh /*, PropertyListT */> &Acc) const {
-    //   static_assert(Target == access::target::device ||
-    //                     Target == access::target::constant_buffer,
-    //                "The method is available only for target::device
-    //                accessors");
 #ifndef __SYCL_DEVICE_ONLY__
     if (Backend != get_backend())
       throw invalid_object_error("Incorrect backend argument was passed",
@@ -195,7 +190,6 @@ private:
         NativeHandles);
   }
 
-  // CP
   template <backend Backend, int Dims>
   backend_return_t<Backend, image<Dims>>
   getMemImpl(detail::AccessorImplHost *Req) const {

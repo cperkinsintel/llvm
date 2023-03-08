@@ -927,6 +927,8 @@ pi_result piextImgCreateWithNativeHandle(pi_native_handle nativeHandle,
                                          pi_mem *Img) {
   (void)context;
   (void)ownNativeHandle;
+  (void)ImageFormat;
+  (void)ImageDesc;
   assert(Img != nullptr);
   *Img = reinterpret_cast<pi_mem>(nativeHandle);
   return PI_SUCCESS;

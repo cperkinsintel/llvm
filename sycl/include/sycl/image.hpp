@@ -22,20 +22,7 @@
 namespace sycl {
 __SYCL_INLINE_VER_NAMESPACE(_V1) {
 
-// Forward declarations
 class handler;
-
-template <backend BackendName, class SyclImageT>
-auto get_native(const SyclImageT &Obj)
-    -> backend_return_t<BackendName, SyclImageT>;
-
-// template <backend Backend, class SyclImageT>
-// SyclImageT make_image(const backend_input_t<Backend, SyclImageT>
-// &BackendObject, const context &TargetContext, event AvailableEvent);
-
-// template <typename T, class SyclImageT>
-// SyclImageT make_image(const T &BackendObject, const context &TargetContext,
-// event AvailableEvent);
 
 enum class image_channel_order : unsigned int {
   a = 0,
@@ -179,8 +166,6 @@ protected:
   image_channel_order getChannelOrder() const;
 
   image_channel_type getChannelType() const;
-
-  pi_native_handle getNative() const;
 
   std::shared_ptr<detail::image_impl> impl;
 };
@@ -517,25 +502,6 @@ private:
 
   template <class Obj>
   friend decltype(Obj::impl) detail::getSyclObjImpl(const Obj &SyclObject);
-
-  // None Working
-  // template <backend Backend, int D, typename A>
-  // friend image<D,A> make_image(const backend_input_t<Backend, image<D, A>>
-  // &BackendObject, const context &TargetContext, event AvailableEvent);
-
-  // template <backend Backend, class SyclImageT>
-  // friend SyclImageT make_image(const backend_input_t<Backend, SyclImageT>
-  // &BackendObject, const context &TargetContext, event AvailableEvent);
-
-  // template <typename T>
-  // friend image make_image(const T &BackendObject, const context
-  // &TargetContext, event AvailableEvent);
-
-  template <backend BackendName, int D, typename A>
-  friend auto get_native(const image<D, A> &Obj)
-      -> backend_return_t<BackendName, image<D, A>>;
-
-  pi_native_handle getNative() const { return image_plain::getNative(); }
 
   template <typename DataT, int Dims, access::mode AccMode,
             access::target AccTarget, access::placeholder IsPlaceholder,

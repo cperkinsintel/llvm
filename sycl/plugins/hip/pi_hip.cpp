@@ -2402,6 +2402,8 @@ pi_result hip_piextImgCreateWithNativeHandle(pi_native_handle nativeHandle,
   (void)nativeHandle;
   (void)context;
   (void)ownNativeHandle;
+  (void)ImageFormat;
+  (void)ImageDesc;
   (void)mem;
 
   sycl::detail::pi::die(

@@ -157,8 +157,6 @@ image_channel_type image_plain::getChannelType() const {
   return impl->getChannelType();
 }
 
-pi_native_handle image_plain::getNative() const { return impl->getNative(); }
-
 } // namespace detail
 } // __SYCL_INLINE_VER_NAMESPACE(_V1)
 } // namespace sycl
