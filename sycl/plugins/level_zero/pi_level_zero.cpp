@@ -3104,8 +3104,11 @@ pi_result piMemRelease(pi_mem Mem) {
 
   if (Mem->isImage()) {
     char *ZeHandleImage;
-    PI_CALL(Mem->getZeHandle(ZeHandleImage, _pi_mem::write_only));
-    ZE_CALL(zeImageDestroy, (pi_cast<ze_image_handle_t>(ZeHandleImage)));
+    auto Image = static_cast<pi_image>(Mem);
+    if (Image->OwnZeMemHandle) {
+      PI_CALL(Mem->getZeHandle(ZeHandleImage, _pi_mem::write_only));
+      ZE_CALL(zeImageDestroy, (pi_cast<ze_image_handle_t>(ZeHandleImage)));
+    }
   } else {
     auto Buffer = static_cast<pi_buffer>(Mem);
     Buffer->free();
@@ -3262,7 +3265,7 @@ pi_result piMemImageCreate(pi_context Context, pi_mem_flags Flags,
           (Context->ZeContext, Device->ZeDevice, &ZeImageDesc, &ZeHImage));
 
   try {
-    auto ZePIImage = new _pi_image(Context, ZeHImage);
+    auto ZePIImage = new _pi_image(Context, ZeHImage, /*OwnNativeHandle=*/true);
     *RetImage = ZePIImage;
 
 #ifndef NDEBUG
@@ -3390,7 +3393,7 @@ pi_result piextMemCreateWithNativeHandle(pi_native_handle NativeHandle,
 // CP
 pi_result piextImgCreateWithNativeHandle(pi_native_handle NativeHandle,
                                          pi_context Context,
-                                         bool ownNativeHandle,
+                                         bool OwnNativeHandle,
                                          pi_mem *RetImage) {
 
   PI_ASSERT(RetImage, PI_ERROR_INVALID_VALUE);
@@ -3400,8 +3403,13 @@ pi_result piextImgCreateWithNativeHandle(pi_native_handle NativeHandle,
   std::shared_lock<pi_shared_mutex> Lock(Context->Mutex);
   ze_image_handle_t ZeHImage = pi_cast<ze_image_handle_t>(NativeHandle);
   try {
-    auto ZePIImage = new _pi_image(Context, ZeHImage);
+    auto ZePIImage = new _pi_image(Context, ZeHImage, OwnNativeHandle);
     *RetImage = ZePIImage;
+
+    // CP  (coming soon)
+    // #ifndef NDEBUG
+    //     ZePIImage->ZeImageDesc = ZeImageDesc;
+    // #endif // !NDEBUG
 
   } catch (const std::bad_alloc &) {
     return PI_ERROR_OUT_OF_HOST_MEMORY;

@@ -311,6 +311,14 @@ image_impl::image_impl(pi_native_handle MemObject, const context &SyclContext,
   MNumChannels = getImageNumberChannels(MOrder);
   MElementSize = getImageElementSize(MNumChannels, Type);
   setPitches(); // sets MRowPitch, MSlice and BaseT::MSizeInBytes
+  // CP
+  // if(OwnNativeHandle){
+  //   std::cout << "allocateHostMen()!!" << std::endl;
+  //   MShadowCopy = allocateHostMem();
+  //   MUserPtr = MShadowCopy;
+  // } else {
+  //   BaseT::MNeedWriteBack = false;
+  // }
 }
 
 void *image_impl::allocateMem(ContextImplPtr Context, bool InitFromUserData,

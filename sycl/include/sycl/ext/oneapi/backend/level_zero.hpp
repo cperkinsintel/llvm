@@ -9,7 +9,6 @@
 #pragma once
 
 #include <sycl/backend.hpp>
-#include <sycl/detail/sycl_mem_obj_allocator.hpp>
 
 #include <vector>
 
