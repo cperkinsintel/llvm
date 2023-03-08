@@ -2398,10 +2398,10 @@ pi_result cuda_piextMemCreateWithNativeHandle(pi_native_handle nativeHandle,
 /// \param[out] mem Set to the PI mem object created from native handle.
 ///
 /// \return TBD
-pi_result cuda_piextImgCreateWithNativeHandle(pi_native_handle nativeHandle,
-                                              pi_context context,
-                                              bool ownNativeHandle,
-                                              pi_mem *Img) {
+pi_result cuda_piextImgCreateWithNativeHandle(
+    pi_native_handle nativeHandle, pi_context context, bool ownNativeHandle,
+    const pi_image_format *ImageFormat, const pi_image_desc *ImageDesc,
+    pi_mem *Img) {
   sycl::detail::pi::die(
       "Creation of PI mem from native image handle not implemented");
   return {};

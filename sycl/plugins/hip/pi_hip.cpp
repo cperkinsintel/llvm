@@ -2396,6 +2396,8 @@ pi_result hip_piextMemCreateWithNativeHandle(pi_native_handle nativeHandle,
 pi_result hip_piextImgCreateWithNativeHandle(pi_native_handle nativeHandle,
                                              pi_context context,
                                              bool ownNativeHandle,
+                                             const pi_image_format *ImageFormat,
+                                             const pi_image_desc *ImageDesc,
                                              pi_mem *mem) {
   (void)nativeHandle;
   (void)context;

@@ -304,7 +304,9 @@ image_impl::image_impl(pi_native_handle MemObject, const context &SyclContext,
                        image_channel_type Type, bool OwnNativeHandle,
                        range<3> Range3WithOnes)
     : BaseT(MemObject, SyclContext, OwnNativeHandle, std::move(AvailableEvent),
-            std::move(Allocator), MemObjType::Image),
+            std::move(Allocator), detail::convertChannelOrder(Order),
+            detail::convertChannelType(Type), Range3WithOnes, Dimensions,
+            getImageElementSize(getImageNumberChannels(Order), Type)),
       MDimensions(Dimensions), MRange(Range3WithOnes) {
   MOrder = Order;
   MType = Type;

@@ -1261,6 +1261,7 @@ __SYCL_EXPORT pi_result piextMemCreateWithNativeHandle(
 /// \param img is the PI img created from the native handle.
 __SYCL_EXPORT pi_result piextImgCreateWithNativeHandle(
     pi_native_handle nativeHandle, pi_context context, bool ownNativeHandle,
+    const pi_image_format *ImageFormat, const pi_image_desc *ImageDesc,
     pi_mem *img);
 
 //

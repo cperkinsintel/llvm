@@ -921,7 +921,10 @@ pi_result piextMemCreateWithNativeHandle(pi_native_handle nativeHandle,
 
 pi_result piextImgCreateWithNativeHandle(pi_native_handle nativeHandle,
                                          pi_context context,
-                                         bool ownNativeHandle, pi_mem *Img) {
+                                         bool ownNativeHandle,
+                                         const pi_image_format *ImageFormat,
+                                         const pi_image_desc *ImageDesc,
+                                         pi_mem *Img) {
   (void)context;
   (void)ownNativeHandle;
   assert(Img != nullptr);

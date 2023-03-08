@@ -3118,20 +3118,9 @@ pi_result piMemRelease(pi_mem Mem) {
   return PI_SUCCESS;
 }
 
-pi_result piMemImageCreate(pi_context Context, pi_mem_flags Flags,
-                           const pi_image_format *ImageFormat,
-                           const pi_image_desc *ImageDesc, void *HostPtr,
-                           pi_mem *RetImage) {
-
-  // TODO: implement read-only, write-only
-  if ((Flags & PI_MEM_FLAGS_ACCESS_RW) == 0) {
-    die("piMemImageCreate: Level-Zero implements only read-write buffer,"
-        "no read-only or write-only yet.");
-  }
-  PI_ASSERT(Context, PI_ERROR_INVALID_CONTEXT);
-  PI_ASSERT(RetImage, PI_ERROR_INVALID_VALUE);
-  PI_ASSERT(ImageFormat, PI_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR);
-
+pi_result PIToZeImageDesc(const pi_image_format *ImageFormat,
+                          const pi_image_desc *ImageDesc,
+                          ZeStruct<ze_image_desc_t> &ZeImageDesc) {
   ze_image_format_type_t ZeImageFormatType;
   size_t ZeImageFormatTypeSize;
   switch (ImageFormat->image_channel_data_type) {
@@ -3242,8 +3231,8 @@ pi_result piMemImageCreate(pi_context Context, pi_mem_flags Flags,
     return PI_ERROR_INVALID_VALUE;
   }
 
-  ZeStruct<ze_image_desc_t> ZeImageDesc;
-  ZeImageDesc.arraylevels = ZeImageDesc.flags = 0;
+  ZeImageDesc.arraylevels = 0;
+  ZeImageDesc.flags = 0;
   ZeImageDesc.type = ZeImageType;
   ZeImageDesc.format = ZeFormatDesc;
   ZeImageDesc.width = pi_cast<uint32_t>(ImageDesc->image_width);
@@ -3251,6 +3240,29 @@ pi_result piMemImageCreate(pi_context Context, pi_mem_flags Flags,
   ZeImageDesc.depth = pi_cast<uint32_t>(ImageDesc->image_depth);
   ZeImageDesc.arraylevels = pi_cast<uint32_t>(ImageDesc->image_array_size);
   ZeImageDesc.miplevels = ImageDesc->num_mip_levels;
+
+  return PI_SUCCESS;
+}
+
+pi_result piMemImageCreate(pi_context Context, pi_mem_flags Flags,
+                           const pi_image_format *ImageFormat,
+                           const pi_image_desc *ImageDesc, void *HostPtr,
+                           pi_mem *RetImage) {
+
+  // TODO: implement read-only, write-only
+  if ((Flags & PI_MEM_FLAGS_ACCESS_RW) == 0) {
+    die("piMemImageCreate: Level-Zero implements only read-write buffer,"
+        "no read-only or write-only yet.");
+  }
+  PI_ASSERT(Context, PI_ERROR_INVALID_CONTEXT);
+  PI_ASSERT(RetImage, PI_ERROR_INVALID_VALUE);
+  PI_ASSERT(ImageFormat, PI_ERROR_INVALID_IMAGE_FORMAT_DESCRIPTOR);
+
+  ZeStruct<ze_image_desc_t> ZeImageDesc;
+  pi_result DescriptionResult =
+      PIToZeImageDesc(ImageFormat, ImageDesc, ZeImageDesc);
+  if (DescriptionResult != PI_SUCCESS)
+    return DescriptionResult;
 
   std::shared_lock<pi_shared_mutex> Lock(Context->Mutex);
 
@@ -3390,10 +3402,11 @@ pi_result piextMemCreateWithNativeHandle(pi_native_handle NativeHandle,
   return PI_SUCCESS;
 }
 
-// CP
 pi_result piextImgCreateWithNativeHandle(pi_native_handle NativeHandle,
                                          pi_context Context,
                                          bool OwnNativeHandle,
+                                         const pi_image_format *ImageFormat,
+                                         const pi_image_desc *ImageDesc,
                                          pi_mem *RetImage) {
 
   PI_ASSERT(RetImage, PI_ERROR_INVALID_VALUE);
@@ -3401,15 +3414,22 @@ pi_result piextImgCreateWithNativeHandle(pi_native_handle NativeHandle,
   PI_ASSERT(Context, PI_ERROR_INVALID_CONTEXT);
 
   std::shared_lock<pi_shared_mutex> Lock(Context->Mutex);
+
   ze_image_handle_t ZeHImage = pi_cast<ze_image_handle_t>(NativeHandle);
+
   try {
     auto ZePIImage = new _pi_image(Context, ZeHImage, OwnNativeHandle);
     *RetImage = ZePIImage;
 
-    // CP  (coming soon)
-    // #ifndef NDEBUG
-    //     ZePIImage->ZeImageDesc = ZeImageDesc;
-    // #endif // !NDEBUG
+#ifndef NDEBUG
+    ZeStruct<ze_image_desc_t> ZeImageDesc;
+    pi_result DescriptionResult =
+        PIToZeImageDesc(ImageFormat, ImageDesc, ZeImageDesc);
+    if (DescriptionResult != PI_SUCCESS)
+      return DescriptionResult;
+
+    ZePIImage->ZeImageDesc = ZeImageDesc;
+#endif // !NDEBUG
 
   } catch (const std::bad_alloc &) {
     return PI_ERROR_OUT_OF_HOST_MEMORY;
