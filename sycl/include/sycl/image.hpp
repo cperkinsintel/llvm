@@ -490,11 +490,12 @@ public:
 
   image(pi_native_handle MemObject, const context &SyclContext,
         event AvailableEvent, image_channel_order Order,
-        image_channel_type Type, bool OwnNativeHandle, range<3> Range3WithOnes)
+        image_channel_type Type, bool OwnNativeHandle, range<Dimensions> Range)
       : image_plain(MemObject, SyclContext, AvailableEvent,
                     make_unique_ptr<
                         detail::SYCLMemObjAllocatorHolder<AllocatorT, byte>>(),
-                    Dimensions, Order, Type, OwnNativeHandle, Range3WithOnes) {}
+                    Dimensions, Order, Type, OwnNativeHandle,
+                    detail::convertToArrayOfN<3, 1>(Range)) {}
 
 private:
   // This utility api is currently used by accessor to get the element size of

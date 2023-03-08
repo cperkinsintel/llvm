@@ -209,13 +209,11 @@ make_image(const backend_input_t<backend::ext_oneapi_level_zero,
 
   bool OwnNativeHandle =
       (BackendObject.Ownership == ext::oneapi::level_zero::ownership::transfer);
-  range<3> Range3WithOnes =
-      detail::convertToArrayOfN<3, 1>(BackendObject.Range);
 
   return image<Dimensions, AllocatorT>(
       detail::pi::cast<pi_native_handle>(BackendObject.ZeImageHandle),
       TargetContext, AvailableEvent, BackendObject.ChanOrder,
-      BackendObject.ChanType, OwnNativeHandle, Range3WithOnes);
+      BackendObject.ChanType, OwnNativeHandle, BackendObject.Range);
 }
 
 namespace __SYCL2020_DEPRECATED("use 'ext::oneapi::level_zero' instead")
