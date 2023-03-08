@@ -19,15 +19,13 @@ namespace detail {
 
 SYCLMemObjT::SYCLMemObjT(pi_native_handle MemObject, const context &SyclContext,
                          const size_t, event AvailableEvent,
-                         std::unique_ptr<SYCLMemObjAllocator> Allocator,
-                         MemObjType NativeObjType)
+                         std::unique_ptr<SYCLMemObjAllocator> Allocator)
     : SYCLMemObjT(MemObject, SyclContext, true, AvailableEvent,
-                  std::move(Allocator), NativeObjType) {}
+                  std::move(Allocator)) {}
 
 SYCLMemObjT::SYCLMemObjT(pi_native_handle MemObject, const context &SyclContext,
                          bool OwnNativeHandle, event AvailableEvent,
-                         std::unique_ptr<SYCLMemObjAllocator> Allocator,
-                         MemObjType NativeObjType)
+                         std::unique_ptr<SYCLMemObjAllocator> Allocator)
     : MAllocator(std::move(Allocator)), MProps(),
       MInteropEvent(detail::getSyclObjImpl(std::move(AvailableEvent))),
       MInteropContext(detail::getSyclObjImpl(SyclContext)),
@@ -43,23 +41,13 @@ SYCLMemObjT::SYCLMemObjT(pi_native_handle MemObject, const context &SyclContext,
   RT::PiContext Context = nullptr;
   const plugin &Plugin = getPlugin();
 
-  if (NativeObjType == MemObjType::Image) {
-    // CP
-    // Plugin.call<detail::PiApiKind::piextImgCreateWithNativeHandle>(
-    //     MemObject, MInteropContext->getHandleRef(), OwnNativeHandle,
-    //     &MInteropMemObject);
-    // piMemGetInfo doesn't work with images, iMemImageGetInfo not yet
-    // implemented The image_impl parent class bears the responsibility of
-    // correctly setting MSizeInBytes in the meantime.
-  } else {
-    Plugin.call<detail::PiApiKind::piextMemCreateWithNativeHandle>(
-        MemObject, MInteropContext->getHandleRef(), OwnNativeHandle,
-        &MInteropMemObject);
+  Plugin.call<detail::PiApiKind::piextMemCreateWithNativeHandle>(
+      MemObject, MInteropContext->getHandleRef(), OwnNativeHandle,
+      &MInteropMemObject);
 
-    // Get the size of the buffer in bytes
-    Plugin.call<detail::PiApiKind::piMemGetInfo>(
-        MInteropMemObject, PI_MEM_SIZE, sizeof(size_t), &MSizeInBytes, nullptr);
-  }
+  // Get the size of the buffer in bytes
+  Plugin.call<detail::PiApiKind::piMemGetInfo>(
+      MInteropMemObject, PI_MEM_SIZE, sizeof(size_t), &MSizeInBytes, nullptr);
 
   Plugin.call<PiApiKind::piMemGetInfo>(MInteropMemObject, PI_MEM_CONTEXT,
                                        sizeof(Context), &Context, nullptr);
