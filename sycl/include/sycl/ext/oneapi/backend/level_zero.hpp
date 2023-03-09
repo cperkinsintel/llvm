@@ -203,9 +203,9 @@ template <backend Backend, int Dimensions = 1,
           typename AllocatorT = image_allocator>
 typename std::enable_if<Backend == backend::ext_oneapi_level_zero,
                         image<Dimensions, AllocatorT>>::type
-make_image(const backend_input_t<backend::ext_oneapi_level_zero,
-                                 image<Dimensions, AllocatorT>> &BackendObject,
-           const context &TargetContext, event AvailableEvent = {}) {
+make_image(const backend_input_t<Backend, image<Dimensions, AllocatorT>>
+               &BackendObject,
+           const context &TargetContext, event AvailableEvent) {
 
   bool OwnNativeHandle =
       (BackendObject.Ownership == ext::oneapi::level_zero::ownership::transfer);

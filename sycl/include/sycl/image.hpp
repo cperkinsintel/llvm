@@ -22,7 +22,17 @@
 namespace sycl {
 __SYCL_INLINE_VER_NAMESPACE(_V1) {
 
+// forward declarations
 class handler;
+
+template <int D, typename A> class image;
+
+// 'friend'
+template <backend Backend, int D, typename A>
+typename std::enable_if<Backend == backend::ext_oneapi_level_zero,
+                        image<D, A>>::type
+make_image(const backend_input_t<Backend, image<D, A>> &BackendObject,
+           const context &TargetContext, event AvailableEvent = {});
 
 enum class image_channel_order : unsigned int {
   a = 0,
@@ -473,6 +483,7 @@ public:
 
   void set_write_back(bool flag = true) { image_plain::set_write_back(flag); }
 
+private:
   image(pi_native_handle MemObject, const context &SyclContext,
         event AvailableEvent, image_channel_order Order,
         image_channel_type Type, bool OwnNativeHandle, range<Dimensions> Range)
@@ -482,7 +493,6 @@ public:
                     Dimensions, Order, Type, OwnNativeHandle,
                     detail::convertToArrayOfN<3, 1>(Range)) {}
 
-private:
   // This utility api is currently used by accessor to get the element size of
   // the image. Element size is dependent on num of channels and channel type.
   // This information is not accessible from the image using any public API.
@@ -499,6 +509,23 @@ private:
   image_channel_type getChannelType() const {
     return image_plain::getChannelType();
   }
+
+  // Declare make_image as a friend function
+  template <backend Backend, int D, typename A>
+  friend typename std::enable_if<
+      detail::InteropFeatureSupportMap<Backend>::MakeImage == true &&
+          Backend != backend::ext_oneapi_level_zero,
+      image<D, A>>::type
+  make_image(
+      const typename backend_traits<Backend>::template input_type<image<D, A>>
+          &BackendObject,
+      const context &TargetContext, event AvailableEvent);
+
+  template <backend Backend, int D, typename A>
+  friend typename std::enable_if<Backend == backend::ext_oneapi_level_zero,
+                                 image<D, A>>::type
+  make_image(const backend_input_t<Backend, image<D, A>> &BackendObject,
+             const context &TargetContext, event AvailableEvent);
 
   template <class Obj>
   friend decltype(Obj::impl) detail::getSyclObjImpl(const Obj &SyclObject);
