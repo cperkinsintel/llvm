@@ -420,7 +420,7 @@ The additional <code>AvailableEvent</code> argument must be a valid SYCL event. 
 make_image(
     const backend_input_t<backend::ext_oneapi_level_zero,
                           image<Dimensions, AllocatorT>> &,
-    const context &Context)
+    const context &Context, event AvailableEvent = {})
 ```
 </td>
 <td>This API is available starting with revision 4 of this specification.

@@ -162,7 +162,7 @@ struct BackendReturn<backend::ext_oneapi_level_zero,
 template <int Dimensions, typename AllocatorT>
 struct BackendInput<backend::ext_oneapi_level_zero,
                     image<Dimensions, AllocatorT>> {
-  // LevelZero has no way of getting image descrdiption FROM a ZeImageHandle so
+  // LevelZero has no way of getting image description FROM a ZeImageHandle so
   // it must be provided.
   struct type {
     ze_image_handle_t ZeImageHandle;
