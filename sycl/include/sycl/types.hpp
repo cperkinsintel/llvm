@@ -799,11 +799,10 @@ public:
   }
 
   template <typename Ty = DataT>
-  explicit constexpr vec(const EnableIfHostHalf<Ty> &arg) : m_Data{} {
-    for (int i = 0; i < NumElements; ++i) {
-      setValue(i, arg);
-    }
-  }
+  explicit constexpr vec(const EnableIfHostHalf<Ty> &arg)
+      : vec{detail::RepeatValue<NumElements>(
+                static_cast<vec_data_t<DataT>>(arg)),
+            std::make_index_sequence<NumElements>()} {}
 
   template <typename Ty = DataT>
   typename std::enable_if_t<
@@ -817,11 +816,10 @@ public:
     return *this;
   }
 #else
-  explicit constexpr vec(const DataT &arg) : m_Data{} {
-    for (int i = 0; i < NumElements; ++i) {
-      setValue(i, arg);
-    }
-  }
+  explicit constexpr vec(const DataT &arg)
+      : vec{detail::RepeatValue<NumElements>(
+                static_cast<vec_data_t<DataT>>(arg)),
+            std::make_index_sequence<NumElements>()} {}
 
   template <typename Ty = DataT>
   typename std::enable_if_t<
@@ -891,9 +889,12 @@ public:
   // base types are match and that the NumElements == sum of lengths of args.
   template <typename... argTN, typename = EnableIfSuitableTypes<argTN...>,
             typename = EnableIfSuitableNumElements<argTN...>>
-  constexpr vec(const argTN &... args) : m_Data{} {
-    vaargCtorHelper(0, args...);
-  }
+  constexpr vec(const argTN &... args)
+      : vec{VecArgArrayCreator<vec_data_t<DataT>, argTN...>::Create(args...),
+            std::make_index_sequence<NumElements>()} {}
+  // constexpr vec(const argTN &... args) : m_Data{} {
+  //   vaargCtorHelper(0, args...);
+  // }
 
   // TODO: Remove, for debug purposes only.
   void dump() const {
@@ -1398,7 +1399,7 @@ private:
       setValue(Index, Value, 0.f);
   }
 
-  constexpr DataT getValue(int Index) const {
+  DataT getValue(int Index) const {
     return (NumElements == 1) ? getValue(Index, 0) : getValue(Index, 0.f);
   }
 
@@ -2176,29 +2177,50 @@ template <typename T, int N, typename V> struct VecStorage {
   static_assert(!std::is_same_v<V, void>, "Incorrect data type for sycl::vec");
 };
 
-#define __SYCL_GET_CL_TYPE(target, num) std::array<target, (num == 3) ? 4 : num>
-#define __SYCL_GET_SCALAR_CL_TYPE(target) target
-
-using __half_t = sycl::detail::half_impl::StorageT;
-using __half2_vec_t = sycl::detail::half_impl::Vec2StorageT;
-using __half3_vec_t = sycl::detail::half_impl::Vec3StorageT;
-using __half4_vec_t = sycl::detail::half_impl::Vec4StorageT;
-using __half8_vec_t = sycl::detail::half_impl::Vec8StorageT;
-using __half16_vec_t = sycl::detail::half_impl::Vec16StorageT;
-#define __SYCL_GET_CL_HALF_TYPE(target, num) __##target##num##_vec_t
-
 //#ifdef __SYCL_USE_EXT_VECTOR_TYPE__
 #ifdef __HAS_EXT_VECTOR_TYPE__
+// bunch of crap we have since deleted
+#endif // <-- ?
 
-#define __SYCL_GET_VECTOR_TYPE(target, num) __##target##num##_vec_t
+#ifdef __SYCL_DEVICE_ONLY__
+
+#define __SYCL_GET_CL_TYPE(target, num) __##target##num##_vec_t
+#define __SYCL_GET_SCALAR_CL_TYPE(target) target
+#define __SYCL_GET_VECTOR_TYPE(base, num) __SYCL_GET_CL_TYPE(base, num)
+
+///------
+// #define __SYCL_GET_CL_TYPE(target, num) std::array<target, (num == 3) ? 4 :
+// num> #define __SYCL_GET_SCALAR_CL_TYPE(target) target
+
+// using __half_t = sycl::detail::half_impl::StorageT;
+// using __half2_vec_t = sycl::detail::half_impl::Vec2StorageT;
+// using __half3_vec_t = sycl::detail::half_impl::Vec3StorageT;
+// using __half4_vec_t = sycl::detail::half_impl::Vec4StorageT;
+// using __half8_vec_t = sycl::detail::half_impl::Vec8StorageT;
+// using __half16_vec_t = sycl::detail::half_impl::Vec16StorageT;
+// #define __SYCL_GET_CL_HALF_TYPE(target, num) __##target##num##_vec_t
+///------
+
+//#define __SYCL_GET_VECTOR_TYPE(target, num) __##target##num##_vec_t
 
 template <typename T, int N> struct VecStorageImpl {
   using DataType = T __attribute__((ext_vector_type(N)));
   using DataVectorType = __SYCL_GET_VECTOR_TYPE(T, N);
 };
-#else
+#else // __ SYCL_DEVICE_ONLY  //cp
 
+// ==
+#define __SYCL_GET_CL_TYPE(target, num) std::array<target, (num == 3) ? 4 : num>
+#define __SYCL_GET_SCALAR_CL_TYPE(target) target
+// Use vector types if they are available to speed up computations
+#ifdef __HAS_EXT_VECTOR_TYPE__
+#define __SYCL_GET_VECTOR_TYPE(target, num) __##target##num##_vec_t
+#else
 #define __SYCL_GET_VECTOR_TYPE(target, num) __SYCL_GET_CL_TYPE(target, num)
+#endif // __HAS_EXT_VECTOR_TYPE__
+// ==
+
+#endif // __SYCL_DEVICE_ONLY //cp
 
 // When ext_vector_type is not available, we rely on cl_* types from CL/cl.h
 // to represent vec storage.
@@ -2227,7 +2249,7 @@ __SYCL_DEFINE_VECSTORAGE_IMPL_FOR_TYPE(float, float)
 __SYCL_DEFINE_VECSTORAGE_IMPL_FOR_TYPE(double, double)
 #undef __SYCL_DEFINE_VECSTORAGE_IMPL_FOR_TYPE
 #undef __SYCL_DEFINE_VECSTORAGE_IMPL
-#endif // __SYCL_HAS_EXT_VECTOR_TYPE__
+
 // Single element bool
 template <> struct VecStorage<bool, 1, void> {
   using DataType = bool;
