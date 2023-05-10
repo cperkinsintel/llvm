@@ -2182,7 +2182,7 @@ template <typename T, int N, typename V> struct VecStorage {
 // bunch of crap we have since deleted
 #endif // <-- ?
 
-#ifdef __SYCL_DEVICE_ONLY__
+#ifndef badrash //__SYCL_DEVICE_ONLY__  //cp
 
 #define __SYCL_GET_CL_TYPE(target, num) __##target##num##_vec_t
 #define __SYCL_GET_SCALAR_CL_TYPE(target) target
@@ -2220,8 +2220,6 @@ template <typename T, int N> struct VecStorageImpl {
 #endif // __HAS_EXT_VECTOR_TYPE__
 // ==
 
-#endif // __SYCL_DEVICE_ONLY //cp
-
 // When ext_vector_type is not available, we rely on cl_* types from CL/cl.h
 // to represent vec storage.
 template <typename T, int N> struct VecStorageImpl;
@@ -2249,6 +2247,8 @@ __SYCL_DEFINE_VECSTORAGE_IMPL_FOR_TYPE(float, float)
 __SYCL_DEFINE_VECSTORAGE_IMPL_FOR_TYPE(double, double)
 #undef __SYCL_DEFINE_VECSTORAGE_IMPL_FOR_TYPE
 #undef __SYCL_DEFINE_VECSTORAGE_IMPL
+
+#endif // __SYCL_DEVICE_ONLY //cp
 
 // Single element bool
 template <> struct VecStorage<bool, 1, void> {
