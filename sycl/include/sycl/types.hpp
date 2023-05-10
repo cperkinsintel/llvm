@@ -1374,7 +1374,7 @@ private:
   template <int Num = NumElements,
             typename = typename std::enable_if_t<1 != Num>>
   constexpr DataT getValue(int Index, int) const {
-    return vec_data<DataT>::get(m_Data.[Index]); //?
+    return vec_data<DataT>::get(m_Data[Index]); //?
   }
 #endif // __SYCL_DEVICE_ONLY__
 
