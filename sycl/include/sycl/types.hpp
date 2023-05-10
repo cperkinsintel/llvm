@@ -33,14 +33,7 @@
 #endif
 #endif // __clang__
 
-#ifdef __SYCL_USE_EXT_VECTOR_TYPE__
-#error "Undefine __SYCL_USE_EXT_VECTOR_TYPE__ macro"
-#endif
-#ifdef __HAS_EXT_VECTOR_TYPE__
-#if defined(__SYCL_DEVICE_ONLY__) || !defined(__NO_EXT_VECTOR_TYPE_ON_HOST__)
-#define __SYCL_USE_EXT_VECTOR_TYPE__
-#endif
-#elif defined(__SYCL_DEVICE_ONLY__)
+#if !defined(__HAS_EXT_VECTOR_TYPE__) && defined(__SYCL_DEVICE_ONLY__)
 // This is a soft error. We expect the device compiler to have ext_vector_type
 // support, but that should not be a hard requirement.
 #error "SYCL device compiler is built without ext_vector_type support"
@@ -578,6 +571,29 @@ template <typename Type, int NumElements> class vec {
   // in the class, so vec<float, 16> should be equal to float16 in memory.
   using DataType = typename detail::VecStorage<DataT, NumElements>::DataType;
 
+  using VectorDataType =
+      typename detail::VecStorage<DataT, NumElements>::DataVectorType;
+
+  VectorDataType &getAsVector() {
+    return *reinterpret_cast<VectorDataType *>(m_Data.data());
+  }
+
+  const VectorDataType &getAsVector() const {
+    return *reinterpret_cast<const VectorDataType *>(m_Data.data());
+  }
+
+  static constexpr bool IsHostHalf =
+      std::is_same<DataT, sycl::detail::half_impl::half>::value &&
+      std::is_same<sycl::detail::half_impl::StorageT,
+                   sycl::detail::host_half_impl::half>::value;
+
+#ifdef __HAS_EXT_VECTOR_TYPE__
+  // TODO: There is no support for vector half type on host yet.
+  static constexpr bool NativeVec = NumElements > 1 && !IsHostHalf;
+#else
+  static constexpr bool NativeVec = false;
+#endif
+
   static constexpr int getNumElements() { return NumElements; }
 
   // SizeChecker is needed for vec(const argTN &... args) ctor to validate args.
@@ -745,13 +761,7 @@ public:
 
   vec() = default;
 
-  // TODO Remove this difference between host and device side after
-  // when root cause of API incompatibility will be fixed
-#ifdef __SYCL_DEVICE_ONLY__
   vec(const vec &Rhs) = default;
-#else
-  constexpr vec(const vec &Rhs) : m_Data(Rhs.m_Data) {}
-#endif
 
   vec(vec &&Rhs) = default;
 
@@ -767,23 +777,16 @@ public:
     return *this;
   }
 
-#ifdef __SYCL_USE_EXT_VECTOR_TYPE__
+#ifdef __SYCL_DEVICE_ONLY__
   template <typename T = void>
-  using EnableIfNotHostHalf = typename std::enable_if_t<
-      !std::is_same_v<DataT, sycl::detail::half_impl::half> ||
-          !std::is_same_v<sycl::detail::half_impl::StorageT,
-                          sycl::detail::host_half_impl::half>,
-      T>;
+  using EnableIfNotHostHalf = typename std::enable_if_t<!IsHostHalf, T>;
+
   template <typename T = void>
-  using EnableIfHostHalf = typename std::enable_if_t<
-      std::is_same_v<DataT, sycl::detail::half_impl::half> &&
-          std::is_same_v<sycl::detail::half_impl::StorageT,
-                         sycl::detail::host_half_impl::half>,
-      T>;
+  using EnableIfHostHalf = typename std::enable_if_t<IsHostHalf, T>;
 
   template <typename Ty = DataT>
   explicit constexpr vec(const EnableIfNotHostHalf<Ty> &arg)
-      : m_Data{DataType(vec_data<Ty>::get(arg))} {}
+      : m_Data{(DataType)vec_data<Ty>::get(arg)} {}
 
   template <typename Ty = DataT>
   typename std::enable_if_t<
@@ -796,10 +799,11 @@ public:
   }
 
   template <typename Ty = DataT>
-  explicit constexpr vec(const EnableIfHostHalf<Ty> &arg)
-      : vec{detail::RepeatValue<NumElements>(
-                static_cast<vec_data_t<DataT>>(arg)),
-            std::make_index_sequence<NumElements>()} {}
+  explicit constexpr vec(const EnableIfHostHalf<Ty> &arg) : m_Data{} {
+    for (int i = 0; i < NumElements; ++i) {
+      setValue(i, arg);
+    }
+  }
 
   template <typename Ty = DataT>
   typename std::enable_if_t<
@@ -813,10 +817,11 @@ public:
     return *this;
   }
 #else
-  explicit constexpr vec(const DataT &arg)
-      : vec{detail::RepeatValue<NumElements>(
-                static_cast<vec_data_t<DataT>>(arg)),
-            std::make_index_sequence<NumElements>()} {}
+  explicit constexpr vec(const DataT &arg) : m_Data{} {
+    for (int i = 0; i < NumElements; ++i) {
+      setValue(i, arg);
+    }
+  }
 
   template <typename Ty = DataT>
   typename std::enable_if_t<
@@ -831,7 +836,7 @@ public:
   }
 #endif
 
-#ifdef __SYCL_USE_EXT_VECTOR_TYPE__
+#ifdef __SYCL_DEVICE_ONLY__
   // Optimized naive constructors with NumElements of DataT values.
   // We don't expect compilers to optimize vararg recursive functions well.
 
@@ -886,9 +891,9 @@ public:
   // base types are match and that the NumElements == sum of lengths of args.
   template <typename... argTN, typename = EnableIfSuitableTypes<argTN...>,
             typename = EnableIfSuitableNumElements<argTN...>>
-  constexpr vec(const argTN &...args)
-      : vec{VecArgArrayCreator<vec_data_t<DataT>, argTN...>::Create(args...),
-            std::make_index_sequence<NumElements>()} {}
+  constexpr vec(const argTN &... args) : m_Data{} {
+    vaargCtorHelper(0, args...);
+  }
 
   // TODO: Remove, for debug purposes only.
   void dump() const {
@@ -1057,7 +1062,7 @@ public:
 #error "Undefine __SYCL_BINOP macro"
 #endif
 
-#ifdef __SYCL_USE_EXT_VECTOR_TYPE__
+#ifdef __SYCL_DEVICE_ONLY__
 #define __SYCL_BINOP(BINOP, OPASSIGN, CONVERT)                                 \
   template <typename Ty = vec>                                                 \
   vec operator BINOP(const EnableIfNotHostHalf<Ty> &Rhs) const {               \
@@ -1095,13 +1100,16 @@ public:
     *this = *this BINOP vec(Rhs);                                              \
     return *this;                                                              \
   }
-#else // __SYCL_USE_EXT_VECTOR_TYPE__
+#else // __SYCL_DEVICE_ONLY__
 #define __SYCL_BINOP(BINOP, OPASSIGN, CONVERT)                                 \
   vec operator BINOP(const vec &Rhs) const {                                   \
     vec Ret;                                                                   \
-    for (size_t I = 0; I < NumElements; ++I) {                                 \
-      Ret.setValue(I, (getValue(I) BINOP Rhs.getValue(I)));                    \
-    }                                                                          \
+    if constexpr (NativeVec)                                                   \
+      Ret.getAsVector() = getAsVector() BINOP Rhs.getAsVector();               \
+    else                                                                       \
+      for (size_t I = 0; I < NumElements; ++I)                                 \
+        Ret.setValue(I, (DataT)(vec_data<DataT>::get(getValue(                 \
+                            I)) BINOP vec_data<DataT>::get(Rhs.getValue(I)))); \
     return Ret;                                                                \
   }                                                                            \
   template <typename T>                                                        \
@@ -1123,7 +1131,7 @@ public:
     *this = *this BINOP vec(Rhs);                                              \
     return *this;                                                              \
   }
-#endif // __SYCL_USE_EXT_VECTOR_TYPE__
+#endif // __SYCL_DEVICE_ONLY__
 
   __SYCL_BINOP(+, +=, true)
   __SYCL_BINOP(-, -=, true)
@@ -1174,7 +1182,7 @@ public:
 #else
 #define __SYCL_RELLOGOP(RELLOGOP)                                              \
   vec<rel_t, NumElements> operator RELLOGOP(const vec &Rhs) const {            \
-    vec<rel_t, NumElements> Ret;                                               \
+    vec<rel_t, NumElements> Ret{0};                                            \
     for (size_t I = 0; I < NumElements; ++I) {                                 \
       Ret.setValue(I, -(vec_data<DataT>::get(getValue(I))                      \
                             RELLOGOP vec_data<DataT>::get(Rhs.getValue(I))));  \
@@ -1292,7 +1300,7 @@ public:
   // vec<RET, NumElements> operatorOP(const DataT &Rhs) const;
 private:
   // Generic method that execute "Operation" on underlying values.
-#ifdef __SYCL_USE_EXT_VECTOR_TYPE__
+#ifdef __SYCL_DEVICE_ONLY__
   template <template <typename> class Operation,
             typename Ty = vec<DataT, NumElements>>
   vec<DataT, NumElements>
@@ -1314,22 +1322,24 @@ private:
     }
     return Result;
   }
-#else  // __SYCL_USE_EXT_VECTOR_TYPE__
+#else  // __SYCL_DEVICE_ONLY__
   template <template <typename> class Operation>
   vec<DataT, NumElements>
   operatorHelper(const vec<DataT, NumElements> &Rhs) const {
     vec<DataT, NumElements> Result;
     Operation<DataT> Op;
-    for (size_t I = 0; I < NumElements; ++I) {
-      Result.setValue(I, Op(Rhs.getValue(I), getValue(I)));
-    }
+    if constexpr (NativeVec)
+      Result.m_Data = Op(m_Data, Rhs.m_Data);
+    else
+      for (size_t I = 0; I < NumElements; ++I)
+        Result.setValue(I, Op(Rhs.getValue(I), getValue(I)));
     return Result;
   }
-#endif // __SYCL_USE_EXT_VECTOR_TYPE__
+#endif // __SYCL_DEVICE_ONLY__
 
 // setValue and getValue should be able to operate on different underlying
 // types: enum cl_float#N , builtin vector float#N, builtin type float.
-#ifdef __SYCL_USE_EXT_VECTOR_TYPE__
+#ifdef __SYCL_DEVICE_ONLY__
   template <int Num = NumElements, typename Ty = int,
             typename = typename std::enable_if_t<1 != Num>>
   constexpr void setValue(EnableIfNotHostHalf<Ty> Index, const DataT &Value,
@@ -1346,27 +1356,27 @@ private:
   template <int Num = NumElements, typename Ty = int,
             typename = typename std::enable_if_t<1 != Num>>
   constexpr void setValue(EnableIfHostHalf<Ty> Index, const DataT &Value, int) {
-    m_Data.s[Index] = vec_data<DataT>::get(Value);
+    m_Data[Index] = vec_data<DataT>::get(Value);
   }
 
   template <int Num = NumElements, typename Ty = int,
             typename = typename std::enable_if_t<1 != Num>>
   constexpr DataT getValue(EnableIfHostHalf<Ty> Index, int) const {
-    return vec_data<DataT>::get(m_Data.s[Index]);
+    return vec_data<DataT>::get(m_Data[Index]);
   }
-#else  // __SYCL_USE_EXT_VECTOR_TYPE__
+#else  // __SYCL_DEVICE_ONLY__
   template <int Num = NumElements,
             typename = typename std::enable_if_t<1 != Num>>
   constexpr void setValue(int Index, const DataT &Value, int) {
-    m_Data.s[Index] = vec_data<DataT>::get(Value);
+    m_Data[Index] = vec_data<DataT>::get(Value);
   }
 
   template <int Num = NumElements,
             typename = typename std::enable_if_t<1 != Num>>
   constexpr DataT getValue(int Index, int) const {
-    return vec_data<DataT>::get(m_Data.s[Index]);
+    return vec_data<DataT>::get(m_Data.[Index]); //?
   }
-#endif // __SYCL_USE_EXT_VECTOR_TYPE__
+#endif // __SYCL_DEVICE_ONLY__
 
   template <int Num = NumElements,
             typename = typename std::enable_if_t<1 == Num>>
@@ -1388,7 +1398,7 @@ private:
       setValue(Index, Value, 0.f);
   }
 
-  DataT getValue(int Index) const {
+  constexpr DataT getValue(int Index) const {
     return (NumElements == 1) ? getValue(Index, 0) : getValue(Index, 0.f);
   }
 
@@ -2166,17 +2176,37 @@ template <typename T, int N, typename V> struct VecStorage {
   static_assert(!std::is_same_v<V, void>, "Incorrect data type for sycl::vec");
 };
 
-#ifdef __SYCL_USE_EXT_VECTOR_TYPE__
+#define __SYCL_GET_CL_TYPE(target, num) std::array<target, (num == 3) ? 4 : num>
+#define __SYCL_GET_SCALAR_CL_TYPE(target) target
+
+using __half_t = sycl::detail::half_impl::StorageT;
+using __half2_vec_t = sycl::detail::half_impl::Vec2StorageT;
+using __half3_vec_t = sycl::detail::half_impl::Vec3StorageT;
+using __half4_vec_t = sycl::detail::half_impl::Vec4StorageT;
+using __half8_vec_t = sycl::detail::half_impl::Vec8StorageT;
+using __half16_vec_t = sycl::detail::half_impl::Vec16StorageT;
+#define __SYCL_GET_CL_HALF_TYPE(target, num) __##target##num##_vec_t
+
+//#ifdef __SYCL_USE_EXT_VECTOR_TYPE__
+#ifdef __HAS_EXT_VECTOR_TYPE__
+
+#define __SYCL_GET_VECTOR_TYPE(target, num) __##target##num##_vec_t
+
 template <typename T, int N> struct VecStorageImpl {
   using DataType = T __attribute__((ext_vector_type(N)));
+  using DataVectorType = __SYCL_GET_VECTOR_TYPE(T, N);
 };
 #else
+
+#define __SYCL_GET_VECTOR_TYPE(target, num) __SYCL_GET_CL_TYPE(target, num)
+
 // When ext_vector_type is not available, we rely on cl_* types from CL/cl.h
 // to represent vec storage.
 template <typename T, int N> struct VecStorageImpl;
 #define __SYCL_DEFINE_VECSTORAGE_IMPL(type, cl_type, num)                      \
   template <> struct VecStorageImpl<type, num> {                               \
     using DataType = ::cl_##cl_type##num;                                      \
+    using DataVectorType = __SYCL_GET_VECTOR_TYPE(cl_type, num);               \
   };
 #define __SYCL_DEFINE_VECSTORAGE_IMPL_FOR_TYPE(type, cl_type)                  \
   __SYCL_DEFINE_VECSTORAGE_IMPL(type, cl_type, 2)                              \
@@ -2197,11 +2227,12 @@ __SYCL_DEFINE_VECSTORAGE_IMPL_FOR_TYPE(float, float)
 __SYCL_DEFINE_VECSTORAGE_IMPL_FOR_TYPE(double, double)
 #undef __SYCL_DEFINE_VECSTORAGE_IMPL_FOR_TYPE
 #undef __SYCL_DEFINE_VECSTORAGE_IMPL
-#endif // __SYCL_USE_EXT_VECTOR_TYPE__
+#endif // __SYCL_HAS_EXT_VECTOR_TYPE__
 // Single element bool
 template <> struct VecStorage<bool, 1, void> {
   using DataType = bool;
 };
+
 // Multiple element bool
 template <int N>
 struct VecStorage<bool, N, typename std::enable_if_t<isValidVectorSize(N)>> {
@@ -2209,19 +2240,32 @@ struct VecStorage<bool, N, typename std::enable_if_t<isValidVectorSize(N)>> {
       typename VecStorageImpl<select_apply_cl_t<bool, std::int8_t, std::int16_t,
                                                 std::int32_t, std::int64_t>,
                               N>::DataType;
+
+  using DataVectorType = detail::select_apply_cl_t<
+      bool, __SYCL_GET_VECTOR_TYPE(char, N), __SYCL_GET_VECTOR_TYPE(short, N),
+      __SYCL_GET_VECTOR_TYPE(int, N), __SYCL_GET_VECTOR_TYPE(long, N)>;
 };
+
 // Single element signed integers
 template <typename T>
 struct VecStorage<T, 1, typename std::enable_if_t<is_sigeninteger<T>::value>> {
   using DataType = select_apply_cl_t<T, std::int8_t, std::int16_t, std::int32_t,
                                      std::int64_t>;
+  using DataVectorType = detail::select_apply_cl_t<
+      T, __SYCL_GET_VECTOR_TYPE(char, 1), __SYCL_GET_VECTOR_TYPE(short, 1),
+      __SYCL_GET_VECTOR_TYPE(int, 1), __SYCL_GET_VECTOR_TYPE(long, 1)>;
 };
+
 // Single element unsigned integers
 template <typename T>
 struct VecStorage<T, 1, typename std::enable_if_t<is_sugeninteger<T>::value>> {
   using DataType = select_apply_cl_t<T, std::uint8_t, std::uint16_t,
                                      std::uint32_t, std::uint64_t>;
+  using DataVectorType = detail::select_apply_cl_t<
+      T, __SYCL_GET_VECTOR_TYPE(uchar, 1), __SYCL_GET_VECTOR_TYPE(ushort, 1),
+      __SYCL_GET_VECTOR_TYPE(uint, 1), __SYCL_GET_VECTOR_TYPE(ulong, 1)>;
 };
+
 // Single element floating-point (except half)
 template <typename T>
 struct VecStorage<
@@ -2229,7 +2273,12 @@ struct VecStorage<
     typename std::enable_if_t<!is_half<T>::value && is_sgenfloat<T>::value>> {
   using DataType =
       select_apply_cl_t<T, std::false_type, std::false_type, float, double>;
+  using DataVectorType =
+      detail::select_apply_cl_t<T, std::false_type, std::false_type,
+                                __SYCL_GET_VECTOR_TYPE(float, 1),
+                                __SYCL_GET_VECTOR_TYPE(double, 1)>;
 };
+
 // Multiple elements signed/unsigned integers and floating-point (except half)
 template <typename T, int N>
 struct VecStorage<T, N,
@@ -2239,15 +2288,20 @@ struct VecStorage<T, N,
                                               !is_half<T>::value))>> {
   using DataType =
       typename VecStorageImpl<typename VecStorage<T, 1>::DataType, N>::DataType;
+  using DataVectorType =
+      typename VecStorageImpl<typename VecStorage<T, 1>::DataType,
+                              N>::DataVectorType;
 };
 // Single element half
 template <> struct VecStorage<half, 1, void> {
   using DataType = sycl::detail::half_impl::StorageT;
+  using DataVectorType = sycl::detail::half_impl::StorageT;
 };
 // Multiple elements half
 #define __SYCL_DEFINE_HALF_VECSTORAGE(Num)                                     \
   template <> struct VecStorage<half, Num, void> {                             \
     using DataType = sycl::detail::half_impl::Vec##Num##StorageT;              \
+    using DataVectorType = sycl::detail::half_impl::Vec##Num##StorageT;        \
   };
 __SYCL_DEFINE_HALF_VECSTORAGE(2)
 __SYCL_DEFINE_HALF_VECSTORAGE(3)
