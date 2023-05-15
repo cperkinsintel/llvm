@@ -37,9 +37,10 @@
 #error "Undefine __SYCL_USE_EXT_VECTOR_TYPE__ macro"
 #endif
 #ifdef __HAS_EXT_VECTOR_TYPE__
-#if defined(__SYCL_DEVICE_ONLY__) || !defined(__NO_EXT_VECTOR_TYPE_ON_HOST__)
+// CP
+//#if defined(__SYCL_DEVICE_ONLY__) || !defined(__NO_EXT_VECTOR_TYPE_ON_HOST__)
 #define __SYCL_USE_EXT_VECTOR_TYPE__
-#endif
+//#endif
 #elif defined(__SYCL_DEVICE_ONLY__)
 // This is a soft error. We expect the device compiler to have ext_vector_type
 // support, but that should not be a hard requirement.
@@ -55,9 +56,10 @@
 #include <sycl/marray.hpp>
 #include <sycl/multi_ptr.hpp>
 
-#ifndef __SYCL_USE_EXT_VECTOR_TYPE__
-#include <sycl/detail/cl.h>
-#endif
+// CP
+// #ifndef __SYCL_USE_EXT_VECTOR_TYPE__
+// #include <sycl/detail/cl.h>
+// #endif
 
 #include <array>
 #include <cmath>
