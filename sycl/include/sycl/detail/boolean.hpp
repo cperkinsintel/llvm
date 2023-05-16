@@ -95,7 +95,7 @@ template <int N> struct Boolean {
     return r;
   }
 
-private:
+//private:
   template <int Num> friend struct Assigner;
   alignas(detail::vector_alignment<element_type, N>::value) DataType value;
 };
@@ -122,7 +122,7 @@ template <> struct Boolean<1> {
   operator bool() const { return value; }
 #endif
 
-private:
+//private:
   alignas(1) bool value = false;
 };
 
