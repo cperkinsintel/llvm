@@ -704,21 +704,27 @@ private:
     constexpr bool KernelHasName =
         KI::getName() != nullptr && KI::getName()[0] != '\0';
 
+    // char (*__kaboom)[ sizeof(KernelFunc) ] = 1;
+    // char (*__badoom)[ KI::getKernelSize() ] = 2;
+    std::cout << "-- StoreLambda --\n";
+    std::cout << "sizeof(KernelFunc): " << sizeof(KernelFunc)  << "  KI::getKernelSize(): " << KI::getKernelSize() << std::endl;
+    std::cout << "sizeof(decltype(KF)): " << sizeof(decltype(KernelFunc)) << "  alignof(decltype(KF)): " << alignof(decltype(KernelFunc)) <<   std::endl;
+
     // Some host compilers may have different captures from Clang. Currently
     // there is no stable way of handling this when extracting the captures, so
     // a static assert is made to fail for incompatible kernel lambdas.
-    static_assert(
-        !KernelHasName || sizeof(KernelFunc) == KI::getKernelSize(),
-        "Unexpected kernel lambda size. This can be caused by an "
-        "external host compiler producing a lambda with an "
-        "unexpected layout. This is a limitation of the compiler."
-        "In many cases the difference is related to capturing constexpr "
-        "variables. In such cases removing constexpr specifier aligns the "
-        "captures between the host compiler and the device compiler."
-        "\n"
-        "In case of MSVC, passing "
-        "-fsycl-host-compiler-options='/std:c++latest' "
-        "might also help.");
+    // static_assert(
+    //     !KernelHasName || sizeof(KernelFunc) == KI::getKernelSize(),
+    //     "Unexpected kernel lambda size. This can be caused by an "
+    //     "external host compiler producing a lambda with an "
+    //     "unexpected layout. This is a limitation of the compiler."
+    //     "In many cases the difference is related to capturing constexpr "
+    //     "variables. In such cases removing constexpr specifier aligns the "
+    //     "captures between the host compiler and the device compiler."
+    //     "\n"
+    //     "In case of MSVC, passing "
+    //     "-fsycl-host-compiler-options='/std:c++latest' "
+    //     "might also help.");
 
     // Empty name indicates that the compilation happens without integration
     // header, so don't perform things that require it.

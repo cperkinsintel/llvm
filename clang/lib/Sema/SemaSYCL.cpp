@@ -34,6 +34,8 @@
 #include <functional>
 #include <initializer_list>
 
+#include <iostream>
+
 using namespace clang;
 using namespace std::placeholders;
 
@@ -3657,6 +3659,12 @@ public:
       : SyclKernelFieldHandler(S), Header(H) {
 
     // The header needs to access the kernel object size.
+    auto kernelType = KernelObj->getTypeForDecl();
+    std::cout << "== INTERGRATION HEADER ==\n typeSizeInChars: " << SemaRef.getASTContext().getTypeSizeInChars(kernelType).getQuantity()
+              << "  typeAlignInChars: " << SemaRef.getASTContext().getTypeAlignInChars(kernelType).getQuantity()
+              << "  typeUnadjustedAlignInChars: " << SemaRef.getASTContext().getTypeUnadjustedAlignInChars(kernelType).getQuantity()
+              << "  preferredTypeAlignInChars(kf): " << SemaRef.getASTContext().getPreferredTypeAlignInChars(KernelFunc->getType()).getQuantity()
+              << std::endl;
     int64_t ObjSize = SemaRef.getASTContext()
                           .getTypeSizeInChars(KernelObj->getTypeForDecl())
                           .getQuantity();
