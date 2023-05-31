@@ -16,7 +16,7 @@
 #define __NOEXC /*noexcept*/
 
 #define __MAKE_1V(Fun, Call, N, Ret, Arg1)                                     \
-  __SYCL_EXPORT sycl::vec<Ret, N> Fun __NOEXC(sycl::vec<Arg1, N> x) {          \
+  __SYCL_EXPORT sycl::vec<Ret, N>  Fun __NOEXC(sycl::vec<Arg1, N> &x) { \
     sycl::vec<Ret, N> r;                                                       \
     detail::helper<N - 1>().run_1v(                                            \
         r, [](Arg1 x) { return __host_std::Call(x); }, x);                     \
@@ -24,8 +24,8 @@
   }
 
 #define __MAKE_1V_2V(Fun, Call, N, Ret, Arg1, Arg2)                            \
-  __SYCL_EXPORT sycl::vec<Ret, N> Fun __NOEXC(sycl::vec<Arg1, N> x,            \
-                                              sycl::vec<Arg2, N> y) {          \
+  __SYCL_EXPORT sycl::vec<Ret, N> Fun __NOEXC(sycl::vec<Arg1, N> &x,            \
+                                              sycl::vec<Arg2, N> &y) {          \
     sycl::vec<Ret, N> r;                                                       \
     detail::helper<N - 1>().run_1v_2v(                                         \
         r, [](Arg1 x, Arg2 y) { return __host_std::Call(x, y); }, x, y);       \
@@ -33,7 +33,7 @@
   }
 
 #define __MAKE_1V_2V_RS(Fun, Call, N, Ret, Arg1, Arg2)                         \
-  __SYCL_EXPORT Ret Fun __NOEXC(sycl::vec<Arg1, N> x, sycl::vec<Arg2, N> y) {  \
+  __SYCL_EXPORT Ret Fun __NOEXC(sycl::vec<Arg1, N> &x, sycl::vec<Arg2, N> &y) {  \
     Ret r = Ret();                                                             \
     detail::helper<N - 1>().run_1v_2v_rs(                                      \
         r, [](Ret &r, Arg1 x, Arg2 y) { return __host_std::Call(r, x, y); },   \
@@ -42,7 +42,7 @@
   }
 
 #define __MAKE_1V_RS(Fun, Call, N, Ret, Arg1)                                  \
-  __SYCL_EXPORT Ret Fun __NOEXC(sycl::vec<Arg1, N> x) {                        \
+  __SYCL_EXPORT Ret Fun __NOEXC(sycl::vec<Arg1, N> &x) {                        \
     Ret r = Ret();                                                             \
     detail::helper<N - 1>().run_1v_rs(                                         \
         r, [](Ret &r, Arg1 x) { return __host_std::Call(r, x); }, x);          \
@@ -51,7 +51,7 @@
 
 #define __MAKE_1V_2V_3V(Fun, Call, N, Ret, Arg1, Arg2, Arg3)                   \
   __SYCL_EXPORT sycl::vec<Ret, N> Fun __NOEXC(                                 \
-      sycl::vec<Arg1, N> x, sycl::vec<Arg2, N> y, sycl::vec<Arg3, N> z) {      \
+      sycl::vec<Arg1, N> &x, sycl::vec<Arg2, N> &y, sycl::vec<Arg3, N> &z) {      \
     sycl::vec<Ret, N> r;                                                       \
     detail::helper<N - 1>().run_1v_2v_3v(                                      \
         r, [](Arg1 x, Arg2 y, Arg3 z) { return __host_std::Call(x, y, z); },   \
@@ -60,7 +60,7 @@
   }
 
 #define __MAKE_1V_2S_3S(Fun, N, Ret, Arg1, Arg2, Arg3)                         \
-  __SYCL_EXPORT sycl::vec<Ret, N> Fun __NOEXC(sycl::vec<Arg1, N> x, Arg2 y,    \
+  __SYCL_EXPORT sycl::vec<Ret, N> Fun __NOEXC(sycl::vec<Arg1, N> &x, Arg2 y,    \
                                               Arg3 z) {                        \
     sycl::vec<Ret, N> r;                                                       \
     detail::helper<N - 1>().run_1v_2s_3s(                                      \
@@ -70,7 +70,7 @@
   }
 
 #define __MAKE_1V_2S(Fun, N, Ret, Arg1, Arg2)                                  \
-  __SYCL_EXPORT sycl::vec<Ret, N> Fun __NOEXC(sycl::vec<Arg1, N> x, Arg2 y) {  \
+  __SYCL_EXPORT sycl::vec<Ret, N> Fun __NOEXC(sycl::vec<Arg1, N> &x, Arg2 y) {  \
     sycl::vec<Ret, N> r;                                                       \
     detail::helper<N - 1>().run_1v_2s(                                         \
         r, [](Arg1 x, Arg2 y) { return __host_std::Fun(x, y); }, x, y);        \
@@ -78,7 +78,7 @@
   }
 
 #define __MAKE_SR_1V_AND(Fun, Call, N, Ret, Arg1)                              \
-  __SYCL_EXPORT Ret Fun __NOEXC(sycl::vec<Arg1, N> x) {                        \
+  __SYCL_EXPORT Ret Fun __NOEXC(sycl::vec<Arg1, N> &x) {                        \
     Ret r;                                                                     \
     detail::helper<N - 1>().run_1v_sr_and(                                     \
         r, [](Arg1 x) { return __host_std::Call(x); }, x);                     \
@@ -86,7 +86,7 @@
   }
 
 #define __MAKE_SR_1V_OR(Fun, Call, N, Ret, Arg1)                               \
-  __SYCL_EXPORT Ret Fun __NOEXC(sycl::vec<Arg1, N> x) {                        \
+  __SYCL_EXPORT Ret Fun __NOEXC(sycl::vec<Arg1, N> &x) {                        \
     Ret r;                                                                     \
     detail::helper<N - 1>().run_1v_sr_or(                                      \
         r, [](Arg1 x) { return __host_std::Call(x); }, x);                     \
@@ -94,7 +94,7 @@
   }
 
 #define __MAKE_1V_2P(Fun, N, Ret, Arg1, Arg2)                                  \
-  __SYCL_EXPORT sycl::vec<Ret, N> Fun __NOEXC(sycl::vec<Arg1, N> x,            \
+  __SYCL_EXPORT sycl::vec<Ret, N> Fun __NOEXC(sycl::vec<Arg1, N> &x,            \
                                               sycl::vec<Arg2, N> *y) {         \
     sycl::vec<Ret, N> r;                                                       \
     detail::helper<N - 1>().run_1v_2p(                                         \
@@ -104,7 +104,7 @@
 
 #define __MAKE_1V_2V_3P(Fun, N, Ret, Arg1, Arg2, Arg3)                         \
   __SYCL_EXPORT sycl::vec<Ret, N> Fun __NOEXC(                                 \
-      sycl::vec<Arg1, N> x, sycl::vec<Arg2, N> y, sycl::vec<Arg3, N> *z) {     \
+      sycl::vec<Arg1, N> &x, sycl::vec<Arg2, N> &y, sycl::vec<Arg3, N> *z) {     \
     sycl::vec<Ret, N> r;                                                       \
     detail::helper<N - 1>().run_1v_2v_3p(                                      \
         r, [](Arg1 x, Arg2 y, Arg3 *z) { return __host_std::Fun(x, y, z); },   \
@@ -218,44 +218,44 @@ namespace detail {
 
 template <int N> struct helper {
   template <typename Res, typename Op, typename T1>
-  inline void run_1v(Res &r, Op op, T1 x) {
+  inline void run_1v(Res &r, Op op, T1 &x) {
     helper<N - 1>().run_1v(r, op, x);
     r.template swizzle<N>() = op(x.template swizzle<N>());
   }
 
   template <typename Res, typename Op, typename T1, typename T2>
-  inline void run_1v_2v(Res &r, Op op, T1 x, T2 y) {
+  inline void run_1v_2v(Res &r, Op op, T1 &x, T2 &y) {
     helper<N - 1>().run_1v_2v(r, op, x, y);
     r.template swizzle<N>() =
         op(x.template swizzle<N>(), y.template swizzle<N>());
   }
 
   template <typename Res, typename Op, typename T1, typename T2>
-  inline void run_1v_2s(Res &r, Op op, T1 x, T2 y) {
+  inline void run_1v_2s(Res &r, Op op, T1 &x, T2 &y) {
     helper<N - 1>().run_1v_2s(r, op, x, y);
     r.template swizzle<N>() = op(x.template swizzle<N>(), y);
   }
 
   template <typename Res, typename Op, typename T1, typename T2, typename T3>
-  inline void run_1v_2s_3s(Res &r, Op op, T1 x, T2 y, T3 z) {
+  inline void run_1v_2s_3s(Res &r, Op op, T1 &x, T2 &y, T3 &z) {
     helper<N - 1>().run_1v_2s_3s(r, op, x, y, z);
     r.template swizzle<N>() = op(x.template swizzle<N>(), y, z);
   }
 
   template <typename Res, typename Op, typename T1, typename T2>
-  inline void run_1v_2v_rs(Res &r, Op op, T1 x, T2 y) {
+  inline void run_1v_2v_rs(Res &r, Op op, T1 &x, T2 &y) {
     helper<N - 1>().run_1v_2v_rs(r, op, x, y);
     op(r, x.template swizzle<N>(), y.template swizzle<N>());
   }
 
   template <typename Res, typename Op, typename T1>
-  inline void run_1v_rs(Res &r, Op op, T1 x) {
+  inline void run_1v_rs(Res &r, Op op, T1 &x) {
     helper<N - 1>().run_1v_rs(r, op, x);
     op(r, x.template swizzle<N>());
   }
 
   template <typename Res, typename Op, typename T1, typename T2>
-  inline void run_1v_2p(Res &r, Op op, T1 x, T2 y) {
+  inline void run_1v_2p(Res &r, Op op, T1 &x, T2 y) {
     helper<N - 1>().run_1v_2p(r, op, x, y);
     // TODO avoid creating a temporary variable
     typename std::remove_pointer<T2>::type::element_type temp;
@@ -264,7 +264,7 @@ template <int N> struct helper {
   }
 
   template <typename Res, typename Op, typename T1, typename T2, typename T3>
-  inline void run_1v_2v_3p(Res &r, Op op, T1 x, T2 y, T3 z) {
+  inline void run_1v_2v_3p(Res &r, Op op, T1 &x, T2 &y, T3 z) {
     helper<N - 1>().run_1v_2v_3p(r, op, x, y, z);
     // TODO avoid creating a temporary variable
     typename std::remove_pointer<T3>::type::element_type temp;
@@ -274,7 +274,7 @@ template <int N> struct helper {
   }
 
   template <typename Res, typename Op, typename T1, typename T2, typename T3>
-  inline void run_1v_2v_3v(Res &r, Op op, T1 x, T2 y, T3 z) {
+  inline void run_1v_2v_3v(Res &r, Op op, T1 &x, T2 &y, T3 &z) {
     helper<N - 1>().run_1v_2v_3v(r, op, x, y, z);
     r.template swizzle<N>() =
         op(x.template swizzle<N>(), y.template swizzle<N>(),
@@ -282,13 +282,13 @@ template <int N> struct helper {
   }
 
   template <typename Res, typename Op, typename T1>
-  inline void run_1v_sr_or(Res &r, Op op, T1 x) {
+  inline void run_1v_sr_or(Res &r, Op op, T1 &x) {
     helper<N - 1>().run_1v_sr_or(r, op, x);
     r = (op(x.template swizzle<N>()) || r);
   }
 
   template <typename Res, typename Op, typename T1>
-  inline void run_1v_sr_and(Res &r, Op op, T1 x) {
+  inline void run_1v_sr_and(Res &r, Op op, T1 &x) {
     helper<N - 1>().run_1v_sr_and(r, op, x);
     r = (op(x.template swizzle<N>()) && r);
   }
@@ -296,38 +296,38 @@ template <int N> struct helper {
 
 template <> struct helper<0> {
   template <typename Res, typename Op, typename T1>
-  inline void run_1v(Res &r, Op op, T1 x) {
+  inline void run_1v(Res &r, Op op, T1 &x) {
     r.template swizzle<0>() = op(x.template swizzle<0>());
   }
 
   template <typename Res, typename Op, typename T1, typename T2>
-  inline void run_1v_2v(Res &r, Op op, T1 x, T2 y) {
+  inline void run_1v_2v(Res &r, Op op, T1 &x, T2 &y) {
     r.template swizzle<0>() =
         op(x.template swizzle<0>(), y.template swizzle<0>());
   }
 
   template <typename Res, typename Op, typename T1, typename T2>
-  inline void run_1v_2s(Res &r, Op op, T1 x, T2 y) {
+  inline void run_1v_2s(Res &r, Op op, T1 &x, T2 y) {
     r.template swizzle<0>() = op(x.template swizzle<0>(), y);
   }
 
   template <typename Res, typename Op, typename T1, typename T2, typename T3>
-  inline void run_1v_2s_3s(Res &r, Op op, T1 x, T2 y, T3 z) {
+  inline void run_1v_2s_3s(Res &r, Op op, T1 &x, T2 y, T3 z) {
     r.template swizzle<0>() = op(x.template swizzle<0>(), y, z);
   }
 
   template <typename Res, typename Op, typename T1, typename T2>
-  inline void run_1v_2v_rs(Res &r, Op op, T1 x, T2 y) {
+  inline void run_1v_2v_rs(Res &r, Op op, T1 &x, T2 &y) {
     op(r, x.template swizzle<0>(), y.template swizzle<0>());
   }
 
   template <typename Res, typename Op, typename T1>
-  inline void run_1v_rs(Res &r, Op op, T1 x) {
+  inline void run_1v_rs(Res &r, Op op, T1 &x) {
     op(r, x.template swizzle<0>());
   }
 
   template <typename Res, typename Op, typename T1, typename T2>
-  inline void run_1v_2p(Res &r, Op op, T1 x, T2 y) {
+  inline void run_1v_2p(Res &r, Op op, T1 &x, T2 y) {
     // TODO avoid creating a temporary variable
     typename std::remove_pointer<T2>::type::element_type temp;
     r.template swizzle<0>() = op(x.template swizzle<0>(), &temp);
@@ -335,7 +335,7 @@ template <> struct helper<0> {
   }
 
   template <typename Res, typename Op, typename T1, typename T2, typename T3>
-  inline void run_1v_2v_3p(Res &r, Op op, T1 x, T2 y, T3 z) {
+  inline void run_1v_2v_3p(Res &r, Op op, T1 &x, T2 &y, T3 z) {
     // TODO avoid creating a temporary variable
     typename std::remove_pointer<T3>::type::element_type temp;
     r.template swizzle<0>() =
@@ -344,19 +344,19 @@ template <> struct helper<0> {
   }
 
   template <typename Res, typename Op, typename T1, typename T2, typename T3>
-  inline void run_1v_2v_3v(Res &r, Op op, T1 x, T2 y, T3 z) {
+  inline void run_1v_2v_3v(Res &r, Op op, T1 &x, T2 &y, T3 &z) {
     r.template swizzle<0>() =
         op(x.template swizzle<0>(), y.template swizzle<0>(),
            z.template swizzle<0>());
   }
 
   template <typename Res, typename Op, typename T1>
-  inline void run_1v_sr_or(Res &r, Op op, T1 x) {
+  inline void run_1v_sr_or(Res &r, Op op, T1 &x) {
     r = op(x.template swizzle<0>());
   }
 
   template <typename Res, typename Op, typename T1>
-  inline void run_1v_sr_and(Res &r, Op op, T1 x) {
+  inline void run_1v_sr_and(Res &r, Op op, T1 &x) {
     r = op(x.template swizzle<0>());
   }
 };

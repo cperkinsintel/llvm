@@ -554,10 +554,19 @@ using vec_data_t = typename detail::vec_helper<T>::RetType;
 #pragma message("Alignment of class vec is not in accordance with SYCL \
 specification requirements, a limitation of the MSVC compiler(Error C2719).\
 Requested alignment applied, limited at 64.")
-#define __SYCL_ALIGNED_VAR(type, x, var)                                       \
-  type __declspec(align((x < 64) ? x : 64)) var
+ #ifdef __SYCL_DEVICE_ONLY__
+//#define __SYCL_ALIGNED_VAR(type, x, var)   alignas( (x < 64) ? x : 64) type var
+// vec<double,16> =>  error: requested alignment is less than minimum alignment of 128 for type
+ 
+  #define __SYCL_ALIGNED_VAR(type, x, var) alignas(x) type var
+ #else
+//#define __SYCL_ALIGNED_VAR(type, x, var)   type __declspec(align((x < 64) ? x : 64)) var
+
+ #define __SYCL_ALIGNED_VAR(type, x, var)   type __declspec(align(x)) var
+//builtins_integer.cpp(247): error C2719: 'x': formal parameter with requested alignment of 128 won't be aligned
+ #endif
 #else
-#define __SYCL_ALIGNED_VAR(type, x, var) alignas(x) type var
+ #define __SYCL_ALIGNED_VAR(type, x, var) alignas(x) type var
 #endif
 
 /// Provides a cross-patform vector class template that works efficiently on
@@ -565,6 +574,12 @@ Requested alignment applied, limited at 64.")
 ///
 /// \ingroup sycl_api
 template <typename Type, int NumElements> class vec {
+  // CP
+#ifdef __SYCL_DEVICE_ONLY__
+  //#pragma message("Chris says hi") // <-- not showing up?
+  //#error
+  //char (*__shaboom)[ sizeof(test_kernel) ] = 1;
+#endif
   using DataT = Type;
 
   // This represent type of underlying value. There should be only one field
@@ -1404,6 +1419,9 @@ private:
   __SYCL_ALIGNED_VAR(DataType,
                      (detail::vector_alignment<DataT, NumElements>::value),
                      m_Data);
+  //#ifdef __SYCL_DEVICE_ONLY__
+  //#error "omg"
+  //#endif
 
   // friends
   template <typename T1, typename T2, typename T3, template <typename> class T4,
