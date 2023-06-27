@@ -709,7 +709,7 @@ private:
   void StoreLambda(KernelType KernelFunc) {
     using KI = detail::KernelInfo<KernelName>;
     constexpr bool IsCallableWithKernelHandler =
-        detail::KernelLambdaHasKernelHandlerArgT<KernelType,
+        detail::KernelLambdaHasKernelHandlerArgT<KernelType, KernelName,
                                                  LambdaArgType>::value;
 
     if (IsCallableWithKernelHandler && MIsHost) {
@@ -717,6 +717,16 @@ private:
           "kernel_handler is not yet supported by host device.",
           PI_ERROR_INVALID_OPERATION);
     }
+
+    // CP
+    // constexpr unsigned LastParamIndex = KI::getNumParams() - 1;
+    // constexpr bool UsesSpecializationConstants = (
+    // IsCallableWithKernelHandler &&
+    //                                                LastParamIndex >= 0 &&
+    //                                                KI::getParamDesc(LastParamIndex).kind
+    //                                                ==
+    //                                                detail::kernel_param_kind_t::kind_specialization_constants_buffer
+    //                                                );
 
     KernelType *KernelPtr =
         ResetHostKernel<KernelType, LambdaArgType, Dims>(KernelFunc);
@@ -1435,7 +1445,8 @@ private:
                 ext::oneapi::experimental::detail::empty_properties_t>
   void kernel_single_task_wrapper(_KERNELFUNCPARAM(KernelFunc)) {
     unpack<KernelType, PropertiesT,
-           detail::KernelLambdaHasKernelHandlerArgT<KernelType>::value>(
+           detail::KernelLambdaHasKernelHandlerArgT<KernelType,
+                                                    KernelName>::value>(
         KernelFunc, [&](auto Unpacker, auto... args) {
           Unpacker.template kernel_single_task_unpack<KernelName, KernelType>(
               args...);
@@ -1447,7 +1458,7 @@ private:
                 ext::oneapi::experimental::detail::empty_properties_t>
   void kernel_parallel_for_wrapper(_KERNELFUNCPARAM(KernelFunc)) {
     unpack<KernelType, PropertiesT,
-           detail::KernelLambdaHasKernelHandlerArgT<KernelType,
+           detail::KernelLambdaHasKernelHandlerArgT<KernelType, KernelName,
                                                     ElementType>::value>(
         KernelFunc, [&](auto Unpacker, auto... args) {
           Unpacker.template kernel_parallel_for_unpack<KernelName, ElementType,
@@ -1460,7 +1471,7 @@ private:
                 ext::oneapi::experimental::detail::empty_properties_t>
   void kernel_parallel_for_work_group_wrapper(_KERNELFUNCPARAM(KernelFunc)) {
     unpack<KernelType, PropertiesT,
-           detail::KernelLambdaHasKernelHandlerArgT<KernelType,
+           detail::KernelLambdaHasKernelHandlerArgT<KernelType, KernelName,
                                                     ElementType>::value>(
         KernelFunc, [&](auto Unpacker, auto... args) {
           Unpacker.template kernel_parallel_for_work_group_unpack<
@@ -3058,7 +3069,7 @@ private:
   template <typename WrapperT, typename TransformedArgType, int Dims,
             typename KernelType,
             std::enable_if_t<detail::KernelLambdaHasKernelHandlerArgT<
-                KernelType, TransformedArgType>::value> * = nullptr>
+                KernelType, WrapperT, TransformedArgType>::value> * = nullptr>
   auto getRangeRoundedKernelLambda(KernelType KernelFunc,
                                    range<Dims> NumWorkItems) {
     return detail::RoundedRangeKernelWithKH<TransformedArgType, Dims,
@@ -3069,7 +3080,7 @@ private:
   template <typename WrapperT, typename TransformedArgType, int Dims,
             typename KernelType,
             std::enable_if_t<!detail::KernelLambdaHasKernelHandlerArgT<
-                KernelType, TransformedArgType>::value> * = nullptr>
+                KernelType, WrapperT, TransformedArgType>::value> * = nullptr>
   auto getRangeRoundedKernelLambda(KernelType KernelFunc,
                                    range<Dims> NumWorkItems) {
     return detail::RoundedRangeKernel<TransformedArgType, Dims, KernelType>(

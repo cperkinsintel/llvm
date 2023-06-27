@@ -170,8 +170,22 @@ constexpr bool isKernelLambdaCallableWithKernelHandlerImpl() {
 }
 
 // Type trait to find out if kernal lambda has kernel_handler argument
-template <typename KernelType, typename LambdaArgType = void>
+// but only if specialization constants are actually used.
+template <typename KernelType, typename KernelName,
+          typename LambdaArgType = void>
 struct KernelLambdaHasKernelHandlerArgT {
+  using KI = detail::KernelInfo<KernelName>;
+  constexpr static bool value =
+      isKernelLambdaCallableWithKernelHandlerImpl<KernelType,
+                                                  LambdaArgType>() &&
+      KI::getParamDesc(KI::getNumParams() - 1).kind ==
+          detail::kernel_param_kind_t::kind_specialization_constants_buffer;
+};
+
+// Type trait to find out if kernal lambda has kernel_handler argument
+// host only
+template <typename KernelType, typename LambdaArgType = void>
+struct HostKernelLambdaHasKernelHandlerArgT {
   constexpr static bool value =
       isKernelLambdaCallableWithKernelHandlerImpl<KernelType, LambdaArgType>();
 };
@@ -179,21 +193,23 @@ struct KernelLambdaHasKernelHandlerArgT {
 // Helpers for running kernel lambda on the host device
 
 template <typename KernelType>
-typename std::enable_if_t<KernelLambdaHasKernelHandlerArgT<KernelType>::value>
+typename std::enable_if_t<
+    HostKernelLambdaHasKernelHandlerArgT<KernelType>::value>
 runKernelWithoutArg(KernelType KernelName) {
   kernel_handler KH;
   KernelName(KH);
 }
 
 template <typename KernelType>
-typename std::enable_if_t<!KernelLambdaHasKernelHandlerArgT<KernelType>::value>
+typename std::enable_if_t<
+    !HostKernelLambdaHasKernelHandlerArgT<KernelType>::value>
 runKernelWithoutArg(KernelType KernelName) {
   KernelName();
 }
 
 template <typename ArgType, typename KernelType>
 typename std::enable_if_t<
-    KernelLambdaHasKernelHandlerArgT<KernelType, ArgType>::value>
+    HostKernelLambdaHasKernelHandlerArgT<KernelType, ArgType>::value>
 runKernelWithArg(KernelType KernelName, ArgType Arg) {
   kernel_handler KH;
   KernelName(Arg, KH);
@@ -201,7 +217,7 @@ runKernelWithArg(KernelType KernelName, ArgType Arg) {
 
 template <typename ArgType, typename KernelType>
 typename std::enable_if_t<
-    !KernelLambdaHasKernelHandlerArgT<KernelType, ArgType>::value>
+    !HostKernelLambdaHasKernelHandlerArgT<KernelType, ArgType>::value>
 runKernelWithArg(KernelType KernelName, ArgType Arg) {
   KernelName(Arg);
 }

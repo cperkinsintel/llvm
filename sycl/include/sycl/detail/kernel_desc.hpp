@@ -73,11 +73,14 @@ template <auto &SpecName> const char *get_spec_constant_symbolic_ID_impl();
 // Definition in spec_const_integration.hpp.
 template <auto &SpecName> const char *get_spec_constant_symbolic_ID();
 
+static constexpr kernel_param_desc_t Dummy{
+    detail::kernel_param_kind_t::kind_invalid, 0, 0};
+
 #ifndef __SYCL_UNNAMED_LAMBDA__
 template <class KernelNameType> struct KernelInfo {
   static constexpr unsigned getNumParams() { return 0; }
-  static const kernel_param_desc_t &getParamDesc(int) {
-    static kernel_param_desc_t Dummy;
+  static constexpr const kernel_param_desc_t &getParamDesc(int) {
+    // static kernel_param_desc_t Dummy;
     return Dummy;
   }
   static constexpr const char *getName() { return ""; }
@@ -91,8 +94,8 @@ template <class KernelNameType> struct KernelInfo {
 #else
 template <char...> struct KernelInfoData {
   static constexpr unsigned getNumParams() { return 0; }
-  static const kernel_param_desc_t &getParamDesc(int Idx) {
-    static kernel_param_desc_t Dummy;
+  static constexpr const kernel_param_desc_t &getParamDesc(int Idx) {
+    // static kernel_param_desc_t Dummy;
     return Dummy;
   }
   static constexpr const char *getName() { return ""; }
@@ -135,7 +138,7 @@ template <class KernelNameType> struct KernelInfo {
   static constexpr unsigned getNumParams() {
     return SubKernelInfo::getNumParams();
   }
-  static const kernel_param_desc_t &getParamDesc(int Idx) {
+  static constexpr const kernel_param_desc_t &getParamDesc(int Idx) {
     return SubKernelInfo::getParamDesc(Idx);
   }
   static constexpr const char *getName() { return SubKernelInfo::getName(); }
