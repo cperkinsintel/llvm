@@ -254,9 +254,12 @@ __SYCL_EXPORT kernel make_kernel(
 __SYCL_EXPORT std::shared_ptr<detail::kernel_bundle_impl>
 make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
                    bundle_state State, backend Backend);
+
+// CP
 __SYCL_EXPORT std::shared_ptr<detail::kernel_bundle_impl>
 make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
-                   bool KeepOwnership, bundle_state State, backend Backend);
+                   bool KeepOwnership, bundle_state State, backend Backend,
+                   int x);
 } // namespace detail
 
 template <backend Backend>
@@ -368,7 +371,7 @@ make_kernel_bundle(const typename backend_traits<Backend>::template input_type<
   std::shared_ptr<detail::kernel_bundle_impl> KBImpl =
       detail::make_kernel_bundle(
           detail::pi::cast<pi_native_handle>(BackendObject), TargetContext,
-          false, State, Backend);
+          false, State, Backend, 1); // CP
   return detail::createSyclObjFromImpl<kernel_bundle<State>>(KBImpl);
 }
 } // __SYCL_INLINE_VER_NAMESPACE(_V1)

@@ -158,7 +158,7 @@ make_kernel_bundle<backend::ext_oneapi_level_zero, bundle_state::executable>(
           detail::pi::cast<pi_native_handle>(BackendObject.NativeHandle),
           TargetContext,
           BackendObject.Ownership == ext::oneapi::level_zero::ownership::keep,
-          bundle_state::executable, backend::ext_oneapi_level_zero);
+          bundle_state::executable, backend::ext_oneapi_level_zero, 7); // CP
   return detail::createSyclObjFromImpl<kernel_bundle<bundle_state::executable>>(
       KBImpl);
 }

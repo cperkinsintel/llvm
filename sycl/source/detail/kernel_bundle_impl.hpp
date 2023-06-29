@@ -87,6 +87,9 @@ public:
           make_error_code(errc::invalid),
           "Not all devices are associated with the context or "
           "vector of devices is empty");
+
+    // CP
+    std::cout << "Interop Constructor for kernel_bundle_impl" << std::endl;
     MIsInterop = true;
   }
 

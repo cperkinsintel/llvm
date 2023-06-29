@@ -157,9 +157,11 @@ __SYCL_EXPORT event make_event(pi_native_handle NativeHandle,
   return Event;
 }
 
+// CP
 std::shared_ptr<detail::kernel_bundle_impl>
 make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
-                   bool KeepOwnership, bundle_state State, backend Backend) {
+                   bool KeepOwnership, bundle_state State, backend Backend,
+                   int x) {
   const auto &Plugin = getPlugin(Backend);
   const auto &ContextImpl = getSyclObjImpl(TargetContext);
 
@@ -239,10 +241,12 @@ make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
 }
 
 // TODO: Unused. Remove when allowed.
+// CP
 std::shared_ptr<detail::kernel_bundle_impl>
 make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
                    bundle_state State, backend Backend) {
-  return make_kernel_bundle(NativeHandle, TargetContext, false, State, Backend);
+  return make_kernel_bundle(NativeHandle, TargetContext, false, State, Backend,
+                            9);
 }
 
 kernel make_kernel(const context &TargetContext,
