@@ -159,7 +159,8 @@ make_kernel_bundle<backend::ext_oneapi_level_zero, bundle_state::executable>(
           TargetContext,
           BackendObject.Ownership == ext::oneapi::level_zero::ownership::keep,
           bundle_state::executable, backend::ext_oneapi_level_zero,
-          BackendObject.KernelNames); // CP
+          BackendObject.KernelNames, BackendObject.BinaryData,
+          BackendObject.BDataSize); // CP
   return detail::createSyclObjFromImpl<kernel_bundle<bundle_state::executable>>(
       KBImpl);
 }

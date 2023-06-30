@@ -161,7 +161,8 @@ __SYCL_EXPORT event make_event(pi_native_handle NativeHandle,
 std::shared_ptr<detail::kernel_bundle_impl>
 make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
                    bool KeepOwnership, bundle_state State, backend Backend,
-                   const std::vector<std::string> &KernelNames) {
+                   const std::vector<std::string> &KernelNames,
+                   uint8_t *BinaryData, size_t BDataSize) {
   const auto &Plugin = getPlugin(Backend);
   const auto &ContextImpl = getSyclObjImpl(TargetContext);
 
@@ -241,8 +242,14 @@ make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
         std::make_shared<kernel_id_impl>(KernelName)));
   }
 
+  // TODO making/moving unique_ptr here feels wrong. Should be done at
+  // origination.
+  std::unique_ptr<char[]> Data = std::unique_ptr<char[]>((char *)BinaryData);
+  DynRTDeviceBinaryImage *BinaryImagePtr =
+      new DynRTDeviceBinaryImage(std::move(Data), BDataSize);
+
   auto DevImgImpl = std::make_shared<device_image_impl>(
-      nullptr, TargetContext, Devices, State, KernelIDs, PiProgram);
+      BinaryImagePtr, TargetContext, Devices, State, KernelIDs, PiProgram);
   device_image_plain DevImg{DevImgImpl};
 
   return std::make_shared<kernel_bundle_impl>(TargetContext, Devices, DevImg);
@@ -254,7 +261,8 @@ std::shared_ptr<detail::kernel_bundle_impl>
 make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
                    bundle_state State, backend Backend) {
   return make_kernel_bundle(NativeHandle, TargetContext, false, State, Backend,
-                            /*KernelNames*/ {});
+                            /*KernelNames*/ {}, /*KernelData*/ nullptr,
+                            /*BDataSize*/ 0);
 }
 
 kernel make_kernel(const context &TargetContext,

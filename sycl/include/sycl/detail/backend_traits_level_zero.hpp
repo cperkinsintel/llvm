@@ -206,6 +206,8 @@ struct BackendInput<backend::ext_oneapi_level_zero, kernel_bundle<State>> {
     ext::oneapi::level_zero::ownership Ownership{
         ext::oneapi::level_zero::ownership::transfer};
     const std::vector<std::string> KernelNames;
+    uint8_t *BinaryData;
+    size_t BDataSize;
   };
 };
 

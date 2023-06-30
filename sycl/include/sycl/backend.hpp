@@ -259,7 +259,8 @@ make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
 __SYCL_EXPORT std::shared_ptr<detail::kernel_bundle_impl>
 make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
                    bool KeepOwnership, bundle_state State, backend Backend,
-                   const std::vector<std::string> &KernelNames);
+                   const std::vector<std::string> &KernelNames,
+                   uint8_t *BinaryData, size_t BDataSize);
 } // namespace detail
 
 template <backend Backend>
