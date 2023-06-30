@@ -161,7 +161,7 @@ __SYCL_EXPORT event make_event(pi_native_handle NativeHandle,
 std::shared_ptr<detail::kernel_bundle_impl>
 make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
                    bool KeepOwnership, bundle_state State, backend Backend,
-                   int x) {
+                   const std::vector<std::string> &KernelNames) {
   const auto &Plugin = getPlugin(Backend);
   const auto &ContextImpl = getSyclObjImpl(TargetContext);
 
@@ -232,7 +232,15 @@ make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
   // this by pre-building the device image and extracting kernel info. We can't
   // do the same to user images, since they may contain references to undefined
   // symbols (e.g. when kernel_bundle is supposed to be joined with another).
+  // However for ::executable, if kernel names are provided, then we'll use
+  // them.
+
   auto KernelIDs = std::make_shared<std::vector<kernel_id>>();
+  for (auto KernelName : KernelNames) {
+    KernelIDs->push_back(createSyclObjFromImpl<kernel_id>(
+        std::make_shared<kernel_id_impl>(KernelName)));
+  }
+
   auto DevImgImpl = std::make_shared<device_image_impl>(
       nullptr, TargetContext, Devices, State, KernelIDs, PiProgram);
   device_image_plain DevImg{DevImgImpl};
@@ -246,7 +254,7 @@ std::shared_ptr<detail::kernel_bundle_impl>
 make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
                    bundle_state State, backend Backend) {
   return make_kernel_bundle(NativeHandle, TargetContext, false, State, Backend,
-                            9);
+                            /*KernelNames*/ {});
 }
 
 kernel make_kernel(const context &TargetContext,
