@@ -77,8 +77,13 @@ public:
         MSpecConstSymMap(SpecConstMap) {}
 
   bool has_kernel(const kernel_id &KernelIDCand) const noexcept {
-    return std::binary_search(MKernelIDs->begin(), MKernelIDs->end(),
-                              KernelIDCand, LessByHash<kernel_id>{});
+    // CP -- binary_search presupposed kernel ids are in some sort of order
+    //       and are comparable.
+    // return std::binary_search(MKernelIDs->begin(), MKernelIDs->end(),
+    //                           KernelIDCand, LessByHash<kernel_id>{});
+    std::string candName = KernelIDCand.get_name();
+    return std::any_of(MKernelIDs->begin(), MKernelIDs->end(),
+                       [&](kernel_id id) { return id.get_name() == candName; });
   }
 
   bool has_kernel(const kernel_id &KernelIDCand,

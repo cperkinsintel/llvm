@@ -163,6 +163,9 @@ make_kernel_bundle(pi_native_handle NativeHandle, const context &TargetContext,
                    bool KeepOwnership, bundle_state State, backend Backend,
                    const std::vector<std::string> &KernelNames,
                    uint8_t *BinaryData, size_t BDataSize) {
+
+  std::cout << "backend.cpp detail::make_kernel_bundle(.....)" << std::endl;
+
   const auto &Plugin = getPlugin(Backend);
   const auto &ContextImpl = getSyclObjImpl(TargetContext);
 
