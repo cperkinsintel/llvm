@@ -1292,6 +1292,10 @@ defm cuda_prec_sqrt : BoolFOption<"cuda-prec-sqrt",
 def emit_static_lib : Flag<["--"], "emit-static-lib">,
   HelpText<"Enable linker job to emit a static library.">;
 
+def fpreview_major_release : Flag<["-"], "fpreview-major-release">, Flags<[NoXarchOption]>,
+  Visibility<[ClangOption, CLOption]>,
+  HelpText<"Enables API and ABI breaking changes in libraries and headers ahead of next major release.">;
+
 def mprintf_kind_EQ : Joined<["-"], "mprintf-kind=">, Group<m_Group>,
   HelpText<"Specify the printf lowering scheme (AMDGPU only), allowed values are "
   "\"hostcall\"(printing happens during kernel execution, this scheme "

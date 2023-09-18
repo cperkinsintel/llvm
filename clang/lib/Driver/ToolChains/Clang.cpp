@@ -4782,6 +4782,11 @@ void Clang::ConstructHostCompilerJob(Compilation &C, const JobAction &JA,
   if (IsMSVCHostCompiler)
     HostCompileArgs.push_back("/Zc:__cplusplus");
 
+  if (TCArgs.hasArg(options::OPT_fpreview_major_release)) {
+    HostCompileArgs.push_back(IsMSVCHostCompiler ? "/D" : "-D");
+    HostCompileArgs.push_back("__SYCL_PREVIEW_MAJOR_RELEASE__");
+  }
+
   // FIXME: Reuse existing toolchains which are already supported to put
   // together the options.
   // FIXME: For any potential obscure host compilers that do not use the
@@ -5298,6 +5303,9 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     if (Arg *A = Args.getLastArg(options::OPT_fsycl_id_queries_fit_in_int,
                                  options::OPT_fno_sycl_id_queries_fit_in_int))
       A->render(Args, CmdArgs);
+
+    if (Args.hasArg(options::OPT_fpreview_major_release))
+      CmdArgs.push_back("-D__SYCL_PREVIEW_MAJOR_RELEASE__");
 
     if (SYCLStdArg) {
       // Use of -sycl-std=1.2.1 is deprecated. Emit a diagnostic stating so.
@@ -6443,8 +6451,13 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   // library.
   if (Args.hasArg(options::OPT_fsycl) && !Args.hasArg(options::OPT_nolibsycl)) {
     if (!D.IsCLMode() && TC.getTriple().isWindowsMSVCEnvironment()) {
-      if (isDependentLibAdded(Args, "msvcrtd"))
-        CmdArgs.push_back("--dependent-lib=sycl" SYCL_MAJOR_VERSION "d");
+      if (isDependentLibAdded(Args, "msvcrtd")) {
+        if (Args.hasArg(options::OPT_fpreview_major_release))
+          CmdArgs.push_back("--dependent-lib=sycl-preview" SYCL_MAJOR_VERSION
+                            "d");
+        else
+          CmdArgs.push_back("--dependent-lib=sycl" SYCL_MAJOR_VERSION "d");
+      }
     } else if (!D.IsCLMode() && TC.getTriple().isWindowsGNUEnvironment()) {
       CmdArgs.push_back("--dependent-lib=sycl" SYCL_MAJOR_VERSION ".dll");
     }
