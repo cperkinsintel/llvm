@@ -1,6 +1,6 @@
 // RUN: not %clangxx -fsycl %s -o %t 2>&1 | FileCheck --check-prefix=CHECK-NO-PREVIEW %s
 // RUN: %clangxx -fsycl -fpreview-major-release %s -o %t
-// REQUIRES: preview-major-release-lib
+// REQUIRES: preview-major-release-lib && linux
 
 // Checks that the preview-major-release marker is present only when the
 // -fpreview-major-release option is used. This implies two things:

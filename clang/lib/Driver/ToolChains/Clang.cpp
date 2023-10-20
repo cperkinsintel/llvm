@@ -6453,8 +6453,7 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     if (!D.IsCLMode() && TC.getTriple().isWindowsMSVCEnvironment()) {
       if (isDependentLibAdded(Args, "msvcrtd")) {
         if (Args.hasArg(options::OPT_fpreview_major_release))
-          CmdArgs.push_back("--dependent-lib=sycl-preview" SYCL_MAJOR_VERSION
-                            "d");
+          CmdArgs.push_back("--dependent-lib=sycl" SYCL_MAJOR_VERSION  "-previewd");
         else
           CmdArgs.push_back("--dependent-lib=sycl" SYCL_MAJOR_VERSION "d");
       }
