@@ -2300,7 +2300,7 @@ struct VecStorage<
     T, N,
     typename std::enable_if_t<isValidVectorSize(N) &&
                               (is_sgeninteger_v<T> ||
-                               (is_sgenfloat_v<T> && !is_half_v<T>))>> {
+                               (is_sgenfloat_v<T> && !is_half_or_bf16_v<T>))>> {
   using DataType =
       typename VecStorageImpl<typename VecStorage<T, 1>::DataType, N>::DataType;
   using VectorDataType =
@@ -2324,6 +2324,25 @@ __SYCL_DEFINE_HALF_VECSTORAGE(4)
 __SYCL_DEFINE_HALF_VECSTORAGE(8)
 __SYCL_DEFINE_HALF_VECSTORAGE(16)
 #undef __SYCL_DEFINE_HALF_VECSTORAGE
+
+// Single element bfloat16
+template <> struct VecStorage<sycl::ext::oneapi::bfloat16, 1, void> {
+  using DataType = sycl::ext::oneapi::detail::Bfloat16StorageT;
+  using VectorDataType = sycl::ext::oneapi::detail::Bfloat16StorageT;
+};
+// Multiple elements bfloat16
+#define __SYCL_DEFINE_BF16_VECSTORAGE(Num)                                     \
+  template <> struct VecStorage<sycl::ext::oneapi::bfloat16, Num, void> {      \
+    using DataType = sycl::ext::oneapi::detail::bf16::Vec##Num##StorageT;      \
+    using VectorDataType =                                                     \
+        sycl::ext::oneapi::detail::bf16::Vec##Num##StorageT;                   \
+  };
+__SYCL_DEFINE_BF16_VECSTORAGE(2)
+__SYCL_DEFINE_BF16_VECSTORAGE(3)
+__SYCL_DEFINE_BF16_VECSTORAGE(4)
+__SYCL_DEFINE_BF16_VECSTORAGE(8)
+__SYCL_DEFINE_BF16_VECSTORAGE(16)
+#undef __SYCL_DEFINE_BF16_VECSTORAGE
 } // namespace detail
 
 /// This macro must be defined to 1 when SYCL implementation allows user
