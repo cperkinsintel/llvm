@@ -156,7 +156,6 @@ using vector_geo_list =
     tl_append<vector_geo_half_list, vector_geo_bfloat16_list,
               vector_geo_float_list, vector_geo_double_list>;
 
-// should this include marray_geo_half_list and marray_geo_bfloat16_list ?
 using marray_geo_list =
     tl_append<marray_geo_float_list, marray_geo_double_list>;
 

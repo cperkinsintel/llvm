@@ -63,6 +63,8 @@ int main() {
 
   static_assert(d::is_half_v<s::half>);
 
+  static_assert(d::is_bfloat16_v<sycl::ext::oneapi::bfloat16>);
+
   // TODO add checks for the following type traits
   /*
   is_doublen

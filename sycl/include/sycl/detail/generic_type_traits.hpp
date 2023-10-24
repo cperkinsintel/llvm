@@ -57,6 +57,10 @@ template <typename T>
 inline constexpr bool is_half_v = is_contained_v<T, gtl::scalar_half_list>;
 
 template <typename T>
+inline constexpr bool is_bfloat16_v =
+    is_contained_v<T, gtl::scalar_bfloat16_list>;
+
+template <typename T>
 inline constexpr bool is_svgenfloath_v =
     is_contained_v<T, gtl::scalar_vector_half_list>;
 
