@@ -45,6 +45,8 @@
 #include <sycl/marray.hpp>                     // for __SYCL_BINOP, __SYCL_...
 #include <sycl/multi_ptr.hpp>                  // for multi_ptr
 
+#include <sycl/ext/oneapi/bfloat16.hpp> // bfloat16
+
 #include <array>       // for array
 #include <assert.h>    // for assert
 #include <cstddef>     // for size_t, NULL, byte
@@ -575,13 +577,18 @@ template <typename Type, int NumElements> class vec {
       std::is_same_v<sycl::detail::half_impl::StorageT,
                      sycl::detail::host_half_impl::half>;
 
+  // CP
+  // static constexpr bool IsHostBFloat16 = std::is_same_v<DataT,
+  // sycl::ext::oneapi::bfloat16>;
+  static constexpr bool IsHostBFloat16 = IsHostHalf;
+
   // TODO: There is no support for vector half type on host yet.
   // Also, when Sz is greater than alignment, we use std::array instead of
   // vector extension. This is for MSVC compatibility, which has a max alignment
   // of 64 for direct params. If we drop MSVC, we can have alignment the same as
   // size and use vector extensions for all sizes.
   static constexpr bool IsUsingArrayOnDevice =
-      (IsHostHalf || IsSizeGreaterThanMaxAlign);
+      (IsHostHalf || IsSizeGreaterThanMaxAlign || IsHostBFloat16);
 
 #if defined(__SYCL_DEVICE_ONLY__)
   static constexpr bool NativeVec = NumElements > 1 && !IsUsingArrayOnDevice;
