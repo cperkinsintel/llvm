@@ -63,6 +63,8 @@ using scalar_vector_bfloat16_list =
 using bfloat16_list =
     tl_append<scalar_bfloat16_list, vector_bfloat16_list, marray_bfloat16_list>;
 
+using half_bfloat16_list = tl_append<scalar_half_list, scalar_bfloat16_list>;
+
 using scalar_float_list = type_list<float>;
 
 using vector_float_list =
