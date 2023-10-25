@@ -808,7 +808,7 @@ public:
   template <typename Ty = DataT>
   typename std::enable_if_t<
       std::is_fundamental_v<vec_data_t<Ty>> ||
-          std::is_same_v<typename std::remove_const_t<Ty>, half>,
+          detail::is_half_or_bf16_v<typename std::remove_const_t<Ty>>,
       vec &>
   operator=(const EnableIfNotUsingArrayOnDevice<Ty> &Rhs) {
     m_Data = (DataType)vec_data<Ty>::get(Rhs);
@@ -824,7 +824,7 @@ public:
   template <typename Ty = DataT>
   typename std::enable_if_t<
       std::is_fundamental_v<vec_data_t<Ty>> ||
-          std::is_same_v<typename std::remove_const_t<Ty>, half>,
+          detail::is_half_or_bf16_v<typename std::remove_const_t<Ty>>,
       vec &>
   operator=(const EnableIfUsingArrayOnDevice<Ty> &Rhs) {
     for (int i = 0; i < NumElements; ++i) {
@@ -841,7 +841,7 @@ public:
   template <typename Ty = DataT>
   typename std::enable_if_t<
       std::is_fundamental_v<vec_data_t<Ty>> ||
-          std::is_same_v<typename std::remove_const_t<Ty>, half>,
+          detail::is_half_or_bf16_v<typename std::remove_const_t<Ty>>,
       vec &>
   operator=(const DataT &Rhs) {
     for (int i = 0; i < NumElements; ++i) {
@@ -1105,7 +1105,7 @@ public:
   typename std::enable_if_t<                                                   \
       std::is_convertible_v<DataT, T> &&                                       \
           (std::is_fundamental_v<vec_data_t<T>> ||                             \
-           std::is_same_v<typename std::remove_const_t<T>, half>),             \
+           detail::is_half_or_bf16_v<typename std::remove_const_t<T>>),        \
       vec>                                                                     \
   operator BINOP(const T & Rhs) const {                                        \
     return *this BINOP vec(static_cast<const DataT &>(Rhs));                   \
@@ -1136,7 +1136,7 @@ public:
   typename std::enable_if_t<                                                   \
       std::is_convertible_v<DataT, T> &&                                       \
           (std::is_fundamental_v<vec_data_t<T>> ||                             \
-           std::is_same_v<typename std::remove_const_t<T>, half>),             \
+           detail::is_half_or_bf16_v<typename std::remove_const_t<T>>),        \
       vec>                                                                     \
   operator BINOP(const T & Rhs) const {                                        \
     return *this BINOP vec(static_cast<const DataT &>(Rhs));                   \
@@ -1194,7 +1194,7 @@ public:
   template <typename T>                                                        \
   typename std::enable_if_t<std::is_convertible_v<T, DataT> &&                 \
                                 (std::is_fundamental_v<vec_data_t<T>> ||       \
-                                 std::is_same_v<T, half>),                     \
+                                 detail::is_half_or_bf16_v<T>),                \
                             vec<rel_t, NumElements>>                           \
   operator RELLOGOP(const T & Rhs) const {                                     \
     return *this RELLOGOP vec(static_cast<const DataT &>(Rhs));                \
@@ -1212,7 +1212,7 @@ public:
   template <typename T>                                                        \
   typename std::enable_if_t<std::is_convertible_v<T, DataT> &&                 \
                                 (std::is_fundamental_v<vec_data_t<T>> ||       \
-                                 std::is_same_v<T, half>),                     \
+                                 detail::is_half_or_bf16_v<T>),                \
                             vec<rel_t, NumElements>>                           \
   operator RELLOGOP(const T & Rhs) const {                                     \
     return *this RELLOGOP vec(static_cast<const DataT &>(Rhs));                \
@@ -1516,13 +1516,13 @@ class SwizzleOp {
   using EnableIfScalarType = typename std::enable_if_t<
       std::is_convertible_v<DataT, T> &&
       (std::is_fundamental_v<vec_data_t<T>> ||
-       std::is_same_v<typename std::remove_const_t<T>, half>)>;
+       detail::is_half_or_bf16_v<typename std::remove_const_t<T>>)>;
 
   template <typename T>
   using EnableIfNoScalarType = typename std::enable_if_t<
       !std::is_convertible_v<DataT, T> ||
       !(std::is_fundamental_v<vec_data_t<T>> ||
-        std::is_same_v<typename std::remove_const_t<T>, half>)>;
+        detail::is_half_or_bf16_v<typename std::remove_const_t<T>>)>;
 
   template <int... Indices>
   using Swizzle =
@@ -2098,7 +2098,7 @@ private:
   template <typename T, int Num>                                               \
   typename std::enable_if_t<                                                   \
       std::is_fundamental_v<vec_data_t<T>> ||                                  \
-          std::is_same_v<typename std::remove_const_t<T>, half>,               \
+          detail::is_half_or_bf16_v<typename std::remove_const_t<T>>,          \
       vec<T, Num>>                                                             \
   operator BINOP(const T & Lhs, const vec<T, Num> &Rhs) {                      \
     return vec<T, Num>(Lhs) BINOP Rhs;                                         \
@@ -2110,7 +2110,7 @@ private:
   typename std::enable_if_t<                                                   \
       std::is_convertible_v<T, T1> &&                                          \
           (std::is_fundamental_v<vec_data_t<T>> ||                             \
-           std::is_same_v<typename std::remove_const_t<T>, half>),             \
+           detail::is_half_or_bf16_v<typename std::remove_const_t<T>>),        \
       vec<T1, Num>>                                                            \
   operator BINOP(                                                              \
       const T & Lhs,                                                           \
@@ -2154,7 +2154,7 @@ __SYCL_BINOP(<<)
   typename std::enable_if_t<                                                   \
       std::is_convertible_v<T, DataT> &&                                       \
           (std::is_fundamental_v<vec_data_t<T>> ||                             \
-           std::is_same_v<typename std::remove_const_t<T>, half>),             \
+           detail::is_half_or_bf16_v<typename std::remove_const_t<T>>),        \
       vec<detail::rel_t<DataT>, Num>>                                          \
   operator RELLOGOP(const T & Lhs, const vec<DataT, Num> &Rhs) {               \
     return vec<T, Num>(static_cast<T>(Lhs)) RELLOGOP Rhs;                      \
@@ -2166,7 +2166,7 @@ __SYCL_BINOP(<<)
   typename std::enable_if_t<                                                   \
       std::is_convertible_v<T, T1> &&                                          \
           (std::is_fundamental_v<vec_data_t<T>> ||                             \
-           std::is_same_v<typename std::remove_const_t<T>, half>),             \
+           detail::is_half_or_bf16_v<typename std::remove_const_t<T>>),        \
       vec<detail::rel_t<T1>, Num>>                                             \
   operator RELLOGOP(                                                           \
       const T & Lhs,                                                           \
@@ -2286,10 +2286,11 @@ struct VecStorage<T, 1, typename std::enable_if_t<is_sugeninteger_v<T>>> {
                                      std::uint32_t, std::uint64_t>;
   using VectorDataType = DataType;
 };
-// Single element floating-point (except half)
+// Single element floating-point (except half/bfloat16)
 template <typename T>
 struct VecStorage<
-    T, 1, typename std::enable_if_t<!is_half_v<T> && is_sgenfloat_v<T>>> {
+    T, 1,
+    typename std::enable_if_t<!is_half_or_bf16_v<T> && is_sgenfloat_v<T>>> {
   using DataType =
       select_apply_cl_t<T, std::false_type, std::false_type, float, double>;
   using VectorDataType = DataType;
