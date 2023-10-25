@@ -221,6 +221,19 @@ public:
 
   // Bitwise(|,&,~,^), modulo(%) and shift(<<,>>) operations are not supported
   // for floating-point types.
+
+  // Stream Operator << and >>
+  inline friend std::ostream &operator<<(std::ostream &O, bfloat16 const &rhs) {
+    O << static_cast<float>(rhs);
+    return O;
+  }
+
+  inline friend std::istream &operator>>(std::istream &I, bfloat16 &rhs) {
+    float ValFloat = 0.0f;
+    I >> ValFloat;
+    rhs = ValFloat;
+    return I;
+  }
 };
 
 namespace detail {
