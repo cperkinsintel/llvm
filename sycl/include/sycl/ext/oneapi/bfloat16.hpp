@@ -9,7 +9,6 @@
 #pragma once
 
 #include <sycl/aliases.hpp>                   // for half
-// #include <sycl/builtins.hpp>                  // for isnan
 #include <sycl/detail/defines_elementary.hpp> // for __DPCPP_SYCL_EXTERNAL
 #include <sycl/half_type.hpp>                 // for half
 
@@ -23,7 +22,7 @@ __devicelib_ConvertBF16ToFINTEL(const uint16_t &) noexcept;
 namespace sycl {
 inline namespace _V1 {
 
-// forward declaration of one of the built-ins.
+// forward declaration of isnan built-in.
 bool isnan(float a);
 
 namespace ext::oneapi {

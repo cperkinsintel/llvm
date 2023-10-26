@@ -747,7 +747,8 @@ template <typename Type, int NumElements> class vec {
   template <size_t... Is>
   constexpr vec(const std::array<vec_data_t<DataT>, NumElements> &Arr,
                 std::index_sequence<Is...>)
-      : m_Data{vec_data_t<DataT>(static_cast<DataT>(Arr[Is]))...} {}
+      : m_Data{
+        vec_data_t<DataT>( static_cast<DataT>(Arr[Is]) )...} {}
 
 public:
   using element_type = DataT;
@@ -2295,7 +2296,7 @@ struct VecStorage<
       select_apply_cl_t<T, std::false_type, std::false_type, float, double>;
   using VectorDataType = DataType;
 };
-// Multiple elements signed/unsigned integers and floating-point (except half)
+// Multiple elements signed/unsigned integers and floating-point (except half/bfloat16)
 template <typename T, int N>
 struct VecStorage<
     T, N,
