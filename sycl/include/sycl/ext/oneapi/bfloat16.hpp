@@ -113,6 +113,17 @@ private:
 #endif
   }
 
+protected:
+  // conversion for sycl::vec/ext_vector_type
+  operator uint16_t() const { return value; }
+
+  friend class sycl::vec<bfloat16, 1>;
+  friend class sycl::vec<bfloat16, 2>;
+  friend class sycl::vec<bfloat16, 3>;
+  friend class sycl::vec<bfloat16, 4>;
+  friend class sycl::vec<bfloat16, 8>;
+  friend class sycl::vec<bfloat16, 16>;
+
 public:
   // Implicit conversion from float to bfloat16
   bfloat16(const float &a) { value = from_float(a); }
