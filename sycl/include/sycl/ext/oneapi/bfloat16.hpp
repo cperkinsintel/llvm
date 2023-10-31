@@ -8,8 +8,6 @@
 
 #pragma once
 
-#define FIX_VEC_VIA_OPERATOR 1
-
 #include <sycl/aliases.hpp>                   // for half
 #include <sycl/detail/defines_elementary.hpp> // for __DPCPP_SYCL_EXTERNAL
 #include <sycl/half_type.hpp>                 // for half
@@ -117,10 +115,8 @@ private:
   }
 
 protected:
-#ifdef FIX_VEC_VIA_OPERATOR
   // conversion for sycl::vec/ext_vector_type
   explicit operator uint16_t() const { return value; }
-#endif
 
   friend class sycl::vec<bfloat16, 1>;
   friend class sycl::vec<bfloat16, 2>;
