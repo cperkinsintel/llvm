@@ -8,6 +8,7 @@
 
 #pragma once
 
+// CP  - REMOVE THIS MACRO
 // #define FIX_VEC_VIA_OPERATOR 1
 
 #include <sycl/aliases.hpp>                   // for half
@@ -66,7 +67,9 @@ protected:
 
 public:
   bfloat16() = default;
-  bfloat16(const bfloat16 &) = default;
+  constexpr bfloat16(const bfloat16 &) = default;
+  constexpr bfloat16(bfloat16 &&) = default;
+  constexpr bfloat16 &operator=(const bfloat16 &rhs) = default;
   ~bfloat16() = default;
 
 private:

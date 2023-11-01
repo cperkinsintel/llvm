@@ -751,13 +751,11 @@ template <typename Type, int NumElements> class vec {
 #ifdef FIX_VEC_VIA_OPERATOR
             vec_data_t<DataT>(static_cast<DataT>(Arr[Is]))...
 #else
-
-            // Working, but not acceptable, because the lambda makes this no
-            // longer compile time.
-            ([&](DataT v) constexpr {
+            // CP
+            ([&](vec_data_t<DataT> v) constexpr {
               if constexpr (std::is_same_v<sycl::ext::oneapi::bfloat16, DataT>)
                 return v.value;
-              // return sycl::ext::oneapi::detail::bfloat16ToBits(v);
+                //return sycl::ext::oneapi::detail::bfloat16ToBits(v);
               else
                 return vec_data_t<DataT>(static_cast<DataT>(v));
             })(Arr[Is])...
