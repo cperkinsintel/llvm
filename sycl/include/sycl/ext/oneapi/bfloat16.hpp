@@ -119,6 +119,11 @@ private:
 protected:
 #ifdef FIX_VEC_VIA_OPERATOR
   // conversion for sycl::vec/ext_vector_type
+  // this introduces 'ambiguity' into bfloat16, making it harder to output to
+  // strings, convert to longs, etc
+
+  // making it explicit fixes the ambiguity, but then the vec resorts to, once
+  // again, type converting the data to float rather than directly copying it.
   operator uint16_t() const { return value; }
 #endif
 

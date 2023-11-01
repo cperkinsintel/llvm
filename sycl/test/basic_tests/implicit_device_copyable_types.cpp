@@ -98,6 +98,9 @@ int main() {
 
   // Extra checks
   static_assert(sycl::is_device_copyable_v<sycl::vec<int, 4>>);
+  static_assert(sycl::is_device_copyable_v<sycl::vec<sycl::half, 4>>);
+  static_assert(
+      sycl::is_device_copyable_v<sycl::vec<sycl::ext::oneapi::bfloat16, 4>>);
 
   struct S {
     sycl::vec<int, 4> v;
