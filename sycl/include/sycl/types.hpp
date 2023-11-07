@@ -802,6 +802,12 @@ public:
 
 #ifdef __SYCL_DEVICE_ONLY__
   template <typename T = void>
+  using EnableIfNotHostHalf = typename std::enable_if_t<!IsHostHalf, T>;
+
+  template <typename T = void>
+  using EnableIfHostHalf = typename std::enable_if_t<IsHostHalf, T>;
+
+  template <typename T = void>
   using EnableIfNotHostHalfOrBF16 =
       typename std::enable_if_t<!IsHostHalf && !IsHostBFloat16, T>;
 
@@ -1403,27 +1409,26 @@ private:
 #ifdef __SYCL_DEVICE_ONLY__
   template <int Num = NumElements, typename Ty = int,
             typename = typename std::enable_if_t<1 != Num>>
-  constexpr void setValue(EnableIfNotHostHalfOrBF16<Ty> Index,
-                          const DataT &Value, int) {
+  constexpr void setValue(EnableIfNotHostHalf<Ty> Index, const DataT &Value,
+                          int) {
     m_Data[Index] = vec_data<DataT>::get(Value);
   }
 
   template <int Num = NumElements, typename Ty = int,
             typename = typename std::enable_if_t<1 != Num>>
-  constexpr DataT getValue(EnableIfNotHostHalfOrBF16<Ty> Index, int) const {
+  constexpr DataT getValue(EnableIfNotHostHalf<Ty> Index, int) const {
     return vec_data<DataT>::get(m_Data[Index]);
   }
 
   template <int Num = NumElements, typename Ty = int,
             typename = typename std::enable_if_t<1 != Num>>
-  constexpr void setValue(EnableIfHostHalfOrBF16<Ty> Index, const DataT &Value,
-                          int) {
+  constexpr void setValue(EnableIfHostHalf<Ty> Index, const DataT &Value, int) {
     m_Data.s[Index] = vec_data<DataT>::get(Value);
   }
 
   template <int Num = NumElements, typename Ty = int,
             typename = typename std::enable_if_t<1 != Num>>
-  constexpr DataT getValue(EnableIfHostHalfOrBF16<Ty> Index, int) const {
+  constexpr DataT getValue(EnableIfHostHalf<Ty> Index, int) const {
     return vec_data<DataT>::get(m_Data.s[Index]);
   }
 #else  // __SYCL_DEVICE_ONLY__
