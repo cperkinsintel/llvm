@@ -173,7 +173,7 @@ public:
 #elif defined(__SYCL_DEVICE_ONLY__) && defined(__SPIR__)
     return bfloat16{-__devicelib_ConvertBF16ToFINTEL(lhs.value)};
 #else
-    return -to_float(lhs.value);
+    return bfloat16{-to_float(lhs.value)};
 #endif
   }
 

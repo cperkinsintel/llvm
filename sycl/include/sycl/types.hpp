@@ -577,6 +577,9 @@ template <typename Type, int NumElements> class vec {
       std::is_same_v<sycl::detail::half_impl::StorageT,
                      sycl::detail::host_half_impl::half>;
 
+  static constexpr bool IsBfloat16 =
+      std::is_same_v<DataT, sycl::ext::oneapi::bfloat16>;
+
   // TODO: There is no support for vector half type on host yet.
   // Also, when Sz is greater than alignment, we use std::array instead of
   // vector extension. This is for MSVC compatibility, which has a max alignment
@@ -1340,13 +1343,46 @@ public:
 
   // operator -
   template <typename T = vec> EnableIfNotUsingArray<T> operator-() const {
+    if constexpr (IsBfloat16) {
+      vec Ret{};
+      for (size_t I = 0; I < NumElements; ++I) {
+        ext::oneapi::bfloat16 v =
+            ext::oneapi::detail::bitsToBfloat16(m_Data[I]);
+        ext::oneapi::bfloat16 w = -v;
+        Ret.setValue(I, ext::oneapi::detail::bfloat16ToBits(w));
+      }
+      return Ret;
+    }
+
     return vec{-m_Data};
   }
 
+  //   Bfloat16,  array is irrelevant
+  // template <typename T = vec>
+  // typename std::enable_if_t<IsBfloat16, T>
+  // operator-() const {
+  //   vec Ret{};
+  //   for(size_t I = 0; I < NumElements; ++I){
+  //     ext::oneapi::bfloat16 v =
+  //     ext::oneapi::detail::bitsToBfloat16(m_Data[I]); Ret.setValue(I, -v);
+  //   }
+  //   return Ret;
+  // }
+
   template <typename T = vec> EnableIfUsingArray<T> operator-() const {
     vec Ret{};
-    for (size_t I = 0; I < NumElements; ++I)
-      Ret.setValue(I, vec_data<DataT>::get(-vec_data<DataT>::get(getValue(I))));
+    if constexpr (IsBfloat16) {
+      for (size_t I = 0; I < NumElements; I++) {
+        ext::oneapi::bfloat16 v =
+            ext::oneapi::detail::bitsToBfloat16(m_Data[I]);
+        ext::oneapi::bfloat16 w = -v;
+        Ret.setValue(I, ext::oneapi::detail::bfloat16ToBits(w));
+      }
+    } else {
+      for (size_t I = 0; I < NumElements; ++I)
+        Ret.setValue(I,
+                     vec_data<DataT>::get(-vec_data<DataT>::get(getValue(I))));
+    }
     return Ret;
   }
 
