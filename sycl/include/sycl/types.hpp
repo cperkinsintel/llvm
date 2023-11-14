@@ -1343,7 +1343,12 @@ public:
 
   // operator -
   template <typename T = vec> EnableIfNotUsingArray<T> operator-() const {
-    if constexpr (IsBfloat16) {
+    if constexpr (IsBfloat16 && NumElements == 1) {
+      vec Ret{};
+      ext::oneapi::bfloat16 v = ext::oneapi::detail::bitsToBfloat16(m_Data);
+      ext::oneapi::bfloat16 w = -v;
+      Ret.setValue(0, ext::oneapi::detail::bfloat16ToBits(w));
+    } else if constexpr (IsBfloat16) {
       vec Ret{};
       for (size_t I = 0; I < NumElements; ++I) {
         ext::oneapi::bfloat16 v =
@@ -1371,12 +1376,20 @@ public:
 
   template <typename T = vec> EnableIfUsingArray<T> operator-() const {
     vec Ret{};
-    if constexpr (IsBfloat16) {
+    if constexpr (IsBfloat16 && NumElements == 1) {
+      ext::oneapi::bfloat16 v = ext::oneapi::detail::bitsToBfloat16(m_Data);
+      ext::oneapi::bfloat16 w = -v;
+      DataType d = ext::oneapi::detail::bfloat16ToBits(w);
+      // float f = w;
+      // Ret.setValue(0, f);
+      Ret.m_Data = d;
+    } else if constexpr (IsBfloat16) {
       for (size_t I = 0; I < NumElements; I++) {
         ext::oneapi::bfloat16 v =
             ext::oneapi::detail::bitsToBfloat16(m_Data[I]);
         ext::oneapi::bfloat16 w = -v;
-        Ret.setValue(I, ext::oneapi::detail::bfloat16ToBits(w));
+        // Ret.setValue(I, ext::oneapi::detail::bfloat16ToBits(w));
+        Ret.m_Data[I] = ext::oneapi::detail::bfloat16ToBits(w);
       }
     } else {
       for (size_t I = 0; I < NumElements; ++I)
@@ -1486,9 +1499,9 @@ private:
   // Special proxies as specialization is not allowed in class scope.
   constexpr void setValue(int Index, const DataT &Value) {
     if (NumElements == 1)
-      setValue(Index, Value, 0);
-    else
       setValue(Index, Value, 0.f);
+    else
+      setValue(Index, Value, 0);
   }
 
   DataT getValue(int Index) const {
