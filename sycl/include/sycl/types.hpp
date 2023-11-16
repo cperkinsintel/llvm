@@ -1347,14 +1347,16 @@ public:
       vec Ret{};
       ext::oneapi::bfloat16 v = ext::oneapi::detail::bitsToBfloat16(m_Data);
       ext::oneapi::bfloat16 w = -v;
-      Ret.setValue(0, ext::oneapi::detail::bfloat16ToBits(w));
+      // Ret.setValue(0, ext::oneapi::detail::bfloat16ToBits(w));
+      Ret.m_Data = ext::oneapi::detail::bfloat16ToBits(w);
     } else if constexpr (IsBfloat16) {
       vec Ret{};
       for (size_t I = 0; I < NumElements; ++I) {
         ext::oneapi::bfloat16 v =
             ext::oneapi::detail::bitsToBfloat16(m_Data[I]);
         ext::oneapi::bfloat16 w = -v;
-        Ret.setValue(I, ext::oneapi::detail::bfloat16ToBits(w));
+        // Ret.setValue(I, ext::oneapi::detail::bfloat16ToBits(w));
+        Ret.m_Data[I] = ext::oneapi::detail::bfloat16ToBits(w);
       }
       return Ret;
     }
