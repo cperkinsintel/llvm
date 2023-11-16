@@ -1343,20 +1343,18 @@ public:
 
   // operator -
   template <typename T = vec> EnableIfNotUsingArray<T> operator-() const {
+    namespace oneapi = sycl::ext::oneapi;
     if constexpr (IsBfloat16 && NumElements == 1) {
       vec Ret{};
-      ext::oneapi::bfloat16 v = ext::oneapi::detail::bitsToBfloat16(m_Data);
-      ext::oneapi::bfloat16 w = -v;
-      // Ret.setValue(0, ext::oneapi::detail::bfloat16ToBits(w));
-      Ret.m_Data = ext::oneapi::detail::bfloat16ToBits(w);
+      oneapi::bfloat16 v = oneapi::detail::bitsToBfloat16(m_Data);
+      oneapi::bfloat16 w = -v;
+      Ret.m_Data = oneapi::detail::bfloat16ToBits(w);
     } else if constexpr (IsBfloat16) {
       vec Ret{};
       for (size_t I = 0; I < NumElements; ++I) {
-        ext::oneapi::bfloat16 v =
-            ext::oneapi::detail::bitsToBfloat16(m_Data[I]);
-        ext::oneapi::bfloat16 w = -v;
-        // Ret.setValue(I, ext::oneapi::detail::bfloat16ToBits(w));
-        Ret.m_Data[I] = ext::oneapi::detail::bfloat16ToBits(w);
+        oneapi::bfloat16 v = oneapi::detail::bitsToBfloat16(m_Data[I]);
+        oneapi::bfloat16 w = -v;
+        Ret.m_Data[I] = oneapi::detail::bfloat16ToBits(w);
       }
       return Ret;
     }
@@ -1364,34 +1362,18 @@ public:
     return vec{-m_Data};
   }
 
-  //   Bfloat16,  array is irrelevant
-  // template <typename T = vec>
-  // typename std::enable_if_t<IsBfloat16, T>
-  // operator-() const {
-  //   vec Ret{};
-  //   for(size_t I = 0; I < NumElements; ++I){
-  //     ext::oneapi::bfloat16 v =
-  //     ext::oneapi::detail::bitsToBfloat16(m_Data[I]); Ret.setValue(I, -v);
-  //   }
-  //   return Ret;
-  // }
-
   template <typename T = vec> EnableIfUsingArray<T> operator-() const {
+    namespace oneapi = sycl::ext::oneapi;
     vec Ret{};
     if constexpr (IsBfloat16 && NumElements == 1) {
-      ext::oneapi::bfloat16 v = ext::oneapi::detail::bitsToBfloat16(m_Data);
-      ext::oneapi::bfloat16 w = -v;
-      DataType d = ext::oneapi::detail::bfloat16ToBits(w);
-      // float f = w;
-      // Ret.setValue(0, f);
-      Ret.m_Data = d;
+      oneapi::bfloat16 v = oneapi::detail::bitsToBfloat16(m_Data);
+      oneapi::bfloat16 w = -v;
+      Ret.m_Data = oneapi::detail::bfloat16ToBits(w);
     } else if constexpr (IsBfloat16) {
       for (size_t I = 0; I < NumElements; I++) {
-        ext::oneapi::bfloat16 v =
-            ext::oneapi::detail::bitsToBfloat16(m_Data[I]);
-        ext::oneapi::bfloat16 w = -v;
-        // Ret.setValue(I, ext::oneapi::detail::bfloat16ToBits(w));
-        Ret.m_Data[I] = ext::oneapi::detail::bfloat16ToBits(w);
+        oneapi::bfloat16 v = oneapi::detail::bitsToBfloat16(m_Data[I]);
+        oneapi::bfloat16 w = -v;
+        Ret.m_Data[I] = oneapi::detail::bfloat16ToBits(w);
       }
     } else {
       for (size_t I = 0; I < NumElements; ++I)
