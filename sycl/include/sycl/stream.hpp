@@ -20,6 +20,7 @@
 #include <sycl/detail/export.hpp>             // for __SYCL_EXPORT
 #include <sycl/detail/item_base.hpp>          // for id, range
 #include <sycl/detail/owner_less_base.hpp>    // for OwnerLessBase
+#include <sycl/ext/oneapi/bfloat16.hpp>       // for bfloat16
 #include <sycl/group.hpp>                     // for group
 #include <sycl/h_item.hpp>                    // for h_item
 #include <sycl/half_type.hpp>                 // for half, operator-, operator<
@@ -83,10 +84,10 @@ constexpr size_t MAX_ARRAY_SIZE =
 constexpr unsigned FLUSH_BUF_OFFSET_SIZE = 2;
 
 template <class F, class T = void>
-using EnableIfFP = typename std::enable_if_t<std::is_same_v<F, float> ||
-                                                 std::is_same_v<F, double> ||
-                                                 std::is_same_v<F, half>,
-                                             T>;
+using EnableIfFP = typename std::enable_if_t<
+    std::is_same_v<F, float> || std::is_same_v<F, double> ||
+        std::is_same_v<F, half> || std::is_same_v<F, ext::oneapi::bfloat16>,
+    T>;
 
 using GlobalBufAccessorT = accessor<char, 1, sycl::access::mode::read_write,
                                     sycl::access::target::device>;
@@ -327,8 +328,12 @@ checkForInfNan(char *Buf, T Val) {
   return 0;
 }
 
+// CP - unlikely this will work exactly the same for half and bfloat16
+// TODO: implement for bfloat16
 template <typename T>
-inline typename std::enable_if_t<std::is_same_v<T, half>, unsigned>
+inline typename std::enable_if_t<std::is_same_v<T, half> ||
+                                     std::is_same_v<T, ext::oneapi::bfloat16>,
+                                 unsigned>
 checkForInfNan(char *Buf, T Val) {
   if (Val != Val)
     return append(Buf, "nan");
@@ -1053,6 +1058,8 @@ private:
   friend const stream &operator<<(const stream &, const float &);
   friend const stream &operator<<(const stream &, const double &);
   friend const stream &operator<<(const stream &, const half &);
+  friend const stream &operator<<(const stream &,
+                                  const ext::oneapi::bfloat16 &);
 
   friend const stream &operator<<(const stream &, const stream_manipulator);
 
@@ -1156,6 +1163,14 @@ inline const stream &operator<<(const stream &Out, const half &RHS) {
   detail::writeFloatingPoint<half>(Out.GlobalFlushBuf, Out.FlushBufferSize,
                                    Out.WIOffset, Out.get_flags(),
                                    Out.get_width(), Out.get_precision(), RHS);
+  return Out;
+}
+
+inline const stream &operator<<(const stream &Out,
+                                const ext::oneapi::bfloat16 &RHS) {
+  detail::writeFloatingPoint<ext::oneapi::bfloat16>(
+      Out.GlobalFlushBuf, Out.FlushBufferSize, Out.WIOffset, Out.get_flags(),
+      Out.get_width(), Out.get_precision(), RHS);
   return Out;
 }
 
