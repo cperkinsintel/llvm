@@ -233,21 +233,29 @@ vhalf3or4 = [Vec(["half"], {3,4})]
 mhalfn = [Marray(["half"])]
 mhalf3or4 = [Marray(["half"], {3,4})]
 
-genfloat = ["float", "double", "half", Vec(["float", "double", "half"]),
-            Marray(["float", "double", "half"])]
-vgenfloat = [Vec(["float", "double", "half"])]
-sgenfloat = ["float", "double", "half"]
-mgenfloat = [Marray(["float", "double", "half"])]
+vbfloat16n = [Vec(["ext::oneapi::bfloat16"])]
+vbfloat163or4 = [Vec(["ext::oneapi::bfloat16"], {3,4})]
+mbfloat16n = [Marray(["ext::oneapi::bfloat16"])]
+mbfloat163or4 = [Marray(["ext::oneapi::bfloat16"], {3,4})]
+
+genfloat = ["float", "double", "half", "ext::oneapi::bfloat16", Vec(["float", "double", "half", "ext::oneapi::bfloat16"]),
+            Marray(["float", "double", "half", "ext::oneapi::bfloat16"])]
+vgenfloat = [Vec(["float", "double", "half", "ext::oneapi::bfloat16"])]
+sgenfloat = ["float", "double", "half", "ext::oneapi::bfloat16"]
+mgenfloat = [Marray(["float", "double", "half", "ext::oneapi::bfloat16"])]
 
 vgeofloat = [Vec(["float"], {1, 2, 3, 4})]
 vgeodouble = [Vec(["double"], {1, 2, 3, 4})]
 vgeohalf = [Vec(["half"], {1, 2, 3, 4})]
+vgeobfloat16 = [Vec(["ext::oneapi::bfloat16"], {1, 2, 3, 4})]
 mgeofloat = [Marray(["float"], {1, 2, 3, 4})]
 mgeodouble = [Marray(["double"], {1, 2, 3, 4})]
 mgeohalf = [Marray(["half"], {1, 2, 3, 4})]
+mgeobfloat16 = [Marray(["ext::oneapi::bfloat16"], {1, 2, 3, 4})]
 gengeofloat = ["float", Vec(["float"], {1, 2, 3, 4}), Marray(["float"], {1, 2, 3, 4})]
 gengeodouble = ["double", Vec(["double"], {1, 2, 3, 4}), Marray(["double"], {1, 2, 3, 4})]
 gengeohalf = ["half", Vec(["half"], {1, 2, 3, 4}), Marray(["half"], {1, 2, 3, 4})]
+gengeobfloat16 = ["ext::oneapi::bfloat16", Vec(["ext::oneapi::bfloat16"], {1, 2, 3, 4}), Marray(["ext::oneapi::bfloat16"], {1, 2, 3, 4})]
 
 vint8n = [Vec(["int8_t", "char", "signed char"])] # Fundamental integer types non-standard. Deprecated.
 vint16n = [Vec(["int16_t", "short"])] # Fundamental integer types non-standard. Deprecated.
@@ -302,15 +310,15 @@ genint32 = ["int32_t", "uint32_t", Vec(["int32_t", "uint32_t"]), Marray(["int32_
 
 sgentype = ["char", "signed char", "short", "int", "long", "long long",
             "unsigned char", "unsigned short", "unsigned int",
-            "unsigned long", "unsigned long long", "float", "double", "half"]
+            "unsigned long", "unsigned long long", "float", "double", "half", "ext::oneapi::bfloat16"]
 vgentype = [Vec(["int8_t", "int16_t", "int32_t", "int64_t", "uint8_t", "uint16_t",
-                 "uint32_t", "uint64_t", "float", "double", "half",
+                 "uint32_t", "uint64_t", "float", "double", "half", "ext::oneapi::bfloat16",
                  "char", "signed char", "short", "int", "long", "long long",
                  "unsigned char", "unsigned short", "unsigned int",
                  "unsigned long", "unsigned long long"])] # Fundamental integer types non-standard. Deprecated.
 mgentype = [Marray(["char", "signed char", "short", "int", "long", "long long",
                     "unsigned char", "unsigned short", "unsigned int",
-                    "unsigned long", "unsigned long long", "float", "double", "half"])]
+                    "unsigned long", "unsigned long long", "float", "double", "half", "ext::oneapi::bfloat16"])]
 
 intptr = [MultiPtr("int"), RawPtr("int")]
 floatptr = [MultiPtr("float"), RawPtr("float")]
@@ -347,6 +355,10 @@ builtin_types = {
   "vhalf3or4" : vhalf3or4,
   "mhalfn" : mhalfn,
   "mhalf3or4" : mhalf3or4,
+  "vbfloat16n" : vbfloat16n,
+  "vbfloat163or4" : vbfloat163or4,
+  "mbfloat16n" : mbfloat16n,
+  "mbfloat163or4" : mbfloat163or4,
   "genfloat" : genfloat,
   "vgenfloat" : vgenfloat,
   "sgenfloat" : sgenfloat,
@@ -354,12 +366,15 @@ builtin_types = {
   "vgeofloat" : vgeofloat,
   "vgeodouble" : vgeodouble,
   "vgeohalf" : vgeohalf,
+  "vgeobfloat16" : vgeobfloat16,
   "mgeofloat" : mgeofloat,
   "mgeodouble" : mgeodouble,
   "mgeohalf" : mgeohalf,
+  "mgeobfloat16" : mgeobfloat16,
   "gengeofloat" : gengeofloat,
   "gengeodouble" : gengeodouble,
   "gengeohalf" : gengeohalf,
+  "gengeobfloat16" : gengeobfloat16,
   "vint8n" : vint8n,
   "vint16n" : vint16n,
   "vint32n" : vint32n,
@@ -421,6 +436,7 @@ builtin_types = {
   "float" : ["float"],
   "double" : ["double"],
   "half" : ["half"],
+  "ext::oneapi::bfloat16" : ["ext::oneapi::bfloat16"],
   "int8_t" : ["int8_t"],
   "int16_t" : ["int16_t"],
   "int32_t" : ["int32_t"],
