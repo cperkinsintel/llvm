@@ -77,7 +77,7 @@ context_impl::context_impl(sycl::detail::pi::PiContext PiContext,
       MSupportBufferLocationByDevices(NotChecked) {
 
   std::vector<sycl::detail::pi::PiDevice> DeviceIds;
-  size_t DevicesNum = 0;
+  uint32_t DevicesNum = 0;
   // TODO catch an exception and put it to list of asynchronous exceptions
   Plugin->call<PiApiKind::piContextGetInfo>(
       MContext, PI_CONTEXT_INFO_NUM_DEVICES, sizeof(DevicesNum), &DevicesNum,
@@ -367,12 +367,12 @@ std::vector<sycl::detail::pi::PiEvent> context_impl::initializeDeviceGlobals(
       DeviceGlobalUSMMem &DeviceGlobalUSM =
           DeviceGlobalEntry->getOrAllocateDeviceGlobalUSM(QueueImpl);
 
-      // If the device global still has a zero-initialization event it should be
+      // If the device global still has a initialization event it should be
       // added to the initialization events list. Since initialization events
       // are cleaned up separately from cleaning up the device global USM memory
       // this must retain the event.
       {
-        if (OwnedPiEvent ZIEvent = DeviceGlobalUSM.getZeroInitEvent(Plugin))
+        if (OwnedPiEvent ZIEvent = DeviceGlobalUSM.getInitEvent(Plugin))
           InitEventsRef.push_back(ZIEvent.TransferOwnership());
       }
       // Write the pointer to the device global and store the event in the
@@ -447,7 +447,7 @@ std::optional<sycl::detail::pi::PiProgram> context_impl::getProgramForDevImgs(
     const device &Device, const std::set<std::uintptr_t> &ImgIdentifiers,
     const std::string &ObjectTypeName) {
 
-  KernelProgramCache::ProgramWithBuildStateT *BuildRes = nullptr;
+  KernelProgramCache::ProgramBuildResultPtr BuildRes = nullptr;
   {
     auto LockedCache = MKernelProgramCache.acquireCachedPrograms();
     auto &KeyMap = LockedCache.get().KeyMap;
@@ -471,12 +471,18 @@ std::optional<sycl::detail::pi::PiProgram> context_impl::getProgramForDevImgs(
       assert(KeyMappingsIt != KeyMap.end());
       auto CachedProgIt = Cache.find(KeyMappingsIt->second);
       assert(CachedProgIt != Cache.end());
-      BuildRes = &CachedProgIt->second;
+      BuildRes = CachedProgIt->second;
     }
   }
   if (!BuildRes)
     return std::nullopt;
-  return *MKernelProgramCache.waitUntilBuilt<compile_program_error>(BuildRes);
+  using BuildState = KernelProgramCache::BuildState;
+  BuildState NewState = BuildRes->waitUntilTransition();
+  if (NewState == BuildState::BS_Failed)
+    throw compile_program_error(BuildRes->Error.Msg, BuildRes->Error.Code);
+
+  assert(NewState == BuildState::BS_Done);
+  return BuildRes->Val;
 }
 
 std::optional<sycl::detail::pi::PiProgram>
