@@ -151,6 +151,29 @@ template <> struct vec_helper<bool> {
   static constexpr RetType get(bool value) { return value; }
 };
 
+template <> struct vec_helper<sycl::ext::oneapi::bfloat16> {
+  using RetType = sycl::ext::oneapi::bfloat16;
+  using BFloat16StorageT = sycl::ext::oneapi::detail::Bfloat16StorageT;
+  static constexpr RetType get(BFloat16StorageT value) {
+    // return sycl::ext::oneapi::detail::bitsToBfloat16( value );  // can't do
+    // this, bitsToBfloat16 not constexpr. return *( reinterpret_cast<RetType*>(
+    // &value ));   // compiler converts to float. (which is odd, since that
+    // calls operator float() which isn't constexpr) return
+    // reinterpret_cast<RetType>(value); // invalid cast return (RetType)value;
+    // // compiler converts to float AND refuses because that conversion isn't
+    // constexpr return *((RetType*)&value); // compiler converts to float
+    // return reinterpret_cast<RetType&>(value); // converts to float
+    // return *( reinterpret_cast<RetType*>(  (void*)(&value) )); // converts to
+    // float
+    void *ptr = (void *)(&value);
+    RetType *rptr = reinterpret_cast<RetType *>(ptr);
+    return *rptr;
+
+    // hmm. the conversion to float is being done AFTER this
+  }
+  static constexpr RetType get(RetType value) { return value; }
+};
+
 #if (!defined(_HAS_STD_BYTE) || _HAS_STD_BYTE != 0)
 template <> struct vec_helper<std::byte> {
   using RetType = std::uint8_t;
@@ -1035,7 +1058,7 @@ public:
   typename std::enable_if_t<                                                   \
       std::is_convertible_v<DataT, T> &&                                       \
           (std::is_fundamental_v<vec_data_t<T>> ||                             \
-           std::is_same_v<typename std::remove_const_t<T>, half>),             \
+           detail::is_half_or_bf16_v<typename std::remove_const_t<T>>),        \
       vec>                                                                     \
   operator BINOP(const T & Rhs) const {                                        \
     return *this BINOP vec(static_cast<const DataT &>(Rhs));                   \
@@ -1464,7 +1487,7 @@ private:
 
   // setValue and getValue should be able to operate on different underlying
   // types: enum cl_float#N , builtin vector float#N, builtin type float.
-
+  // These versions are for N > 1.
 #ifdef __SYCL_USE_EXT_VECTOR_TYPE__
   template <int Num = NumElements, typename Ty = int,
             typename = typename std::enable_if_t<1 != Num>>
@@ -1512,6 +1535,7 @@ private:
   }
 #endif // __SYCL_USE_EXT_VECTOR_TYPE__
 
+  // N==1 versions, used by host and device. Shouldn't trailing type be int?
   template <int Num = NumElements,
             typename = typename std::enable_if_t<1 == Num>>
   constexpr void setValue(int, const DataT &Value, float) {
@@ -1524,16 +1548,30 @@ private:
     return vec_data<DataT>::get(m_Data);
   }
 
+  // template <int Num = NumElements, typename Ty,
+  //           typename = typename std::enable_if_t<1 == Num>>
+  // DataT getValue(int, float) const{
+
+  // }
+
+  // setValue and getValue.
+  // The "api" functions used by BINOP etc.  These versions just dispatch
+  // using additional int or float arg to disambiguate vec<1> vs. vec<N>
   // Special proxies as specialization is not allowed in class scope.
   constexpr void setValue(int Index, const DataT &Value) {
     if (NumElements == 1)
-      setValue(Index, Value, 0);
+      setValue(Index, Value, 0); // original ( wrong ?)
+    // setValue(Index, Value, 0.f); //0);   // CP
     else
-      setValue(Index, Value, 0.f);
+      setValue(Index, Value, 0.f); // original ( wrong ? )
+                                   // setValue(Index, Value, 0); //0.f);  // CP
   }
 
   DataT getValue(int Index) const {
-    return (NumElements == 1) ? getValue(Index, 0) : getValue(Index, 0.f);
+    return (NumElements == 1) ? getValue(Index, 0)
+                              : getValue(Index, 0.f); // original  (wrong?)
+    // return (NumElements == 1) ? getValue(Index, 0.f) : getValue(Index, 0); //
+    // CP
   }
 
 #if defined(__INTEL_PREVIEW_BREAKING_CHANGES)
@@ -2544,7 +2582,8 @@ __SYCL_DEFINE_HALF_VECSTORAGE(16)
 // Single element bfloat16
 template <> struct VecStorage<sycl::ext::oneapi::bfloat16, 1, void> {
   using DataType = sycl::ext::oneapi::detail::Bfloat16StorageT;
-  using VectorDataType = sycl::ext::oneapi::detail::Bfloat16StorageT;
+  using VectorDataType = sycl::ext::oneapi::
+      bfloat16; // sycl::ext::oneapi::detail::Bfloat16StorageT;
 };
 // Multiple elements bfloat16
 #define __SYCL_DEFINE_BF16_VECSTORAGE(Num)                                     \
