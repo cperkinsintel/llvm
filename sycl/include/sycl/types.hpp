@@ -144,11 +144,13 @@ using select_apply_cl_t = std::conditional_t<
 template <typename T> struct vec_helper {
   using RetType = T;
   static constexpr RetType get(T value) { return value; }
+  static constexpr RetType set(T value) { return value; }
 };
 template <> struct vec_helper<bool> {
   using RetType = select_apply_cl_t<bool, std::int8_t, std::int16_t,
                                     std::int32_t, std::int64_t>;
   static constexpr RetType get(bool value) { return value; }
+  static constexpr RetType set(bool value) { return value; }
 };
 
 template <> struct vec_helper<sycl::ext::oneapi::bfloat16> {
@@ -168,17 +170,26 @@ template <> struct vec_helper<sycl::ext::oneapi::bfloat16> {
     void *ptr = (void *)(&value);
     RetType *rptr = reinterpret_cast<RetType *>(ptr);
     return *rptr;
-
-    // hmm. the conversion to float is being done AFTER this
   }
+
   static constexpr RetType get(RetType value) { return value; }
+
+  static constexpr BFloat16StorageT set(RetType value) {
+    void *ptr = (void *)(&value);
+    BFloat16StorageT *rptr = reinterpret_cast<BFloat16StorageT *>(ptr);
+    return *rptr;
+  }
 };
 
 #if (!defined(_HAS_STD_BYTE) || _HAS_STD_BYTE != 0)
 template <> struct vec_helper<std::byte> {
   using RetType = std::uint8_t;
   static constexpr RetType get(std::byte value) { return (RetType)value; }
+  static constexpr RetType set(std::byte value) { return (RetType)value; }
   static constexpr std::byte get(std::uint8_t value) {
+    return (std::byte)value;
+  }
+  static constexpr std::byte set(std::uint8_t value) {
     return (std::byte)value;
   }
 };
@@ -1539,7 +1550,7 @@ private:
   template <int Num = NumElements,
             typename = typename std::enable_if_t<1 == Num>>
   constexpr void setValue(int, const DataT &Value, float) {
-    m_Data = vec_data<DataT>::get(Value);
+    m_Data = vec_data<DataT>::set(Value);
   }
 
   template <int Num = NumElements,
