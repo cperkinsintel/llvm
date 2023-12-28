@@ -157,26 +157,29 @@ template <> struct vec_helper<sycl::ext::oneapi::bfloat16> {
   using RetType = sycl::ext::oneapi::bfloat16;
   using BFloat16StorageT = sycl::ext::oneapi::detail::Bfloat16StorageT;
   static constexpr RetType get(BFloat16StorageT value) {
-    // return sycl::ext::oneapi::detail::bitsToBfloat16( value );  // can't do
-    // this, bitsToBfloat16 not constexpr. return *( reinterpret_cast<RetType*>(
-    // &value ));   // compiler converts to float. (which is odd, since that
-    // calls operator float() which isn't constexpr) return
-    // reinterpret_cast<RetType>(value); // invalid cast return (RetType)value;
-    // // compiler converts to float AND refuses because that conversion isn't
-    // constexpr return *((RetType*)&value); // compiler converts to float
+    // clang-format off
+    // return sycl::ext::oneapi::detail::bitsToBfloat16( value );  // can't do this, bitsToBfloat16 not constexpr. 
+    // return *( reinterpret_cast<RetType*>(&value ));   // compiler converts to float. 
+    // (which is odd, since that calls operator float() which isn't constexpr) 
+    // return reinterpret_cast<RetType>(value); // invalid cast 
+    // return (RetType)value; // compiler converts to float AND refuses because that conversion isn't constexpr 
+    // return *((RetType*)&value); // compiler converts to float
     // return reinterpret_cast<RetType&>(value); // converts to float
-    // return *( reinterpret_cast<RetType*>(  (void*)(&value) )); // converts to
-    // float
+    // return *( reinterpret_cast<RetType*>(  (void*)(&value) )); // converts to float
+
     void *ptr = (void *)(&value);
-    RetType *rptr = reinterpret_cast<RetType *>(ptr);
+    //RetType *rptr = reinterpret_cast<RetType *>(ptr);    // note: reinterpret_cast is not allowed in a constant expression
+    RetType *rptr = (RetType *)ptr;  // note: cast from 'void *' is not allowed in a constant expression in C++ standards before C++2c
     return *rptr;
+    // clang-format on
   }
 
   static constexpr RetType get(RetType value) { return value; }
 
   static constexpr BFloat16StorageT set(RetType value) {
     void *ptr = (void *)(&value);
-    BFloat16StorageT *rptr = reinterpret_cast<BFloat16StorageT *>(ptr);
+    // BFloat16StorageT *rptr = reinterpret_cast<BFloat16StorageT *>(ptr);
+    BFloat16StorageT *rptr = (BFloat16StorageT *)ptr;
     return *rptr;
   }
 };
@@ -1504,7 +1507,7 @@ private:
             typename = typename std::enable_if_t<1 != Num>>
   constexpr void setValue(EnableIfNotHostHalf<Ty> Index, const DataT &Value,
                           int) {
-    m_Data[Index] = vec_data<DataT>::get(Value);
+    m_Data[Index] = vec_data<DataT>::set(Value);
   }
 
   template <int Num = NumElements, typename Ty = int,
@@ -1516,7 +1519,7 @@ private:
   template <int Num = NumElements, typename Ty = int,
             typename = typename std::enable_if_t<1 != Num>>
   constexpr void setValue(EnableIfHostHalf<Ty> Index, const DataT &Value, int) {
-    m_Data.s[Index] = vec_data<DataT>::get(Value);
+    m_Data.s[Index] = vec_data<DataT>::set(Value);
   }
 
   template <int Num = NumElements, typename Ty = int,
@@ -1529,9 +1532,9 @@ private:
             typename = typename std::enable_if_t<1 != Num>>
   constexpr void setValue(int Index, const DataT &Value, int) {
 #if defined(__INTEL_PREVIEW_BREAKING_CHANGES)
-    m_Data[Index] = vec_data<DataT>::get(Value);
+    m_Data[Index] = vec_data<DataT>::set(Value);
 #else
-    m_Data.s[Index] = vec_data<DataT>::get(Value);
+    m_Data.s[Index] = vec_data<DataT>::set(Value);
 #endif
   }
 
@@ -1558,12 +1561,6 @@ private:
   DataT getValue(int, float) const {
     return vec_data<DataT>::get(m_Data);
   }
-
-  // template <int Num = NumElements, typename Ty,
-  //           typename = typename std::enable_if_t<1 == Num>>
-  // DataT getValue(int, float) const{
-
-  // }
 
   // setValue and getValue.
   // The "api" functions used by BINOP etc.  These versions just dispatch
@@ -2593,8 +2590,8 @@ __SYCL_DEFINE_HALF_VECSTORAGE(16)
 // Single element bfloat16
 template <> struct VecStorage<sycl::ext::oneapi::bfloat16, 1, void> {
   using DataType = sycl::ext::oneapi::detail::Bfloat16StorageT;
-  using VectorDataType = sycl::ext::oneapi::
-      bfloat16; // sycl::ext::oneapi::detail::Bfloat16StorageT;
+  // using VectorDataType = sycl::ext::oneapi::bfloat16;
+  using VectorDataType = sycl::ext::oneapi::detail::Bfloat16StorageT;
 };
 // Multiple elements bfloat16
 #define __SYCL_DEFINE_BF16_VECSTORAGE(Num)                                     \
