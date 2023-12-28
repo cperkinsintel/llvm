@@ -163,7 +163,7 @@ template <> struct vec_helper<sycl::ext::oneapi::bfloat16> {
     // (which is odd, since that calls operator float() which isn't constexpr) 
     // return reinterpret_cast<RetType>(value); // invalid cast 
     // return (RetType)value; // compiler converts to float AND refuses because that conversion isn't constexpr 
-    // return *((RetType*)&value); // compiler converts to float
+    // return *((RetType*)&value); // compiler converts to float   // note: cast that performs the conversions of a reinterpret_cast is not allowed in a constant expression
     // return reinterpret_cast<RetType&>(value); // converts to float
     // return *( reinterpret_cast<RetType*>(  (void*)(&value) )); // converts to float
 
