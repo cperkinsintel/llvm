@@ -367,7 +367,7 @@ template <typename Type, int NumElements> class vec {
   // of 64 for direct params. If we drop MSVC, we can have alignment the same as
   // size and use vector extensions for all sizes.
   static constexpr bool IsUsingArrayOnDevice =
-      (IsHostHalf || IsSizeGreaterThanMaxAlign);
+      (IsHostHalf || IsBfloat16 || IsSizeGreaterThanMaxAlign);
 
 #if defined(__SYCL_DEVICE_ONLY__)
   static constexpr bool NativeVec = NumElements > 1 && !IsUsingArrayOnDevice;
@@ -380,7 +380,7 @@ template <typename Type, int NumElements> class vec {
 #endif // defined(__INTEL_PREVIEW_BREAKING_CHANGES)
 
 #if !defined(__INTEL_PREVIEW_BREAKING_CHANGES)
-  static constexpr bool IsUsingArrayOnDevice = IsHostHalf;
+  static constexpr bool IsUsingArrayOnDevice = IsHostHalf || IsBfloat16;
 #endif // !defined(__INTEL_PREVIEW_BREAKING_CHANGES)
 
   static constexpr int getNumElements() { return NumElements; }
