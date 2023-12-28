@@ -157,30 +157,16 @@ template <> struct vec_helper<sycl::ext::oneapi::bfloat16> {
   using RetType = sycl::ext::oneapi::bfloat16;
   using BFloat16StorageT = sycl::ext::oneapi::detail::Bfloat16StorageT;
   static constexpr RetType get(BFloat16StorageT value) {
-    // clang-format off
-    // return sycl::ext::oneapi::detail::bitsToBfloat16( value );  // can't do this, bitsToBfloat16 not constexpr. 
-    // return *( reinterpret_cast<RetType*>(&value ));   // compiler converts to float. 
-    // (which is odd, since that calls operator float() which isn't constexpr) 
-    // return reinterpret_cast<RetType>(value); // invalid cast 
-    // return (RetType)value; // compiler converts to float AND refuses because that conversion isn't constexpr 
-    // return *((RetType*)&value); // compiler converts to float   // note: cast that performs the conversions of a reinterpret_cast is not allowed in a constant expression
-    // return reinterpret_cast<RetType&>(value); // converts to float
-    // return *( reinterpret_cast<RetType*>(  (void*)(&value) )); // converts to float
-
-    void *ptr = (void *)(&value);
-    //RetType *rptr = reinterpret_cast<RetType *>(ptr);    // note: reinterpret_cast is not allowed in a constant expression
-    RetType *rptr = (RetType *)ptr;  // note: cast from 'void *' is not allowed in a constant expression in C++ standards before C++2c
-    return *rptr;
-    // clang-format on
+    // given that BFloat16StorageT is the storageT for bfloat16, I'd prefer
+    // to use a reinterpret_cast (or cast from void*). But inexplicably
+    // that's not allowed in constexpr (before C++20).
+    return sycl::bit_cast<RetType>(value);
   }
 
   static constexpr RetType get(RetType value) { return value; }
 
   static constexpr BFloat16StorageT set(RetType value) {
-    void *ptr = (void *)(&value);
-    // BFloat16StorageT *rptr = reinterpret_cast<BFloat16StorageT *>(ptr);
-    BFloat16StorageT *rptr = (BFloat16StorageT *)ptr;
-    return *rptr;
+    return sycl::bit_cast<BFloat16StorageT>(value);
   }
 };
 
@@ -1568,18 +1554,13 @@ private:
   // Special proxies as specialization is not allowed in class scope.
   constexpr void setValue(int Index, const DataT &Value) {
     if (NumElements == 1)
-      setValue(Index, Value, 0); // original ( wrong ?)
-    // setValue(Index, Value, 0.f); //0);   // CP
+      setValue(Index, Value, 0);
     else
-      setValue(Index, Value, 0.f); // original ( wrong ? )
-                                   // setValue(Index, Value, 0); //0.f);  // CP
+      setValue(Index, Value, 0.f);
   }
 
   DataT getValue(int Index) const {
-    return (NumElements == 1) ? getValue(Index, 0)
-                              : getValue(Index, 0.f); // original  (wrong?)
-    // return (NumElements == 1) ? getValue(Index, 0.f) : getValue(Index, 0); //
-    // CP
+    return (NumElements == 1) ? getValue(Index, 0) : getValue(Index, 0.f);
   }
 
 #if defined(__INTEL_PREVIEW_BREAKING_CHANGES)
