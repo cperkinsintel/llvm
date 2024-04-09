@@ -43,6 +43,7 @@
 #include "clang/Sema/ScopeInfo.h"
 #include "clang/Sema/SemaConsumer.h"
 #include "clang/Sema/SemaInternal.h"
+#include "clang/Sema/SemaOpenACC.h"
 #include "clang/Sema/TemplateDeduction.h"
 #include "clang/Sema/TemplateInstCallback.h"
 #include "clang/Sema/TypoCorrection.h"
@@ -196,7 +197,7 @@ Sema::Sema(Preprocessor &pp, ASTContext &ctxt, ASTConsumer &consumer,
       ThreadSafetyDeclCache(nullptr), LateTemplateParser(nullptr),
       LateTemplateParserCleanup(nullptr), OpaqueParser(nullptr),
       CurContext(nullptr), ExternalSource(nullptr), CurScope(nullptr),
-      Ident_super(nullptr),
+      Ident_super(nullptr), OpenACCPtr(std::make_unique<SemaOpenACC>(*this)),
       MSPointerToMemberRepresentationMethod(
           LangOpts.getMSPointerToMemberRepresentationMethod()),
       MSStructPragmaOn(false), VtorDispStack(LangOpts.getVtorDispMode()),
@@ -681,6 +682,7 @@ ExprResult Sema::ImpCastExprToType(Expr *E, QualType Ty,
     case CK_FunctionToPointerDecay:
     case CK_ToVoid:
     case CK_NonAtomicToAtomic:
+    case CK_HLSLArrayRValue:
       break;
     }
   }
@@ -1118,10 +1120,6 @@ void Sema::ActOnEndOfTranslationUnitFragment(TUFragmentKind Kind) {
   }
 
   if (getLangOpts().SYCLIsDevice) {
-    // Check and propagate device function attributes.
-    MarkDevices();
-    // Generate device code for free function kernels.
-    ProcessFreeFunctions();
     // Set the names of the kernels, now that the names have settled down. This
     // needs to happen before we generate the integration headers.
     SetSYCLKernelNames();
@@ -1133,6 +1131,7 @@ void Sema::ActOnEndOfTranslationUnitFragment(TUFragmentKind Kind) {
     // Emit SYCL integration header for current translation unit if needed
     if (SyclIntHeader != nullptr)
       SyclIntHeader->emit(getLangOpts().SYCLIntHeader);
+    MarkDevices();
   }
 
   emitDeferredDiags();
