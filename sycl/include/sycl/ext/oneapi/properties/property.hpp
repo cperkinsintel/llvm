@@ -198,8 +198,9 @@ enum PropKind : uint32_t {
   ResponseCapacity = 57,
   NDRangeKernel = 58,
   SingleTaskKernel = 59,
+  IncludeFiles = 60,
   // PropKindSize must always be the last value.
-  PropKindSize = 60,
+  PropKindSize = 61,
 };
 
 struct property_key_base_tag {};
