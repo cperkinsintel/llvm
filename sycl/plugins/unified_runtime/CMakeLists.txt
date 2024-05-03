@@ -95,41 +95,36 @@ if(SYCL_PI_UR_USE_FETCH_CONTENT)
   endfunction()
 
   set(UNIFIED_RUNTIME_REPO "https://github.com/oneapi-src/unified-runtime.git")
-  # commit 065bf2dd97b58a4ceeb2fb83eed1df9319e61c59
-  # Merge: b9153547 ec773e6c
-  # Author: aarongreig <aaron.greig@codeplay.com>
-  # Date:   Fri Apr 5 14:26:59 2024 +0100
-  #     Merge pull request #1486 from nrspruit/fix_memfree_report
-  #     [L0] Fix DeviceInfo global mem free to report unsupported given MemCount==0
-  set(UNIFIED_RUNTIME_TAG 065bf2dd97b58a4ceeb2fb83eed1df9319e61c59)
+  # commit 1906ce76c9c2d2112584cc0679c25f00c4935e73
+  # Merge: 3e3d8748 7f9b30f6
+  # Author: Kenneth Benzie (Benie) <k.benzie@codeplay.com>
+  # Date:   Tue Apr 30 11:25:19 2024 +0100
+  #     Merge pull request #1452 from jinge90/omp_device_global_intercept
+  #     [ASAN] Intercept urProgramLink in sanitizer layer
+  set(UNIFIED_RUNTIME_TAG 1906ce76c9c2d2112584cc0679c25f00c4935e73)
 
   fetch_adapter_source(level_zero
-    "https://github.com/oneapi-src/unified-runtime.git"
+    ${UNIFIED_RUNTIME_REPO}
     ${UNIFIED_RUNTIME_TAG}
   )
 
   fetch_adapter_source(opencl
-    "https://github.com/oneapi-src/unified-runtime.git"
-    # Merge: e60c3c22 9287547e
-    # Author: Kenneth Benzie (Benie) <k.benzie@codeplay.com>
-    # Date:   Thu Apr 4 10:23:33 2024 +0200
-    #     Merge pull request #1448 from steffenlarsen/steffen/make_ext_func_fail_unsupported
-    #     [OpenCL] Make extension function lookup return unusupported error
-    3609afc7f8781f2eae5de74deaf50ba52b1bb344
+    ${UNIFIED_RUNTIME_REPO}
+    ${UNIFIED_RUNTIME_TAG}
   )
 
   fetch_adapter_source(cuda
-    "https://github.com/oneapi-src/unified-runtime.git"
+    ${UNIFIED_RUNTIME_REPO}
     ${UNIFIED_RUNTIME_TAG}
   )
 
   fetch_adapter_source(hip
-    "https://github.com/oneapi-src/unified-runtime.git"
+    ${UNIFIED_RUNTIME_REPO}
     ${UNIFIED_RUNTIME_TAG}
   )
 
   fetch_adapter_source(native_cpu
-    "https://github.com/oneapi-src/unified-runtime.git"
+    ${UNIFIED_RUNTIME_REPO}
     ${UNIFIED_RUNTIME_TAG}
   )
 
