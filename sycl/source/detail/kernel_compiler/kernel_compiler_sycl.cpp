@@ -130,6 +130,8 @@ void invoke_compiler(const std::filesystem::path &fpath,
   std::filesystem::path log_path = parent_dir / "compilation_log.txt";
   std::string compiler = get_compiler_name();
 
+  // TODO: -c , -fsycl-device-only ( once they work in conjunction with
+  // -fsycl-dump-device-code)
   std::string command =
       compiler + " -fsycl -o " + target_path.make_preferred().string() + " " +
       user_args_as_string(UserArgs) +

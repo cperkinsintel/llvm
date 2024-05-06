@@ -118,7 +118,7 @@ void test_build_and_run() {
          std::string::npos);
 
   // amend __free_function_  to kernel f name.
-  sycl::kernel k = kbExe2.ext_oneapi_get_kernel("__free_function_ff_cp");
+  sycl::kernel k = kbExe2.ext_oneapi_get_kernel("_Z19__sycl_kernel_ff_cpPi");
 
   // NOTE THIS NOISE
   // sycl::kernel_bundle<sycl::bundle_state::executable> kb =
