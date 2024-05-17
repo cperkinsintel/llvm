@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-// RUN: %clangxx  -fsyntax-only -fsycl -Xclang -verify -Xclang -verify-ignore-unexpected=note %s
+// RUN: %clangxx  -fsyntax-only -fsycl -ferror-limit=50 -Xclang -verify -Xclang -verify-ignore-unexpected=note %s
 
 // kernel_bundles sporting the new bundle_state::ext_oneapi_source should NOT
 // support several member functions. This test confirms that.

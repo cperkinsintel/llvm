@@ -75,7 +75,7 @@ end program
 ! CHECK-SAME:                                  %[[VAL_0:.*]]: !fir.box<!fir.array<?xf64>> {fir.bindc_name = "r"}) attributes {{.*}} {
 ! CHECK:           %[[VAL_1:.*]] = fir.address_of(@_QFFreduceEi) : !fir.ref<i32>
 ! CHECK:           %[[VAL_2:.*]]:2 = hlfir.declare %[[VAL_1]] {uniq_name = "_QFFreduceEi"} : (!fir.ref<i32>) -> (!fir.ref<i32>, !fir.ref<i32>)
-! CHECK:           %[[VAL_3:.*]]:2 = hlfir.declare %[[VAL_0]] {fortran_attrs = {{.*}}, uniq_name = "_QFFreduceEr"} : (!fir.box<!fir.array<?xf64>>) -> (!fir.box<!fir.array<?xf64>>, !fir.box<!fir.array<?xf64>>)
+! CHECK:           %[[VAL_3:.*]]:2 = hlfir.declare %[[VAL_0]] dummy_scope %{{[0-9]+}} {fortran_attrs = {{.*}}, uniq_name = "_QFFreduceEr"} : (!fir.box<!fir.array<?xf64>>, !fir.dscope) -> (!fir.box<!fir.array<?xf64>>, !fir.box<!fir.array<?xf64>>)
 ! CHECK:           omp.parallel {
 ! CHECK:             %[[VAL_4:.*]] = fir.alloca i32 {adapt.valuebyref, pinned}
 ! CHECK:             %[[VAL_5:.*]]:2 = hlfir.declare %[[VAL_4]] {uniq_name = "_QFFreduceEi"} : (!fir.ref<i32>) -> (!fir.ref<i32>, !fir.ref<i32>)
@@ -84,21 +84,24 @@ end program
 ! CHECK:             %[[VAL_8:.*]] = arith.constant 1 : i32
 ! CHECK:             %[[VAL_9:.*]] = fir.alloca !fir.box<!fir.array<?xf64>>
 ! CHECK:             fir.store %[[VAL_3]]#1 to %[[VAL_9]] : !fir.ref<!fir.box<!fir.array<?xf64>>>
-! CHECK:             omp.wsloop byref reduction(@add_reduction_byref_box_Uxf64 %[[VAL_9]] -> %[[VAL_10:.*]] : !fir.ref<!fir.box<!fir.array<?xf64>>>)  for  (%[[VAL_11:.*]]) : i32 = (%[[VAL_6]]) to (%[[VAL_7]]) inclusive step (%[[VAL_8]]) {
-! CHECK:               fir.store %[[VAL_11]] to %[[VAL_5]]#1 : !fir.ref<i32>
-! CHECK:               %[[VAL_12:.*]]:2 = hlfir.declare %[[VAL_10]] {fortran_attrs = {{.*}}, uniq_name = "_QFFreduceEr"} : (!fir.ref<!fir.box<!fir.array<?xf64>>>) -> (!fir.ref<!fir.box<!fir.array<?xf64>>>, !fir.ref<!fir.box<!fir.array<?xf64>>>)
-! CHECK:               %[[VAL_13:.*]] = fir.load %[[VAL_5]]#0 : !fir.ref<i32>
-! CHECK:               %[[VAL_14:.*]] = fir.convert %[[VAL_13]] : (i32) -> f64
-! CHECK:               %[[VAL_15:.*]] = fir.load %[[VAL_12]]#0 : !fir.ref<!fir.box<!fir.array<?xf64>>>
-! CHECK:               %[[VAL_16:.*]] = arith.constant 1 : index
-! CHECK:               %[[VAL_17:.*]] = hlfir.designate %[[VAL_15]] (%[[VAL_16]])  : (!fir.box<!fir.array<?xf64>>, index) -> !fir.ref<f64>
-! CHECK:               hlfir.assign %[[VAL_14]] to %[[VAL_17]] : f64, !fir.ref<f64>
-! CHECK:               %[[VAL_18:.*]] = arith.constant 1.000000e+00 : f64
-! CHECK:               %[[VAL_19:.*]] = fir.load %[[VAL_12]]#0 : !fir.ref<!fir.box<!fir.array<?xf64>>>
-! CHECK:               %[[VAL_20:.*]] = arith.constant 2 : index
-! CHECK:               %[[VAL_21:.*]] = hlfir.designate %[[VAL_19]] (%[[VAL_20]])  : (!fir.box<!fir.array<?xf64>>, index) -> !fir.ref<f64>
-! CHECK:               hlfir.assign %[[VAL_18]] to %[[VAL_21]] : f64, !fir.ref<f64>
-! CHECK:               omp.yield
+! CHECK:             omp.wsloop byref reduction(@add_reduction_byref_box_Uxf64 %[[VAL_9]] -> %[[VAL_10:.*]] : !fir.ref<!fir.box<!fir.array<?xf64>>>) {
+! CHECK-NEXT:          omp.loop_nest (%[[VAL_11:.*]]) : i32 = (%[[VAL_6]]) to (%[[VAL_7]]) inclusive step (%[[VAL_8]]) {
+! CHECK:                 %[[VAL_12:.*]]:2 = hlfir.declare %[[VAL_10]] {fortran_attrs = {{.*}}, uniq_name = "_QFFreduceEr"} : (!fir.ref<!fir.box<!fir.array<?xf64>>>) -> (!fir.ref<!fir.box<!fir.array<?xf64>>>, !fir.ref<!fir.box<!fir.array<?xf64>>>)
+! CHECK:                 fir.store %[[VAL_11]] to %[[VAL_5]]#1 : !fir.ref<i32>
+! CHECK:                 %[[VAL_13:.*]] = fir.load %[[VAL_5]]#0 : !fir.ref<i32>
+! CHECK:                 %[[VAL_14:.*]] = fir.convert %[[VAL_13]] : (i32) -> f64
+! CHECK:                 %[[VAL_15:.*]] = fir.load %[[VAL_12]]#0 : !fir.ref<!fir.box<!fir.array<?xf64>>>
+! CHECK:                 %[[VAL_16:.*]] = arith.constant 1 : index
+! CHECK:                 %[[VAL_17:.*]] = hlfir.designate %[[VAL_15]] (%[[VAL_16]])  : (!fir.box<!fir.array<?xf64>>, index) -> !fir.ref<f64>
+! CHECK:                 hlfir.assign %[[VAL_14]] to %[[VAL_17]] : f64, !fir.ref<f64>
+! CHECK:                 %[[VAL_18:.*]] = arith.constant 1.000000e+00 : f64
+! CHECK:                 %[[VAL_19:.*]] = fir.load %[[VAL_12]]#0 : !fir.ref<!fir.box<!fir.array<?xf64>>>
+! CHECK:                 %[[VAL_20:.*]] = arith.constant 2 : index
+! CHECK:                 %[[VAL_21:.*]] = hlfir.designate %[[VAL_19]] (%[[VAL_20]])  : (!fir.box<!fir.array<?xf64>>, index) -> !fir.ref<f64>
+! CHECK:                 hlfir.assign %[[VAL_18]] to %[[VAL_21]] : f64, !fir.ref<f64>
+! CHECK:                 omp.yield
+! CHECK:               }
+! CHECK:               omp.terminator
 ! CHECK:             }
 ! CHECK:             omp.terminator
 ! CHECK:           }

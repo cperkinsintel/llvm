@@ -1,6 +1,9 @@
+// REQUIRES: aspect-usm_shared_allocations
 // RUN: %{build} -o %t.out
 // RUN: %{run} %t.out
-// UNSUPPORTED: hip
+
+// The name mangling for free function kernels currently does not work with PTX.
+// UNSUPPORTED: cuda
 
 // This test tests free function kernel code generation and execution.
 
@@ -221,7 +224,7 @@ SYCL_EXTERNAL SYCL_EXT_ONEAPI_FUNCTION_PROPERTY((
   ptr2D[GId.get(0)][GId.get(1)] = LId.get(0) + LId.get(1) + start;
 }
 
-// Explicit instantiation with “int*”.
+// Explicit instantiation with ï¿½int*ï¿½.
 template void ff_3(int *ptr, int start);
 
 bool test_3(queue Queue, KernelFinder &KF) {
@@ -245,7 +248,11 @@ bool test_3(queue Queue, KernelFinder &KF) {
   bool PassA = checkUSM(usmPtr, Range, Result);
   std::cout << "Test 3a: " << (PassA ? "PASS" : "FAIL") << std::endl;
 
+<<<<<<< HEAD
   kernel Kernel = KF.get_kernel("_Z18__sycl_kernel_ff_3Pii");
+=======
+  kernel Kernel = KF.get_kernel("_Z18__sycl_kernel_ff_3IiEvPT_S0_");
+>>>>>>> sycl
   memset(usmPtr, 0, Range * sizeof(int));
   Queue.submit([&](handler &Handler) {
     Handler.set_arg(0, usmPtr);

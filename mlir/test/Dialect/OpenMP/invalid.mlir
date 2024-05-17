@@ -748,10 +748,10 @@ omp.critical.declare @mutex hint(invalid_hint)
 
 // -----
 
-func.func @omp_ordered1(%arg1 : i32, %arg2 : i32, %arg3 : i32) -> () {
-  omp.wsloop ordered(1) {
-    omp.loop_nest (%0) : i32 = (%arg1) to (%arg2) step (%arg3) {
-      // expected-error @below {{ordered region must be closely nested inside a worksharing-loop region with an ordered clause without parameter present}}
+func.func @omp_ordered_region1(%x : i32) -> () {
+  omp.distribute {
+    omp.loop_nest (%i) : i32 = (%x) to (%x) step (%x) {
+      // expected-error @below {{op must be nested inside of a worksharing, simd or worksharing simd loop}}
       omp.ordered.region {
         omp.terminator
       }
@@ -764,25 +764,69 @@ func.func @omp_ordered1(%arg1 : i32, %arg2 : i32, %arg3 : i32) -> () {
 
 // -----
 
-func.func @omp_ordered2(%arg1 : i32, %arg2 : i32, %arg3 : i32) -> () {
+func.func @omp_ordered_region2(%x : i32) -> () {
+  omp.wsloop {
+    omp.loop_nest (%i) : i32 = (%x) to (%x) step (%x) {
+      // expected-error @below {{the enclosing worksharing-loop region must have an ordered clause}}
+      omp.ordered.region {
+        omp.terminator
+      }
+      omp.yield
+    }
+    omp.terminator
+  }
+  return
+}
+
+// -----
+
+func.func @omp_ordered_region3(%x : i32) -> () {
+  omp.wsloop ordered(1) {
+    omp.loop_nest (%i) : i32 = (%x) to (%x) step (%x) {
+      // expected-error @below {{the enclosing loop's ordered clause must not have a parameter present}}
+      omp.ordered.region {
+        omp.terminator
+      }
+      omp.yield
+    }
+    omp.terminator
+  }
+  return
+}
+
+// -----
+
+func.func @omp_ordered1(%vec0 : i64) -> () {
+  // expected-error @below {{op must be nested inside of a loop}}
+  omp.ordered depend_type(dependsink) depend_vec(%vec0 : i64) {num_loops_val = 1 : i64}
+  return
+}
+
+// -----
+
+func.func @omp_ordered2(%arg1 : i32, %arg2 : i32, %arg3 : i32, %vec0 : i64) -> () {
+  omp.distribute {
+    omp.loop_nest (%0) : i32 = (%arg1) to (%arg2) step (%arg3) {
+      // expected-error @below {{op must be nested inside of a worksharing, simd or worksharing simd loop}}
+      omp.ordered depend_type(dependsink) depend_vec(%vec0 : i64) {num_loops_val = 1 : i64}
+      omp.yield
+    }
+    omp.terminator
+  }
+  return
+}
+
+// -----
+
+func.func @omp_ordered3(%arg1 : i32, %arg2 : i32, %arg3 : i32, %vec0 : i64) -> () {
   omp.wsloop {
     omp.loop_nest (%0) : i32 = (%arg1) to (%arg2) step (%arg3) {
-      // expected-error @below {{ordered region must be closely nested inside a worksharing-loop region with an ordered clause without parameter present}}
-      omp.ordered.region {
-        omp.terminator
-      }
+      // expected-error @below {{the enclosing worksharing-loop region must have an ordered clause}}
+      omp.ordered depend_type(dependsink) depend_vec(%vec0 : i64) {num_loops_val = 1 : i64}
       omp.yield
     }
     omp.terminator
   }
-  return
-}
-
-// -----
-
-func.func @omp_ordered3(%vec0 : i64) -> () {
-  // expected-error @below {{ordered depend directive must be closely nested inside a worksharing-loop with ordered clause with parameter present}}
-  omp.ordered depend_type(dependsink) depend_vec(%vec0 : i64) {num_loops_val = 1 : i64}
   return
 }
 
@@ -791,15 +835,15 @@ func.func @omp_ordered3(%vec0 : i64) -> () {
 func.func @omp_ordered4(%arg1 : i32, %arg2 : i32, %arg3 : i32, %vec0 : i64) -> () {
   omp.wsloop ordered(0) {
     omp.loop_nest (%0) : i32 = (%arg1) to (%arg2) step (%arg3) {
-      // expected-error @below {{ordered depend directive must be closely nested inside a worksharing-loop with ordered clause with parameter present}}
+      // expected-error @below {{the enclosing loop's ordered clause must have a parameter present}}
       omp.ordered depend_type(dependsink) depend_vec(%vec0 : i64) {num_loops_val = 1 : i64}
-
       omp.yield
     }
     omp.terminator
   }
   return
 }
+
 // -----
 
 func.func @omp_ordered5(%arg1 : i32, %arg2 : i32, %arg3 : i32, %vec0 : i64, %vec1 : i64) -> () {
@@ -807,7 +851,6 @@ func.func @omp_ordered5(%arg1 : i32, %arg2 : i32, %arg3 : i32, %vec0 : i64, %vec
     omp.loop_nest (%0) : i32 = (%arg1) to (%arg2) step (%arg3) {
       // expected-error @below {{number of variables in depend clause does not match number of iteration variables in the doacross loop}}
       omp.ordered depend_type(dependsource) depend_vec(%vec0, %vec1 : i64, i64) {num_loops_val = 2 : i64}
-
       omp.yield
     }
     omp.terminator
@@ -2044,7 +2087,7 @@ func.func @omp_target_depend(%data_var: memref<i32>) {
   // expected-error @below {{op expected as many depend values as depend variables}}
     "omp.target"(%data_var) ({
       "omp.terminator"() : () -> ()
-    }) {depends = [], operandSegmentSizes = array<i32: 0, 0, 0, 1, 0, 0, 0>} : (memref<i32>) -> ()
+    }) {depends = [], operandSegmentSizes = array<i32: 0, 0, 0, 1, 0, 0, 0, 0>} : (memref<i32>) -> ()
    "func.return"() : () -> ()
 }
 
@@ -2070,23 +2113,23 @@ func.func @omp_distribute_allocate(%data_var : memref<i32>) -> () {
 
 func.func @omp_distribute_wrapper() -> () {
   // expected-error @below {{op must be a loop wrapper}}
-  "omp.distribute"() ({
+  omp.distribute {
       %0 = arith.constant 0 : i32
       "omp.terminator"() : () -> ()
-    }) : () -> ()
+  }
 }
 
 // -----
 
 func.func @omp_distribute_nested_wrapper(%data_var : memref<i32>) -> () {
   // expected-error @below {{only supported nested wrappers are 'omp.parallel' and 'omp.simd'}}
-  "omp.distribute"() ({
-      "omp.wsloop"() ({
-        %0 = arith.constant 0 : i32
-        "omp.terminator"() : () -> ()
-      }) : () -> ()
+  omp.distribute {
+    "omp.wsloop"() ({
+      %0 = arith.constant 0 : i32
       "omp.terminator"() : () -> ()
     }) : () -> ()
+    "omp.terminator"() : () -> ()
+  }
 }
 
 // -----
@@ -2104,6 +2147,17 @@ omp.private {type = private} @x.privatizer : i32 alloc {
 ^bb0(%arg0: i32):
   // expected-error @below {{Invalid yielded value. Expected type: 'i32', got: None}}
   omp.yield
+}
+
+// -----
+
+omp.private {type = private} @x.privatizer : f32 alloc {
+^bb0(%arg0: f32):
+  omp.yield(%arg0 : f32)
+} dealloc {
+^bb0(%arg0: f32):
+  // expected-error @below {{Did not expect any values to be yielded.}}
+  omp.yield(%arg0 : f32)
 }
 
 // -----
@@ -2131,6 +2185,17 @@ omp.private {type = firstprivate} @x.privatizer : f32 alloc {
 } copy {
 ^bb0(%arg0: f32):
   omp.yield(%arg0 : f32)
+}
+
+// -----
+
+// expected-error @below {{`dealloc`: expected 1 region arguments, got: 2}}
+omp.private {type = private} @x.privatizer : f32 alloc {
+^bb0(%arg0: f32):
+  omp.yield(%arg0 : f32)
+} dealloc {
+^bb0(%arg0: f32, %arg1: f32):
+  omp.yield
 }
 
 // -----

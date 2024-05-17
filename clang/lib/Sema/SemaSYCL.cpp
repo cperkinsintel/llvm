@@ -1075,70 +1075,61 @@ static target getAccessTarget(QualType FieldTy,
       AccTy->getTemplateArgs()[3].getAsIntegral().getExtValue());
 }
 
+// FIXME: Free functions must have void return type, be declared at file scope,
+// outside any namespaces, and with the SYCL_DEVICE attribute. If the
+// SYCL_DEVICE attribute is not specified this function is not entered since the
+// possibility of the function being a free function is ruled out already.
 static bool isFreeFunction(SemaSYCL &SemaSYCLRef, const FunctionDecl *FD) {
   for (auto *IRAttr : FD->specific_attrs<SYCLAddIRAttributesFunctionAttr>()) {
     SmallVector<std::pair<std::string, std::string>, 4> NameValuePairs =
         IRAttr->getAttributeNameValuePairs(SemaSYCLRef.getASTContext());
     for (const auto &NameValuePair : NameValuePairs) {
       if (NameValuePair.first == "sycl-nd-range-kernel" ||
-          NameValuePair.first == "sycl-single-task-kernel")
+          NameValuePair.first == "sycl-single-task-kernel") {
+        if (!FD->getReturnType()->isVoidType()) {
+          llvm::report_fatal_error(
+              "Only functions at file scope with void return "
+              "type are permitted as free functions");
+          return false;
+        }
         return true;
+      }
     }
   }
   return false;
 }
 
-static std::string constructFFKernelName(const FunctionDecl *FD) {
-  IdentifierInfo *Id = FD->getIdentifier();
-  std::string NewIdent = (Twine("__sycl_kernel_") + Id->getName()).str();
-  return NewIdent;
-}
-
 // Creates a name for the free function kernel function.
-// We add __sycl_kernel_ to the original function name and then use the mangled
-// name as the kernel name. The renaming allows a normal device function to
-// coexist with the kernel function.
+// Consider a free function named "MyFunction". The normal device function will
+// be given its mangled name, say "_Z10MyFunctionIiEvPT_S0_". The corresponding
+// kernel function for this free function will be named
+// "_Z24__sycl_kernel_MyFunctionIiEvPT_S0_". This is the mangled name of a
+// fictitious function that has the same template and function parameters as the
+// original free function but with identifier prefixed with __sycl_kernel_.
+// We generate this name by starting with the mangled name of the free function
+// and adjusting it textually to simulate the __sycl_kernel_ prefix.
+// Because free functions are allowed only at file scope and cannot be within
+// namespaces the mangled name has the format _Z<length><identifier>... where
+// length is the identifier's length. The text manipulation inserts the prefix
+// __sycl_kernel_ and adjusts the length, leaving the rest of the name as-is.
 static std::pair<std::string, std::string> constructFreeFunctionKernelName(
     SemaSYCL &SemaSYCLRef, const FunctionDecl *FreeFunc, MangleContext &MC) {
   SmallString<256> Result;
   llvm::raw_svector_ostream Out(Result);
-  std::string MangledName;
   std::string StableName;
 
-  ASTContext &Ctx = SemaSYCLRef.getASTContext();
-  FunctionProtoType::ExtProtoInfo Info(CC_OpenCLKernel);
-  QualType FuncType = Ctx.getFunctionType(Ctx.VoidTy, {}, Info);
-  std::string FFName =
-      (Twine("__sycl_kernel_") + FreeFunc->getIdentifier()->getName()).str();
-  const IdentifierInfo *FFIdent = &Ctx.Idents.get(FFName);
-  FunctionDecl *NewFD = FunctionDecl::Create(
-      Ctx, Ctx.getTranslationUnitDecl(), {}, {}, DeclarationName(FFIdent),
-      FuncType, Ctx.getTrivialTypeSourceInfo(Ctx.VoidTy), SC_None);
-  llvm::SmallVector<ParmVarDecl *, 8> Params;
-  for (ParmVarDecl *Param : FreeFunc->parameters()) {
-    QualType Ty = Param->getType();
-    ParamDesc newParamDesc =
-        std::make_tuple(Ty, &Ctx.Idents.get(Param->getName()),
-                        Ctx.getTrivialTypeSourceInfo(Ty));
-    auto *NewParam = ParmVarDecl::Create(
-        Ctx, NewFD, SourceLocation(), SourceLocation(),
-        std::get<1>(newParamDesc), std::get<0>(newParamDesc),
-        std::get<2>(newParamDesc), SC_None, /*DefArg*/ nullptr);
-    NewParam->setScopeInfo(0, Params.size());
-    NewParam->setIsUsed();
-    Params.push_back(NewParam);
-  }
-  SmallVector<QualType, 8> ArgTys;
-  std::transform(std::begin(Params), std::end(Params),
-                 std::back_inserter(ArgTys),
-                 [](const ParmVarDecl *PVD) { return PVD->getType(); });
-  FuncType = Ctx.getFunctionType(Ctx.VoidTy, ArgTys, Info);
-  NewFD->setType(FuncType);
-  NewFD->setParams(Params);
-  MC.mangleName(NewFD, Out);
-  MangledName = Out.str();
-  StableName = MangledName;
-  return {MangledName, StableName};
+  MC.mangleName(FreeFunc, Out);
+  std::string MangledName(Out.str());
+  size_t StartNums = MangledName.find_first_of("0123456789");
+  size_t EndNums = MangledName.find_first_not_of("0123456789", StartNums);
+  size_t NameLength =
+      std::stoi(MangledName.substr(StartNums, EndNums - StartNums));
+  size_t NewNameLength = 14 /*length of __sycl_kernel_*/ + NameLength;
+  std::string NewName = MangledName.substr(0, StartNums) +
+                        std::to_string(NewNameLength) + "__sycl_kernel_" +
+                        MangledName.substr(EndNums);
+  StableName = NewName;
+  return {NewName, StableName};
 }
 
 // The first template argument to the kernel caller function is used to identify
@@ -1901,7 +1892,6 @@ public:
   }
 
   bool handleStructType(FieldDecl *FD, QualType FieldTy) final {
-    IsInvalid |= checkNotCopyableToKernel(FD, FieldTy);
     CXXRecordDecl *RD = FieldTy->getAsCXXRecordDecl();
     assert(RD && "Not a RecordDecl inside the handler for struct type");
     if (RD->isLambda()) {
@@ -2501,8 +2491,8 @@ public:
 
 // A type to Create and own the FunctionDecl for the kernel.
 class SyclKernelDeclCreator : public SyclKernelFieldHandler {
-  bool IsFreeFunction;
-  FunctionDecl *KernelDecl;
+  bool IsFreeFunction = false;
+  FunctionDecl *KernelDecl = nullptr;
   llvm::SmallVector<ParmVarDecl *, 8> Params;
   Sema::ContextRAII FuncContext;
   // Holds the last handled field's first parameter. This doesn't store an
@@ -2691,25 +2681,6 @@ class SyclKernelDeclCreator : public SyclKernelFieldHandler {
     return FD;
   }
 
-  static FunctionDecl *createFreeFunctionDecl(ASTContext &Ctx, FunctionDecl *FD,
-                                              SourceLocation Loc,
-                                              bool IsInline) {
-    // Create this with no prototype, and we can fix this up after we've seen
-    // all the params.
-    FunctionProtoType::ExtProtoInfo Info(CC_OpenCLKernel);
-    QualType FuncType = Ctx.getFunctionType(Ctx.VoidTy, {}, Info);
-    const IdentifierInfo *NewIdent = &Ctx.Idents.get(constructFFKernelName(FD));
-    FD = FunctionDecl::Create(
-        Ctx, Ctx.getTranslationUnitDecl(), Loc, Loc, DeclarationName(NewIdent),
-        FuncType, Ctx.getTrivialTypeSourceInfo(Ctx.VoidTy), SC_None);
-    FD->setImplicitlyInline(IsInline);
-    setKernelImplicitAttrs(Ctx, FD, false);
-
-    // Add kernel to translation unit to see it in AST-dump.
-    Ctx.getTranslationUnitDecl()->addDecl(FD);
-    return FD;
-  }
-
   // If the record has been marked with SYCLGenerateNewTypeAttr,
   // it implies that it contains a pointer within. This function
   // defines a PointerHandler visitor which visits this record
@@ -2743,14 +2714,11 @@ public:
                         bool IsSIMDKernel, bool IsFreeFunction,
                         FunctionDecl *SYCLKernel)
       : SyclKernelFieldHandler(S), IsFreeFunction(IsFreeFunction),
-        KernelDecl(IsFreeFunction
-                       ? createFreeFunctionDecl(S.getASTContext(), SYCLKernel,
-                                                Loc, IsInline)
-                       : createKernelDecl(S.getASTContext(), Loc, IsInline,
-                                          IsSIMDKernel)),
+        KernelDecl(
+            createKernelDecl(S.getASTContext(), Loc, IsInline, IsSIMDKernel)),
         FuncContext(SemaSYCLRef.SemaRef, KernelDecl) {
     S.addSyclOpenCLKernel(SYCLKernel, KernelDecl);
-    for (auto *IRAttr :
+    for (const auto *IRAttr :
          SYCLKernel->specific_attrs<SYCLAddIRAttributesFunctionAttr>()) {
       KernelDecl->addAttr(IRAttr->clone(SemaSYCLRef.getASTContext()));
     }
@@ -4104,7 +4072,7 @@ public:
 class FreeFunctionKernelBodyCreator : public SyclKernelFieldHandler {
   SyclKernelDeclCreator &DeclCreator;
   llvm::SmallVector<Stmt *, 16> BodyStmts;
-  FunctionDecl *FreeFunc;
+  FunctionDecl *FreeFunc = nullptr;
   SourceLocation FreeFunctionSrcLoc; // Free function source location.
   llvm::SmallVector<Expr *, 8> ArgExprs;
 
@@ -4338,10 +4306,6 @@ public:
 // the first template argument has been corrected by the library to match the
 // functor type.
 static bool IsSYCLUnnamedKernel(SemaSYCL &SemaSYCLRef, const FunctionDecl *FD) {
-  // If free function then remaining checks are not applicable.
-  if (isFreeFunction(SemaSYCLRef, FD))
-    return false;
-
   if (!SemaSYCLRef.getLangOpts().SYCLUnnamedLambda)
     return false;
 
@@ -4942,14 +4906,17 @@ void SemaSYCL::SetSYCLKernelNames() {
   for (const std::pair<const FunctionDecl *, FunctionDecl *> &Pair :
        SyclKernelsToOpenCLKernels) {
     std::string CalculatedName, StableName;
-    if (isFreeFunction(*this, Pair.first))
+    StringRef KernelName;
+    if (isFreeFunction(*this, Pair.first)) {
       std::tie(CalculatedName, StableName) =
           constructFreeFunctionKernelName(*this, Pair.first, *MangleCtx);
-    else
+      KernelName = CalculatedName;
+    } else {
       std::tie(CalculatedName, StableName) =
           constructKernelName(*this, Pair.first, *MangleCtx);
-    StringRef KernelName(
-        IsSYCLUnnamedKernel(*this, Pair.first) ? StableName : CalculatedName);
+      KernelName =
+          IsSYCLUnnamedKernel(*this, Pair.first) ? StableName : CalculatedName;
+    }
 
     getSyclIntegrationHeader().updateKernelNames(Pair.first, KernelName,
                                                  StableName);

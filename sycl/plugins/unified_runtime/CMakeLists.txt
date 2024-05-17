@@ -95,13 +95,13 @@ if(SYCL_PI_UR_USE_FETCH_CONTENT)
   endfunction()
 
   set(UNIFIED_RUNTIME_REPO "https://github.com/oneapi-src/unified-runtime.git")
-  # commit 1906ce76c9c2d2112584cc0679c25f00c4935e73
-  # Merge: 3e3d8748 7f9b30f6
+  # commit 3b7f35b1907d1acd35204c6d9472037383566a33
+  # Merge: 65c39c8a 3ec0dde6
   # Author: Kenneth Benzie (Benie) <k.benzie@codeplay.com>
-  # Date:   Tue Apr 30 11:25:19 2024 +0100
-  #     Merge pull request #1452 from jinge90/omp_device_global_intercept
-  #     [ASAN] Intercept urProgramLink in sanitizer layer
-  set(UNIFIED_RUNTIME_TAG 1906ce76c9c2d2112584cc0679c25f00c4935e73)
+  # Date:   Fri May 17 09:26:05 2024 +0100
+  #     Merge pull request #1534 from zhaomaosu/config-red-zone-size
+  #     [DeviceSanitizer] Add options to allow user to customize red zone size
+  set(UNIFIED_RUNTIME_TAG 3b7f35b1907d1acd35204c6d9472037383566a33)
 
   fetch_adapter_source(level_zero
     ${UNIFIED_RUNTIME_REPO}
