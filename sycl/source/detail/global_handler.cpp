@@ -11,6 +11,7 @@
 #include "llvm/Support/Signals.h"
 #endif
 
+#include <detail/context_impl.hpp>
 #include <detail/config.hpp>
 #include <detail/global_handler.hpp>
 #include <detail/platform_impl.hpp>
@@ -224,11 +225,22 @@ void GlobalHandler::releaseDefaultContexts() {
   // Note that on Windows the destruction of the default context
   // races with the detaching of the DLL object that calls piTearDown.
 
+  std::cout << "::: GlobalHandler::releaseDefaultContexts()" << std::endl;
+
+  for (const auto& [key, value] : GlobalHandler::getPlatformToDefaultContextCache()) {
+    // std::cout << ":::: Platform: " << std::hex << "0x" << reinterpret_cast<uintptr_t>(key.get()) << std::endl;
+    std::cout << "::::  Context: " << std::hex << "0x" << reinterpret_cast<uintptr_t>(value.get()->MContext) << std::endl; //access controls
+    
+    // if SYCL_PI_TRACE is on, this will cause the native handle to be output
+    //value.get()->getNative();
+  }
+
   MPlatformToDefaultContextCache.Inst.reset(nullptr);
 }
 
 struct DefaultContextReleaseHandler {
   ~DefaultContextReleaseHandler() {
+    std::cout << "::: ~DefaultContextReleaseHandler()" << std::endl;
     GlobalHandler::instance().releaseDefaultContexts();
   }
 };
@@ -249,6 +261,7 @@ void GlobalHandler::unloadPlugins() {
       // given plugin has been teardown successfully.
       // This tracking prevents usage of this plugin after teardown
       // has been completed to avoid invalid resource access.
+      std::cout << "::: unloadPlugins() calling piTearDown" << std::endl;
       Plugin->call<PiApiKind::piTearDown>(&Plugin->pluginReleased);
       Plugin->unload();
     }
@@ -302,6 +315,7 @@ void shutdown() {
   // prior to closing the plugins.
   // Note: Releasing a default context here may cause failures in plugins with
   // global state as the global state may have been released.
+  std::cout << "::: shutdown()" << std::endl;
   Handler->releaseDefaultContexts();
 
   // First, release resources, that may access plugins.

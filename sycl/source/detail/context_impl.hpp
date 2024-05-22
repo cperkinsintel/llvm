@@ -264,12 +264,15 @@ public:
   bool isOwnedByRuntime() { return MOwnedByRuntime; };
 
   enum PropertySupport { NotSupported = 0, Supported = 1, NotChecked = 2 };
+  // CP -- access control shenanigans
+  sycl::detail::pi::PiContext MContext;
 
 private:
   bool MOwnedByRuntime;
   async_handler MAsyncHandler;
   std::vector<device> MDevices;
-  sycl::detail::pi::PiContext MContext;
+  // CP -- access control shenanigans
+  //sycl::detail::pi::PiContext MContext;
   PlatformImplPtr MPlatform;
   property_list MPropList;
   bool MHostContext;
