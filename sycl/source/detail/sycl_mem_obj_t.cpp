@@ -146,6 +146,7 @@ void SYCLMemObjT::updateHostMemory(void *const Ptr) {
 }
 
 void SYCLMemObjT::updateHostMemory() {
+  CPOUT << "updateHostMemory()" << std::endl;
   if ((MUploadDataFunctor != nullptr) && MNeedWriteBack)
     MUploadDataFunctor();
 
@@ -153,7 +154,8 @@ void SYCLMemObjT::updateHostMemory() {
   // record. We may get detached before we do this.
   if (MRecord) {
     bool Result = Scheduler::getInstance().removeMemoryObject(this);
-    std::ignore = Result; // for no assert build
+    std::cout << "result of removeMemoryObject: " << Result << std::endl;
+    //std::ignore = Result; // for no assert build
     assert(
         Result &&
         "removeMemoryObject should not return false in mem object destructor");
@@ -234,6 +236,7 @@ void SYCLMemObjT::detachMemoryObject(
     CPOUT << " => MemObj: <SKIP>  MCurContext (impl/pi): " << std::hex
           << MRecord->MCurContext << " / "
           << MRecord->MCurContext->getHandleRef() << std::endl;
+
     bool okToDefer = GlobalHandler::instance().isOkToDefer();
     if (okToDefer)
       Scheduler::getInstance().deferMemObjRelease(Self);

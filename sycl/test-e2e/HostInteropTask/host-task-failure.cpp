@@ -50,6 +50,7 @@ void test() {
   init<int>(Buffer1, Buffer2, Q);
 
   copy(Buffer1, Buffer2, Q);
+  std::cout << "host-task-failure copy() enqueued" << std::endl;
 }
 
 int main() {

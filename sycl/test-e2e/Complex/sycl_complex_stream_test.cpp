@@ -84,6 +84,7 @@ int main() {
     test_passes &= test_common<sycl::half>(Q);
   if (Q.get_device().has(sycl::aspect::fp64))
     test_passes &= test_common<double>(Q);
+  
 
   if (!test_passes)
     std::cerr << "Stream operator with complex test fails\n";

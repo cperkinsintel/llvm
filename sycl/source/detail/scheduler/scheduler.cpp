@@ -44,6 +44,7 @@ bool Scheduler::checkLeavesCompletion(MemObjRecord *Record) {
 
 void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
                                       ReadLockT &GraphReadLock) {
+  CPOUT << "waitForRecordToFinish" << std::endl;
 #ifdef XPTI_ENABLE_INSTRUMENTATION
   // Will contain the list of dependencies for the Release Command
   std::set<Command *> DepCommands;
@@ -290,19 +291,27 @@ bool Scheduler::removeMemoryObject(detail::SYCLMemObjI *MemObj,
     // awaiting for events
     ReadLockT Lock = StrictLock ? ReadLockT(MGraphLock)
                                 : ReadLockT(MGraphLock, std::try_to_lock);
+    CPOUT << (StrictLock ? "ReadLock gotten: " : "ReadLock attempt finished: ") << Lock.owns_lock()  << std::endl;
     if (!Lock.owns_lock())
       return false;
     waitForRecordToFinish(Record, Lock);
   }
+  CPOUT << " section 1 done" << std::endl;
   {
     WriteLockT Lock = StrictLock ? acquireWriteLock()
                                  : WriteLockT(MGraphLock, std::try_to_lock);
+    CPOUT << (StrictLock ? "WriteLock gotten: " : "WriteLock attempt finished: ") << Lock.owns_lock() << std::endl;
     if (!Lock.owns_lock())
       return false;
+    
     MGraphBuilder.decrementLeafCountersForRecord(Record);
+    CPOUT << "decrementLeafCOuntersForRecord() completed." << std::endl;
     MGraphBuilder.cleanupCommandsForRecord(Record);
+    CPOUT << "cleanupCommandsForRecord() complted." << std::endl;
     MGraphBuilder.removeRecordForMemObj(MemObj);
+    CPOUT << "removeRecordForMemObj() completed." << std::endl;
   }
+  CPOUT << " section 2  done" << std::endl;
   return true;
 }
 

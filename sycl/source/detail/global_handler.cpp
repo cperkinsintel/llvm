@@ -274,13 +274,22 @@ void GlobalHandler::unloadPlugins() {
 }
 
 void GlobalHandler::prepareSchedulerToRelease(bool Blocking) {
+
+  CPOUT << "prepareSchedulerToRelease() Blocking: " << Blocking << " Scheduler:Inst: " << std::hex << MScheduler.Inst << std::endl;
+  // CP
 #ifndef _WIN32
   if (Blocking)
     drainThreadPool();
+  CPOUT << "thread pool drained. " << std::endl;
+#endif
+  
   if (MScheduler.Inst)
     MScheduler.Inst->releaseResources(Blocking ? BlockingT::BLOCKING
                                                : BlockingT::NON_BLOCKING);
-#endif
+
+  CPOUT << "releaseResources() completed." << std::endl;
+  // CP
+  //#endif
 }
 
 void GlobalHandler::drainThreadPool() {
@@ -339,14 +348,19 @@ void shutdown2() {
 
     // First, release resources, that may access plugins.
   Handler->MPlatformCache.Inst.reset(nullptr);
+  CPOUT << "MPlatformCache has been reset" << std::endl;
   Handler->MScheduler.Inst.reset(nullptr);
+  CPOUT << "MScheduler has been reset" << std::endl;
   Handler->MProgramManager.Inst.reset(nullptr);
+  CPOUT << "MProgramMangaer has been reset" << std::endl;
 
   Handler->unloadPlugins();
 
   // Release the rest of global resources.
   delete Handler;
   Handler = nullptr;
+
+  CPOUT << "done." << std::endl;
 }
 #else
 void shutdown2() {
@@ -372,6 +386,8 @@ void shutdown2() {
   // Release the rest of global resources.
   delete Handler;
   Handler = nullptr;
+
+  CPOUT << "done." << std::endl;
 }
 #endif
 
