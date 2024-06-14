@@ -37,7 +37,6 @@ using LockGuard = std::lock_guard<SpinLock>;
 SpinLock GlobalHandler::MSyclGlobalHandlerProtector{};
 
 // forward decl
-void shutdown_win(); // TODO: win variant will go away soon
 void shutdown_early();
 void shutdown_late();
 
@@ -226,20 +225,13 @@ ThreadPool &GlobalHandler::getHostTaskThreadPool() {
 
 void GlobalHandler::releaseDefaultContexts() {
   // Release shared-pointers to SYCL objects.
-  // Note that on Windows the destruction of the default context
-  // races with the detaching of the DLL object that calls piTearDown.
 
   MPlatformToDefaultContextCache.Inst.reset(nullptr);
 }
 
 struct EarlyShutdownHandler {
   ~EarlyShutdownHandler() {
-#ifdef _WIN32
-    // on Windows we keep to the existing shutdown procedure
-    GlobalHandler::instance().releaseDefaultContexts();
-#else
     shutdown_early();
-#endif
   }
 };
 
@@ -286,18 +278,7 @@ void GlobalHandler::drainThreadPool() {
     MHostTaskThreadPool.Inst->drain();
 }
 
-#ifdef _WIN32
-// because of something not-yet-understood on Windows
-// threads may be shutdown once the end of main() is reached
-// making an orderly shutdown difficult. Fortunately, Windows
-// itself is very aggressive about reclaiming memory. Thus,
-// we focus solely on unloading the plugins, so as to not
-// accidentally retain device handles. etc
-void shutdown_win() {
-  GlobalHandler *&Handler = GlobalHandler::getInstancePtr();
-  Handler->unloadPlugins();
-}
-#else
+
 void shutdown_early() {
   const LockGuard Lock{GlobalHandler::MSyclGlobalHandlerProtector};
   GlobalHandler *&Handler = GlobalHandler::getInstancePtr();
@@ -341,7 +322,7 @@ void shutdown_late() {
   delete Handler;
   Handler = nullptr;
 }
-#endif
+
 
 #ifdef _WIN32
 extern "C" __SYCL_EXPORT BOOL WINAPI DllMain(HINSTANCE hinstDLL,
@@ -360,17 +341,12 @@ extern "C" __SYCL_EXPORT BOOL WINAPI DllMain(HINSTANCE hinstDLL,
     if (PrintPiTrace)
       std::cout << "---> DLL_PROCESS_DETACH syclx.dll\n" << std::endl;
 
-#ifdef XPTI_ENABLE_INSTRUMENTATION
-    if (xptiTraceEnabled())
-      return TRUE; // When doing xpti tracing, we can't safely call shutdown.
-                   // TODO: figure out what XPTI is doing that prevents release.
-#endif
-
-    shutdown_win();
     break;
   case DLL_PROCESS_ATTACH:
     if (PrintPiTrace)
       std::cout << "---> DLL_PROCESS_ATTACH syclx.dll\n" << std::endl;
+
+    atexit(shutdown_late);
     break;
   case DLL_THREAD_ATTACH:
     break;
