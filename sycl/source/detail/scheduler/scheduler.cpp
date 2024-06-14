@@ -50,6 +50,7 @@ void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
   std::set<Command *> DepCommands;
 #endif
   std::vector<Command *> ToCleanUp;
+  CPOUT << "  #1 " << std::endl;
   for (Command *Cmd : Record->MReadLeaves) {
     EnqueueResultT Res;
     bool Enqueued =
@@ -61,8 +62,11 @@ void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
     // Capture the dependencies
     DepCommands.insert(Cmd);
 #endif
+    CPOUT << "  #1 - hi" << std::endl;
     GraphProcessor::waitForEvent(Cmd->getEvent(), GraphReadLock, ToCleanUp);
+    CPOUT << "  #1 waitForEvent done" << std::endl;
   }
+  CPOUT << "  #2 "  << std::endl;
   for (Command *Cmd : Record->MWriteLeaves) {
     EnqueueResultT Res;
     bool Enqueued =
@@ -73,8 +77,11 @@ void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
 #ifdef XPTI_ENABLE_INSTRUMENTATION
     DepCommands.insert(Cmd);
 #endif
+    CPOUT << "  #2 - hi" << std::endl;
     GraphProcessor::waitForEvent(Cmd->getEvent(), GraphReadLock, ToCleanUp);
+    CPOUT << "  #2 waitForEvent done" << std::endl;
   }
+  CPOUT << "  #3 " << std::endl;
   for (AllocaCommandBase *AllocaCmd : Record->MAllocaCommands) {
     Command *ReleaseCmd = AllocaCmd->getReleaseCmd();
     EnqueueResultT Res;
@@ -88,8 +95,10 @@ void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
     // reported as edges
     ReleaseCmd->resolveReleaseDependencies(DepCommands);
 #endif
+    CPOUT << "  #3 - hi" << std::endl;
     GraphProcessor::waitForEvent(ReleaseCmd->getEvent(), GraphReadLock,
                                  ToCleanUp);
+    CPOUT << "  #3 wiatForEvent done" << std::endl;
   }
 }
 

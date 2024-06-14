@@ -242,7 +242,7 @@ struct DefaultContextReleaseHandler {
         << std::endl;
     // GlobalHandler::instance().releaseDefaultContexts();
 #ifdef _WIN32
-    //shutdown2();
+    shutdown();
 #else
     shutdown();
 #endif
@@ -319,7 +319,7 @@ void shutdown() {
   // it might not be the last one quite yet.
   Handler->releaseDefaultContexts();
   
-  shutdown2();
+  //shutdown2();
 #else
 
   // Ensure neither host task is working so that no default context is accessed
@@ -424,7 +424,7 @@ extern "C" __SYCL_EXPORT BOOL WINAPI DllMain(HINSTANCE hinstDLL,
     if (PrintPiTrace)
       std::cout << "---> DLL_PROCESS_ATTACH syclx.dll\n" << std::endl;
 
-    atexit(shutdown); //<-- latest of all, afaict. and not same order as an app
+    atexit(shutdown2); //<-- latest of all, afaict. and not same order as an app
     break;
   case DLL_THREAD_ATTACH:
     break;
