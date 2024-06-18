@@ -50,6 +50,6 @@ int main() {
 // CHECK:---> piProgramCreate
 // CHECK:---> piKernelCreate
 // CHECK:---> piQueueRelease
-// CHECK:---> piContextRelease
 // CHECK:---> piKernelRelease
 // CHECK:---> piProgramRelease
+// CHECK:---> piContextRelease

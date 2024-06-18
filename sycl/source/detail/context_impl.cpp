@@ -159,6 +159,10 @@ context_impl::~context_impl() {
     assert(LibProg.second && "Null program must not be kept in the cache");
     getPlugin()->call<PiApiKind::piProgramRelease>(LibProg.second);
   }
+
+  // release the cached builds _before_ releasing the context itself.
+  MKernelProgramCache.reset();
+
   if (!MHostContext) {
     // TODO catch an exception and put it to list of asynchronous exceptions
     getPlugin()->call_nocheck<PiApiKind::piContextRelease>(MContext);

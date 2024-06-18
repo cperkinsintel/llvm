@@ -18,7 +18,8 @@ int main() {
 // specific queue workaround.
 // CHECK-DAG: ---> piEventRelease(
 // CHECK-DAG: ---> piQueueRelease(
-// CHECK: ---> piContextRelease(
 // CHECK: ---> piKernelRelease(
 // CHECK: ---> piProgramRelease(
+// CHECK: ---> piContextRelease(
 // CHECK: ---> piDeviceRelease(
+// CHECK: ---> piTearDown(

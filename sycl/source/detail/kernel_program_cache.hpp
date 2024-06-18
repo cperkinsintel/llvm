@@ -215,14 +215,13 @@ public:
 
   /// Clears cache state.
   ///
-  /// This member function should only be used in unit tests.
   void reset() {
     std::lock_guard<std::mutex> L1(MProgramCacheMutex);
     std::lock_guard<std::mutex> L2(MKernelsPerProgramCacheMutex);
     std::lock_guard<std::mutex> L3(MKernelFastCacheMutex);
-    MCachedPrograms = ProgramCache{};
     MKernelsPerProgramCache = KernelCacheT{};
     MKernelFastCache = KernelFastCacheT{};
+    MCachedPrograms = ProgramCache{};
   }
 
   /// Try to fetch entity (kernel or program) from cache. If there is no such
