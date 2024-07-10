@@ -1198,6 +1198,7 @@ ProgramManager::ProgramPtr ProgramManager::build(
     const std::string &Options = LinkOptions.empty()
                                      ? CompileOptions
                                      : (CompileOptions + " " + LinkOptions);
+    std::cout << "Options!!: " << Options << std::endl;
     sycl::detail::pi::PiResult Error =
         Plugin->call_nocheck<PiApiKind::piProgramBuild>(
             Program.get(), /*num devices =*/1, &Device, Options.c_str(),

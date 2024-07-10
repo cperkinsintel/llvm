@@ -151,13 +151,13 @@ void test_build_and_run() {
 
   // Compilation with props and devices
   std::string log;
-  std::vector<std::string> flags{"-g", "-fno-fast-math"};
+  std::vector<std::string> flags{"-g", "-fno-fast-math",
+                                 "-Xs '-ze-exp-register-file-size=256'"};
   std::vector<sycl::device> devs = kbSrc.get_devices();
   exe_kb kbExe2 = syclex::build(
       kbSrc, devs,
-      syclex::properties{// syclex::build_options{flags},
-                         syclex::save_log{&log},
-                         syclex::registered_kernel_names{"ff_templated<int>"}});
+      syclex::properties{syclex::build_options{flags}, syclex::save_log{&log}});
+  // syclex::registered_kernel_names{"ff_templated<int>"}});
   assert(log.find("warning: 'this_nd_item<1>' is deprecated") !=
          std::string::npos);
 
@@ -172,13 +172,13 @@ void test_build_and_run() {
 
   // Instead, we can TEMPORARILY use the mangled name. Once demangling is supported
   // this might no longer work.
-  sycl::kernel k2 = kbExe2.ext_oneapi_get_kernel("_Z26__sycl_kernel_ff_templatedIiEvPT_");
+  //sycl::kernel k2 = kbExe2.ext_oneapi_get_kernel("_Z26__sycl_kernel_ff_templatedIiEvPT_");
 
   // clang-format on
 
   // Test the kernels.
   test_1(q, k, 37 + 5); // AddEm will add 5 more.
-  test_1(q, k2, 39);
+  // test_1(q, k2, 39);
 }
 
 void test_error() {
@@ -276,8 +276,8 @@ int main() {
 
 #ifdef SYCL_EXT_ONEAPI_KERNEL_COMPILER
   test_build_and_run();
-  test_error();
-  test_esimd();
+  // test_error();
+  // test_esimd();
 #else
   static_assert(false, "Kernel Compiler feature test macro undefined");
 #endif

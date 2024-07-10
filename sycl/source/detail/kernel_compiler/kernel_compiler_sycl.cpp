@@ -74,7 +74,8 @@ std::string generateSemiUniqueId() {
 
 std::filesystem::path prepareWS(const std::string &Id) {
   const std::filesystem::path TmpDirectoryPath =
-      std::filesystem::temp_directory_path();
+      std::filesystem::current_path();
+  // std::filesystem::temp_directory_path();
   std::filesystem::path NewDirectoryPath = TmpDirectoryPath / Id;
 
   try {
