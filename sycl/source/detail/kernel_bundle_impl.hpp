@@ -533,6 +533,23 @@ public:
           ContextImpl->getHandleRef(), spirv.data(), spirv.size(), nullptr,
           &UrProgram);
       // program created by urProgramCreateWithIL is implicitly retained.
+
+      // -------------------------------------
+      // CP - adding to try an force an imbalance
+      Adapter->call<detail::UrApiKind::urProgramRetain>(UrProgram);
+
+      // rebalance:
+      // this works.
+      // Adapter->call<detail::UrApiKind::urProgramRelease>(UrProgram);
+
+      // this ALSO works.  So much for my theory.
+      detail::UrFuncInfo<detail::UrApiKind::urProgramRelease> programReleaseInfo;
+      auto programRelease = programReleaseInfo.getFuncPtrFromModule(detail::ur::getURLoaderLibrary());
+      programRelease(UrProgram);
+
+      // -------------------------------------
+
+
       if (UrProgram == nullptr)
         throw sycl::exception(
             sycl::make_error_code(errc::invalid),

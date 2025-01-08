@@ -131,6 +131,9 @@ public:
                                           e);
       }
     }
+    ProgramBuildResult() = delete;
+    ProgramBuildResult(const ProgramBuildResult&) = delete;
+    ProgramBuildResult& operator=(const ProgramBuildResult&) = delete;
   };
   using ProgramBuildResultPtr = std::shared_ptr<ProgramBuildResult>;
 
