@@ -219,7 +219,11 @@ public:
     return nullptr;
   }
 
-  virtual ~Command() { MEvent->cleanDepEventsThroughOneLevel(); }
+  virtual ~Command() { 
+    // CP
+    std::cout << "~Command() type: " << MType << std::endl;
+    MEvent->cleanDepEventsThroughOneLevel(); 
+    }
 
   const char *getBlockReason() const;
 

@@ -128,7 +128,7 @@ EventImplPtr Scheduler::addCG(
     NewEvent->setSubmissionTime();
   }
 
-  enqueueCommandForCG(NewEvent, AuxiliaryCmds);
+  enqueueCommandForCG(NewEvent, AuxiliaryCmds); // may throw
 
   if (!AuxiliaryResources.empty())
     registerAuxiliaryResources(NewEvent, std::move(AuxiliaryResources));
@@ -149,19 +149,32 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
     EnqueueResultT Res;
     bool Enqueued;
 
+    // CP
+    // I'm not sure the logic here is correct.  This Cleanup is only used in the case of an error.
+    // It seems like NewEvent should have its command
+    // cleared no matter what. Also, shouldn't the cleanup used when staging auxiliary commands
+    // be cleaning up auxillary commands, instead o the main command, which was never enqueued?
+    // Or should we be cleaning up everything?    I think enqueueCommand has to be careful about 
+    // it's error semantics. Did it enqueue or not?  
+    // In my case, we successfully enqueue one dependency, but the GC command itself fails (does it, it throws certainly, but maybe afterwards?)
     auto CleanUp = [&]() {
-      if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
-        if (NewEvent) {
-          NewEvent->setCommand(nullptr);
-        }
-        delete NewCmd;
-      }
+      // this will clear up the CG command, but not the others, and also results in crash during shutdown
+      NewEvent->setComplete();
+      NewEvent->setCommand(nullptr);
+      delete NewCmd;
+      
+      // if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
+      //   if (NewEvent) {
+      //     NewEvent->setCommand(nullptr);
+      //   }
+      //   delete NewCmd;
+      // }
     };
 
     for (Command *Cmd : AuxiliaryCmds) {
       Enqueued = GraphProcessor::enqueueCommand(Cmd, Lock, Res, ToCleanUp, Cmd,
                                                 Blocking);
-      try {
+      try {  // CP  <== this is wrong.   Should encompass enqueeuCommand
         if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
           throw exception(make_error_code(errc::runtime),
                           "Auxiliary enqueue process failed.");
@@ -177,11 +190,9 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
       // TODO: Check if lazy mode.
       EnqueueResultT Res;
       try {
-        bool Enqueued = GraphProcessor::enqueueCommand(
-            NewCmd, Lock, Res, ToCleanUp, NewCmd, Blocking);
+        bool Enqueued = GraphProcessor::enqueueCommand(NewCmd, Lock, Res, ToCleanUp, NewCmd, Blocking);
         if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
-          throw exception(make_error_code(errc::runtime),
-                          "Enqueue process failed.");
+          throw exception(make_error_code(errc::runtime), "Enqueue process failed.");
       } catch (...) {
         // enqueueCommand() func and if statement above may throw an exception,
         // so destroy required resources to avoid memory leak
@@ -190,6 +201,7 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
       }
     }
   }
+  // THIS cleanup op has no bearing on the outcome.  Wihtout it the good app still has no leaks.
   cleanupCommands(ToCleanUp);
 }
 
