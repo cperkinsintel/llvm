@@ -52,6 +52,10 @@ void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
 #endif
   std::vector<Command *> ToCleanUp;
   for (Command *Cmd : Record->MReadLeaves) {
+    // CP -- possible fix
+    if(Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed)
+      continue; // nothing to do
+    
     EnqueueResultT Res;
     bool Enqueued =
         GraphProcessor::enqueueCommand(Cmd, GraphReadLock, Res, ToCleanUp, Cmd);
@@ -65,6 +69,10 @@ void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
     GraphProcessor::waitForEvent(Cmd->getEvent(), GraphReadLock, ToCleanUp);
   }
   for (Command *Cmd : Record->MWriteLeaves) {
+    // CP -- possible fix
+    if(Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed)
+      continue; // nothing to do
+
     EnqueueResultT Res;
     bool Enqueued =
         GraphProcessor::enqueueCommand(Cmd, GraphReadLock, Res, ToCleanUp, Cmd);
@@ -159,16 +167,17 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
     // In my case, we successfully enqueue one dependency, but the GC command itself fails (does it, it throws certainly, but maybe afterwards?)
     auto CleanUp = [&]() {
       // this will clear up the CG command, but not the others, and also results in crash during shutdown
-      NewEvent->setComplete();
-      NewEvent->setCommand(nullptr);
-      delete NewCmd;
+      // NewEvent->setComplete();
+      // NewEvent->setCommand(nullptr);
+      // delete NewCmd;
       
-      // if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
-      //   if (NewEvent) {
-      //     NewEvent->setCommand(nullptr);
-      //   }
-      //   delete NewCmd;
-      // }
+      // original logic. doesn't do anything b.c. MDeps or MUsers rarely both empty
+      if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
+        if (NewEvent) {
+          NewEvent->setCommand(nullptr);
+        }
+        delete NewCmd;
+      }
     };
 
     for (Command *Cmd : AuxiliaryCmds) {
