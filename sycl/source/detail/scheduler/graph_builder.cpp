@@ -641,7 +641,8 @@ DepDesc Scheduler::GraphBuilder::findDepForRecord(Command *Cmd,
     }
   }
   assert(false && "No dependency found for a leaf of the record");
-  static DespDesc nullDep{nullptr, nullptr, nullptr};
+  // CP -- if we drop copy constructor, this will have to change
+  static DepDesc nullDep{nullptr, nullptr, nullptr};
   return nullDep;
 }
 
