@@ -474,7 +474,9 @@ void Scheduler::NotifyHostTaskCompletion(Command *Cmd) {
   {
     ReadLockT Lock = acquireReadLock();
 
-    std::vector<DepDesc> Deps = Cmd->MDeps;
+    // CP -- not needed
+    //std::vector<DepDesc> Deps = Cmd->MDeps;
+
     // Host tasks are cleaned up upon completion rather than enqueuing.
     if (Cmd->MLeafCounter == 0) {
       ToCleanUp.push_back(Cmd);

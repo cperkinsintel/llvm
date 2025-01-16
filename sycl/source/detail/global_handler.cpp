@@ -234,6 +234,8 @@ void GlobalHandler::releaseDefaultContexts() {
   // Note that on Windows the destruction of the default context
   // races with the detaching of the DLL object that calls urLoaderTearDown.
 
+  std::cout << "releaseDefaultContext()" << std::endl;
+
   MPlatformToDefaultContextCache.Inst.reset(nullptr);
 }
 

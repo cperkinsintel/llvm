@@ -828,9 +828,11 @@ bool Command::producesPiEvent() const { return true; }
 
 bool Command::supportsPostEnqueueCleanup() const { return true; }
 
+// CP - moar fix  ( this fix and the change to the assert in graph_builder.cpp are not likely really needed. )
 bool Command::readyForCleanup() const {
   return MLeafCounter == 0 &&
-         MEnqueueStatus == EnqueueResultT::SyclEnqueueSuccess;
+         (MEnqueueStatus == EnqueueResultT::SyclEnqueueSuccess ||
+          MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed);
 }
 
 Command *Command::addDep(DepDesc NewDep, std::vector<Command *> &ToCleanUp) {
@@ -1549,7 +1551,7 @@ MemCpyCommand::MemCpyCommand(Requirement SrcReq,
       MSrcAllocaCmd(SrcAllocaCmd), MDstReq(std::move(DstReq)),
       MDstAllocaCmd(DstAllocaCmd) {
   // CP
-  std::cout << "MemCpyCommand constructor " << MType << std::endl;
+  std::cout << "MemCpyCommand constructor " << MType << "  " << this <<  std::endl;
   if (MSrcQueue) {
     MEvent->setContextImpl(MSrcQueue->getContextImplPtr());
   }

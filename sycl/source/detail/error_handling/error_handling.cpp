@@ -192,6 +192,7 @@ void handleInvalidWorkGroupSize(const device_impl &DeviceImpl,
 
     for (size_t I = 0; I < 3; ++I) {
       if (MaxThreadsPerBlock[I] < NDRDesc.LocalSize[I]) {
+        std::cout << "---- THROWING ---- " << std::endl;
         throw sycl::exception(make_error_code(errc::nd_range),
                               "The number of work-items in each dimension of a "
                               "work-group cannot exceed {" +

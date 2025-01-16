@@ -201,7 +201,13 @@ struct MemObjRecord {
   MemObjRecord(ContextImplPtr Ctx, std::size_t LeafLimit,
                LeavesCollection::AllocateDependencyF AllocateDependency)
       : MReadLeaves{this, LeafLimit, AllocateDependency},
-        MWriteLeaves{this, LeafLimit, AllocateDependency}, MCurContext{Ctx} {}
+        MWriteLeaves{this, LeafLimit, AllocateDependency}, MCurContext{Ctx} {
+          std::cout << "MemObjRecord() constructor" << std::endl;
+        }
+
+  ~MemObjRecord() {
+    std::cout << "~MemObjRecord destructor" << std::endl;
+  }
   // Contains all allocation commands for the memory object.
   std::vector<AllocaCommandBase *> MAllocaCommands;
 
@@ -693,6 +699,7 @@ protected:
 
   protected:
     /// Finds a command dependency corresponding to the record.
+    // CP - switch if we drop copy constructor
     DepDesc findDepForRecord(Command *Cmd, MemObjRecord *Record);
 
     /// Searches for suitable alloca in memory record.
