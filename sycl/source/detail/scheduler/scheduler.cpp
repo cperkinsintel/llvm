@@ -165,11 +165,18 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
     // Or should we be cleaning up everything?    I think enqueueCommand has to be careful about 
     // it's error semantics. Did it enqueue or not?  
     // In my case, we successfully enqueue one dependency, but the GC command itself fails (does it, it throws certainly, but maybe afterwards?)
-    auto CleanUp = [&]() {
+    auto CleanUp = [&](Command* SomeCmd) {
       // this will clear up the CG command, but not the others, and also results in crash during shutdown
       // NewEvent->setComplete();
       // NewEvent->setCommand(nullptr);
       // delete NewCmd;
+
+      // doesn't do anything. 
+      for(auto Desc : SomeCmd->MDeps) {
+        if (auto DepCmd = Desc.MDepCommand) {
+          DepCmd->MEnqueueStatus = EnqueueResultT::SyclEnqueueFailed;
+        }
+      }
       
       // original logic. doesn't do anything b.c. MDeps or MUsers rarely both empty
       if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
@@ -190,7 +197,7 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
       } catch (...) {
         // enqueueCommand() func and if statement above may throw an exception,
         // so destroy required resources to avoid memory leak
-        CleanUp();
+        CleanUp(Cmd);
         std::rethrow_exception(std::current_exception());
       }
     }
@@ -205,7 +212,7 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
       } catch (...) {
         // enqueueCommand() func and if statement above may throw an exception,
         // so destroy required resources to avoid memory leak
-        CleanUp();
+        CleanUp(NewCmd);
         std::rethrow_exception(std::current_exception());
       }
     }
