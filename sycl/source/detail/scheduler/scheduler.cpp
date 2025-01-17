@@ -175,8 +175,13 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
       for(auto Desc : SomeCmd->MDeps) {
         if (auto DepCmd = Desc.MDepCommand) {
           DepCmd->MEnqueueStatus = EnqueueResultT::SyclEnqueueFailed;
+          //DepCmd->MMarks.MToBeDeleted = true;
+          DepCmd->MMarkedForCleanup = true;
         }
       }
+      
+      //auto someRecord = this.getMemObjRecord( req ); 
+      //MGraphBuilder.cleanupCommandsForRecord( someRecord ); //MemObjRecord *Record)
       
       // original logic. doesn't do anything b.c. MDeps or MUsers rarely both empty
       if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
