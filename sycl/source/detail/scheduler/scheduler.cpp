@@ -172,24 +172,29 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
       // delete NewCmd;
 
       // doesn't do anything. 
-      for(auto Desc : SomeCmd->MDeps) {
-        if (auto DepCmd = Desc.MDepCommand) {
-          DepCmd->MEnqueueStatus = EnqueueResultT::SyclEnqueueFailed;
-          //DepCmd->MMarks.MToBeDeleted = true;
-          DepCmd->MMarkedForCleanup = true;
-        }
-      }
+      // for(auto Desc : SomeCmd->MDeps) {
+      //   if (auto DepCmd = Desc.MDepCommand) {
+      //     DepCmd->MEnqueueStatus = EnqueueResultT::SyclEnqueueFailed;
+      //     //DepCmd->MMarks.MToBeDeleted = true;
+      //     DepCmd->MMarkedForCleanup = true;
+      //   }
+      // }
       
       //auto someRecord = this.getMemObjRecord( req ); 
       //MGraphBuilder.cleanupCommandsForRecord( someRecord ); //MemObjRecord *Record)
+
+      // CP -- latest and last fix!!
+      cleanupCommands(ToCleanUp);
       
       // original logic. doesn't do anything b.c. MDeps or MUsers rarely both empty
-      if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
-        if (NewEvent) {
-          NewEvent->setCommand(nullptr);
-        }
-        delete NewCmd;
-      }
+      // if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
+      //   if (NewEvent) {
+      //     NewEvent->setCommand(nullptr);
+      //   }
+      //   delete NewCmd;
+      // }
+
+
     };
 
     for (Command *Cmd : AuxiliaryCmds) {
