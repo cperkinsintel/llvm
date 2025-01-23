@@ -183,16 +183,18 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
       //auto someRecord = this.getMemObjRecord( req ); 
       //MGraphBuilder.cleanupCommandsForRecord( someRecord ); //MemObjRecord *Record)
 
-      // CP -- latest and last fix!!
-      cleanupCommands(ToCleanUp);
+      
       
       // original logic. doesn't do anything b.c. MDeps or MUsers rarely both empty
-      // if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
-      //   if (NewEvent) {
-      //     NewEvent->setCommand(nullptr);
-      //   }
-      //   delete NewCmd;
-      // }
+      if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
+        if (NewEvent) {
+          NewEvent->setCommand(nullptr);
+        }
+        delete NewCmd;
+      }
+
+      // CP -- latest and last fix!!
+      cleanupCommands(ToCleanUp);
 
 
     };
