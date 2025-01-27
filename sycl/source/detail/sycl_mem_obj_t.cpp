@@ -140,6 +140,7 @@ void SYCLMemObjT::updateHostMemory(void *const Ptr) {
 }
 
 void SYCLMemObjT::updateHostMemory() {
+  std::cout << "updateHostMemory() entered. Have Upload functor: " << (MUploadDataFunctor != nullptr) << "  NeedWriteBack: " << MNeedWriteBack << std::endl;
   if ((MUploadDataFunctor != nullptr) && MNeedWriteBack)
     MUploadDataFunctor();
 

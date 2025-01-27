@@ -286,13 +286,14 @@ void GlobalHandler::unloadAdapters() {
 }
 
 void GlobalHandler::prepareSchedulerToRelease(bool Blocking) {
+  // CP - fix part 1
 #ifndef _WIN32
   if (Blocking)
     drainThreadPool();
+#endif
   if (MScheduler.Inst)
     MScheduler.Inst->releaseResources(Blocking ? BlockingT::BLOCKING
                                                : BlockingT::NON_BLOCKING);
-#endif
 }
 
 void GlobalHandler::drainThreadPool() {

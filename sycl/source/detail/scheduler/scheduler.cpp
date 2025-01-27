@@ -306,11 +306,22 @@ void Scheduler::waitForEvent(const EventImplPtr &Event, bool *Success) {
 
 bool Scheduler::removeMemoryObject(detail::SYCLMemObjI *MemObj,
                                    bool StrictLock) {
+  std::cout << "Scheduler::removeMemoryObject() " << StrictLock << std::endl;
   MemObjRecord *Record = MGraphBuilder.getMemObjRecord(MemObj);
+  std::cout << "Got a Record: " << Record << std::endl;
   if (!Record)
     // No operations were performed on the mem object
     return true;
 
+  //CP - fix part 2.  Should this be the same for linux?
+#ifdef _WIN32
+  bool allowWait = MemObj->hasUserDataPtr();
+#else
+  bool allowWait = true;
+#endif
+  std::cout << "allowWait: " << allowWait << std::endl;
+
+  if(allowWait)
   {
     // This only needs a shared mutex as it only involves enqueueing and
     // awaiting for events
@@ -429,6 +440,11 @@ void Scheduler::releaseResources(BlockingT Blocking) {
   cleanupCommands({});
 
   cleanupAuxiliaryResources(Blocking);
+
+  // CP - fix part 3
+#ifdef _WIN32
+  cleanupDeferredMemObjects(Blocking); //<-- if non-blocking DeleteCmdExpception fails, otherwise host-task-failure freezes
+#else
   // We need loop since sometimes we may need new objects to be added to
   // deferred mem objects storage during cleanup. Known example is: we cleanup
   // existing deferred mem objects under write lock, during this process we
@@ -439,6 +455,7 @@ void Scheduler::releaseResources(BlockingT Blocking) {
   do {
     cleanupDeferredMemObjects(Blocking);
   } while (Blocking == BlockingT::BLOCKING && !isDeferredMemObjectsEmpty());
+#endif
 }
 
 MemObjRecord *Scheduler::getMemObjRecord(const Requirement *const Req) {
@@ -533,10 +550,8 @@ void Scheduler::cleanupDeferredMemObjects(BlockingT Blocking) {
     std::vector<std::shared_ptr<SYCLMemObjI>> TempStorage;
     {
       std::lock_guard<std::mutex> LockDef{MDeferredMemReleaseMutex};
-      MDeferredMemObjRelease.swap(TempStorage);
+      MDeferredMemObjRelease.swap(TempStorage); // it is here that host-task-failure freezes. destructors, presumably?
     }
-    // if any objects in TempStorage exist - it is leaving scope and being
-    // deleted
   }
 
   std::vector<std::shared_ptr<SYCLMemObjI>> ObjsReadyToRelease;
