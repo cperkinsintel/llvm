@@ -52,6 +52,10 @@ void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
 #endif
   std::vector<Command *> ToCleanUp;
   for (Command *Cmd : Record->MReadLeaves) {
+    // CP -- possible fix
+    if(Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed)
+      continue; // nothing to do
+    
     EnqueueResultT Res;
     bool Enqueued =
         GraphProcessor::enqueueCommand(Cmd, GraphReadLock, Res, ToCleanUp, Cmd);
@@ -65,6 +69,10 @@ void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
     GraphProcessor::waitForEvent(Cmd->getEvent(), GraphReadLock, ToCleanUp);
   }
   for (Command *Cmd : Record->MWriteLeaves) {
+    // CP -- possible fix
+    if(Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed)
+      continue; // nothing to do
+
     EnqueueResultT Res;
     bool Enqueued =
         GraphProcessor::enqueueCommand(Cmd, GraphReadLock, Res, ToCleanUp, Cmd);
@@ -128,7 +136,7 @@ EventImplPtr Scheduler::addCG(
     NewEvent->setSubmissionTime();
   }
 
-  enqueueCommandForCG(NewEvent, AuxiliaryCmds);
+  enqueueCommandForCG(NewEvent, AuxiliaryCmds); // may throw
 
   if (!AuxiliaryResources.empty())
     registerAuxiliaryResources(NewEvent, std::move(AuxiliaryResources));
@@ -149,26 +157,32 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
     EnqueueResultT Res;
     bool Enqueued;
 
-    auto CleanUp = [&]() {
+    // CP
+    auto CleanUp = [&](Command* SomeCmd) {
+
+      // original logic. doesn't do anything b.c. MDeps or MUsers rarely both empty
       if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
         if (NewEvent) {
           NewEvent->setCommand(nullptr);
         }
         delete NewCmd;
       }
+
+      // CP -- latest and last fix!!
+      cleanupCommands(ToCleanUp);
     };
 
     for (Command *Cmd : AuxiliaryCmds) {
-      Enqueued = GraphProcessor::enqueueCommand(Cmd, Lock, Res, ToCleanUp, Cmd,
-                                                Blocking);
-      try {
+     try {  
+        Enqueued = GraphProcessor::enqueueCommand(Cmd, Lock, Res, ToCleanUp, Cmd, Blocking);
+      
         if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
           throw exception(make_error_code(errc::runtime),
                           "Auxiliary enqueue process failed.");
       } catch (...) {
         // enqueueCommand() func and if statement above may throw an exception,
         // so destroy required resources to avoid memory leak
-        CleanUp();
+        CleanUp(Cmd);
         std::rethrow_exception(std::current_exception());
       }
     }
@@ -177,19 +191,18 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
       // TODO: Check if lazy mode.
       EnqueueResultT Res;
       try {
-        bool Enqueued = GraphProcessor::enqueueCommand(
-            NewCmd, Lock, Res, ToCleanUp, NewCmd, Blocking);
+        bool Enqueued = GraphProcessor::enqueueCommand(NewCmd, Lock, Res, ToCleanUp, NewCmd, Blocking);
         if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
-          throw exception(make_error_code(errc::runtime),
-                          "Enqueue process failed.");
+          throw exception(make_error_code(errc::runtime), "Enqueue process failed.");
       } catch (...) {
         // enqueueCommand() func and if statement above may throw an exception,
         // so destroy required resources to avoid memory leak
-        CleanUp();
+        CleanUp(NewCmd);
         std::rethrow_exception(std::current_exception());
       }
     }
   }
+  // THIS cleanup op has no bearing on the outcome.  Wihtout it the good app still has no leaks.
   cleanupCommands(ToCleanUp);
 }
 
@@ -266,11 +279,22 @@ void Scheduler::waitForEvent(const EventImplPtr &Event, bool *Success) {
 
 bool Scheduler::removeMemoryObject(detail::SYCLMemObjI *MemObj,
                                    bool StrictLock) {
+  CPOUT << "Scheduler::removeMemoryObject() " << StrictLock << std::endl;
   MemObjRecord *Record = MGraphBuilder.getMemObjRecord(MemObj);
+  CPOUT << "Got a Record: " << Record << std::endl;
   if (!Record)
     // No operations were performed on the mem object
     return true;
 
+  //CP - fix part 2.  Should this be the same for linux?
+#ifdef _WIN32
+  bool allowWait = MemObj->hasUserDataPtr() || GlobalHandler::instance().isOkToDefer();
+#else
+  bool allowWait = true;
+#endif
+  CPOUT << "allowWait: " << allowWait << std::endl;
+
+  if(allowWait)
   {
     // This only needs a shared mutex as it only involves enqueueing and
     // awaiting for events
@@ -389,6 +413,7 @@ void Scheduler::releaseResources(BlockingT Blocking) {
   cleanupCommands({});
 
   cleanupAuxiliaryResources(Blocking);
+
   // We need loop since sometimes we may need new objects to be added to
   // deferred mem objects storage during cleanup. Known example is: we cleanup
   // existing deferred mem objects under write lock, during this process we
@@ -453,7 +478,9 @@ void Scheduler::NotifyHostTaskCompletion(Command *Cmd) {
   {
     ReadLockT Lock = acquireReadLock();
 
-    std::vector<DepDesc> Deps = Cmd->MDeps;
+    // CP -- not needed
+    //std::vector<DepDesc> Deps = Cmd->MDeps;
+
     // Host tasks are cleaned up upon completion rather than enqueuing.
     if (Cmd->MLeafCounter == 0) {
       ToCleanUp.push_back(Cmd);
@@ -491,10 +518,8 @@ void Scheduler::cleanupDeferredMemObjects(BlockingT Blocking) {
     std::vector<std::shared_ptr<SYCLMemObjI>> TempStorage;
     {
       std::lock_guard<std::mutex> LockDef{MDeferredMemReleaseMutex};
-      MDeferredMemObjRelease.swap(TempStorage);
+      MDeferredMemObjRelease.swap(TempStorage); // it is here that host-task-failure freezes. destructors, presumably?
     }
-    // if any objects in TempStorage exist - it is leaving scope and being
-    // deleted
   }
 
   std::vector<std::shared_ptr<SYCLMemObjI>> ObjsReadyToRelease;

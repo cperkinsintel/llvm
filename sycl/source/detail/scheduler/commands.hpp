@@ -83,7 +83,26 @@ struct EnqueueResultT {
 struct DepDesc {
   DepDesc(Command *DepCommand, const Requirement *Req,
           AllocaCommandBase *AllocaCmd)
-      : MDepCommand(DepCommand), MDepRequirement(Req), MAllocaCmd(AllocaCmd) {}
+      : MDepCommand(DepCommand), MDepRequirement(Req), MAllocaCmd(AllocaCmd) {
+        CPOUT << "DepDesc() constructor(" << this << ").  MDepCommand: " << MDepCommand << std::endl;
+      }
+
+  ~DepDesc() {
+    CPOUT << "~DepDesc() destructor(" << this << ").  MDepCommand: " << MDepCommand << std::endl;
+  }
+
+  DepDesc() = delete; // CP
+
+  // CP - not sure if removing the copy constructor will help identify the problem.  
+  //      will take this up if needed.
+  //DepDesc(const DepDesc &Other) = delete; // CP
+
+  //copy constructor.
+  DepDesc(const DepDesc &Other)
+      : MDepCommand(Other.MDepCommand), MDepRequirement(Other.MDepRequirement),
+        MAllocaCmd(Other.MAllocaCmd) {
+          CPOUT << "DepDesc() copy constructor(" << this << ").  MDepCommand: " << MDepCommand << std::endl;
+        }
 
   friend bool operator<(const DepDesc &Lhs, const DepDesc &Rhs) {
     return std::tie(Lhs.MDepRequirement, Lhs.MDepCommand) <
@@ -219,7 +238,11 @@ public:
     return nullptr;
   }
 
-  virtual ~Command() { MEvent->cleanDepEventsThroughOneLevel(); }
+  virtual ~Command() { 
+    // CP
+    CPOUT << "~Command() type: " << MType << " " << this << std::endl;
+    MEvent->cleanDepEventsThroughOneLevel(); 
+    }
 
   const char *getBlockReason() const;
 

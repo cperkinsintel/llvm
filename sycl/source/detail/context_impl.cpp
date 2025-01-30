@@ -33,6 +33,8 @@ context_impl::context_impl(const device &Device, async_handler AsyncHandler,
       MContext(nullptr),
       MPlatform(detail::getSyclObjImpl(Device.get_platform())),
       MPropList(PropList), MSupportBufferLocationByDevices(NotChecked) {
+  // CP
+  CPOUT << "context_impl(dev, async, plist) constructor" << std::endl;
   verifyProps(PropList);
   MKernelProgramCache.setContextPtr(this);
 }
@@ -43,6 +45,8 @@ context_impl::context_impl(const std::vector<sycl::device> Devices,
     : MOwnedByRuntime(true), MAsyncHandler(AsyncHandler), MDevices(Devices),
       MContext(nullptr), MPlatform(), MPropList(PropList),
       MSupportBufferLocationByDevices(NotChecked) {
+  // CP
+  CPOUT << "context_impl(devices, async, plist) constructor" << std::endl;
   verifyProps(PropList);
   MPlatform = detail::getSyclObjImpl(MDevices[0].get_platform());
   std::vector<ur_device_handle_t> DeviceIds;
@@ -76,6 +80,8 @@ context_impl::context_impl(ur_context_handle_t UrContext,
     : MOwnedByRuntime(OwnedByRuntime), MAsyncHandler(AsyncHandler),
       MDevices(DeviceList), MContext(UrContext), MPlatform(),
       MSupportBufferLocationByDevices(NotChecked) {
+  // CP
+  CPOUT << "context_impl(UrContext, async, Adapter, DeviceList, OwnedByRuntime) constructor" << std::endl;
   if (!MDevices.empty()) {
     MPlatform = detail::getSyclObjImpl(MDevices[0].get_platform());
   } else {
@@ -126,6 +132,8 @@ cl_context context_impl::get() const {
 }
 
 context_impl::~context_impl() {
+  // CP
+  CPOUT << "~context_impl() called" << std::endl;
   try {
     // Free all events associated with the initialization of device globals.
     for (auto &DeviceGlobalInitializer : MDeviceGlobalInitializers)

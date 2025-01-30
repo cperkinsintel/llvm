@@ -1,5 +1,5 @@
 // RUN: %{build} -o %t.out
-// RUN: %{run} %t.out
+// RUN: env SYCL_UR_TRACE=-2 %{run} %t.out
 //
 // RUN: %{build} -DTEST_ERRORS -D_GLIBCXX_USE_CXX11_ABI=0 -fsyntax-only -Wno-error=unused-command-line-argument -Xclang -verify -Xclang -verify-ignore-unexpected=note
 

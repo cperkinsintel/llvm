@@ -121,6 +121,8 @@ public:
         MIsProfilingEnabled(has_property<property::queue::enable_profiling>()),
         MQueueID{
             MNextAvailableQueueID.fetch_add(1, std::memory_order_relaxed)} {
+    // CP
+    CPOUT << "queue_impl() constructor" << std::endl;
     verifyProps(PropList);
     if (has_property<property::queue::enable_profiling>()) {
       if (has_property<ext::oneapi::property::queue::discard_events>())
@@ -232,6 +234,7 @@ public:
         MIsProfilingEnabled(has_property<property::queue::enable_profiling>()),
         MQueueID{
             MNextAvailableQueueID.fetch_add(1, std::memory_order_relaxed)} {
+    CPOUT << "queue_impl() interop constructor" << std::endl;
     queue_impl_interop(UrQueue);
   }
 
@@ -251,11 +254,14 @@ public:
         MIsProfilingEnabled(has_property<property::queue::enable_profiling>()),
         MQueueID{
             MNextAvailableQueueID.fetch_add(1, std::memory_order_relaxed)} {
+    CPOUT << "queue_impl() verify/interop constructor " << std::endl;
     verifyProps(PropList);
     queue_impl_interop(UrQueue);
   }
 
   ~queue_impl() {
+    // CP
+    CPOUT << "~queue_impl() called" << std::endl;
     try {
 #if XPTI_ENABLE_INSTRUMENTATION
       // The trace event created in the constructor should be active through the

@@ -154,6 +154,7 @@ int main() {
       }
 
       // test exception
+      std::cout << "TEST EXCEPTION!! " << std::endl;
       try {
         const size_t out_of_bounds = std::numeric_limits<size_t>::max();
         const auto partition =

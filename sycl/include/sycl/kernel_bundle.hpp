@@ -541,6 +541,9 @@ kernel_bundle<State> get_kernel_bundle(const context &Ctx) {
   return get_kernel_bundle<State>(Ctx, Ctx.get_devices());
 }
 
+// CP
+__SYCL_EXPORT void test_release(sycl::context &Ctx, ur_native_handle_t NativeHandle);
+
 namespace detail {
 
 // Internal non-template versions of get_kernel_bundle API which is used by

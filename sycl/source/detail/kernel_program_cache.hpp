@@ -112,14 +112,20 @@ public:
   struct ProgramBuildResult : public BuildResult<ur_program_handle_t> {
     AdapterPtr Adapter;
     ProgramBuildResult(const AdapterPtr &Adapter) : Adapter(Adapter) {
+      // CP
+      CPOUT << "ProgramBuildResult(adapter)" << std::endl;
       Val = nullptr;
     }
     ProgramBuildResult(const AdapterPtr &Adapter, BuildState InitialState)
         : Adapter(Adapter) {
+      // CP
+      CPOUT << "ProgramBuildResult(adapter, state)" << std::endl;
       Val = nullptr;
       this->State.store(InitialState);
     }
     ~ProgramBuildResult() {
+      // CP
+      CPOUT << "~ProgramBuildResult()" << std::endl;
       try {
         if (Val) {
           ur_result_t Err =
@@ -131,6 +137,9 @@ public:
                                           e);
       }
     }
+    ProgramBuildResult() = delete;
+    ProgramBuildResult(const ProgramBuildResult&) = delete;
+    ProgramBuildResult& operator=(const ProgramBuildResult&) = delete;
   };
   using ProgramBuildResultPtr = std::shared_ptr<ProgramBuildResult>;
 
@@ -198,9 +207,13 @@ public:
   struct KernelBuildResult : public BuildResult<KernelArgMaskPairT> {
     AdapterPtr Adapter;
     KernelBuildResult(const AdapterPtr &Adapter) : Adapter(Adapter) {
+      // CP
+      CPOUT << "KernelBuildResult(adapter)" << std::endl;
       Val.first = nullptr;
     }
     ~KernelBuildResult() {
+      // CP
+      CPOUT << "~KernelBuildResult()" << std::endl;
       try {
         if (Val.first) {
           ur_result_t Err =

@@ -193,7 +193,9 @@ Scheduler::GraphBuilder::getOrInsertMemObjRecord(const QueueImplPtr &Queue,
              LeavesCollection::EnqueueListT &ToEnqueue) {
         // Add the old leaf as a dependency for the new one by duplicating one
         // of the requirements for the current record
+        // CP  - if we drop copy constructor, this will have to change
         DepDesc Dep = findDepForRecord(Dependant, Record);
+        CPOUT << "DepDesc change dependency. Before MDepCommand: " << Dep.MDepCommand << "  After: " << Dependency << std::endl;
         Dep.MDepCommand = Dependency;
         std::vector<Command *> ToCleanUp;
         Command *ConnectionCmd = Dependant->addDep(Dep, ToCleanUp);
@@ -201,6 +203,7 @@ Scheduler::GraphBuilder::getOrInsertMemObjRecord(const QueueImplPtr &Queue,
           ToEnqueue.push_back(ConnectionCmd);
 
         --(Dependency->MLeafCounter);
+        CPOUT << "reduced Dependency->MLeafCounter: " << Dependency->MLeafCounter << " cleanup? " << Dependency->readyForCleanup() << std::endl;
         if (Dependency->readyForCleanup())
           ToCleanUp.push_back(Dependency);
         for (Command *Cmd : ToCleanUp)
@@ -486,8 +489,11 @@ Scheduler::GraphBuilder::addCopyBack(Requirement *Req,
 
   std::vector<Command *> ToCleanUp;
   for (Command *Dep : Deps) {
-    Command *ConnCmd = MemCpyCmd->addDep(
-        DepDesc{Dep, MemCpyCmd->getRequirement(), SrcAllocaCmd}, ToCleanUp);
+    // CP -- moar fix
+    if (Dep->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed)
+      continue; // nothing to do
+
+    Command *ConnCmd = MemCpyCmd->addDep(DepDesc{Dep, MemCpyCmd->getRequirement(), SrcAllocaCmd}, ToCleanUp);
     if (ConnCmd)
       ToEnqueue.push_back(ConnCmd);
   }
@@ -626,6 +632,7 @@ Scheduler::GraphBuilder::findDepsForReq(MemObjRecord *Record,
 
 // A helper function for finding a command dependency on a specific memory
 // object
+// CP - will have to change if we move from copy constructor
 DepDesc Scheduler::GraphBuilder::findDepForRecord(Command *Cmd,
                                                   MemObjRecord *Record) {
   for (const DepDesc &DD : Cmd->MDeps) {
@@ -634,7 +641,9 @@ DepDesc Scheduler::GraphBuilder::findDepForRecord(Command *Cmd,
     }
   }
   assert(false && "No dependency found for a leaf of the record");
-  return {nullptr, nullptr, nullptr};
+  // CP -- if we drop copy constructor, this will have to change
+  static DepDesc nullDep{nullptr, nullptr, nullptr};
+  return nullDep;
 }
 
 // The function searches for the alloca command matching context and
@@ -1157,8 +1166,10 @@ void Scheduler::GraphBuilder::cleanupCommand(
   if (SYCLConfig<SYCL_DISABLE_EXECUTION_GRAPH_CLEANUP>::get())
     return;
 
+  // CP -- change to include failed probably not needed.
   assert(Cmd->MLeafCounter == 0 &&
-         (Cmd->isSuccessfullyEnqueued() || AllowUnsubmitted));
+         (Cmd->isSuccessfullyEnqueued() || AllowUnsubmitted || 
+          (Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed)));
   Command::CommandType CmdT = Cmd->getType();
 
   assert(CmdT != Command::ALLOCA && CmdT != Command::ALLOCA_SUB_BUF);
@@ -1169,6 +1180,7 @@ void Scheduler::GraphBuilder::cleanupCommand(
     for (DepDesc &Dep : UserCmd->MDeps) {
       // Link the users of the command to the alloca command(s) instead
       if (Dep.MDepCommand == Cmd) {
+        CPOUT << "DepDesc changing MDepCommand.  Before: " << Dep.MDepCommand; 
         // ... unless the user is the alloca itself.
         if (Dep.MAllocaCmd == UserCmd) {
           Dep.MDepCommand = nullptr;
@@ -1176,6 +1188,7 @@ void Scheduler::GraphBuilder::cleanupCommand(
           Dep.MDepCommand = Dep.MAllocaCmd;
           Dep.MDepCommand->MUsers.insert(UserCmd);
         }
+        CPOUT << " After: " << Dep.MDepCommand << std::endl;
       }
     }
   }
@@ -1247,6 +1260,7 @@ Command *Scheduler::GraphBuilder::connectDepEvent(
     // add user to Dep.MDepCommand is already performed beyond this if branch
     {
       DepDesc DepOnConnect = Dep;
+      CPOUT << "connect DepDesc changing MDepCommand.  Before: " << DepOnConnect.MDepCommand << " After: " << ConnectCmd << std::endl;
       DepOnConnect.MDepCommand = ConnectCmd;
 
       // Dismiss the result here as it's not a connection now,

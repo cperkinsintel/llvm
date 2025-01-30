@@ -477,6 +477,7 @@ public:
   buffer &operator=(buffer &&rhs) = default;
 
   ~buffer() {
+    CPOUT << "~buffer()" << std::endl;
     try {
       buffer_plain::handleRelease();
     } catch (std::exception &e) {

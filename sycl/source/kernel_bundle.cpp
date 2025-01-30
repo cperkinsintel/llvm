@@ -328,6 +328,41 @@ bool is_compatible(const std::vector<kernel_id> &KernelIDs, const device &Dev) {
   return true;
 }
 
+// CP
+#include "detail/adapter.hpp"
+#include <detail/ur.hpp>
+//using ContextImplPtr = std::shared_ptr<sycl::detail::context_impl>;
+void test_release(sycl::context &Context, ur_native_handle_t NativeHandle) {
+  //detail::ProgramManager::getInstance();
+
+  const detail::ContextImplPtr &ContextImpl = getSyclObjImpl(Context);
+  const detail::AdapterPtr &Adapter = ContextImpl->getAdapter(); 
+  ur_program_handle_t UrProgram = nullptr;
+  ur_program_native_properties_t Properties{};
+  Properties.stype = UR_STRUCTURE_TYPE_PROGRAM_NATIVE_PROPERTIES;
+  Properties.isNativeHandleOwned = true; //!KeepOwnership;
+
+  detail::UrFuncInfo<detail::UrApiKind::urProgramRelease> programReleaseInfo;
+  auto programRelease = programReleaseInfo.getFuncPtrFromModule(detail::ur::getURLoaderLibrary());
+
+  Adapter->call<detail::UrApiKind::urProgramCreateWithNativeHandle>( NativeHandle, ContextImpl->getHandleRef(), &Properties, &UrProgram);
+
+  uint32_t NumDevices = 0;
+  Adapter->call<detail::UrApiKind::urProgramGetInfo>( UrProgram, UR_PROGRAM_INFO_NUM_DEVICES, sizeof(NumDevices), &NumDevices, nullptr);
+  std::cout << "NumDevice: " << NumDevices << std::endl;
+
+  // is this necessary?  SHouldn't be.
+  Adapter->call<detail::UrApiKind::urProgramRetain>(UrProgram);
+  Adapter->call<detail::UrApiKind::urProgramRetain>(UrProgram);
+
+  //
+  //Adapter->call<detail::UrApiKind::urProgramRelease>(UrProgram);
+
+  // or 
+  //programRelease(UrProgram);
+
+}
+
 /////////////////////////
 // * kernel_compiler extension *
 /////////////////////////
