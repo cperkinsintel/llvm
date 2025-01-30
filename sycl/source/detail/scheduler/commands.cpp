@@ -1066,7 +1066,7 @@ AllocaCommandBase::AllocaCommandBase(CommandType Type, QueueImplPtr Queue,
       MIsLeaderAlloca(nullptr == LinkedAllocaCmd), MIsConst(IsConst),
       MRequirement(std::move(Req)), MReleaseCmd(Queue, this) {
   // CP
-  std::cout << "AllocaCommandBase constructor " << MType << std::endl;
+  CPOUT << "AllocaCommandBase constructor " << MType << std::endl;
   MRequirement.MAccessMode = access::mode::read_write;
   emitInstrumentationDataProxy();
 }
@@ -1270,7 +1270,7 @@ void AllocaSubBufCommand::printDot(std::ostream &Stream) const {
 ReleaseCommand::ReleaseCommand(QueueImplPtr Queue, AllocaCommandBase *AllocaCmd)
     : Command(CommandType::RELEASE, std::move(Queue)), MAllocaCmd(AllocaCmd) {
   // CP
-  std::cout << "ReleaseCommmand(Q, Allocacmd) constructor " << MType << std::endl;
+  CPOUT << "ReleaseCommmand(Q, Allocacmd) constructor " << MType << std::endl;
   emitInstrumentationDataProxy();
 }
 
@@ -1397,7 +1397,7 @@ MapMemObject::MapMemObject(AllocaCommandBase *SrcAllocaCmd, Requirement Req,
       MSrcAllocaCmd(SrcAllocaCmd), MSrcReq(std::move(Req)), MDstPtr(DstPtr),
       MMapMode(MapMode) {
   // CP
-  std::cout << "MapMemObject constructor " << MType << std::endl;
+  CPOUT << "MapMemObject constructor " << MType << std::endl;
   emitInstrumentationDataProxy();
 }
 
@@ -1461,7 +1461,7 @@ UnMapMemObject::UnMapMemObject(AllocaCommandBase *DstAllocaCmd, Requirement Req,
     : Command(CommandType::UNMAP_MEM_OBJ, std::move(Queue)),
       MDstAllocaCmd(DstAllocaCmd), MDstReq(std::move(Req)), MSrcPtr(SrcPtr) {
   // CP
-  std::cout << "UnMapMemObject constructor " << MType << std::endl;
+  CPOUT << "UnMapMemObject constructor " << MType << std::endl;
   emitInstrumentationDataProxy();
 }
 
@@ -1551,7 +1551,7 @@ MemCpyCommand::MemCpyCommand(Requirement SrcReq,
       MSrcAllocaCmd(SrcAllocaCmd), MDstReq(std::move(DstReq)),
       MDstAllocaCmd(DstAllocaCmd) {
   // CP
-  std::cout << "MemCpyCommand constructor " << MType << "  " << this <<  std::endl;
+  CPOUT << "MemCpyCommand constructor " << MType << "  " << this <<  std::endl;
   if (MSrcQueue) {
     MEvent->setContextImpl(MSrcQueue->getContextImplPtr());
   }
@@ -1727,7 +1727,7 @@ MemCpyCommandHost::MemCpyCommandHost(Requirement SrcReq,
       MSrcQueue(SrcQueue), MSrcReq(std::move(SrcReq)),
       MSrcAllocaCmd(SrcAllocaCmd), MDstReq(std::move(DstReq)), MDstPtr(DstPtr) {
   // CP
-  std::cout << "MemCpyCommandHost constructor " << MType << std::endl;
+  CPOUT << "MemCpyCommandHost constructor " << MType << std::endl;
   if (MSrcQueue) {
     MEvent->setContextImpl(MSrcQueue->getContextImplPtr());
   }
@@ -1803,7 +1803,7 @@ ur_result_t MemCpyCommandHost::enqueueImp() {
 
 EmptyCommand::EmptyCommand() : Command(CommandType::EMPTY_TASK, nullptr) {
   // CP
-  std::cout << "EmptyCommand() " << MType << std::endl;
+  CPOUT << "EmptyCommand() " << MType << std::endl;
   emitInstrumentationDataProxy();
 }
 
@@ -1899,7 +1899,7 @@ UpdateHostRequirementCommand::UpdateHostRequirementCommand(
     : Command(CommandType::UPDATE_REQUIREMENT, std::move(Queue)),
       MSrcAllocaCmd(SrcAllocaCmd), MDstReq(std::move(Req)), MDstPtr(DstPtr) {
   // CP
-  std::cout << "UpdateHostRequirementCommand constructor " << MType << std::endl;
+  CPOUT << "UpdateHostRequirementCommand constructor " << MType << std::endl;
   emitInstrumentationDataProxy();
 }
 
@@ -2000,7 +2000,7 @@ ExecCGCommand::ExecCGCommand(
               Dependencies),
       MEventNeeded(EventNeeded), MCommandGroup(std::move(CommandGroup)) {
   // CP
-  std::cout << "ExecCGCommand constructor " << MType << std::endl;
+  CPOUT << "ExecCGCommand constructor " << MType << std::endl;
   if (MCommandGroup->getType() == detail::CGType::CodeplayHostTask) {
     MEvent->setSubmittedQueue(
         static_cast<detail::CGHostTask *>(MCommandGroup.get())->MQueue);
@@ -3703,7 +3703,7 @@ UpdateCommandBufferCommand::UpdateCommandBufferCommand(
     : Command(CommandType::UPDATE_CMD_BUFFER, Queue), MGraph(Graph),
       MNodes(Nodes) {
         // CP
-        std::cout << "Create UpdateCommandBufferCommand " << MType << std::endl;
+        CPOUT << "Create UpdateCommandBufferCommand " << MType << std::endl;
 
       }
 

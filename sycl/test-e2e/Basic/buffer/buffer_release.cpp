@@ -1,7 +1,7 @@
 // REQUIRES: cpu
 
 // RUN: %{build} -o %t.out
-// RUN: %{run} %t.out
+// RUN: env SYCL_UR_TRACE=-2 %{run} %t.out
 
 #include <sycl/detail/core.hpp>
 

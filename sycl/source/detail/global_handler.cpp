@@ -60,10 +60,6 @@ public:
 
       LockGuard Guard(GlobalHandler::MSyclGlobalHandlerProtector);
       MCounter--;
-      GlobalHandler *RTGlobalObjHandler = GlobalHandler::getInstancePtr();
-      if (RTGlobalObjHandler) {
-        RTGlobalObjHandler->prepareSchedulerToRelease(!MCounter);
-      }
     } catch (std::exception &e) {
       __SYCL_REPORT_EXCEPTION_TO_STREAM("exception in ~ObjectUsageCounter", e);
     }
@@ -234,7 +230,7 @@ void GlobalHandler::releaseDefaultContexts() {
   // Note that on Windows the destruction of the default context
   // races with the detaching of the DLL object that calls urLoaderTearDown.
 
-  std::cout << "releaseDefaultContext()" << std::endl;
+  CPOUT << "releaseDefaultContext()" << std::endl;
 
   MPlatformToDefaultContextCache.Inst.reset(nullptr);
 }
@@ -244,7 +240,10 @@ struct EarlyShutdownHandler {
     try {
 #ifdef _WIN32
       // on Windows we keep to the existing shutdown procedure
-      GlobalHandler::instance().releaseDefaultContexts();
+      //GlobalHandler::instance().endDeferredRelease();
+      //GlobalHandler::instance().releaseDefaultContexts();
+      //shutdown_early();
+      //shutdown_late();
 #else
       shutdown_early();
 #endif
@@ -301,7 +300,7 @@ void GlobalHandler::drainThreadPool() {
     MHostTaskThreadPool.Inst->drain();
 }
 
-#ifdef _WIN32
+  //#ifdef _WIN32
 // because of something not-yet-understood on Windows
 // threads may be shutdown once the end of main() is reached
 // making an orderly shutdown difficult. Fortunately, Windows
@@ -312,7 +311,7 @@ void shutdown_win() {
   GlobalHandler *&Handler = GlobalHandler::getInstancePtr();
   Handler->unloadAdapters();
 }
-#else
+  //#else
 void shutdown_early() {
   const LockGuard Lock{GlobalHandler::MSyclGlobalHandlerProtector};
   GlobalHandler *&Handler = GlobalHandler::getInstancePtr();
@@ -324,8 +323,10 @@ void shutdown_early() {
 
   // Ensure neither host task is working so that no default context is accessed
   // upon its release
+  CPOUT << "shutdown_early() about to prepareSchedulerToRelease" << std::endl;
   Handler->prepareSchedulerToRelease(true);
 
+  CPOUT << "shutdown_early() about to finishAndWait()" << std::endl;
   if (Handler->MHostTaskThreadPool.Inst)
     Handler->MHostTaskThreadPool.Inst->finishAndWait();
 
@@ -356,9 +357,18 @@ void shutdown_late() {
   delete Handler;
   Handler = nullptr;
 }
-#endif
+  //#endif
 
 #ifdef _WIN32
+// a simple wrapper to catch and stream any exception then continue
+template <typename F>
+void safe_call(F func) {
+    try {
+        func();
+    } catch (const std::exception& e) {
+        std::cerr << "exception in DllMain DLL_PROCESS_DETACH " << e.what() << std::endl;
+    }
+}
 extern "C" __SYCL_EXPORT BOOL WINAPI DllMain(HINSTANCE hinstDLL,
                                              DWORD fdwReason,
                                              LPVOID lpReserved) {
@@ -377,19 +387,8 @@ extern "C" __SYCL_EXPORT BOOL WINAPI DllMain(HINSTANCE hinstDLL,
     if (PrintUrTrace)
       std::cout << "---> DLL_PROCESS_DETACH syclx.dll\n" << std::endl;
 
-#ifdef XPTI_ENABLE_INSTRUMENTATION
-    if (xptiTraceEnabled())
-      return TRUE; // When doing xpti tracing, we can't safely call shutdown.
-                   // TODO: figure out what XPTI is doing that prevents
-                   // release.
-#endif
-
-    try {
-      shutdown_win();
-    } catch (std::exception &e) {
-      __SYCL_REPORT_EXCEPTION_TO_STREAM("exception in shutdown_win", e);
-      return FALSE;
-    }
+    safe_call([](){ shutdown_early(); });
+    safe_call([](){ shutdown_late(); });
     break;
   case DLL_PROCESS_ATTACH:
     if (PrintUrTrace)

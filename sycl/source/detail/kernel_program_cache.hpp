@@ -113,19 +113,19 @@ public:
     AdapterPtr Adapter;
     ProgramBuildResult(const AdapterPtr &Adapter) : Adapter(Adapter) {
       // CP
-      std::cout << "ProgramBuildResult(adapter)" << std::endl;
+      CPOUT << "ProgramBuildResult(adapter)" << std::endl;
       Val = nullptr;
     }
     ProgramBuildResult(const AdapterPtr &Adapter, BuildState InitialState)
         : Adapter(Adapter) {
       // CP
-      std::cout << "ProgramBuildResult(adapter, state)" << std::endl;
+      CPOUT << "ProgramBuildResult(adapter, state)" << std::endl;
       Val = nullptr;
       this->State.store(InitialState);
     }
     ~ProgramBuildResult() {
       // CP
-      std::cout << "~ProgramBuildResult()" << std::endl;
+      CPOUT << "~ProgramBuildResult()" << std::endl;
       try {
         if (Val) {
           ur_result_t Err =
@@ -208,12 +208,12 @@ public:
     AdapterPtr Adapter;
     KernelBuildResult(const AdapterPtr &Adapter) : Adapter(Adapter) {
       // CP
-      std::cout << "KernelBuildResult(adapter)" << std::endl;
+      CPOUT << "KernelBuildResult(adapter)" << std::endl;
       Val.first = nullptr;
     }
     ~KernelBuildResult() {
       // CP
-      std::cout << "~KernelBuildResult()" << std::endl;
+      CPOUT << "~KernelBuildResult()" << std::endl;
       try {
         if (Val.first) {
           ur_result_t Err =

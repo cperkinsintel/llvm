@@ -195,7 +195,7 @@ Scheduler::GraphBuilder::getOrInsertMemObjRecord(const QueueImplPtr &Queue,
         // of the requirements for the current record
         // CP  - if we drop copy constructor, this will have to change
         DepDesc Dep = findDepForRecord(Dependant, Record);
-        std::cout << "DepDesc change dependency. Before MDepCommand: " << Dep.MDepCommand << "  After: " << Dependency << std::endl;
+        CPOUT << "DepDesc change dependency. Before MDepCommand: " << Dep.MDepCommand << "  After: " << Dependency << std::endl;
         Dep.MDepCommand = Dependency;
         std::vector<Command *> ToCleanUp;
         Command *ConnectionCmd = Dependant->addDep(Dep, ToCleanUp);
@@ -203,7 +203,7 @@ Scheduler::GraphBuilder::getOrInsertMemObjRecord(const QueueImplPtr &Queue,
           ToEnqueue.push_back(ConnectionCmd);
 
         --(Dependency->MLeafCounter);
-        std::cout << "reduced Dependency->MLeafCounter: " << Dependency->MLeafCounter << " cleanup? " << Dependency->readyForCleanup() << std::endl;
+        CPOUT << "reduced Dependency->MLeafCounter: " << Dependency->MLeafCounter << " cleanup? " << Dependency->readyForCleanup() << std::endl;
         if (Dependency->readyForCleanup())
           ToCleanUp.push_back(Dependency);
         for (Command *Cmd : ToCleanUp)
@@ -1180,7 +1180,7 @@ void Scheduler::GraphBuilder::cleanupCommand(
     for (DepDesc &Dep : UserCmd->MDeps) {
       // Link the users of the command to the alloca command(s) instead
       if (Dep.MDepCommand == Cmd) {
-        std::cout << "DepDesc changing MDepCommand.  Before: " << Dep.MDepCommand; 
+        CPOUT << "DepDesc changing MDepCommand.  Before: " << Dep.MDepCommand; 
         // ... unless the user is the alloca itself.
         if (Dep.MAllocaCmd == UserCmd) {
           Dep.MDepCommand = nullptr;
@@ -1188,7 +1188,7 @@ void Scheduler::GraphBuilder::cleanupCommand(
           Dep.MDepCommand = Dep.MAllocaCmd;
           Dep.MDepCommand->MUsers.insert(UserCmd);
         }
-        std::cout << " After: " << Dep.MDepCommand << std::endl;
+        CPOUT << " After: " << Dep.MDepCommand << std::endl;
       }
     }
   }
@@ -1260,7 +1260,7 @@ Command *Scheduler::GraphBuilder::connectDepEvent(
     // add user to Dep.MDepCommand is already performed beyond this if branch
     {
       DepDesc DepOnConnect = Dep;
-      std::cout << "connect DepDesc changing MDepCommand.  Before: " << DepOnConnect.MDepCommand << " After: " << ConnectCmd << std::endl;
+      CPOUT << "connect DepDesc changing MDepCommand.  Before: " << DepOnConnect.MDepCommand << " After: " << ConnectCmd << std::endl;
       DepOnConnect.MDepCommand = ConnectCmd;
 
       // Dismiss the result here as it's not a connection now,

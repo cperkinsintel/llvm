@@ -202,11 +202,11 @@ struct MemObjRecord {
                LeavesCollection::AllocateDependencyF AllocateDependency)
       : MReadLeaves{this, LeafLimit, AllocateDependency},
         MWriteLeaves{this, LeafLimit, AllocateDependency}, MCurContext{Ctx} {
-          std::cout << "MemObjRecord() constructor" << std::endl;
+          CPOUT << "MemObjRecord() constructor" << std::endl;
         }
 
   ~MemObjRecord() {
-    std::cout << "~MemObjRecord destructor" << std::endl;
+    CPOUT << "~MemObjRecord destructor" << std::endl;
   }
   // Contains all allocation commands for the memory object.
   std::vector<AllocaCommandBase *> MAllocaCommands;

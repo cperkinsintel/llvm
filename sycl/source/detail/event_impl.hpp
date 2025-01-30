@@ -56,7 +56,7 @@ public:
     // event methods. This ::get() call uses static vars to read and parse the
     // ODS env var exactly once.
     // CP
-    std::cout << "event_impl<HES_Complte>() constructor" << std::endl;
+    CPOUT << "event_impl<HES_Complte>() constructor" << std::endl;
     SYCLConfig<ONEAPI_DEVICE_SELECTOR>::get();
   }
 

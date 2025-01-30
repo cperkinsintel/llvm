@@ -84,11 +84,11 @@ struct DepDesc {
   DepDesc(Command *DepCommand, const Requirement *Req,
           AllocaCommandBase *AllocaCmd)
       : MDepCommand(DepCommand), MDepRequirement(Req), MAllocaCmd(AllocaCmd) {
-        std::cout << "DepDesc() constructor(" << this << ").  MDepCommand: " << MDepCommand << std::endl;
+        CPOUT << "DepDesc() constructor(" << this << ").  MDepCommand: " << MDepCommand << std::endl;
       }
 
   ~DepDesc() {
-    std::cout << "~DepDesc() destructor(" << this << ").  MDepCommand: " << MDepCommand << std::endl;
+    CPOUT << "~DepDesc() destructor(" << this << ").  MDepCommand: " << MDepCommand << std::endl;
   }
 
   DepDesc() = delete; // CP
@@ -101,7 +101,7 @@ struct DepDesc {
   DepDesc(const DepDesc &Other)
       : MDepCommand(Other.MDepCommand), MDepRequirement(Other.MDepRequirement),
         MAllocaCmd(Other.MAllocaCmd) {
-          std::cout << "DepDesc() copy constructor(" << this << ").  MDepCommand: " << MDepCommand << std::endl;
+          CPOUT << "DepDesc() copy constructor(" << this << ").  MDepCommand: " << MDepCommand << std::endl;
         }
 
   friend bool operator<(const DepDesc &Lhs, const DepDesc &Rhs) {
@@ -240,7 +240,7 @@ public:
 
   virtual ~Command() { 
     // CP
-    std::cout << "~Command() type: " << MType << " " << this << std::endl;
+    CPOUT << "~Command() type: " << MType << " " << this << std::endl;
     MEvent->cleanDepEventsThroughOneLevel(); 
     }
 

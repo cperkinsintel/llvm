@@ -25,7 +25,7 @@ kernel_impl::kernel_impl(ur_kernel_handle_t Kernel, ContextImplPtr Context,
       MCreatedFromSource(true), MKernelBundleImpl(std::move(KernelBundleImpl)),
       MIsInterop(true), MKernelArgMaskPtr{ArgMask} {
   // CP
-  std::cout << "kernel_impl(kernel, context, bundle, argmas) constructor" << std::endl;
+  CPOUT << "kernel_impl(kernel, context, bundle, argmas) constructor" << std::endl;
   ur_context_handle_t UrContext = nullptr;
   // Using the adapter from the passed ContextImpl
   getAdapter()->call<UrApiKind::urKernelGetInfo>(
@@ -56,13 +56,13 @@ kernel_impl::kernel_impl(ur_kernel_handle_t Kernel, ContextImplPtr ContextImpl,
       MKernelBundleImpl(std::move(KernelBundleImpl)),
       MKernelArgMaskPtr{ArgMask}, MCacheMutex{CacheMutex} {
   // CP
-  std::cout << "kernel_impl(kernel, context, deviceimage, bundle, argmask, program, mutex) constructor" << std::endl;
+  CPOUT  << "kernel_impl(kernel, context, deviceimage, bundle, argmask, program, mutex) constructor" << std::endl;
   MIsInterop = MKernelBundleImpl->isInterop();
 }
 
 kernel_impl::~kernel_impl() {
   // CP
-  std::cout << "~kernel_impl() called" << std::endl;
+  CPOUT << "~kernel_impl() called" << std::endl;
   try {
     // TODO catch an exception and put it to list of asynchronous exceptions
     getAdapter()->call<UrApiKind::urKernelRelease>(MKernel);

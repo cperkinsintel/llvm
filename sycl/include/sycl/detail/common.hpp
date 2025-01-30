@@ -18,6 +18,10 @@
 #include <type_traits> // for enable_if_t
 #include <utility>     // for index_sequence, make_i...
 
+// CP
+//#define CPOUT  std::clog
+#define CPOUT  std::clog.rdbuf(NULL); std::clog
+
 // Default signature enables the passing of user code location information to
 // public methods as a default argument.
 namespace sycl {

@@ -158,33 +158,8 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
     bool Enqueued;
 
     // CP
-    // I'm not sure the logic here is correct.  This Cleanup is only used in the case of an error.
-    // It seems like NewEvent should have its command
-    // cleared no matter what. Also, shouldn't the cleanup used when staging auxiliary commands
-    // be cleaning up auxillary commands, instead o the main command, which was never enqueued?
-    // Or should we be cleaning up everything?    I think enqueueCommand has to be careful about 
-    // it's error semantics. Did it enqueue or not?  
-    // In my case, we successfully enqueue one dependency, but the GC command itself fails (does it, it throws certainly, but maybe afterwards?)
     auto CleanUp = [&](Command* SomeCmd) {
-      // this will clear up the CG command, but not the others, and also results in crash during shutdown
-      // NewEvent->setComplete();
-      // NewEvent->setCommand(nullptr);
-      // delete NewCmd;
 
-      // doesn't do anything. 
-      // for(auto Desc : SomeCmd->MDeps) {
-      //   if (auto DepCmd = Desc.MDepCommand) {
-      //     DepCmd->MEnqueueStatus = EnqueueResultT::SyclEnqueueFailed;
-      //     //DepCmd->MMarks.MToBeDeleted = true;
-      //     DepCmd->MMarkedForCleanup = true;
-      //   }
-      // }
-      
-      //auto someRecord = this.getMemObjRecord( req ); 
-      //MGraphBuilder.cleanupCommandsForRecord( someRecord ); //MemObjRecord *Record)
-
-      
-      
       // original logic. doesn't do anything b.c. MDeps or MUsers rarely both empty
       if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
         if (NewEvent) {
@@ -195,14 +170,12 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
 
       // CP -- latest and last fix!!
       cleanupCommands(ToCleanUp);
-
-
     };
 
     for (Command *Cmd : AuxiliaryCmds) {
-      Enqueued = GraphProcessor::enqueueCommand(Cmd, Lock, Res, ToCleanUp, Cmd,
-                                                Blocking);
-      try {  // CP  <== this is wrong.   Should encompass enqueeuCommand
+     try {  
+        Enqueued = GraphProcessor::enqueueCommand(Cmd, Lock, Res, ToCleanUp, Cmd, Blocking);
+      
         if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
           throw exception(make_error_code(errc::runtime),
                           "Auxiliary enqueue process failed.");
@@ -306,20 +279,20 @@ void Scheduler::waitForEvent(const EventImplPtr &Event, bool *Success) {
 
 bool Scheduler::removeMemoryObject(detail::SYCLMemObjI *MemObj,
                                    bool StrictLock) {
-  std::cout << "Scheduler::removeMemoryObject() " << StrictLock << std::endl;
+  CPOUT << "Scheduler::removeMemoryObject() " << StrictLock << std::endl;
   MemObjRecord *Record = MGraphBuilder.getMemObjRecord(MemObj);
-  std::cout << "Got a Record: " << Record << std::endl;
+  CPOUT << "Got a Record: " << Record << std::endl;
   if (!Record)
     // No operations were performed on the mem object
     return true;
 
   //CP - fix part 2.  Should this be the same for linux?
 #ifdef _WIN32
-  bool allowWait = MemObj->hasUserDataPtr();
+  bool allowWait = MemObj->hasUserDataPtr() || GlobalHandler::instance().isOkToDefer();
 #else
   bool allowWait = true;
 #endif
-  std::cout << "allowWait: " << allowWait << std::endl;
+  CPOUT << "allowWait: " << allowWait << std::endl;
 
   if(allowWait)
   {
@@ -441,10 +414,6 @@ void Scheduler::releaseResources(BlockingT Blocking) {
 
   cleanupAuxiliaryResources(Blocking);
 
-  // CP - fix part 3
-#ifdef _WIN32
-  cleanupDeferredMemObjects(Blocking); //<-- if non-blocking DeleteCmdExpception fails, otherwise host-task-failure freezes
-#else
   // We need loop since sometimes we may need new objects to be added to
   // deferred mem objects storage during cleanup. Known example is: we cleanup
   // existing deferred mem objects under write lock, during this process we
@@ -455,7 +424,6 @@ void Scheduler::releaseResources(BlockingT Blocking) {
   do {
     cleanupDeferredMemObjects(Blocking);
   } while (Blocking == BlockingT::BLOCKING && !isDeferredMemObjectsEmpty());
-#endif
 }
 
 MemObjRecord *Scheduler::getMemObjRecord(const Requirement *const Req) {

@@ -44,7 +44,7 @@ void event_impl::initContextIfNeeded() {
 
 event_impl::~event_impl() {
   // CP
-  std::cout << "~event_impl() called" << std::endl;
+  CPOUT << "~event_impl() called" << std::endl;
   try {
     auto Handle = this->getHandle();
     if (Handle)
@@ -148,7 +148,7 @@ event_impl::event_impl(ur_event_handle_t Event, const context &SyclContext)
     : MEvent(Event), MContext(detail::getSyclObjImpl(SyclContext)),
       MIsFlushed(true), MState(HES_Complete) {
   // CP
-  std::cout << "event_impl(ur_event_handle_t,  context )" << std::endl;
+  CPOUT << "event_impl(ur_event_handle_t,  context )" << std::endl;
   ur_context_handle_t TempContext;
   getAdapter()->call<UrApiKind::urEventGetInfo>(
       this->getHandle(), UR_EVENT_INFO_CONTEXT, sizeof(ur_context_handle_t),
@@ -167,7 +167,7 @@ event_impl::event_impl(const QueueImplPtr &Queue)
       MFallbackProfiling{MIsProfilingEnabled && Queue &&
                          Queue->isProfilingFallback()} {
   // CP
-  std::cout << "event_impl(QueueImplPtr)" << std::endl;
+  CPOUT << "event_impl(QueueImplPtr)" << std::endl;
   
   if (Queue)
     this->setContextImpl(Queue->getContextImplPtr());
