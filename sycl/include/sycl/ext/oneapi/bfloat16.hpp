@@ -98,7 +98,8 @@ public:
   constexpr bfloat16 &operator=(const bfloat16 &rhs) = default;
 
 private:
-  static detail::Bfloat16StorageT from_float_fallback(const float &a) {
+  static constexpr detail::Bfloat16StorageT
+  from_float_fallback(const float &a) {
     // We don't call sycl::isnan because we don't want a data type to depend on
     // builtins.
     if (a != a)
@@ -134,7 +135,7 @@ private:
     return from_float_fallback(a);
   }
 
-  static float to_float(const detail::Bfloat16StorageT &a) {
+  static constexpr float to_float(const detail::Bfloat16StorageT &a) {
 #if defined(__SYCL_DEVICE_ONLY__) && (defined(__SPIR__) || defined(__SPIRV__))
     return __devicelib_ConvertBF16ToFINTEL(a);
 #else
@@ -173,13 +174,13 @@ public:
   }
 
   // Implicit conversion from bfloat16 to float
-  operator float() const { return to_float(value); }
+  constexpr operator float() const { return to_float(value); }
 
   // Implicit conversion from bfloat16 to sycl::half
-  operator sycl::half() const { return to_float(value); }
+  constexpr operator sycl::half() const { return to_float(value); }
 
   // Logical operators (!,||,&&) are covered if we can cast to bool
-  explicit operator bool() { return to_float(value) != 0.0f; }
+  explicit constexpr operator bool() { return to_float(value) != 0.0f; }
 
   // Unary minus operator overloading
   friend bfloat16 operator-(const bfloat16 &lhs) {
@@ -243,6 +244,24 @@ public:
   OP(bfloat16, -)
   OP(bfloat16, *)
   OP(bfloat16, /)
+#undef OP
+
+// comparisons ( including constexpr )
+#define OP(type, op)                                                           \
+  friend constexpr type operator op(const bfloat16 &lhs,                       \
+                                    const bfloat16 &rhs) {                     \
+    return type{static_cast<float>(lhs) op static_cast<float>(rhs)};           \
+  }                                                                            \
+  template <typename T>                                                        \
+  friend constexpr std::enable_if_t<std::is_convertible_v<T, float>, type>     \
+  operator op(const bfloat16 & lhs, const T & rhs) {                           \
+    return type{static_cast<float>(lhs) op static_cast<float>(rhs)};           \
+  }                                                                            \
+  template <typename T>                                                        \
+  friend constexpr std::enable_if_t<std::is_convertible_v<T, float>, type>     \
+  operator op(const T & lhs, const bfloat16 & rhs) {                           \
+    return type{static_cast<float>(lhs) op static_cast<float>(rhs)};           \
+  }
   OP(bool, ==)
   OP(bool, !=)
   OP(bool, <)
