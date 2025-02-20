@@ -9,6 +9,7 @@
 #pragma once
 
 #include <sycl/aliases.hpp>                   // for half
+#include <sycl/bit_cast.hpp>
 #include <sycl/detail/defines_elementary.hpp> // for __DPCPP_SYCL_EXTERNAL
 #include <sycl/half_type.hpp>                 // for half
 
@@ -105,21 +106,26 @@ private:
     if (a != a)
       return 0xffc1;
 
-    union {
-      uint32_t intStorage;
-      float floatValue;
-    };
-    floatValue = a;
+    // CP  - union cannot be constexpr. Also UB.
+    // union {
+    //   uint32_t intStorage;
+    //   float floatValue;
+    // };
+    // floatValue = a;
+    uint32_t intStorage = sycl::bit_cast<uint32_t>(a);
+
     // Do RNE and truncate
     uint32_t roundingBias = ((intStorage >> 16) & 0x1) + 0x00007FFF;
     return static_cast<uint16_t>((intStorage + roundingBias) >> 16);
   }
 
   // Explicit conversion functions
-  static detail::Bfloat16StorageT from_float(const float &a) {
+  static constexpr detail::Bfloat16StorageT from_float(const float &a) {
 #if defined(__SYCL_DEVICE_ONLY__)
 #if defined(__NVPTX__)
 #if (__SYCL_CUDA_ARCH__ >= 800)
+    // CP TODO: fix here  // #IF C++20:  if constexpr
+    // std::is_constant_evaluated() { fallback } else { asm}
     detail::Bfloat16StorageT res;
     asm("cvt.rn.bf16.f32 %0, %1;" : "=h"(res) : "f"(a));
     return res;
@@ -129,7 +135,10 @@ private:
 #elif defined(__AMDGCN__)
     return from_float_fallback(a);
 #else
-    return __devicelib_ConvertFToBF16INTEL(a);
+    // CP TODO: fix here too. I _think_ these __devicelib_ConvertFToBF16INTEL
+    // can be redeclared as constexpr.
+    // return __devicelib_ConvertFToBF16INTEL(a);
+    return from_float_fallback(a);
 #endif
 #endif
     return from_float_fallback(a);
@@ -137,14 +146,20 @@ private:
 
   static constexpr float to_float(const detail::Bfloat16StorageT &a) {
 #if defined(__SYCL_DEVICE_ONLY__) && (defined(__SPIR__) || defined(__SPIRV__))
-    return __devicelib_ConvertBF16ToFINTEL(a);
+    // CP TODO: as above. Should be able to constexpr these.
+    // return __devicelib_ConvertBF16ToFINTEL(a);
+    uint32_t intStorage = static_cast<uint32_t>(a) << 16;
+    return sycl::bit_cast<float>(intStorage);
 #else
-    union {
-      uint32_t intStorage;
-      float floatValue;
-    };
-    intStorage = a << 16;
-    return floatValue;
+    // CP  - union cannot be constexpr. Also UB.
+    // union {
+    //   uint32_t intStorage;
+    //   float floatValue;
+    // };
+    // intStorage = a << 16;
+    // return floatValue;
+    uint32_t intStorage = static_cast<uint32_t>(a) << 16;
+    return sycl::bit_cast<float>(intStorage);
 #endif
   }
 
@@ -158,7 +173,7 @@ protected:
 
 public:
   // Implicit conversion from float to bfloat16
-  bfloat16(const float &a) { value = from_float(a); }
+  constexpr bfloat16(const float &a) : value(from_float(a)) {}
 
   bfloat16 &operator=(const float &rhs) {
     value = from_float(rhs);
@@ -166,7 +181,7 @@ public:
   }
 
   // Implicit conversion from sycl::half to bfloat16
-  bfloat16(const sycl::half &a) { value = from_float(a); }
+  constexpr bfloat16(const sycl::half &a) : value(from_float(a)) {}
 
   bfloat16 &operator=(const sycl::half &rhs) {
     value = from_float(rhs);
