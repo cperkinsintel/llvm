@@ -15,9 +15,9 @@
 
 #include <stdint.h> // for uint16_t, uint32_t
 
-extern "C" __DPCPP_SYCL_EXTERNAL uint16_t
+extern "C" __DPCPP_SYCL_EXTERNAL constexpr uint16_t
 __devicelib_ConvertFToBF16INTEL(const float &) noexcept;
-extern "C" __DPCPP_SYCL_EXTERNAL float
+extern "C" __DPCPP_SYCL_EXTERNAL constexpr float
 __devicelib_ConvertBF16ToFINTEL(const uint16_t &) noexcept;
 extern "C" __DPCPP_SYCL_EXTERNAL void
 __devicelib_ConvertFToBF16INTELVec1(const float *, uint16_t *) noexcept;
@@ -137,8 +137,8 @@ private:
 #else
     // CP TODO: fix here too. I _think_ these __devicelib_ConvertFToBF16INTEL
     // can be redeclared as constexpr.
-    // return __devicelib_ConvertFToBF16INTEL(a);
-    return from_float_fallback(a);
+    return __devicelib_ConvertFToBF16INTEL(a);
+    // return from_float_fallback(a);
 #endif
 #endif
     return from_float_fallback(a);
