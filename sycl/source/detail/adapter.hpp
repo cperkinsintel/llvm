@@ -84,6 +84,14 @@ public:
         return;
       }
     }
+#ifdef _WIN32
+    if(ur_result == UR_RESULT_ERROR_INVALID_SIZE){
+      // bug in UR where lz_loader is closed
+      // normally, UR converts these to SUCCESS,
+      // but on Win somehow overlooked
+      ur_result = UR_RESULT_SUCCESS;
+    }
+#endif
     if (ur_result != UR_RESULT_SUCCESS) {
       throw sycl::detail::set_ur_error(
           sycl::exception(sycl::make_error_code(errc),
