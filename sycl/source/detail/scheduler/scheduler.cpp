@@ -159,7 +159,8 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
       // restore the enqueue status
       // this fixes the bug where the buffer is not re-usable.
       // BUT, ironically, it reintroduces the other scheduler failure I fixed,
-      // where exceptions lead to memory leaks. if(NewCmd)
+      // where exceptions lead to memory leaks. 
+      // if(NewCmd)
       //   NewCmd->MEnqueueStatus = EnqueueResultT::SyclEnqueueReady;
 
       if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
