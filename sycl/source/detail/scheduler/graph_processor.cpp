@@ -84,10 +84,12 @@ bool Scheduler::GraphProcessor::enqueueCommand(
     return false;
   }
 
-  // CP
+  // CP  -- FAIL TWO
   // Reset enqueue status if reattempting
-  if(Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed)
+  if(Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed){
     Cmd->MEnqueueStatus = EnqueueResultT::SyclEnqueueReady;
+    //std::cout << "CP FAIL TWO. EnqueueResult/Cmd/Err: " << EnqueueResult.MResult << "/" << (long)EnqueueResult.MCmd << "/" << EnqueueResult.MErrCode << std::endl;
+  }
 
   // Recursively enqueue all the implicit + explicit backend level dependencies
   // first and exit immediately if any of the commands cannot be enqueued.

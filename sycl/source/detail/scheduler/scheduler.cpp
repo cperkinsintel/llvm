@@ -52,8 +52,10 @@ void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
 #endif
   std::vector<Command *> ToCleanUp;
   for (Command *Cmd : Record->MReadLeaves) {
-    if (Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed)
+    if (Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed) {
+      std::cout << "scheduler.cpp:56 says HELLO!" << std::endl;
       continue;
+    }
 
     EnqueueResultT Res;
     bool Enqueued =
@@ -68,8 +70,10 @@ void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
     GraphProcessor::waitForEvent(Cmd->getEvent(), GraphReadLock, ToCleanUp);
   }
   for (Command *Cmd : Record->MWriteLeaves) {
-    if (Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed)
+    if (Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed) {
+      std::cout << "scheduler.cpp:74 says HELLO!!" << std::endl;
       continue;
+    }
 
     EnqueueResultT Res;
     bool Enqueued =
@@ -156,12 +160,15 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
     bool Enqueued;
 
     auto CleanUp = [&]() {
+
+      // CP -- FAIL ONE
       // restore the enqueue status
       // this fixes the bug where the buffer is not re-usable.
       // BUT, ironically, it reintroduces the other scheduler failure I fixed,
       // where exceptions lead to memory leaks. 
       // if(NewCmd)
       //   NewCmd->MEnqueueStatus = EnqueueResultT::SyclEnqueueReady;
+      //std::cout << "CleanUp Hit! " << NewCmd->MMarkedForCleanup << std::endl;
 
       if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
         if (NewEvent) {
