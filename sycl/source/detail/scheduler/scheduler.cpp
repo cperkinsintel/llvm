@@ -52,15 +52,17 @@ void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
 #endif
   std::vector<Command *> ToCleanUp;
   for (Command *Cmd : Record->MReadLeaves) {
-    if (Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed)
+    if (Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed) {
+      std::cout << "scheduler.cpp:56 says HELLO!" << std::endl;
       continue;
+    }
 
     EnqueueResultT Res;
     bool Enqueued =
         GraphProcessor::enqueueCommand(Cmd, GraphReadLock, Res, ToCleanUp, Cmd);
     if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
       throw exception(make_error_code(errc::runtime),
-                      "Enqueue process failed.");
+                      "1- Enqueue process failed.");
 #ifdef XPTI_ENABLE_INSTRUMENTATION
     // Capture the dependencies
     DepCommands.insert(Cmd);
@@ -68,15 +70,17 @@ void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
     GraphProcessor::waitForEvent(Cmd->getEvent(), GraphReadLock, ToCleanUp);
   }
   for (Command *Cmd : Record->MWriteLeaves) {
-    if (Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed)
+    if (Cmd->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed) {
+      std::cout << "scheduler.cpp:74 says HELLO!!" << std::endl;
       continue;
+    }
 
     EnqueueResultT Res;
     bool Enqueued =
         GraphProcessor::enqueueCommand(Cmd, GraphReadLock, Res, ToCleanUp, Cmd);
     if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
       throw exception(make_error_code(errc::runtime),
-                      "Enqueue process failed.");
+                      "2- Enqueue process failed.");
 #ifdef XPTI_ENABLE_INSTRUMENTATION
     DepCommands.insert(Cmd);
 #endif
@@ -89,7 +93,7 @@ void Scheduler::waitForRecordToFinish(MemObjRecord *Record,
                                                    Res, ToCleanUp, ReleaseCmd);
     if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
       throw exception(make_error_code(errc::runtime),
-                      "Enqueue process failed.");
+                      "3- Enqueue process failed.");
 #ifdef XPTI_ENABLE_INSTRUMENTATION
     // Report these dependencies to the Command so these dependencies can be
     // reported as edges
@@ -156,6 +160,16 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
     bool Enqueued;
 
     auto CleanUp = [&]() {
+
+      // CP -- FAIL ONE
+      // restore the enqueue status
+      // this fixes the bug where the buffer is not re-usable.
+      // BUT, ironically, it reintroduces the other scheduler failure I fixed,
+      // where exceptions lead to memory leaks. 
+      // if(NewCmd)
+      //   NewCmd->MEnqueueStatus = EnqueueResultT::SyclEnqueueReady;
+      //std::cout << "CleanUp Hit! " << NewCmd->MMarkedForCleanup << std::endl;
+
       if (NewCmd && (NewCmd->MDeps.size() == 0 && NewCmd->MUsers.size() == 0)) {
         if (NewEvent) {
           NewEvent->setCommand(nullptr);
@@ -189,7 +203,7 @@ void Scheduler::enqueueCommandForCG(EventImplPtr NewEvent,
             NewCmd, Lock, Res, ToCleanUp, NewCmd, Blocking);
         if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
           throw exception(make_error_code(errc::runtime),
-                          "Enqueue process failed.");
+                          "4- Enqueue process failed.");
       } catch (...) {
         // enqueueCommand() func and if statement above may throw an exception,
         // so destroy required resources to avoid memory leak
@@ -230,7 +244,7 @@ EventImplPtr Scheduler::addCopyBack(Requirement *Req) {
       if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult) {
         CopyBackCmdsFailed |= Res.MCmd == Cmd;
         throw exception(make_error_code(errc::runtime),
-                        "Enqueue process failed.");
+                        "5- Enqueue process failed.");
       }
     }
 
@@ -239,7 +253,7 @@ EventImplPtr Scheduler::addCopyBack(Requirement *Req) {
     if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult) {
       CopyBackCmdsFailed |= Res.MCmd == NewCmd;
       throw exception(make_error_code(errc::runtime),
-                      "Enqueue process failed.");
+                      "6- Enqueue process failed.");
     }
   } catch (...) {
     if (CopyBackCmdsFailed) {
@@ -346,7 +360,7 @@ EventImplPtr Scheduler::addHostAccessor(Requirement *Req) {
       Enqueued = GraphProcessor::enqueueCommand(Cmd, Lock, Res, ToCleanUp, Cmd);
       if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
         throw exception(make_error_code(errc::runtime),
-                        "Enqueue process failed.");
+                        "7- Enqueue process failed.");
     }
 
     if (Command *NewCmd = static_cast<Command *>(NewCmdEvent->getCommand())) {
@@ -354,7 +368,7 @@ EventImplPtr Scheduler::addHostAccessor(Requirement *Req) {
           GraphProcessor::enqueueCommand(NewCmd, Lock, Res, ToCleanUp, NewCmd);
       if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
         throw exception(make_error_code(errc::runtime),
-                        "Enqueue process failed.");
+                        "8- Enqueue process failed.");
     }
   }
 
@@ -389,7 +403,7 @@ void Scheduler::enqueueLeavesOfReqUnlocked(const Requirement *const Req,
                                                      ToCleanUp, Cmd);
       if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
         throw exception(make_error_code(errc::runtime),
-                        "Enqueue process failed.");
+                        "9- Enqueue process failed.");
     }
   };
 
@@ -409,7 +423,7 @@ void Scheduler::enqueueUnblockedCommands(
         GraphProcessor::enqueueCommand(Cmd, GraphReadLock, Res, ToCleanUp, Cmd);
     if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
       throw exception(make_error_code(errc::runtime),
-                      "Enqueue process failed.");
+                      "10- Enqueue process failed.");
   }
 }
 
@@ -654,7 +668,7 @@ EventImplPtr Scheduler::addCommandGraphUpdate(
       Enqueued = GraphProcessor::enqueueCommand(Cmd, Lock, Res, ToCleanUp, Cmd);
       if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
         throw exception(make_error_code(errc::runtime),
-                        "Enqueue process failed.");
+                        "11- Enqueue process failed.");
     }
 
     if (Command *NewCmd = static_cast<Command *>(NewCmdEvent->getCommand())) {
@@ -662,7 +676,7 @@ EventImplPtr Scheduler::addCommandGraphUpdate(
           GraphProcessor::enqueueCommand(NewCmd, Lock, Res, ToCleanUp, NewCmd);
       if (!Enqueued && EnqueueResultT::SyclEnqueueFailed == Res.MResult)
         throw exception(make_error_code(errc::runtime),
-                        "Enqueue process failed.");
+                        "12- Enqueue process failed.");
     }
   }
 

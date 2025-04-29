@@ -486,8 +486,10 @@ Scheduler::GraphBuilder::addCopyBack(Requirement *Req,
 
   std::vector<Command *> ToCleanUp;
   for (Command *Dep : Deps) {
-    if (Dep->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed)
+    if (Dep->MEnqueueStatus == EnqueueResultT::SyclEnqueueFailed) {
+      std::cout << "graph_builder:490 says HELLO!!" << std::endl;
       continue;
+    }
 
     Command *ConnCmd = MemCpyCmd->addDep(
         DepDesc{Dep, MemCpyCmd->getRequirement(), SrcAllocaCmd}, ToCleanUp);
