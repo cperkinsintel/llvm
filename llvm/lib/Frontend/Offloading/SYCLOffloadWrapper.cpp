@@ -38,6 +38,8 @@
 #include <memory>
 #include <string>
 #include <utility>
+// CP
+#include <iostream>
 
 using namespace llvm;
 using namespace llvm::offloading;
@@ -704,6 +706,9 @@ struct Wrapper {
     FunctionCallee RegFuncC =
         M.getOrInsertFunction("__sycl_register_lib", RegFuncTy);
 
+    // CP  -- 
+    std::cout << "SYCLOffloadWrapper createRegisterFatbinFunction. " << std::endl;
+
     // Construct function body
     IRBuilder Builder(BasicBlock::Create(C, "entry", Func));
     Builder.CreateCall(RegFuncC, FatbinDesc);
@@ -725,6 +730,9 @@ struct Wrapper {
                           /*isVarArg=*/false);
     FunctionCallee UnRegFuncC =
         M.getOrInsertFunction("__sycl_unregister_lib", UnRegFuncTy);
+
+    // CP  -- 
+    std::cout << "SYCLOffloadWrapper createUnregisterFunction. " << std::endl;
 
     // Construct function body
     IRBuilder<> Builder(BasicBlock::Create(C, "entry", Func));

@@ -1290,7 +1290,7 @@ private:
 
 
     // CP  -- this is output when COMPILING the application. 
-    std::cout << "createUnregisterFunction.  SYCL?: " << (Kind == OffloadKind::SYCL) << std::endl;
+    std::cout << "ClangOffloadWrapper createUnregisterFunction.  SYCL?: " << (Kind == OffloadKind::SYCL) << std::endl;
 
 
     // Construct function body
