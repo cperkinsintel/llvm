@@ -67,6 +67,9 @@
 #include <string>
 #include <tuple>
 
+// CP
+#include <iostream>
+
 // For device image compression.
 #include <llvm/Support/Compression.h>
 
@@ -1268,6 +1271,8 @@ private:
     appendToGlobalCtors(M, Func, /*Priority*/ 1);
   }
 
+
+
   void createUnregisterFunction(OffloadKind Kind, GlobalVariable *BinDesc) {
     auto *FuncTy = FunctionType::get(Type::getVoidTy(C), /*isVarArg*/ false);
     auto *Func =
@@ -1282,6 +1287,11 @@ private:
         Kind == OffloadKind::SYCL ? "__sycl_unregister_lib"
                                   : "__tgt_unregister_lib",
         UnRegFuncTy);
+
+
+    // CP  -- this is output when COMPILING the application. 
+    std::cout << "createUnregisterFunction.  SYCL?: " << (Kind == OffloadKind::SYCL) << std::endl;
+
 
     // Construct function body
     IRBuilder<> Builder(BasicBlock::Create(C, "entry", Func));
