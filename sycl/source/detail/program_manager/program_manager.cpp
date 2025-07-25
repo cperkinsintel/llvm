@@ -3855,6 +3855,7 @@ extern "C" void __sycl_unregister_lib(sycl_device_binaries desc) {
 #ifndef _WIN32
   if (!sycl::detail::GlobalHandler::instance().isOkToDefer())
     return;
-  sycl::detail::ProgramManager::getInstance().removeImages(desc);
 #endif
+  sycl::detail::ProgramManager::getInstance().removeImages(desc);
+
 }
