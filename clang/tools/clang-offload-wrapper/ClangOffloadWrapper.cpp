@@ -1257,6 +1257,10 @@ private:
                                                         : "__tgt_register_lib",
                               RegFuncTy);
 
+    // CP  -- this is output when COMPILING the application.
+    std::cout << "ClangOffloadWrapper createRegisterFunction.  SYCL?: "
+              << (Kind == OffloadKind::SYCL) << std::endl;
+
     // Construct function body
     IRBuilder<> Builder(BasicBlock::Create(C, "entry", Func));
     Builder.CreateCall(RegFuncC, BinDesc);
@@ -1301,6 +1305,57 @@ private:
     // Add this function to global destructors.
     // Match priority of __tgt_register_lib
     appendToGlobalDtors(M, Func, /*Priority*/ 1);
+  }
+
+  void createSyclRegisterWithAtexitUnregister(GlobalVariable *BinDesc) {
+    auto *UnregFuncTy =
+        FunctionType::get(Type::getVoidTy(C), /*isVarArg*/ false);
+    auto *UnregFunc =
+        Function::Create(UnregFuncTy, GlobalValue::InternalLinkage,
+                         "sycl.descriptor_unreg.atexit", &M);
+    UnregFunc->setSection(".text.startup");
+
+    // Declaration for __sycl_unregister_lib(void*).
+    auto *UnregTargetTy =
+        FunctionType::get(Type::getVoidTy(C), getPtrTy(), false);
+    FunctionCallee UnregTargetC =
+        M.getOrInsertFunction("__sycl_unregister_lib", UnregTargetTy);
+
+    // Body of the unregister wrapper.
+    IRBuilder<> UnregBuilder(BasicBlock::Create(C, "entry", UnregFunc));
+    UnregBuilder.CreateCall(UnregTargetC, BinDesc);
+    UnregBuilder.CreateRetVoid();
+
+    .auto *RegFuncTy =
+        FunctionType::get(Type::getVoidTy(C), /*isVarArg*/ false);
+    auto *RegFunc = Function::Create(RegFuncTy, GlobalValue::InternalLinkage,
+                                     "sycl.descriptor_reg", &M);
+    RegFunc->setSection(".text.startup");
+
+    auto *RegTargetTy =
+        FunctionType::get(Type::getVoidTy(C), getPtrTy(), false);
+    FunctionCallee RegTargetC =
+        M.getOrInsertFunction("__sycl_register_lib", RegTargetTy);
+
+    // `atexit` takes a `void(*)()` function pointer. In LLVM IR, this is
+    // typically represented as `i32 (ptr)`.
+    FunctionType *AtExitTy =
+        FunctionType::get(Type::getInt32Ty(C), getPtrTy(), false);
+    FunctionCallee AtExitC = M.getOrInsertFunction("atexit", AtExitTy);
+
+    // CP  -- this is output when COMPILING the application.
+    std::cout << "ClangOffloadWrapper createSyclRegisterWithAtexitUnregister. "
+              << std::endl;
+
+    // Body of the register function.
+    IRBuilder<> RegBuilder(BasicBlock::Create(C, "entry", RegFunc));
+    RegBuilder.CreateCall(RegTargetC, BinDesc);
+    RegBuilder.CreateCall(AtExitC, UnregFunc);
+    RegBuilder.CreateRetVoid();
+
+    // Add this function to global destructors.
+    // Match priority of __tgt_register_lib
+    appendToGlobalCtors(M, RegFunc, /*Priority*/ 1);
   }
 
 public:
@@ -1380,8 +1435,13 @@ public:
 
       if (EmitRegFuncs) {
         GlobalVariable *Desc = *DescOrErr;
-        createRegisterFunction(Kind, Desc);
-        createUnregisterFunction(Kind, Desc);
+        if (Kind == OffloadKind::SYCL &&
+            Triple(M.getTargetTriple()).isOSWindows()) {
+          createSyclRegisterWithAtexitUnregister(Desc);
+        } else {
+          createRegisterFunction(Kind, Desc);
+          createUnregisterFunction(Kind, Desc);
+        }
       }
     }
     return &M;
