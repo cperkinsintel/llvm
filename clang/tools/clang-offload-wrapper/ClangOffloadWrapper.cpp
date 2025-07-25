@@ -1326,7 +1326,7 @@ private:
     UnregBuilder.CreateCall(UnregTargetC, BinDesc);
     UnregBuilder.CreateRetVoid();
 
-    .auto *RegFuncTy =
+    auto *RegFuncTy =
         FunctionType::get(Type::getVoidTy(C), /*isVarArg*/ false);
     auto *RegFunc = Function::Create(RegFuncTy, GlobalValue::InternalLinkage,
                                      "sycl.descriptor_reg", &M);
