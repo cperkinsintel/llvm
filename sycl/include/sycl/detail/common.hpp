@@ -378,7 +378,7 @@ static constexpr std::array<T, N> RepeatValue(const T &Arg) {
 }
 
 // to output exceptions caught in ~destructors
-#ifndef NDEBUG
+#if !defined(NDEBUG) && !defined(__SYCL_DEVICE_ONLY__)
 #define __SYCL_REPORT_EXCEPTION_TO_STREAM(str, e)                              \
   {                                                                            \
     std::cerr << str << " " << e.what() << std::endl;                          \
@@ -386,7 +386,7 @@ static constexpr std::array<T, N> RepeatValue(const T &Arg) {
   }
 #else
 #define __SYCL_REPORT_EXCEPTION_TO_STREAM(str, e) (void)e;
-#endif
+#endif // !defined(NDEBUG) && !defined(__SYCL_DEVICE_ONLY__)
 
 // Tag to help create CTAD definition to avoid ctad-maybe-unsupported warning
 // in GCC when relying on default deductions on non-template ctors in template

@@ -1187,9 +1187,11 @@ private:
 
     bool DidAdjust = false;
     auto Adjust = [&](int Dim, size_t Value) {
+#ifndef __SYCL_DEVICE_ONLY__
       if (this->RangeRoundingTrace())
         std::cout << "parallel_for range adjusted at dim " << Dim << " from "
                   << RoundedRange[Dim] << " to " << Value << std::endl;
+#endif // !defined(__SYCL_DEVICE_ONLY__)
       RoundedRange[Dim] = Value;
       DidAdjust = true;
     };

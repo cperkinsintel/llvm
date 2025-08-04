@@ -477,6 +477,7 @@ public:
 #endif // __SYCL_DEVICE_ONLY__
 
   // Operator << and >>
+#ifndef __SYCL_DEVICE_ONLY__
   inline friend std::ostream &operator<<(std::ostream &O,
                                          sycl::half const &rhs) {
     O << static_cast<float>(rhs);
@@ -489,6 +490,7 @@ public:
     rhs = ValFloat;
     return I;
   }
+#endif // !defined(__SYCL_DEVICE_ONLY__)
 
   template <typename Key> friend struct std::hash;
 

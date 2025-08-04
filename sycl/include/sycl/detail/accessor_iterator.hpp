@@ -328,7 +328,7 @@ private:
   }
 
 public:
-#ifndef NDEBUG
+#if !defined(NDEBUG) && !defined(__SYCL_DEVICE_ONLY__)
   // Could be useful for debugging, but not a part of the official API,
   // therefore only available in builds with assertions enabled.
   friend std::ostream &operator<<(std::ostream &os,
@@ -345,7 +345,7 @@ public:
     os << "}";
     return os;
   }
-#endif // NDEBUG
+#endif // !defined(NDEBUG) && !defined(__SYCL_DEVICE_ONLY__)
 };
 } // namespace detail
 } // namespace _V1

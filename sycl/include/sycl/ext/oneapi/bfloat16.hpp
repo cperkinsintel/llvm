@@ -126,6 +126,7 @@ public:
   // for floating-point types.
 
   // Stream Operator << and >>
+#ifndef __SYCL_DEVICE_ONLY__
   inline friend std::ostream &operator<<(std::ostream &O, bfloat16 const &rhs) {
     O << static_cast<float>(rhs);
     return O;
@@ -137,6 +138,7 @@ public:
     rhs = ValFloat;
     return I;
   }
+#endif // !defined(__SYCL_DEVICE_ONLY__)
 
 private:
   Bfloat16StorageT value;

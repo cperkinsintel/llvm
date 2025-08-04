@@ -37,6 +37,7 @@ template <backend Backend, typename SYCLObjectT>
 using backend_return_t =
     typename backend_traits<Backend>::template return_type<SYCLObjectT>;
 
+#ifndef __SYCL_DEVICE_ONLY__
 inline std::ostream &operator<<(std::ostream &Out, backend be) {
   switch (be) {
   case backend::host:
@@ -65,6 +66,7 @@ inline std::ostream &operator<<(std::ostream &Out, backend be) {
   }
   return Out;
 }
+#endif // !defined(__SYCL_DEVICE_ONLY__)
 
 namespace detail {
 inline std::string_view get_backend_name_no_vendor(backend Backend) {

@@ -56,6 +56,7 @@ namespace detail {
 // Default implementation of async_handler used by queue and context when no
 // user-defined async_handler is specified.
 inline void defaultAsyncHandler(exception_list Exceptions) {
+#ifndef __SYCL_DEVICE_ONLY__
   std::cerr << "Default async_handler caught exceptions:";
   for (auto &EIt : Exceptions) {
     try {
@@ -68,6 +69,7 @@ inline void defaultAsyncHandler(exception_list Exceptions) {
   }
   std::cerr << std::endl;
   std::terminate();
+#endif // !defined(__SYCL_DEVICE_ONLY__)
 }
 } // namespace detail
 } // namespace _V1
