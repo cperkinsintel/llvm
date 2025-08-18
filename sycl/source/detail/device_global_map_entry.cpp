@@ -18,13 +18,15 @@ inline namespace _V1 {
 namespace detail {
 
 DeviceGlobalUSMMem::~DeviceGlobalUSMMem() {
+
+  std::cout << "~DeviceGlobalUSMMem destructor. " << (MPtr == nullptr) << " " << (MInitEvent == nullptr) << std::endl;
   // removeAssociatedResources is expected to have cleaned up both the pointer
   // and the event. When asserts are enabled the values are set, so we check
   // these here.
   assert(MPtr == nullptr && "MPtr has not been cleaned up.");
   assert(MInitEvent == nullptr && "MInitEvent has not been cleaned up.");
 
-  std::cout << "~DeviceGlobalUSMMem destructor. " << (MPtr == nullptr) << " " << (MInitEvent == nullptr) << std::endl;
+  
 }
 
 OwnedUrEvent DeviceGlobalUSMMem::getInitEvent(adapter_impl &Adapter) {
