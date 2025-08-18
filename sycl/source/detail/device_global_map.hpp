@@ -86,10 +86,11 @@ public:
                 const std::pair<const void *, DeviceGlobalMapEntry *> &Entry) {
               return Entry.second == DevGlobalIt->second.get();
             });
-        std::cout << "About to Erase: " << (findDevGlobalByValue != MPtr2DeviceGlobal.end() ? "MPtr2DeviceGlobal.erase(findDevGlobalByValue)" : " ") 
-                  << " and MDeviceGlobals.erase(DevGlobalIt)" << std::endl;
+        std::cout << "About to Erase: " << (findDevGlobalByValue != MPtr2DeviceGlobal.end() ? "MPtr2DeviceGlobal.erase(findDevGlobalByValue)" : " ")  << std::endl;
         if (findDevGlobalByValue != MPtr2DeviceGlobal.end())
           MPtr2DeviceGlobal.erase(findDevGlobalByValue);
+
+        std::cout << " and MDeviceGlobals.erase(DevGlobalIt)" << std::endl;
         MDeviceGlobals.erase(DevGlobalIt);
       }
     }

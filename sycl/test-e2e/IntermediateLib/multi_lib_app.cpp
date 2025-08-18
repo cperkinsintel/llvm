@@ -55,11 +55,12 @@
 # | __sycl_unregister_lib()
 
 WINDOWS
-$ ./dgs.exe
+$ dgs.exe
 __sycl_unregister_lib()
 DeviceGlobalMap::eraseEntries() with: 1 entries.
 About to Erase: MPtr2DeviceGlobal.erase(findDevGlobalByValue) and MDeviceGlobals.erase(DevGlobalIt)
-Assertion failed: MPtr == nullptr && "MPtr has not been cleaned up.", file C:\iusers\cperkins\sycl_workspace\llvm\sycl\source\detail\device_global_map_entry.cpp, line 24
+~DeviceGlobalUSMMem destructor. 0 0
+Assertion failed: MPtr == nullptr && "MPtr has not been cleaned up.", file C:\iusers\cperkins\sycl_workspace\llvm\sycl\source\detail\device_global_map_entry.cpp, line 26
 
 */
 
