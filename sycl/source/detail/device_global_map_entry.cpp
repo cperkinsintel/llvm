@@ -23,6 +23,8 @@ DeviceGlobalUSMMem::~DeviceGlobalUSMMem() {
   // these here.
   assert(MPtr == nullptr && "MPtr has not been cleaned up.");
   assert(MInitEvent == nullptr && "MInitEvent has not been cleaned up.");
+
+  std::cout << "~DeviceGlobalUSMMem destructor. " << (MPtr == nullptr) << " " << (MInitEvent == nullptr) << std::endl;
 }
 
 OwnedUrEvent DeviceGlobalUSMMem::getInitEvent(adapter_impl &Adapter) {
@@ -152,6 +154,7 @@ DeviceGlobalMapEntry::getOrAllocateDeviceGlobalUSM(const context &Context) {
 
 void DeviceGlobalMapEntry::removeAssociatedResources(
     const context_impl *CtxImpl) {
+  std::cout << "DeviceGlobalMapEntry::removeAssociatedResources() entered." << std::endl;
   std::lock_guard<std::mutex> Lock{MDeviceToUSMPtrMapMutex};
   for (device_impl &Device : CtxImpl->getDevices()) {
     auto USMPtrIt = MDeviceToUSMPtrMap.find({&Device, CtxImpl});
@@ -170,6 +173,7 @@ void DeviceGlobalMapEntry::removeAssociatedResources(
       MDeviceToUSMPtrMap.erase(USMPtrIt);
     }
   }
+  std::cout << "DeviceGlobalMapEntry::removeAssociatedResources() exiting." << std::endl;
 }
 
 void DeviceGlobalMapEntry::cleanup() {

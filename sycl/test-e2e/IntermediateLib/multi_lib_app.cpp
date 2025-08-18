@@ -29,6 +29,32 @@
 // This test ensures that __sycl_register_lib() and __sycl_unregister_lib()
 // are called correctly, and that the device images are cleaned up properly.
 
+
+/*
+   CP -- Other Notes
+
+  test-e2e/DeviceGlobals/device_global_static.cpp  =>  dgs.bin
+
+  LINUX 
+  ./dgs.bin
+  ~context_impl destructor. 
+  DeviceGlobalMapEntry::removeAssociatedResources() entered.
+  ~DeviceGlobalUSMMem destructor. 1 1
+  DeviceGlobalMapEntry::removeAssociatedResources() exiting.
+  __sycl_unregister_lib()
+
+
+  multi_lib_app test:
+# | lib_b done
+# | 7 7 7 7 7 7 7 7 
+# | __sycl_unregister_lib()
+# | lib_c done
+# | ~context_impl destructor. 
+# | __sycl_unregister_lib()
+
+
+*/
+
 #include <sycl/detail/core.hpp>
 
 using namespace sycl::ext::oneapi::experimental;

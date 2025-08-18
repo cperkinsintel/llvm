@@ -3890,6 +3890,7 @@ extern "C" void __sycl_unregister_lib(sycl_device_binaries desc) {
 // #ifndef _WIN32
 //    if (!sycl::detail::GlobalHandler::instance().isOkToDefer())
 //      return;
+   std::cout << "__sycl_unregister_lib()" << std::endl;
    sycl::detail::ProgramManager::getInstance().removeImages(desc);
 // #endif
 }

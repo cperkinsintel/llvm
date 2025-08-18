@@ -116,6 +116,7 @@ cl_context context_impl::get() const {
 }
 
 context_impl::~context_impl() {
+  std::cout << "~context_impl destructor. " << std::endl;
   try {
     // Free all events associated with the initialization of device globals.
     for (auto &DeviceGlobalInitializer : MDeviceGlobalInitializers)
