@@ -36,12 +36,14 @@
   test-e2e/DeviceGlobals/device_global_static.cpp  =>  dgs.bin
 
   LINUX 
-  ./dgs.bin
+  $ ./dgs.bin 
   ~context_impl destructor. 
   DeviceGlobalMapEntry::removeAssociatedResources() entered.
   ~DeviceGlobalUSMMem destructor. 1 1
   DeviceGlobalMapEntry::removeAssociatedResources() exiting.
   __sycl_unregister_lib()
+  DeviceGlobalMap::eraseEntries() with: 1 entries.
+  About to Erase: MPtr2DeviceGlobal.erase(findDevGlobalByValue) and MDeviceGlobals.erase(DevGlobalIt)
 
 
   multi_lib_app test:
@@ -52,6 +54,10 @@
 # | ~context_impl destructor. 
 # | __sycl_unregister_lib()
 
+WINDOWS
+ ./dgs.exe
+ __sycl_unregister_lib()
+ ~DeviceGlobalUSMMem destructor <-- asserts
 
 */
 
