@@ -17,68 +17,18 @@
  
 // RUN: %{build} %{fPIC_flag} -DSO_PATH='R"(%T)"' -o %t.out
 
-// RUN:  %clangxx -fsycl %{fPIC_flag} -shared -DINC=1 -DCLASSNAME=one -o %T/lib_a.%{shared_lib_ext} %S/Inputs/incrementing_lib.cpp
-// RUN:  %clangxx -fsycl %{fPIC_flag} -shared -DINC=2 -DCLASSNAME=two -o %T/lib_b.%{shared_lib_ext} %S/Inputs/incrementing_lib.cpp
-// RUN:  %clangxx -fsycl %{fPIC_flag} -shared -DINC=4 -DCLASSNAME=fou -o %T/lib_c.%{shared_lib_ext} %S/Inputs/incrementing_lib.cpp
+// RUN:  %clangxx -fsycl %{fPIC_flag} -shared -DINC=1 -o %T/lib_a.%{shared_lib_ext} %S/Inputs/incrementing_lib.cpp
+// RUN:  %clangxx -fsycl %{fPIC_flag} -shared -DINC=2 -o %T/lib_b.%{shared_lib_ext} %S/Inputs/incrementing_lib.cpp
+// RUN:  %clangxx -fsycl %{fPIC_flag} -shared -DINC=4 -o %T/lib_c.%{shared_lib_ext} %S/Inputs/incrementing_lib.cpp
 
 // RUN:  env UR_L0_LEAKS_DEBUG=1 %{run} %t.out
 
 // This test uses a kernel of the same name in three different shared libraries.
 // It loads each library, calls the kernel, and checks that the incrementation
 // is done correctly, and then unloads the library.
+// It also reloads the first library after unloading it. 
 // This test ensures that __sycl_register_lib() and __sycl_unregister_lib()
 // are called correctly, and that the device images are cleaned up properly.
-
-
-/*
-   CP -- Other Notes
-
-  test-e2e/DeviceGlobals/device_global_static.cpp  =>  dgs.bin
-
-  LINUX 
-  $ ./dgs.bin 
-  ~context_impl destructor. 
-  DeviceGlobalMapEntry::removeAssociatedResources() entered.
-  ~DeviceGlobalUSMMem destructor. 1 1
-  DeviceGlobalMapEntry::removeAssociatedResources() exiting.
-  __sycl_unregister_lib()
-  DeviceGlobalMap::eraseEntries() with: 1 entries.
-  About to Erase: MPtr2DeviceGlobal.erase(findDevGlobalByValue) and MDeviceGlobals.erase(DevGlobalIt)
-
-
-  multi_lib_app test:
-# | lib_b done
-# | 7 7 7 7 7 7 7 7 
-# | __sycl_unregister_lib()
-# | lib_c done
-# | ~context_impl destructor. 
-# | __sycl_unregister_lib()
-
-WINDOWS
-$ dgs.exe
-  __sycl_unregister_lib()
-  DeviceGlobalMap::eraseEntries() with: 1 entries.
-  About to Erase: MPtr2DeviceGlobal.erase(findDevGlobalByValue)
-  and MDeviceGlobals.erase(DevGlobalIt)
-  ~DeviceGlobalUSMMem destructor. 0 0
-  Assertion failed: MPtr == nullptr && "MPtr has not been cleaned up.", file C:\iusers\cperkins\sycl_workspace\llvm\sycl\source\detail\device_global_map_entry.cpp, line 26
-
-
-
-NEUTER MDeviceGlobals.erase(DevGlobalIt).    THEN 
-$ dgs.exe
-  __sycl_unregister_lib()
-  DeviceGlobalMap::eraseEntries() with: 1 entries.
-  About to Erase: MPtr2DeviceGlobal.erase(findDevGlobalByValue)
-  and MDeviceGlobals.erase(DevGlobalIt) no more
-  ~context_impl destructor.
-  Assertion failed: Entry != MPtr2DeviceGlobal.end() && "Device global entry not found", file C:\iusers\cperkins\sycl_workspace\llvm\sycl\source\detail/device_global_map.hpp, line 119
-
-
-
-
-*/
-
 
 
 #include <sycl/detail/core.hpp>

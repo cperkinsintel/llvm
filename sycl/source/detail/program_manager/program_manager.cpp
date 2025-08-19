@@ -3886,11 +3886,5 @@ extern "C" void __sycl_register_lib(sycl_device_binaries desc) {
 
 // Executed as a part of current module's (.exe, .dll) static initialization
 extern "C" void __sycl_unregister_lib(sycl_device_binaries desc) {
-  // Partial cleanup is not necessary at shutdown
-// #ifndef _WIN32
-//    if (!sycl::detail::GlobalHandler::instance().isOkToDefer())
-//      return;
-   std::cout << "__sycl_unregister_lib()" << std::endl;
-   sycl::detail::ProgramManager::getInstance().removeImages(desc);
-// #endif
+  sycl::detail::ProgramManager::getInstance().removeImages(desc);
 }

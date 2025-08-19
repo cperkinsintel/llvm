@@ -86,14 +86,10 @@ public:
                 const std::pair<const void *, DeviceGlobalMapEntry *> &Entry) {
               return Entry.second == DevGlobalIt->second.get();
             });
-        std::cout << "About to Erase: " << (findDevGlobalByValue != MPtr2DeviceGlobal.end() ? "MPtr2DeviceGlobal.erase(findDevGlobalByValue)" : " ")  << std::endl;
         if (findDevGlobalByValue != MPtr2DeviceGlobal.end())
           MPtr2DeviceGlobal.erase(findDevGlobalByValue);
 
-        std::cout << " and MDeviceGlobals.erase(DevGlobalIt) no more"
-                  << std::endl;
-        // CP -- removing this.
-        // MDeviceGlobals.erase(DevGlobalIt);
+        MDeviceGlobals.erase(DevGlobalIt);
       }
     }
   }
@@ -118,9 +114,6 @@ public:
   DeviceGlobalMapEntry *getEntry(const void *DeviceGlobalPtr) {
     std::lock_guard<std::mutex> DeviceGlobalsGuard(MDeviceGlobalsMutex);
     auto Entry = MPtr2DeviceGlobal.find(DeviceGlobalPtr);
-    // CP
-    // assert(Entry != MPtr2DeviceGlobal.end() && "Device global entry not
-    // found");
     return (Entry != MPtr2DeviceGlobal.end()) ? Entry->second : nullptr;
   }
 
