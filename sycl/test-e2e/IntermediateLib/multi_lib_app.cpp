@@ -17,9 +17,9 @@
  
 // RUN: %{build} %{fPIC_flag} -DSO_PATH='R"(%T)"' -o %t.out
 
-// RUN:  %clangxx -fsycl %{fPIC_flag} -shared -DINC=1 -o %T/lib_a.%{shared_lib_ext} %S/Inputs/incrementing_lib.cpp
-// RUN:  %clangxx -fsycl %{fPIC_flag} -shared -DINC=2 -o %T/lib_b.%{shared_lib_ext} %S/Inputs/incrementing_lib.cpp
-// RUN:  %clangxx -fsycl %{fPIC_flag} -shared -DINC=4 -o %T/lib_c.%{shared_lib_ext} %S/Inputs/incrementing_lib.cpp
+// RUN:  %clangxx -fsycl %{fPIC_flag} -shared -DINC=1 -DCLASSNAME=one -o %T/lib_a.%{shared_lib_ext} %S/Inputs/incrementing_lib.cpp
+// RUN:  %clangxx -fsycl %{fPIC_flag} -shared -DINC=2 -DCLASSNAME=two -o %T/lib_b.%{shared_lib_ext} %S/Inputs/incrementing_lib.cpp
+// RUN:  %clangxx -fsycl %{fPIC_flag} -shared -DINC=4 -DCLASSNAME=fou -o %T/lib_c.%{shared_lib_ext} %S/Inputs/incrementing_lib.cpp
 
 // RUN:  env UR_L0_LEAKS_DEBUG=1 %{run} %t.out
 
@@ -170,12 +170,24 @@ int main() {
   unloadOsLibrary(lib_a);
   std::cout << "lib_a done" << std::endl;
 
+
+  // Now RELOAD lib_a and try it again.
+  lib_a = loadOsLibrary(path_to_lib_a);
+  f = getOsLibraryFuncAddress(lib_a, "performIncrementation");
+  performIncrementationFuncA = reinterpret_cast<IncFuncT *>(f);
+  performIncrementationFuncA(q, buf); // call the function from lib_a
+  q.wait();
+  checkIncrementation(buf, 1 + 1);
+  unloadOsLibrary(lib_a);
+  std::cout << "reload of lib_a done" << std::endl;
+
+
   void *lib_b = loadOsLibrary(path_to_lib_b);
   f = getOsLibraryFuncAddress(lib_b, "performIncrementation");
   auto performIncrementationFuncB = reinterpret_cast<IncFuncT *>(f);
   performIncrementationFuncB(q, buf); // call the function from lib_b
   q.wait();
-  checkIncrementation(buf, 1 + 2);
+  checkIncrementation(buf, 1 + 1 + 2);
   unloadOsLibrary(lib_b);
   std::cout << "lib_b done" << std::endl;
 
@@ -184,7 +196,7 @@ int main() {
   auto performIncrementationFuncC = reinterpret_cast<IncFuncT *>(f);
   q.wait();
   performIncrementationFuncC(q, buf); // call the function from lib_c
-  checkIncrementation(buf, 1 + 2 + 4);
+  checkIncrementation(buf, 1 + 1 + 2 + 4);
   unloadOsLibrary(lib_c);
   std::cout << "lib_c done" << std::endl;
 

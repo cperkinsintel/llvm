@@ -14,6 +14,16 @@
 #define CLASSNAME same
 #endif
 
+// Macro to concatenate DGVar with CLASSNAME
+#define CONCAT_HELPER(a, b) a##b
+#define CONCAT(a, b) CONCAT_HELPER(a, b)
+
+// #ifdef WITH_DEVICE_GLOBALS
+using SomeProperties = decltype(sycl::ext::oneapi::experimental::properties{});
+sycl::ext::oneapi::experimental::device_global<int, SomeProperties>
+    CONCAT(DGVar, CLASSNAME) __attribute__((visibility("default")));
+// #endif
+
 extern "C" API_EXPORT void performIncrementation(sycl::queue &q,
                                                  sycl::buffer<int, 1> &buf) {
   sycl::range<1> r = buf.get_range();
