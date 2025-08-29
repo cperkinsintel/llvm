@@ -69,6 +69,8 @@ queue::queue(const context &SyclContext, const device_selector &DeviceSelector,
   impl = detail::queue_impl::create(*detail::getSyclObjImpl(SyclDevice),
                                     *detail::getSyclObjImpl(SyclContext),
                                     AsyncHandler, PropList);
+
+  constructedWithAsyncHandler = true;
 }
 
 queue::queue(const context &SyclContext, const device &SyclDevice,
@@ -76,12 +78,14 @@ queue::queue(const context &SyclContext, const device &SyclDevice,
   impl = detail::queue_impl::create(*detail::getSyclObjImpl(SyclDevice),
                                     *detail::getSyclObjImpl(SyclContext),
                                     AsyncHandler, PropList);
+  constructedWithAsyncHandler = true;
 }
 
 queue::queue(const device &SyclDevice, const async_handler &AsyncHandler,
              const property_list &PropList) {
   impl = detail::queue_impl::create(*detail::getSyclObjImpl(SyclDevice),
                                     AsyncHandler, PropList);
+  constructedWithAsyncHandler = true;
 }
 
 queue::queue(const context &SyclContext, const device_selector &deviceSelector,
@@ -103,10 +107,11 @@ queue::queue(cl_command_queue clQueue, const context &SyclContext,
       // TODO(pi2ur): Don't cast straight from cl_command_queue
       reinterpret_cast<ur_queue_handle_t>(clQueue),
       *detail::getSyclObjImpl(SyclContext), AsyncHandler, PropList);
+  constructedWithAsyncHandler = true;
 }
 
 queue::~queue() {
-  if (impl) {
+  if (constructedWithAsyncHandler && impl) {
     impl->throw_asynchronous();
   }
 }

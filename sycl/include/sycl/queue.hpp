@@ -198,7 +198,9 @@ public:
   /// \param AsyncHandler is a SYCL asynchronous exception handler.
   /// \param PropList is a list of properties for queue construction.
   queue(const async_handler &AsyncHandler, const property_list &PropList = {})
-      : queue(default_selector_v, AsyncHandler, PropList) {}
+      : queue(default_selector_v, AsyncHandler, PropList) {
+    constructedWithAsyncHandler = true;
+  }
 
   /// Constructs a SYCL queue instance using the device identified by the
   /// device selector provided.
@@ -257,7 +259,9 @@ public:
                  const async_handler &AsyncHandler,
                  const property_list &propList = {})
       : queue(syclContext, detail::select_device(deviceSelector, syclContext),
-              AsyncHandler, propList) {}
+              AsyncHandler, propList) {
+    constructedWithAsyncHandler = true;
+  }
 
   /// Constructs a SYCL queue instance using the device returned by the
   /// DeviceSelector provided.
@@ -3883,6 +3887,8 @@ private:
             detail::getKernelLineNumber<KernelName>(),
             detail::getKernelColumnNumber<KernelName>()};
   }
+
+  bool constructedWithAsyncHandler = false;
 };
 
 } // namespace _V1
