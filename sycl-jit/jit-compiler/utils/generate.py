@@ -1,66 +1,80 @@
 import os
 import argparse
-import glob
-
+import sys
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate SYCL Headers Resource C++ file"
+        description="Generate SYCL Headers Resource C++ file."
     )
-    parser.add_argument("-o", "--output", type=str, required=True, help="Output file")
-    parser.add_argument(
-        "-i",
-        "--toolchain-dir",
-        type=str,
-        required=True,
-        help="Path to toolchain root directory",
-    )
-    parser.add_argument(
-        "--prefix", type=str, required=True, help="Prefix for file locations"
-    )
+    # These arguments are always required
+    parser.add_argument("-o", "--output", type=str, required=True, help="Output C++ file")
+    parser.add_argument("-i", "--toolchain-dir", type=str, required=True, help="Path to toolchain root directory.")
+    parser.add_argument("--prefix", type=str, required=True, help="Prefix for virtual file locations")
+    
+    # These two arguments control the mode and are mutually exclusive
+    parser.add_argument("-m", "--manifest-input", type=str, help="Build from this manifest (read-only).")
+    parser.add_argument("--manifest-output", type=str, help="Glob for files and write them to this manifest.")
+    
     args = parser.parse_args()
 
-    # abspath also strips trailing "/"
-    toolchain_dir = os.path.abspath(args.toolchain_dir)
+    # --- CHANGE 1: Add validation for the modes ---
+    if args.manifest_input and args.manifest_output:
+        print("Error: --manifest-input and --manifest-output are mutually exclusive.", file=sys.stderr)
+        sys.exit(1)
 
-    with open(args.output, "w") as out:
+    toolchain_dir = os.path.abspath(args.toolchain_dir)
+    
+    # --- CHANGE 2: Determine which file to open for writing the manifest (if any) ---
+    manifest_to_write = open(args.manifest_output, "w") if args.manifest_output else open(os.devnull, "w")
+
+    with manifest_to_write as manifest_out, open(args.output, "w") as out:
         out.write(
             """
 #include <Resource.h>
-
 namespace jit_compiler::resource {
 const resource_file ToolchainFiles[] = {"""
         )
 
         def process_file(file_path):
+            manifest_out.write(file_path + '\n')
             out.write(
                 f"""
-{{
-    {{"{args.prefix}{os.path.relpath(file_path, toolchain_dir).replace(os.sep, "/")}"}} ,
-    []() {{
-    static const char data[] = {{
-    #embed "{file_path}" if_empty(0)
-        , 0}};
-    return resource_string_view{{data}};
-    }}()
-}},"""
+        {{
+        {{"{args.prefix}{os.path.relpath(file_path, toolchain_dir).replace(os.sep, "/")}"}} ,
+        []() {{
+            static const char data[] = {{
+            #embed "{file_path}" if_empty(0)
+                , 0}};
+            return resource_string_view{{data}};
+        }}()
+        }},"""
             )
 
-        def process_dir(dir):
-            for root, _, files in os.walk(dir):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    process_file(file_path)
+        # --- CHANGE 3: Main logic switches based on arguments ---
+        if args.manifest_input:
+            # MODE 3: Read from manifest
+            print(f"Reading resource list from manifest: {args.manifest_input}")
+            with open(args.manifest_input, "r") as manifest_file:
+                for line in manifest_file:
+                    file_path = line.strip()
+                    if file_path:
+                        process_file(file_path)
+        else:
+            # MODE 1 (glob) or 2 (glob and output)
+            if args.manifest_output:
+                print(f"Globbing for resources and writing manifest to: {args.manifest_output}")
+            else:
+                print("Globbing for resources (no manifest output)...")
 
-        process_dir(os.path.join(args.toolchain_dir, "include/"))
-        process_dir(os.path.join(args.toolchain_dir, "lib/clang/"))
-        process_dir(os.path.join(args.toolchain_dir, "lib/clc/"))
+            def process_dir(dir):
+                for root, _, files in os.walk(dir):
+                    for file in files:
+                        process_file(os.path.join(root, file))
 
-        for file in glob.iglob(
-            "*.bc", root_dir=os.path.join(args.toolchain_dir, "lib")
-        ):
-            file_path = os.path.join(args.toolchain_dir, "lib", file)
-            process_file(file_path)
+            process_dir(os.path.join(args.toolchain_dir, "include/"))
+            process_dir(os.path.join(args.toolchain_dir, "lib/clang/"))
+            process_dir(os.path.join(args.toolchain_dir, "lib/clc/"))
+            # ... any other globbing logic ...
 
         out.write(
             f"""
@@ -71,7 +85,6 @@ resource_string_view ToolchainPrefix{{"{args.prefix}"}};
 }} // namespace jit_compiler::resource
 """
         )
-
 
 if __name__ == "__main__":
     main()

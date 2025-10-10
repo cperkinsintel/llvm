@@ -1,4 +1,10 @@
 
+set(SYCL_JIT_RESOURCE_MODE "GLOB" CACHE STRING 
+    "Resource generation mode: GLOB, GLOB_AND_MANIFEST, or MANIFEST")
+set_property(CACHE SYCL_JIT_RESOURCE_MODE PROPERTY STRINGS GLOB GLOB_AND_MANIFEST MANIFEST)
+
+set(SYCL_JIT_RESOURCE_MODE "MANIFEST")
+
 
 set(SYCL_JIT_RESOURCE_CPP "${CMAKE_CURRENT_BINARY_DIR}/resource.cpp")
 set(SYCL_JIT_RESOURCE_OBJ "${CMAKE_CURRENT_BINARY_DIR}/resource.cpp.o")
@@ -23,11 +29,34 @@ if ("libdevice" IN_LIST LLVM_ENABLE_PROJECTS)
   list(APPEND SYCL_JIT_RESOURCE_DEPS libsycldevice) # lib/*.bc
 endif()
 
+set(GENERATE_PY ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py)
+
+set(GENERATE_PY_BASE_COMMAND ${Python3_EXECUTABLE} ${GENERATE_PY}
+    --toolchain-dir ${CMAKE_BINARY_DIR}
+    --output ${SYCL_JIT_RESOURCE_CPP}
+    --prefix ${SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT}
+)
+set(GENERATE_PY_DEPENDS ${SYCL_JIT_RESOURCE_DEPS})
+
+# Conditionally add arguments and dependencies based on the mode
+if(SYCL_JIT_RESOURCE_MODE STREQUAL "MANIFEST")
+    message(STATUS "sycl-jit: Using MANIFEST-based resource generation.")
+    set(MANIFEST_FILE "/iusers/cperkins/sycl_workspace/glob_manifest.txt")
+    list(APPEND GENERATE_PY_BASE_COMMAND --manifest-input ${MANIFEST_FILE})
+    list(APPEND GENERATE_PY_DEPENDS ${MANIFEST_FILE})
+elseif(SYCL_JIT_RESOURCE_MODE STREQUAL "GLOB_AND_MANIFEST")
+    message(STATUS "sycl-jit: Using GLOB_AND_MANIFEST resource generation.")
+    list(APPEND GENERATE_PY_BASE_COMMAND --manifest-output ${CMAKE_CURRENT_BINARY_DIR}/glob_manifest.txt)
+else()
+    message(STATUS "sycl-jit: Using GLOB-only resource generation.")
+endif()
+
 add_custom_command(
-  OUTPUT ${SYCL_JIT_RESOURCE_CPP}
-  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py --toolchain-dir ${CMAKE_BINARY_DIR} --output ${SYCL_JIT_RESOURCE_CPP} --prefix ${SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT}
-  DEPENDS
-  ${SYCL_JIT_RESOURCE_DEPS}
+    OUTPUT ${SYCL_JIT_RESOURCE_CPP}
+    COMMAND ${GENERATE_PY_BASE_COMMAND}
+    DEPENDS ${GENERATE_PY_DEPENDS}
+    COMMENT "Generating resource.cpp..."
+    VERBATIM
 )
 
 # We use C23/C++26's `#embed` to implement this resource creation, and "current"
