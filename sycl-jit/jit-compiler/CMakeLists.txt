@@ -5,6 +5,10 @@ set_property(CACHE SYCL_JIT_RESOURCE_MODE PROPERTY STRINGS GLOB GLOB_AND_MANIFES
 
 set(SYCL_JIT_RESOURCE_MODE "MANIFEST")
 
+set(SYCL_JIT_RESOURCE_BLACKLIST "" CACHE FILEPATH "Path to a blacklist file for sycl-jit resources.")
+
+set(SYCL_JIT_RESOURCE_BLACKLIST "/iusers/cperkins/sycl_workspace/glob_blacklist.txt")
+
 
 set(SYCL_JIT_RESOURCE_CPP "${CMAKE_CURRENT_BINARY_DIR}/resource.cpp")
 set(SYCL_JIT_RESOURCE_OBJ "${CMAKE_CURRENT_BINARY_DIR}/resource.cpp.o")
@@ -49,6 +53,13 @@ elseif(SYCL_JIT_RESOURCE_MODE STREQUAL "GLOB_AND_MANIFEST")
     list(APPEND GENERATE_PY_BASE_COMMAND --manifest-output ${CMAKE_CURRENT_BINARY_DIR}/glob_manifest.txt)
 else()
     message(STATUS "sycl-jit: Using GLOB-only resource generation.")
+endif()
+
+if(EXISTS "${SYCL_JIT_RESOURCE_BLACKLIST}")
+    message(STATUS "sycl-jit: Using resource blacklist file: ${SYCL_JIT_RESOURCE_BLACKLIST}")
+    list(APPEND GENERATE_PY_BASE_COMMAND --blacklist ${SYCL_JIT_RESOURCE_BLACKLIST})
+    # Make the build depend on the blacklist file, so it reruns if the file changes
+    list(APPEND GENERATE_PY_DEPENDS ${SYCL_JIT_RESOURCE_BLACKLIST})
 endif()
 
 add_custom_command(

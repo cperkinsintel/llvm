@@ -1,6 +1,7 @@
 import os
 import argparse
 import sys
+import fnmatch
 
 def main():
     parser = argparse.ArgumentParser(
@@ -14,17 +15,29 @@ def main():
     # These two arguments control the mode and are mutually exclusive
     parser.add_argument("-m", "--manifest-input", type=str, help="Build from this manifest (read-only).")
     parser.add_argument("--manifest-output", type=str, help="Glob for files and write them to this manifest.")
+    parser.add_argument(
+        "--blacklist",
+        type=str,
+        help="Path to a file containing glob patterns of resources to exclude."
+    )
     
     args = parser.parse_args()
 
-    # --- CHANGE 1: Add validation for the modes ---
     if args.manifest_input and args.manifest_output:
         print("Error: --manifest-input and --manifest-output are mutually exclusive.", file=sys.stderr)
         sys.exit(1)
 
+    blacklist_patterns = set()
+    if args.blacklist:
+        print(f"Loading blacklist from: {args.blacklist}")
+        with open(args.blacklist, "r") as f:
+            for line in f:
+                pattern = line.strip()
+                if pattern and not pattern.startswith('#'): # Ignore blank lines and comments
+                    blacklist_patterns.add(pattern)
+
     toolchain_dir = os.path.abspath(args.toolchain_dir)
     
-    # --- CHANGE 2: Determine which file to open for writing the manifest (if any) ---
     manifest_to_write = open(args.manifest_output, "w") if args.manifest_output else open(os.devnull, "w")
 
     with manifest_to_write as manifest_out, open(args.output, "w") as out:
@@ -36,6 +49,11 @@ const resource_file ToolchainFiles[] = {"""
         )
 
         def process_file(file_path):
+            for pattern in blacklist_patterns:
+                if fnmatch.fnmatch(file_path, pattern):
+                    print(f"  -> Skipping blacklisted file: {file_path}")
+                    return # Skip this file
+                    
             manifest_out.write(file_path + '\n')
             out.write(
                 f"""
@@ -50,7 +68,6 @@ const resource_file ToolchainFiles[] = {"""
         }},"""
             )
 
-        # --- CHANGE 3: Main logic switches based on arguments ---
         if args.manifest_input:
             # MODE 3: Read from manifest
             print(f"Reading resource list from manifest: {args.manifest_input}")
