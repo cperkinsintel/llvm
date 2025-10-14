@@ -3,7 +3,7 @@ set(SYCL_JIT_RESOURCE_MODE "GLOB" CACHE STRING
     "Resource generation mode: GLOB, GLOB_AND_MANIFEST, or MANIFEST")
 set_property(CACHE SYCL_JIT_RESOURCE_MODE PROPERTY STRINGS GLOB GLOB_AND_MANIFEST MANIFEST)
 
-set(SYCL_JIT_RESOURCE_MODE "MANIFEST")
+set(SYCL_JIT_RESOURCE_MODE "GLOB_AND_MANIFEST")
 
 set(SYCL_JIT_RESOURCE_BLACKLIST "" CACHE FILEPATH "Path to a blacklist file for sycl-jit resources.")
 set(SYCL_JIT_RESOURCE_BLACKLIST "/iusers/cperkins/sycl_workspace/glob_blacklist.txt")

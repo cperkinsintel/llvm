@@ -2,6 +2,7 @@ import os
 import argparse
 import sys
 import fnmatch
+import glob
 
 def main():
     parser = argparse.ArgumentParser(
@@ -54,7 +55,10 @@ const resource_file ToolchainFiles[] = {"""
                     print(f"  -> Skipping blacklisted file: {file_path}")
                     return # Skip this file
                     
-            manifest_out.write(file_path + '\n')
+            relative_path = os.path.relpath(file_path, toolchain_dir)
+            # Ensure consistent forward slashes for portability
+            portable_relative_path = relative_path.replace(os.sep, '/')
+            manifest_out.write(portable_relative_path + '\n')
             out.write(
                 f"""
         {{
@@ -73,9 +77,13 @@ const resource_file ToolchainFiles[] = {"""
             print(f"Reading resource list from manifest: {args.manifest_input}")
             with open(args.manifest_input, "r") as manifest_file:
                 for line in manifest_file:
-                    file_path = line.strip()
-                    if file_path:
-                        process_file(file_path)
+                    relative_path = line.strip()
+                    if relative_path:
+                        # Convert the relative path back into an absolute path
+                        # so that #embed and os.path.relpath can find the file.
+                        absolute_path = os.path.join(toolchain_dir, relative_path)
+                        process_file(absolute_path)
+
         else:
             # MODE 1 (glob) or 2 (glob and output)
             if args.manifest_output:
@@ -91,7 +99,13 @@ const resource_file ToolchainFiles[] = {"""
             process_dir(os.path.join(args.toolchain_dir, "include/"))
             process_dir(os.path.join(args.toolchain_dir, "lib/clang/"))
             process_dir(os.path.join(args.toolchain_dir, "lib/clc/"))
-            # ... any other globbing logic ...
+            
+            print("Recursively searching for .bc files in lib/...")
+            lib_dir = os.path.join(args.toolchain_dir, "lib")
+            search_pattern = os.path.join(lib_dir, "**", "*.bc")
+            
+            for file_path in glob.glob(search_pattern, recursive=True):
+                process_file(file_path)
 
         out.write(
             f"""
