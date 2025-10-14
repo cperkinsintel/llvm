@@ -6,18 +6,61 @@ set_property(CACHE SYCL_JIT_RESOURCE_MODE PROPERTY STRINGS GLOB GLOB_AND_MANIFES
 set(SYCL_JIT_RESOURCE_MODE "MANIFEST")
 
 set(SYCL_JIT_RESOURCE_BLACKLIST "" CACHE FILEPATH "Path to a blacklist file for sycl-jit resources.")
-
 set(SYCL_JIT_RESOURCE_BLACKLIST "/iusers/cperkins/sycl_workspace/glob_blacklist.txt")
 
 
 set(SYCL_JIT_RESOURCE_CPP "${CMAKE_CURRENT_BINARY_DIR}/resource.cpp")
 set(SYCL_JIT_RESOURCE_OBJ "${CMAKE_CURRENT_BINARY_DIR}/resource.cpp.o")
+#set(GLOB_MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/glob_manifest.txt)
+#set(GLOB_MANIFEST "/iusers/cperkins/sycl_workspace/glob_manifest.txt")
+set(GLOB_MANIFEST "/iusers/cperkins/sycl_workspace/filtered_manifest.txt")
+set(DEPS_FILE ${CMAKE_CURRENT_BINARY_DIR}/probe_dependencies.d)
+set(FILTERED_MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/filtered_manifest.txt)
+set(FILTER_PY_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/utils/filter_manifest.py)
+
 
 if (WIN32)
 set(SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT "c:/sycl-jit-toolchain/")
 else()
 set(SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT "/sycl-jit-toolchain/")
 endif()
+
+
+# this target can be run on demand. It outputs the dependencies 
+# required to build some kernel probe.cpp file.
+# $ ninja generate-deps
+add_custom_target(generate-deps
+    # This is the command that will be executed
+    COMMAND ${clang_exe}
+        -fsycl-device-only
+        --target=x86_64-unknown-linux-gnu
+        -I ${CMAKE_CURRENT_SOURCE_DIR}/include
+        -O2
+        -Wno-c23-extensions
+        -std=c++17
+        -fPIC
+        -fvisibility=hidden
+        -M
+        -MF ${DEPS_FILE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/utils/probe.cpp
+    
+    # This ensures the clang executable is built before we try to use it
+    DEPENDS clang
+    
+    COMMENT "Generating dependencies from probe.cpp into probe_dependencies.d"
+    VERBATIM
+)
+
+add_custom_target(filter-manifest
+    COMMAND ${Python3_EXECUTABLE} ${FILTER_PY_SCRIPT}
+        ${GLOB_MANIFEST}
+        ${DEPS_FILE}
+        ${FILTERED_MANIFEST}
+    # This target depends on the other two finishing first
+    # DEPENDS generate-glob-manifest generate-deps
+    COMMENT "Filtering manifests into ${FILTERED_MANIFEST}"
+    VERBATIM
+)
 
 set(SYCL_JIT_RESOURCE_DEPS
   sycl-headers                # include/sycl
@@ -45,9 +88,9 @@ set(GENERATE_PY_DEPENDS ${SYCL_JIT_RESOURCE_DEPS})
 # Conditionally add arguments and dependencies based on the mode
 if(SYCL_JIT_RESOURCE_MODE STREQUAL "MANIFEST")
     message(STATUS "sycl-jit: Using MANIFEST-based resource generation.")
-    set(MANIFEST_FILE "/iusers/cperkins/sycl_workspace/glob_manifest.txt")
-    list(APPEND GENERATE_PY_BASE_COMMAND --manifest-input ${MANIFEST_FILE})
-    list(APPEND GENERATE_PY_DEPENDS ${MANIFEST_FILE})
+    #set(MANIFEST_FILE "/iusers/cperkins/sycl_workspace/glob_manifest.txt")
+    list(APPEND GENERATE_PY_BASE_COMMAND --manifest-input ${GLOB_MANIFEST})
+    list(APPEND GENERATE_PY_DEPENDS ${GLOB_MANIFEST})
 elseif(SYCL_JIT_RESOURCE_MODE STREQUAL "GLOB_AND_MANIFEST")
     message(STATUS "sycl-jit: Using GLOB_AND_MANIFEST resource generation.")
     list(APPEND GENERATE_PY_BASE_COMMAND --manifest-output ${CMAKE_CURRENT_BINARY_DIR}/glob_manifest.txt)
