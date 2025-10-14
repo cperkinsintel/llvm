@@ -3,7 +3,7 @@ set(SYCL_JIT_RESOURCE_MODE "GLOB" CACHE STRING
     "Resource generation mode: GLOB, GLOB_AND_MANIFEST, or MANIFEST")
 set_property(CACHE SYCL_JIT_RESOURCE_MODE PROPERTY STRINGS GLOB GLOB_AND_MANIFEST MANIFEST)
 
-set(SYCL_JIT_RESOURCE_MODE "GLOB_AND_MANIFEST")
+set(SYCL_JIT_RESOURCE_MODE "MANIFEST")
 
 set(SYCL_JIT_RESOURCE_BLACKLIST "" CACHE FILEPATH "Path to a blacklist file for sycl-jit resources.")
 set(SYCL_JIT_RESOURCE_BLACKLIST "/iusers/cperkins/sycl_workspace/glob_blacklist.txt")
@@ -12,8 +12,8 @@ set(SYCL_JIT_RESOURCE_BLACKLIST "/iusers/cperkins/sycl_workspace/glob_blacklist.
 set(SYCL_JIT_RESOURCE_CPP "${CMAKE_CURRENT_BINARY_DIR}/resource.cpp")
 set(SYCL_JIT_RESOURCE_OBJ "${CMAKE_CURRENT_BINARY_DIR}/resource.cpp.o")
 #set(GLOB_MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/glob_manifest.txt)
-#set(GLOB_MANIFEST "/iusers/cperkins/sycl_workspace/glob_manifest.txt")
-set(GLOB_MANIFEST "/iusers/cperkins/sycl_workspace/filtered_manifest.txt")
+set(GLOB_MANIFEST "/iusers/cperkins/sycl_workspace/rel_glob_manifest.txt")
+#set(GLOB_MANIFEST "/iusers/cperkins/sycl_workspace/filtered_manifest.txt")
 set(DEPS_FILE ${CMAKE_CURRENT_BINARY_DIR}/probe_dependencies.d)
 set(FILTERED_MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/filtered_manifest.txt)
 set(FILTER_PY_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/utils/filter_manifest.py)
