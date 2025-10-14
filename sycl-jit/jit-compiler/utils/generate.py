@@ -11,8 +11,8 @@ def main():
     parser.add_argument("-o", "--output", type=str, required=True, help="Output C++ file")
     parser.add_argument("-i", "--toolchain-dir", type=str, required=True, help="Path to toolchain root directory.")
     parser.add_argument("--prefix", type=str, required=True, help="Prefix for virtual file locations")
-    parser.add_argument("-m", "--manifest-input", type=str, help="Build from this manifest (read-only).")
-    parser.add_argument("--manifest-output", type=str, help="Glob for files and write them to this manifest.")
+    parser.add_argument("-m", "--manifest-input", type=str, help="Build from this whitelist manifest (read-only).")
+    parser.add_argument("--manifest-output", type=str, help="Glob for files and write them to this capture manifest.")
     parser.add_argument("--blacklist", type=str, help="Path to a file containing glob patterns of resources to exclude.")
     
     args = parser.parse_args()
@@ -35,6 +35,16 @@ def main():
     manifest_to_write = open(args.manifest_output, "w") if args.manifest_output else open(os.devnull, "w")
 
     with manifest_to_write as manifest_out, open(args.output, "w") as out:
+        if args.manifest_output:
+            preamble = f"""# This manifest was auto-geneerated by the sycl-jit build process
+            # It contains the list of all candidate resource files found when globbing.
+            #
+            # If any of these files should NOT be included in the final library
+            # (e.g. for IP reasons), add their relative path to the blacklist file at:
+            # {args.blacklist}
+            """
+            manifest_out.write(preamble + '\n')
+
         out.write(
             """
 #include <Resource.h>
@@ -67,7 +77,7 @@ const resource_file ToolchainFiles[] = {"""
             return portable_relative_path
 
         if args.manifest_input:
-            print(f"Reading resource list from manifest: {args.manifest_input}")
+            print(f"Reading resource list from whitelist manifest: {args.manifest_input}")
             with open(args.manifest_input, "r") as manifest_file:
                 for line in manifest_file:
                     relative_path = line.strip()
@@ -76,9 +86,9 @@ const resource_file ToolchainFiles[] = {"""
                         generate_cpp_for_file(absolute_path)
         else:
             if args.manifest_output:
-                print(f"Globbing for resources and writing manifest to: {args.manifest_output}")
+                print(f"Globbing for resources and writing capture manifest to: {args.manifest_output}")
             else:
-                print("Globbing for resources (no manifest output)...")
+                print("Globbing for resources (no capture manifest output)...")
 
             def process_and_log_file(absolute_path):
                 relative_path = generate_cpp_for_file(absolute_path)
