@@ -43,14 +43,15 @@ const resource_file ToolchainFiles[] = {"""
         )
 
         def generate_cpp_for_file(absolute_path):
-            for pattern in blacklist_patterns:
-                if fnmatch.fnmatch(absolute_path, pattern):
-                    print(f"  -> Skipping blacklisted file: {absolute_path}")
-                    return None
-
             relative_path = os.path.relpath(absolute_path, toolchain_dir)
             portable_relative_path = relative_path.replace(os.sep, '/')
-            
+
+            for pattern in blacklist_patterns:
+                # Compare the pattern against the portable relative path
+                if fnmatch.fnmatch(portable_relative_path, pattern):
+                    print(f"  -> Skipping blacklisted file: {portable_relative_path}")
+                    return None
+
             out.write(
                 f"""
         {{
