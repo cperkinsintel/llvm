@@ -2,6 +2,7 @@
 
 set(SYCL_JIT_RESOURCE_CPP "${CMAKE_CURRENT_BINARY_DIR}/resource.cpp")
 set(SYCL_JIT_RESOURCE_OBJ "${CMAKE_CURRENT_BINARY_DIR}/resource.cpp.o")
+set(SYCL_JIT_RESOURCE_INSTALL_CPP "${CMAKE_CURRENT_BINARY_DIR}/resource_install.cpp")
 
 if (WIN32)
 set(SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT "c:/sycl-jit-toolchain/")
@@ -23,11 +24,14 @@ if ("libdevice" IN_LIST LLVM_ENABLE_PROJECTS)
   list(APPEND SYCL_JIT_RESOURCE_DEPS libsycldevice) # lib/*.bc
 endif()
 
+# DEV BUILD PATH ---
+# This command generates resource.cpp for the normal 'ninja build' by globbing the build directory.
 add_custom_command(
   OUTPUT ${SYCL_JIT_RESOURCE_CPP}
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py --toolchain-dir ${CMAKE_BINARY_DIR} --output ${SYCL_JIT_RESOURCE_CPP} --prefix ${SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT}  
   DEPENDS ${SYCL_JIT_RESOURCE_DEPS}
-  COMMENT "generate resource.cpp from output in build directory"
+  COMMENT "Generating DEV sycl-jit resources from build directory..."
+  VERBATIM
 )
 
 add_custom_command(
@@ -35,6 +39,21 @@ add_custom_command(
     COMMAND ${Python3_EXECUTABLE} ${GENERATE_PY} --toolchain-dir ${CMAKE_INSTALL_PREFIX} ...
     DEPENDS install-sycl-jit-resources
     COMMENT "Generating INSTALL resource.cpp from install directory..."
+)
+
+# --- INSTALL BUILD PATH ---
+# first define a target to run the partial install of resources.
+add_custom_target(install-sycl-jit-resources
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR} --component sycl-jit-resources
+    COMMENT "Installing intermediate sycl-jit toolchain resources..."
+    VERBATIM
+)
+
+# second generate a separate resource_install.cpp by globbing the clean install directory.
+add_custom_command(
+  OUTPUT ${SYCL_JIT_RESOURCE_INSTALL_CPP}
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py --toolchain-dir ${CMAKE_INSTALL_PREFIX} --output ${SYCL_JIT_RESOURCE_INSTALL_CPP} --prefix ${SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT}
+  DEPENDS install-sycl-jit-resources
 )
 
 # We use C23/C++26's `#embed` to implement this resource creation, and "current"
@@ -63,21 +82,21 @@ else()
   endif()
 endif()
 
-add_custom_command(
-  OUTPUT ${SYCL_JIT_RESOURCE_OBJ}
-  COMMAND
-  # ${clang_exe}'s default target is not necessarily ${LLVM_HOST_TRIPLE}: when
-  # cross compiling, it will be whatever the host tools were configured with,
-  # and when building a cross compiler, it will be
-  # ${LLVM_DEFAULT_TARGET_TRIPLE}. Rather than special casing these, just always
-  # specify --target=${LLVM_HOST_TRIPLE}.
-  ${clang_exe} --target=${LLVM_HOST_TRIPLE} ${SYCL_JIT_RESOURCE_CPP} -I ${CMAKE_CURRENT_SOURCE_DIR}/include -c -o ${SYCL_JIT_RESOURCE_OBJ} ${SYCL_JIT_RESOURCE_CXX_FLAGS}
-  DEPENDS
-  ${SYCL_JIT_RESOURCE_CPP}
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Resource.h
-)
+# add_custom_command(
+#  OUTPUT ${SYCL_JIT_RESOURCE_OBJ}
+#  COMMAND
+#  # ${clang_exe}'s default target is not necessarily ${LLVM_HOST_TRIPLE}: when
+#  # cross compiling, it will be whatever the host tools were configured with,
+#  # and when building a cross compiler, it will be
+#  # ${LLVM_DEFAULT_TARGET_TRIPLE}. Rather than special casing these, just always
+#  # specify --target=${LLVM_HOST_TRIPLE}.
+#  ${clang_exe} --target=${LLVM_HOST_TRIPLE} ${SYCL_JIT_RESOURCE_CPP} -I ${CMAKE_CURRENT_SOURCE_DIR}/include -c -o ${SYCL_JIT_RESOURCE_OBJ} ${SYCL_JIT_RESOURCE_CXX_FLAGS}
+#  DEPENDS
+#  ${SYCL_JIT_RESOURCE_CPP}
+#  ${CMAKE_CURRENT_SOURCE_DIR}/include/Resource.h
+# )
 
-# build
+# Define the DEV library target 
 add_llvm_library(sycl-jit
    lib/translation/JITContext.cpp
    lib/translation/SPIRVLLVMTranslation.cpp
@@ -90,7 +109,7 @@ add_llvm_library(sycl-jit
    lib/helper/ConfigHelper.cpp
    lib/helper/ErrorHelper.cpp
 
-   ${SYCL_JIT_RESOURCE_OBJ}
+   ${SYCL_JIT_RESOURCE_CPP}
 
    SHARED
 
@@ -128,7 +147,7 @@ add_llvm_library(sycl-jit
    clangSerialization
 )
 
-# install
+# Define teh install library target
 add_llvm_library(sycl-jit-installable
    lib/translation/JITContext.cpp
    lib/translation/SPIRVLLVMTranslation.cpp
@@ -141,12 +160,11 @@ add_llvm_library(sycl-jit-installable
    lib/helper/ConfigHelper.cpp
    lib/helper/ErrorHelper.cpp
 
-   ${CMAKE_CURRENT_BINARY_DIR}/resource_install.cpp.o
+   ${SYCL_JIT_RESOURCE_INSTALL_CPP}
 
    SHARED
 
-   DEPENDS
-   intrinsics_gen
+   EXCLUDE_FROM_ALL # Don't build this target during a normal 'ninja build'
 
    LINK_COMPONENTS
    BitReader
@@ -180,7 +198,6 @@ add_llvm_library(sycl-jit-installable
 )
 set_target_properties(sycl-jit-installable PROPERTIES OUTPUT_NAME "sycl-jit")
 
-add_dependencies(sycl-jit install-sycl-jit-resources)
 
 if(WIN32)
   target_link_libraries(sycl-jit PRIVATE Shlwapi)
