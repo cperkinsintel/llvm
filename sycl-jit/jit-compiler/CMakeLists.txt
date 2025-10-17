@@ -25,18 +25,16 @@ endif()
 
 add_custom_command(
   OUTPUT ${SYCL_JIT_RESOURCE_CPP}
-  # COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py --toolchain-dir ${CMAKE_BINARY_DIR} --output ${SYCL_JIT_RESOURCE_CPP} --prefix ${SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT}
-  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py
-      --toolchain-dir ${CMAKE_INSTALL_PREFIX}
-      --output ${SYCL_JIT_RESOURCE_CPP}
-      --prefix ${SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT}  
-  DEPENDS
-  # ${SYCL_JIT_RESOURCE_DEPS}
-      # This fixes the race condition by forcing the partial install to run first.
-      install-sycl-jit-resources
-      ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py
-  COMMENT "Generating sycl-jit resources by globbing the install directory..."
-  VERBATIM
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py --toolchain-dir ${CMAKE_BINARY_DIR} --output ${SYCL_JIT_RESOURCE_CPP} --prefix ${SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT}  
+  DEPENDS ${SYCL_JIT_RESOURCE_DEPS}
+  COMMENT "generate resource.cpp from output in build directory"
+)
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/resource_install.cpp
+    COMMAND ${Python3_EXECUTABLE} ${GENERATE_PY} --toolchain-dir ${CMAKE_INSTALL_PREFIX} ...
+    DEPENDS install-sycl-jit-resources
+    COMMENT "Generating INSTALL resource.cpp from install directory..."
 )
 
 # We use C23/C++26's `#embed` to implement this resource creation, and "current"
@@ -79,6 +77,7 @@ add_custom_command(
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Resource.h
 )
 
+# build
 add_llvm_library(sycl-jit
    lib/translation/JITContext.cpp
    lib/translation/SPIRVLLVMTranslation.cpp
@@ -128,6 +127,58 @@ add_llvm_library(sycl-jit
    clangTooling
    clangSerialization
 )
+
+# install
+add_llvm_library(sycl-jit-installable
+   lib/translation/JITContext.cpp
+   lib/translation/SPIRVLLVMTranslation.cpp
+   lib/translation/Translation.cpp
+   lib/materializer/MaterializerPipeline.cpp
+   lib/materializer/Materializer.cpp
+   lib/rtc/DeviceCompilation.cpp
+   lib/rtc/ESIMD.cpp
+   lib/rtc/RTC.cpp
+   lib/helper/ConfigHelper.cpp
+   lib/helper/ErrorHelper.cpp
+
+   ${CMAKE_CURRENT_BINARY_DIR}/resource_install.cpp.o
+
+   SHARED
+
+   DEPENDS
+   intrinsics_gen
+
+   LINK_COMPONENTS
+   BitReader
+   BitWriter
+   Core
+   Support
+   Option
+   Analysis
+   IPO
+   TransformUtils
+   Passes
+   IRReader
+   Linker
+   ScalarOpts
+   InstCombine
+   Target
+   TargetParser
+   MC
+   SYCLLowerIR
+   SYCLPostLink
+   SPIRVLib
+   ${LLVM_TARGETS_TO_BUILD}
+
+   LINK_LIBS
+   clangBasic
+   clangDriver
+   clangFrontend
+   clangCodeGen
+   clangTooling
+   clangSerialization
+)
+set_target_properties(sycl-jit-installable PROPERTIES OUTPUT_NAME "sycl-jit")
 
 add_dependencies(sycl-jit install-sycl-jit-resources)
 
@@ -181,3 +232,9 @@ if(NOT MSVC AND NOT APPLE)
     sycl-jit PRIVATE "-Wl,--version-script=${linker_script}")
   set_target_properties(sycl-jit PROPERTIES LINK_DEPENDS ${linker_script})
 endif()
+
+
+install(TARGETS sycl-jit-installable
+    LIBRARY DESTINATION lib
+    COMPONENT sycl-jit
+)
