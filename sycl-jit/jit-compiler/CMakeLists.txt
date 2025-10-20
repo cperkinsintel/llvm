@@ -25,18 +25,10 @@ endif()
 
 add_custom_command(
   OUTPUT ${SYCL_JIT_RESOURCE_CPP}
-  # COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py --toolchain-dir ${CMAKE_BINARY_DIR} --output ${SYCL_JIT_RESOURCE_CPP} --prefix ${SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT}
-  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py
-      --toolchain-dir ${CMAKE_INSTALL_PREFIX}
-      --output ${SYCL_JIT_RESOURCE_CPP}
-      --prefix ${SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT}  
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py --toolchain-dir ${CMAKE_BINARY_DIR} --output ${SYCL_JIT_RESOURCE_CPP} --prefix ${SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT}
+    
   DEPENDS
-  # ${SYCL_JIT_RESOURCE_DEPS}
-      # This fixes the race condition by forcing the partial install to run first.
-      install-sycl-jit-resources
-      ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py
-  COMMENT "Generating sycl-jit resources by globbing the install directory..."
-  VERBATIM
+  ${SYCL_JIT_RESOURCE_DEPS}
 )
 
 # We use C23/C++26's `#embed` to implement this resource creation, and "current"
@@ -129,7 +121,7 @@ add_llvm_library(sycl-jit
    clangSerialization
 )
 
-add_dependencies(sycl-jit install-sycl-jit-resources)
+
 
 if(WIN32)
   target_link_libraries(sycl-jit PRIVATE Shlwapi)
