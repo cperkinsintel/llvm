@@ -173,3 +173,42 @@ if(NOT MSVC AND NOT APPLE)
     sycl-jit PRIVATE "-Wl,--version-script=${linker_script}")
   set_target_properties(sycl-jit PROPERTIES LINK_DEPENDS ${linker_script})
 endif()
+
+# --- In sycl-jit/jit-compiler/CMakeLists.txt ---
+
+# --- Add these variables for the install script ---
+# This variable is set by FindPython.cmake
+set(PYTHON_EXE_FOR_INSTALL "${Python3_EXECUTABLE}")
+
+# This is the path to the generate.py script itself
+set(GENERATE_SCRIPT_PATH "${CMAKE_CURRENT_LIST_DIR}/utils/generate.py")
+
+# This is the path to the sycl-jit.cpp file
+set(SCRIPT_SOURCE_DIR_FOR_INSTALL "${CMAKE_CURRENT_LIST_DIR}")
+
+# This variable points to the *build* directory, where clang++ exists
+set(COMPILER_PATH_FOR_INSTALL "${LLVM_BINARY_DIR}/bin/clang++")
+
+# These are the flags for the *new* compile at install time
+set(JIT_INSTALL_COMPILE_FLAGS "-std=c++17;-fPIC") # Add other necessary flags
+set(JIT_INSTALL_LINK_FLAGS    "-shared") # Add other link flags
+
+# --- Configure the template file ---
+set(INSTALL_SCRIPT_TEMPLATE "${CMAKE_CURRENT_LIST_DIR}/BuildSyclJitAtInstall.cmake.in")
+set(INSTALL_SCRIPT_GENERATED "${CMAKE_CURRENT_BINARY_DIR}/BuildSyclJitAtInstall.cmake")
+
+# Use configure_file to pass the variables
+configure_file(
+  ${INSTALL_SCRIPT_TEMPLATE}
+  ${INSTALL_SCRIPT_GENERATED}
+  @ONLY
+)
+
+# --- Add the install rules (these should be the only ones) ---
+install(SCRIPT "${INSTALL_SCRIPT_GENERATED}" COMPONENT sycl-jit)
+set(CPACK_COMPONENT_SYCL_JIT_DEPENDS "sycl-jit-resources")
+
+# --- Add debug messages ---
+message(STATUS "sycl-jit: Python exe for install: ${PYTHON_EXE_FOR_INSTALL}")
+message(STATUS "sycl-jit: Generate script for install: ${GENERATE_SCRIPT_PATH}")
+message(STATUS "sycl-jit: Compiler path for install: ${COMPILER_PATH_FOR_INSTALL}")
