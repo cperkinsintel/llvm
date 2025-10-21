@@ -71,17 +71,21 @@ add_custom_command(
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Resource.h
 )
 
+set(SYCL_JIT_SOURCES_LIST
+  lib/translation/JITContext.cpp
+  lib/translation/SPIRVLLVMTranslation.cpp
+  lib/translation/Translation.cpp
+  lib/materializer/MaterializerPipeline.cpp
+  lib/materializer/Materializer.cpp
+  lib/rtc/DeviceCompilation.cpp
+  lib/rtc/ESIMD.cpp
+  lib/rtc/RTC.cpp
+  lib/helper/ConfigHelper.cpp
+  lib/helper/ErrorHelper.cpp
+)
+
 add_llvm_library(sycl-jit
-   lib/translation/JITContext.cpp
-   lib/translation/SPIRVLLVMTranslation.cpp
-   lib/translation/Translation.cpp
-   lib/materializer/MaterializerPipeline.cpp
-   lib/materializer/Materializer.cpp
-   lib/rtc/DeviceCompilation.cpp
-   lib/rtc/ESIMD.cpp
-   lib/rtc/RTC.cpp
-   lib/helper/ConfigHelper.cpp
-   lib/helper/ErrorHelper.cpp
+   ${SYCL_JIT_SOURCES_LIST}
 
    ${SYCL_JIT_RESOURCE_OBJ}
 
@@ -192,6 +196,14 @@ set(COMPILER_PATH_FOR_INSTALL "${CMAKE_INSTALL_PREFIX}/bin/clang++")
 # These are the flags for the *new* compile at install time
 set(JIT_INSTALL_COMPILE_FLAGS "-std=c++17;-fPIC") # Add other necessary flags
 set(JIT_INSTALL_LINK_FLAGS    "-shared") # Add other link flags
+
+# Create a new list with absolute paths for the install script
+set(JIT_SOURCES_FOR_INSTALL "")
+foreach(src_file ${SYCL_JIT_SOURCES_LIST})
+  list(APPEND JIT_SOURCES_FOR_INSTALL "${CMAKE_CURRENT_LIST_DIR}/${src_file}")
+endforeach()
+
+set(JIT_SOURCES_STRING_LIST "${JIT_SOURCES_FOR_INSTALL}")
 
 # --- Configure the template file ---
 set(INSTALL_SCRIPT_TEMPLATE "${CMAKE_CURRENT_LIST_DIR}/BuildSyclJitAtInstall.cmake.in")

@@ -49,7 +49,11 @@ if(NOT GEN_RESULT EQUAL 0)
 endif()
 
 # --- 4. Compile and link the new, clean sycl-jit.so ---
-set(JIT_SOURCES "${SCRIPT_SOURCE_DIR}/sycl-jit.cpp" "${RESOURCE_CPP}")
+# This is the full list of .cpp files with absolute paths
+set(JIT_SOURCES "@JIT_SOURCES_STRING_LIST@")
+
+# Add our newly generated *clean* resource.cpp to the list
+list(APPEND JIT_SOURCES ${RESOURCE_CPP})
 set(OUTPUT_FILE "${INSTALL_LIB_DIR}/libsycl-jit.so") # Match the name in the install log
 
 message(STATUS "  Compiling and linking ${OUTPUT_FILE}...")
