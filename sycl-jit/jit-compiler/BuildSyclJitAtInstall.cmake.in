@@ -1,19 +1,5 @@
 # This script is EXECUTED AT INSTALL TIME by 'ninja install'
 
-# --- 1. Manually install our 'sycl-jit-resources' dependencies ---
-message(STATUS "  Checking and installing 'sycl-jit-resources' dependencies...")
-set(MAIN_INSTALL_SCRIPT "${CMAKE_BINARY_DIR}/cmake_install.cmake")
-execute_process(
-  COMMAND ${CMAKE_COMMAND}
-          -DCMAKE_INSTALL_COMPONENT=sycl-jit-resources
-          -P ${MAIN_INSTALL_SCRIPT}
-  RESULT_VARIABLE DEP_INSTALL_RESULT
-)
-if(NOT DEP_INSTALL_RESULT EQUAL 0)
-  message(FATAL_ERROR "  Failed to manually install 'sycl-jit-resources' dependencies.")
-endif()
-message(STATUS "  Dependencies are now installed.")
-
 # --- 2. Define paths ---
 set(INSTALL_ROOT_DIR    "${CMAKE_INSTALL_PREFIX}")
 set(INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")

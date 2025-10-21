@@ -187,7 +187,7 @@ set(GENERATE_SCRIPT_PATH "${CMAKE_CURRENT_LIST_DIR}/utils/generate.py")
 set(SCRIPT_SOURCE_DIR_FOR_INSTALL "${CMAKE_CURRENT_LIST_DIR}")
 
 # This variable points to the *build* directory, where clang++ exists
-set(COMPILER_PATH_FOR_INSTALL "${LLVM_BINARY_DIR}/bin/clang++")
+set(COMPILER_PATH_FOR_INSTALL "${CMAKE_INSTALL_PREFIX}/bin/clang++")
 
 # These are the flags for the *new* compile at install time
 set(JIT_INSTALL_COMPILE_FLAGS "-std=c++17;-fPIC") # Add other necessary flags
@@ -206,7 +206,7 @@ configure_file(
 
 # --- Add the install rules (these should be the only ones) ---
 install(SCRIPT "${INSTALL_SCRIPT_GENERATED}" COMPONENT sycl-jit)
-set(CPACK_COMPONENT_SYCL_JIT_DEPENDS "sycl-jit-resources")
+set(CPACK_COMPONENT_SYCL_JIT_DEPENDS "sycl-jit-resources;clang")
 
 # --- Add debug messages ---
 message(STATUS "sycl-jit: Python exe for install: ${PYTHON_EXE_FOR_INSTALL}")
