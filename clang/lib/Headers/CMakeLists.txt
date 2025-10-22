@@ -643,17 +643,6 @@ install(
   DESTINATION ${header_install_dir}
   COMPONENT sycl-jit-resources)
 
-# CP - TODO - remove these next two
-install(
-  FILES ${cuda_wrapper_files}
-  DESTINATION ${header_install_dir}/cuda_wrappers
-  COMPONENT sycl-jit-resources)
-
-install(
-  FILES ${openmp_wrapper_files}
-  DESTINATION ${header_install_dir}/openmp_wrappers
-  COMPONENT sycl-jit-resources)
-
 install(
   FILES ${llvm_offload_wrapper_files}
   DESTINATION ${header_install_dir}/llvm_offload_wrappers
