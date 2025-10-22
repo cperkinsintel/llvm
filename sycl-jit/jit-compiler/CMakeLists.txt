@@ -11,7 +11,8 @@ endif()
 
 set(SYCL_JIT_RESOURCE_DEPS
   sycl-headers                # include/sycl
-  opencl-resource-headers     # lib/clang/N/include
+  clang                       # lib/clang/N/include
+  opencl-resource-headers     # fixes build race. not actually used.
   ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py)
 
 if ("libclc" IN_LIST LLVM_ENABLE_PROJECTS)
@@ -26,7 +27,6 @@ endif()
 add_custom_command(
   OUTPUT ${SYCL_JIT_RESOURCE_CPP}
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/utils/generate.py --toolchain-dir ${CMAKE_BINARY_DIR} --output ${SYCL_JIT_RESOURCE_CPP} --prefix ${SYCL_JIT_VIRTUAL_TOOLCHAIN_ROOT}
-    
   DEPENDS
   ${SYCL_JIT_RESOURCE_DEPS}
 )
@@ -178,62 +178,24 @@ if(NOT MSVC AND NOT APPLE)
   set_target_properties(sycl-jit PROPERTIES LINK_DEPENDS ${linker_script})
 endif()
 
-# --- In sycl-jit/jit-compiler/CMakeLists.txt ---
 
-# --- Add these variables for the install script ---
-# This variable is set by FindPython.cmake
+# These variables for the install script
 set(PYTHON_EXE_FOR_INSTALL "${Python3_EXECUTABLE}")
-
-# This is the path to the generate.py script itself
 set(GENERATE_SCRIPT_PATH "${CMAKE_CURRENT_LIST_DIR}/utils/generate.py")
-
-# This is the path to the sycl-jit.cpp file
 set(SCRIPT_SOURCE_DIR_FOR_INSTALL "${CMAKE_CURRENT_LIST_DIR}")
-
-# This variable points to the *build* directory, where clang++ exists
 set(COMPILER_PATH_FOR_INSTALL "${CMAKE_INSTALL_PREFIX}/bin/clang++")
-
-# Main LLVM source include (for llvm/IR/Module.h etc.)
-#set(LLVM_MAIN_INCLUDE_DIR "${LLVM_MAIN_SRC_DIR}/include")
-# Main LLVM build include (for generated headers like Options.h)
-#set(LLVM_MAIN_BINARY_DIR "${LLVM_MAIN_BUILD_DIR}/include")
-
-#---
-
-set(LLVM_INCLUDE_DIR_FOR_INSTALL "")
-if(DEFINED LLVM_MAIN_INCLUDE_DIR)
-  list(APPEND LLVM_INCLUDE_DIR_FOR_INSTALL ${LLVM_MAIN_INCLUDE_DIR})
-endif()
-
-set(SPIRV_INCLUDE_DIRS_FOR_INSTALL "")
-if(DEFINED LLVM_SPIRV_INCLUDE_DIRS)
-  list(APPEND SPIRV_INCLUDE_DIRS_FOR_INSTALL ${LLVM_SPIRV_INCLUDE_DIRS})
-endif()
-
-set(CLANG_SOURCE_INCLUDE_DIR_FOR_INSTALL "")
-if(DEFINED LLVM_EXTERNAL_CLANG_SOURCE_DIR)
-  set(CLANG_SOURCE_INCLUDE_DIR_FOR_INSTALL "${LLVM_EXTERNAL_CLANG_SOURCE_DIR}/include")
-endif()
-
-set(CLANG_BUILD_INCLUDE_DIR_FOR_INSTALL "")
-if(DEFINED CMAKE_BINARY_DIR)
-  set(CLANG_BUILD_INCLUDE_DIR_FOR_INSTALL "${CMAKE_BINARY_DIR}/tools/clang/include")
-endif()
-
+set(LLVM_INCLUDE_DIR_FOR_INSTALL ${LLVM_MAIN_INCLUDE_DIR})
+set(SPIRV_INCLUDE_DIRS_FOR_INSTALL ${LLVM_SPIRV_INCLUDE_DIRS})
+set(CLANG_SOURCE_INCLUDE_DIR_FOR_INSTALL "${LLVM_EXTERNAL_CLANG_SOURCE_DIR}/include")
+set(CLANG_BUILD_INCLUDE_DIR_FOR_INSTALL "${CMAKE_BINARY_DIR}/tools/clang/include")
 set(SYCL_JIT_PASSES_DIR_FOR_INSTALL "${CMAKE_CURRENT_LIST_DIR}/../passes")
 set(SYCL_JIT_LOCAL_INCLUDE_DIR_FOR_INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(SYCL_JIT_LOCAL_LIB_DIR_FOR_INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/lib")
-
-# Main LLVM build include (for generated headers like abi-breaking.h)
 set(LLVM_BUILD_INCLUDE_DIR_FOR_INSTALL "${LLVM_BINARY_DIR}/include")
-
-#---
-
-# These are the flags for the *new* compile at install time
-set(JIT_INSTALL_COMPILE_FLAGS "-std=c++17;-fPIC;-Wno-c23-extensions") # Add other necessary flags
+set(JIT_INSTALL_COMPILE_FLAGS "-std=c++17;-fPIC;-Wno-c23-extensions") 
 set(JIT_INSTALL_LINK_FLAGS    "-shared") # Add other link flags
 
-# Create a new list with absolute paths for the install script
+# Create a new list  for the install script
 set(JIT_SOURCES_FOR_INSTALL "")
 foreach(src_file ${SYCL_JIT_SOURCES_LIST})
   list(APPEND JIT_SOURCES_FOR_INSTALL "${CMAKE_CURRENT_LIST_DIR}/${src_file}")
@@ -246,16 +208,13 @@ foreach(src_file ${SYCL_JIT_SOURCES_LIST})
   list(APPEND JIT_INCLUDE_DIRS_FOR_INSTALL ${src_dir})
 endforeach()
 
-# Add the main 'include' dir for headers like Resource.h
 list(APPEND JIT_INCLUDE_DIRS_FOR_INSTALL "${CMAKE_CURRENT_LIST_DIR}/include")
 
 # Remove duplicates and pass to the script
 list(REMOVE_DUPLICATES JIT_INCLUDE_DIRS_FOR_INSTALL)
 set(JIT_INCLUDE_DIRS_STRING_LIST "${JIT_INCLUDE_DIRS_FOR_INSTALL}")
-
 set(JIT_SOURCES_STRING_LIST "${JIT_SOURCES_FOR_INSTALL}")
 
-# --- Configure the template file ---
 set(INSTALL_SCRIPT_TEMPLATE "${CMAKE_CURRENT_LIST_DIR}/BuildSyclJitAtInstall.cmake.in")
 set(INSTALL_SCRIPT_GENERATED "${CMAKE_CURRENT_BINARY_DIR}/BuildSyclJitAtInstall.cmake")
 
@@ -266,7 +225,6 @@ configure_file(
   @ONLY
 )
 
-# --- Add the install rules (these should be the only ones) ---
 install(SCRIPT "${INSTALL_SCRIPT_GENERATED}" COMPONENT sycl-jit)
 set(CPACK_COMPONENT_SYCL_JIT_DEPENDS
   "sycl-jit-resources"
@@ -302,23 +260,3 @@ set(CPACK_COMPONENT_SYCL_JIT_DEPENDS
   "LLVMHeaders"
   "clangHeaders"
   )
-
-# --- Add debug messages ---
-message(STATUS "sycl-jit: Python exe for install: ${PYTHON_EXE_FOR_INSTALL}")
-message(STATUS "sycl-jit: Generate script for install: ${GENERATE_SCRIPT_PATH}")
-message(STATUS "sycl-jit: Compiler path for install: ${COMPILER_PATH_FOR_INSTALL}")
-
-message(STATUS "DEBUG Install Script Paths:")
-message(STATUS "  CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
-
-message(STATUS "  LLVM includes = ${LLVM_INCLUDE_DIR_FOR_INSTALL}")
-message(STATUS "  SPIRV includes = ${SPIRV_INCLUDE_DIRS_FOR_INSTALL}")
-message(STATUS "  Clang Source includes = ${CLANG_SOURCE_INCLUDE_DIR_FOR_INSTALL}")
-message(STATUS "  Clang Build includes = ${CLANG_BUILD_INCLUDE_DIR_FOR_INSTALL}")
-message(STATUS "  SYCL JIT Local include = ${SYCL_JIT_LOCAL_INCLUDE_DIR_FOR_INSTALL}")
-message(STATUS "  SYCL JIT Local lib = ${SYCL_JIT_LOCAL_LIB_DIR_FOR_INSTALL}")
-message(STATUS "  LLVM_BUILD_INCLUDE_DIR_FOR_INSTALL = ${LLVM_BUILD_INCLUDE_DIR_FOR_INSTALL}")
-
-message(STATUS "  INSTALL_INCLUDE_DIR/LLVMSPIRVLib = ${CMAKE_INSTALL_PREFIX}/include/LLVMSPIRVLib")
-message(STATUS "  SYCL JIT Passes dir = ${SYCL_JIT_PASSES_DIR_FOR_INSTALL}")
-message(STATUS "  Local includes = ${JIT_INCLUDE_DIRS_STRING_LIST}")
