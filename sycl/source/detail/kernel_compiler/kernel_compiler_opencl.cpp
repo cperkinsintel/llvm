@@ -13,6 +13,7 @@
 
 #include "../split_string.hpp"
 #include "ocloc_api.h"
+#include <detail/jit_compiler.hpp>
 
 #include <cstring>    // strlen
 #include <functional> // for std::function
@@ -223,159 +224,48 @@ OpenCLC_to_SPIRV(const std::string &Source,
                  const std::vector<uint32_t> &IPVersionVec,
                  const std::vector<sycl::detail::string_view> &UserArgs,
                  std::string *LogPtr) {
-  // handles into ocloc shared lib
-  static void *oclocInvokeHandle = nullptr;
-  static void *oclocFreeOutputHandle = nullptr;
-  std::error_code build_errc = make_error_code(errc::build);
-
-  SetupLibrary(oclocInvokeHandle, oclocFreeOutputHandle, build_errc,
-               IPVersionVec);
-
-  // assemble ocloc args
-  std::string CombinedUserArgs = "";
-  for (const sycl::detail::string_view &UserArg : UserArgs) {
-    CombinedUserArgs += UserArg.data();
-    CombinedUserArgs += " ";
+  // Convert UserArgs to std::string
+  std::vector<std::string> StringUserArgs;
+  StringUserArgs.reserve(UserArgs.size());
+  for (const auto &Arg : UserArgs) {
+    StringUserArgs.emplace_back(Arg.data(), std::string_view(Arg).size());
   }
 
-  std::vector<const char *> Args = {"ocloc", "-q", "-spv_only", "-options",
-                                    CombinedUserArgs.c_str()};
-
-  uint32_t NumOutputs = 0;
-  uint8_t **Outputs = nullptr;
-  uint64_t *OutputLengths = nullptr;
-  char **OutputNames = nullptr;
-
-  const uint8_t *Sources[] = {
-      reinterpret_cast<const uint8_t *>(Source.c_str())};
-  const char *SourceName = "main.cl";
-  const uint64_t SourceLengths[] = {Source.length() + 1};
-
-  Args.push_back("-file");
-  Args.push_back(SourceName);
-
-  std::string IPVersionsStr;
-  std::string OpenCLCFeaturesOption;
-  std::string ExtensionsOption;
-  std::string VersionOption;
-  auto hasSingleDeviceOrSameDevices = [](auto &IPVersionVec) -> bool {
-    auto IPVersion = IPVersionVec.begin();
-    for (auto IPVersionItem = ++std::begin(IPVersionVec);
-         IPVersionItem != std::end(IPVersionVec); IPVersionItem++)
-      if (*IPVersionItem != *IPVersion)
-        return false;
-
-    return true;
-  };
-
-  assert(IPVersionVec.size() >= 1 &&
-         "At least one device must be provided to build_from_source(...).");
-  if (hasSingleDeviceOrSameDevices(IPVersionVec)) {
-    // If we have a single device (or all devices are the same) then pass it
-    // through -device option to enable all extensions supported by that device.
-    IPVersionsStr = IPVersionsToString({IPVersionVec.at(0)});
-    if (!IPVersionsStr.empty()) {
-      Args.push_back("-device");
-      Args.push_back(IPVersionsStr.c_str());
-    }
-  } else {
-    // Currently ocloc -spv_only doesn't produce spirv file when multiple
-    // devices are provided via -device option. That's why in this case we have
-    // to enable common extensions supported by all devices manually.
-
-    // Find maximum opencl version supported by all devices in IPVersionVec.
-    auto OpenCLVersions =
-        InvokeOclocQuery(IPVersionVec, "CL_DEVICE_OPENCL_C_ALL_VERSIONS");
-    const std::regex VersionRegEx("[0-9].[0-9].[0-9]");
-    std::string const &(*max)(std::string const &, std::string const &) =
-        std::max<std::string>;
-    auto MaxVersion = std::accumulate(
-        std::sregex_token_iterator(OpenCLVersions.begin(), OpenCLVersions.end(),
-                                   VersionRegEx),
-        std::sregex_token_iterator(), std::string("0.0.0"), max);
-
-    // Find common extensions supported by all devices in IPVersionVec.
-    // Lambda to accumulate extensions in the format +extension1,+extension2...
-    // to pass to ocloc as an option.
-    auto Accum = [](const std::string &acc, const std::string &s) {
-      return acc + (acc.empty() ? "+" : ",+") + s;
-    };
-
-    // If OpenCL version is higher that 3.0.0 then we need to enable OpenCL C
-    // features as well in addition to CL extensions.
-    if (MaxVersion >= "3.0.0") {
-      // construct a string which enables common extensions supported by
-      // devices.
-      auto OpenCLCFeatures =
-          InvokeOclocQuery(IPVersionVec, "CL_DEVICE_OPENCL_C_FEATURES");
-      const std::regex OpenCLCRegEx("__opencl_c_[^:]+");
-      auto OpenCLCFeaturesValue = std::accumulate(
-          std::sregex_token_iterator(OpenCLCFeatures.begin(),
-                                     OpenCLCFeatures.end(), OpenCLCRegEx),
-          std::sregex_token_iterator(), std::string(""), Accum);
-      if (OpenCLCFeaturesValue.size()) {
-        OpenCLCFeaturesOption = "-cl-ext=" + OpenCLCFeaturesValue;
-        Args.push_back("-internal_options");
-        Args.push_back(OpenCLCFeaturesOption.c_str());
-      }
-    }
-
-    // Accumulate CL extensions into an option.
-    auto Extensions = InvokeOclocQuery(IPVersionVec, "CL_DEVICE_EXTENSIONS");
-    const std::regex CLRegEx("cl_[^\\s]+");
-    auto ExtensionsValue =
-        std::accumulate(std::sregex_token_iterator(Extensions.begin(),
-                                                   Extensions.end(), CLRegEx),
-                        std::sregex_token_iterator(), std::string(""), Accum);
-    if (ExtensionsValue.size()) {
-      ExtensionsOption = "-cl-ext=" + ExtensionsValue;
-      Args.push_back("-internal_options");
-      Args.push_back(ExtensionsOption.c_str());
-    }
-  }
-  // invoke
-  decltype(::oclocInvoke) *OclocInvokeFunc =
-      reinterpret_cast<decltype(::oclocInvoke) *>(oclocInvokeHandle);
-  int CompileError =
-      OclocInvokeFunc(Args.size(), Args.data(), 1, Sources, SourceLengths,
-                      &SourceName, 0, nullptr, nullptr, nullptr, &NumOutputs,
-                      &Outputs, &OutputLengths, &OutputNames);
-
-  // gather the results ( the SpirV and the Log)
-  spirv_vec_t SpirV;
-  std::string CompileLog;
-  for (uint32_t i = 0; i < NumOutputs; i++) {
-    size_t NameLen = strlen(OutputNames[i]);
-    if (NameLen >= 4 && strstr(OutputNames[i], ".spv") != nullptr &&
-        Outputs[i] != nullptr) {
-      assert(SpirV.size() == 0 && "More than one SPIR-V output found.");
-      SpirV = spirv_vec_t(Outputs[i], Outputs[i] + OutputLengths[i]);
-    } else if (!strcmp(OutputNames[i], "stdout.log")) {
-      if (OutputLengths[i] > 0) {
-        const char *LogText = reinterpret_cast<const char *>(Outputs[i]);
-        CompileLog.append(LogText, OutputLengths[i]);
-        if (LogPtr != nullptr)
-          LogPtr->append(LogText, OutputLengths[i]);
-      }
-    }
+  // Use sycl-jit to compile OpenCL C to SPIR-V
+  auto &JIT = sycl::detail::jit_compiler::get_instance();
+  if (!JIT.isAvailable()) {
+    throw sycl::exception(
+        make_error_code(errc::feature_not_supported),
+        "JIT compiler is not available for OpenCL C compilation");
   }
 
-  // Try to free memory before reporting possible error.
-  decltype(::oclocFreeOutput) *OclocFreeOutputFunc =
-      reinterpret_cast<decltype(::oclocFreeOutput) *>(oclocFreeOutputHandle);
-  int MemFreeError =
-      OclocFreeOutputFunc(&NumOutputs, &Outputs, &OutputLengths, &OutputNames);
+  // We perform compilation.
+  std::string CompilationID = "opencl_compilation";
 
-  if (CompileError)
-    throw sycl::exception(build_errc, "ocloc reported compilation errors: {\n" +
-                                          CompileLog + "\n}");
+  // Note: IncludePairs is empty as we don't support headers via this path yet
+  // (ocloc didn't clearly either via this specific API).
+  std::vector<std::pair<std::string, std::string>> IncludePairs;
 
-  if (SpirV.empty())
-    throw sycl::exception(build_errc,
-                          "Unexpected output: ocloc did not return SPIR-V");
+  auto Result =
+      JIT.compileOpenCLC(CompilationID, Source, IncludePairs, StringUserArgs,
+                         LogPtr, ::jit_compiler::BinaryFormat::SPIRV);
 
-  if (MemFreeError)
-    throw sycl::exception(build_errc, "ocloc cannot safely free resources");
+  sycl_device_binaries Binaries = Result.first;
+
+  if (Binaries->NumDeviceBinaries == 0) {
+    throw sycl::exception(make_error_code(errc::build),
+                          "JIT compiler returned no binaries");
+  }
+
+  // Extract the first binary (assuming SPIR-V)
+  const auto &Binary = Binaries->DeviceBinaries[0];
+  const uint8_t *Start = Binary.BinaryStart;
+  size_t Size = Binary.BinaryEnd - Binary.BinaryStart;
+
+  spirv_vec_t SpirV(Start, Start + Size);
+
+  // Clean up binaries managed by JIT
+  JIT.destroyDeviceBinaries(Binaries);
 
   return SpirV;
 }
@@ -491,3 +381,4 @@ std::string OpenCLC_Profile(uint32_t IPVersion) {
 } // namespace ext::oneapi::experimental
 } // namespace _V1
 } // namespace sycl
+

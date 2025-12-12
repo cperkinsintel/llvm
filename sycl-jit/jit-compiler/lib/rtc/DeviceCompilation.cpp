@@ -13,6 +13,7 @@
 #include "translation/Translation.h"
 
 #include "clang/Lex/PreprocessorOptions.h"
+#include <clang/Basic/Diagnostic.h>
 #include <clang/Basic/DiagnosticDriver.h>
 #include <clang/Basic/Version.h>
 #include <clang/CodeGen/CodeGenAction.h>
@@ -32,6 +33,7 @@
 #include <clang/Options/Options.h>
 #include <clang/Tooling/CompilationDatabase.h>
 #include <clang/Tooling/Tooling.h>
+#include <llvm/Support/raw_ostream.h>
 
 #include <llvm/IR/DiagnosticInfo.h>
 #include <llvm/IR/DiagnosticPrinter.h>
@@ -243,10 +245,17 @@ class SYCLToolchain {
 
   std::vector<std::string> createCommandLine(const InputArgList &UserArgList,
                                              BinaryFormat Format,
-                                             std::string_view SourceFilePath) {
+                                             std::string_view SourceFilePath,
+                                             LanguageMode Mode) {
     DerivedArgList DAL{UserArgList};
     const auto &OptTable = getDriverOptTable();
-    DAL.AddFlagArg(nullptr, OptTable.getOption(OPT_fsycl_device_only));
+    if (Mode == LanguageMode::SYCL)
+      DAL.AddFlagArg(nullptr, OptTable.getOption(OPT_fsycl_device_only));
+
+    if (Mode == LanguageMode::OpenCLC && !DAL.hasArg(OPT_target) &&
+        !DAL.hasArg(OPT_triple)) {
+      DAL.AddJoinedArg(nullptr, OptTable.getOption(OPT_target), "spir64");
+    }
     // User args may contain options not intended for the frontend, but we
     // can't claim them here to tell the driver they're used later. Hence,
     // suppress the unused argument warning.
@@ -540,9 +549,10 @@ public:
            const char *SourceFilePath, FrontendAction &FEAction,
            IntrusiveRefCntPtr<FileSystem> FSOverlay = nullptr,
            DiagnosticConsumer *DiagConsumer = nullptr,
-           bool EnableAutoPCHOpts = false) {
+           bool EnableAutoPCHOpts = false,
+           LanguageMode Mode = LanguageMode::SYCL) {
     std::vector<std::string> CommandLine =
-        createCommandLine(UserArgList, Format, SourceFilePath);
+        createCommandLine(UserArgList, Format, SourceFilePath, Mode);
 
     auto FS = llvm::makeIntrusiveRefCnt<llvm::vfs::OverlayFileSystem>(
         llvm::vfs::getRealFileSystem());
@@ -726,7 +736,8 @@ Expected<std::string> jit_compiler::calculateHash(
 
   if (!SYCLToolchain::instance().run(UserArgList, Format, SourceFile.Path,
                                      HashAction,
-                                     getInMemoryFS(SourceFile, IncludeFiles)))
+                                     getInMemoryFS(SourceFile, IncludeFiles),
+                                     nullptr, false, LanguageMode::SYCL))
     return createStringError("Calculating source hash failed");
 
   Hasher.update(CLANG_VERSION_STRING);
@@ -750,7 +761,7 @@ Expected<std::string> jit_compiler::calculateHash(
 Expected<ModuleUPtr> jit_compiler::compileDeviceCode(
     InMemoryFile SourceFile, View<InMemoryFile> IncludeFiles,
     const InputArgList &UserArgList, std::string &BuildLog,
-    LLVMContext &Context, BinaryFormat Format) {
+    LLVMContext &Context, BinaryFormat Format, LanguageMode Mode) {
   TimeTraceScope TTS{"compileDeviceCode"};
 
   EmitLLVMOnlyAction ELOA{&Context};
@@ -760,7 +771,7 @@ Expected<ModuleUPtr> jit_compiler::compileDeviceCode(
   if (SYCLToolchain::instance().run(UserArgList, Format, SourceFile.Path, ELOA,
                                     getInMemoryFS(SourceFile, IncludeFiles),
                                     Wrapper.consumer(),
-                                    true /* EnableAutoPCHOpts */)) {
+                                    true /* EnableAutoPCHOpts */, Mode)) {
     return ELOA.takeModule();
   } else {
     return createStringError(BuildLog);
@@ -772,7 +783,10 @@ Expected<ModuleUPtr> jit_compiler::compileDeviceCode(
 // GPU targets (no native CPU). Keep in sync!
 static void getDeviceLibraries(const ArgList &Args,
                                SmallVectorImpl<std::string> &LibraryList,
-                               BinaryFormat Format) {
+                               BinaryFormat Format, LanguageMode Mode) {
+  if (Mode == LanguageMode::OpenCLC)
+    return; // OpenCL C does not link default SYCL libraries.
+
   // For CUDA/HIP we only need devicelib, early exit here.
   if (Format == BinaryFormat::PTX) {
     LibraryList.push_back(
@@ -822,20 +836,13 @@ static void getDeviceLibraries(const ArgList &Args,
   }
 }
 
-Error jit_compiler::linkDeviceLibraries(llvm::Module &Module,
-                                        const InputArgList &UserArgList,
-                                        std::string &BuildLog,
-                                        BinaryFormat Format) {
+llvm::Error jit_compiler::linkDeviceLibraries(
+    llvm::Module &Module, const llvm::opt::InputArgList &UserArgList,
+    std::string &BuildLog, BinaryFormat Format, LanguageMode Mode) {
   TimeTraceScope TTS{"linkDeviceLibraries"};
 
-  IntrusiveRefCntPtr<DiagnosticIDs> DiagID{new DiagnosticIDs};
-  DiagnosticOptions DiagOpts;
-  ClangDiagnosticWrapper Wrapper(BuildLog, &DiagOpts);
-  DiagnosticsEngine Diags(DiagID, DiagOpts, Wrapper.consumer(),
-                          /* ShouldOwnClient=*/false);
-
-  SmallVector<std::string> LibNames;
-  getDeviceLibraries(UserArgList, LibNames, Format);
+  SmallVector<std::string, 4> DeviceLibraries;
+  getDeviceLibraries(UserArgList, DeviceLibraries, Format, Mode);
   const bool IsCudaHIP =
       Format == BinaryFormat::PTX || Format == BinaryFormat::AMDGCN;
   if (IsCudaHIP) {
@@ -848,12 +855,12 @@ Error jit_compiler::linkDeviceLibraries(llvm::Module &Module,
 #endif
     Libclc.append(Format == BinaryFormat::PTX ? "nvptx64-nvidia-cuda.bc"
                                               : "amdgcn-amd-amdhsa.bc");
-    LibNames.push_back(Libclc);
+    DeviceLibraries.push_back(Libclc);
   }
 
   LLVMContext &Context = Module.getContext();
   SYCLToolchain &TC = SYCLToolchain::instance();
-  for (const std::string &LibName : LibNames) {
+  for (const std::string &LibName : DeviceLibraries) {
     std::string LibPath = (LibName.find("libspirv") != std::string::npos)
                               ? (TC.getLibclcDir() + LibName).str()
                               : (TC.getPrefix() + "/lib/" + LibName).str();
@@ -873,6 +880,11 @@ Error jit_compiler::linkDeviceLibraries(llvm::Module &Module,
 
   // For GPU targets we need to link against vendor provided libdevice.
   if (IsCudaHIP) {
+    IntrusiveRefCntPtr<DiagnosticIDs> DiagID(new DiagnosticIDs());
+    auto *DiagOpts = new DiagnosticOptions();
+    TextDiagnosticPrinter *DiagClient =
+        new TextDiagnosticPrinter(llvm::errs(), *DiagOpts);
+    DiagnosticsEngine Diags(DiagID, *DiagOpts, DiagClient);
     Triple T{Module.getTargetTriple()};
     Driver D{TC.getClangXXExe(), T.getTriple(), Diags};
     auto [CPU, Features] =
@@ -943,9 +955,9 @@ template <class PassClass> static bool runModulePass(llvm::Module &M) {
 static IRSplitMode getDeviceCodeSplitMode(const InputArgList &UserArgList) {
   // This is the (combined) logic from
   // `get[NonTriple|Triple]BasedSYCLPostLinkOpts` in
-  // `clang/lib/Driver/ToolChains/Clang.cpp`: Default is auto mode, but the user
-  // can override it by specifying the `-fsycl-device-code-split=` option. The
-  // no-argument variant `-fsycl-device-code-split` is ignored.
+  // `clang/lib/Driver/ToolChains/Clang.cpp`: Default is auto mode, but the
+  // user can override it by specifying the `-fsycl-device-code-split=`
+  // option. The no-argument variant `-fsycl-device-code-split` is ignored.
   if (auto *Arg = UserArgList.getLastArg(OPT_fsycl_device_code_split_EQ)) {
     StringRef ArgVal{Arg->getValue()};
     if (ArgVal == "per_kernel") {
@@ -1071,8 +1083,8 @@ jit_compiler::performPostLink(ModuleUPtr Module,
       if (MDesc->isESIMD()) {
         // `sycl-post-link` has a `-lower-esimd` option, but there's no clang
         // driver option to influence it. Rather, the driver sets it
-        // unconditionally in the multi-file output mode, which we are mimicking
-        // here.
+        // unconditionally in the multi-file output mode, which we are
+        // mimicking here.
         lowerEsimdConstructs(*MDesc, PerformOpts);
       }
 
@@ -1094,11 +1106,11 @@ jit_compiler::performPostLink(ModuleUPtr Module,
           computeModuleProperties(MDesc->getModule(), MDesc->entries(), PropReq,
                                   AllowDeviceImageDependencies);
 
-      // When the split mode is none, the required work group size will be added
-      // to the whole module, which will make the runtime unable to launch the
-      // other kernels in the module that have different required work group
-      // sizes or no required work group sizes. So we need to remove the
-      // required work group size metadata in this case.
+      // When the split mode is none, the required work group size will be
+      // added to the whole module, which will make the runtime unable to
+      // launch the other kernels in the module that have different required
+      // work group sizes or no required work group sizes. So we need to
+      // remove the required work group size metadata in this case.
       if (SplitMode == module_split::SPLIT_NONE) {
         Properties.remove(PropSetRegTy::SYCL_DEVICE_REQUIREMENTS,
                           PropSetRegTy::PROPERTY_REQD_WORK_GROUP_SIZE);

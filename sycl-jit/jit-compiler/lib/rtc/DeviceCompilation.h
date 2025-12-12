@@ -21,6 +21,8 @@
 
 namespace jit_compiler {
 
+enum class LanguageMode { SYCL, OpenCLC };
+
 using ModuleUPtr = std::unique_ptr<llvm::Module>;
 
 llvm::Expected<std::string>
@@ -31,11 +33,12 @@ llvm::Expected<ModuleUPtr>
 compileDeviceCode(InMemoryFile SourceFile, View<InMemoryFile> IncludeFiles,
                   const llvm::opt::InputArgList &UserArgList,
                   std::string &BuildLog, llvm::LLVMContext &Context,
-                  BinaryFormat Format);
+                  BinaryFormat Format, LanguageMode Mode);
 
 llvm::Error linkDeviceLibraries(llvm::Module &Module,
                                 const llvm::opt::InputArgList &UserArgList,
-                                std::string &BuildLog, BinaryFormat Format);
+                                std::string &BuildLog, BinaryFormat Format,
+                                LanguageMode Mode);
 
 using PostLinkResult = std::pair<RTCBundleInfo, llvm::SmallVector<ModuleUPtr>>;
 llvm::Expected<PostLinkResult>

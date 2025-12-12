@@ -50,6 +50,12 @@ public:
       const std::vector<std::string> &UserArgs, std::string *LogPtr,
       ::jit_compiler::BinaryFormat Format);
 
+  std::pair<sycl_device_binaries, std::string> compileOpenCLC(
+      const std::string &CompilationID, const std::string &Source,
+      const std::vector<std::pair<std::string, std::string>> &IncludePairs,
+      const std::vector<std::string> &UserArgs, std::string *LogPtr,
+      ::jit_compiler::BinaryFormat Format);
+
   void destroyDeviceBinaries(sycl_device_binaries Binaries);
 
   bool isAvailable() { return Available; }
@@ -88,12 +94,14 @@ private:
       decltype(::jit_compiler::materializeSpecConstants) *;
   using CalculateHashFuncT = decltype(::jit_compiler::calculateHash) *;
   using CompileSYCLFuncT = decltype(::jit_compiler::compileSYCL) *;
+  using CompileOpenCLCFuncT = decltype(::jit_compiler::compileOpenCLC) *;
   using DestroyBinaryFuncT = decltype(::jit_compiler::destroyBinary) *;
   using ResetConfigFuncT = decltype(::jit_compiler::resetJITConfiguration) *;
   using AddToConfigFuncT = decltype(::jit_compiler::addToJITConfiguration) *;
   MaterializeSpecConstFuncT MaterializeSpecConstHandle = nullptr;
   CalculateHashFuncT CalculateHashHandle = nullptr;
   CompileSYCLFuncT CompileSYCLHandle = nullptr;
+  CompileOpenCLCFuncT CompileOpenCLCHandle = nullptr;
   DestroyBinaryFuncT DestroyBinaryHandle = nullptr;
   ResetConfigFuncT ResetConfigHandle = nullptr;
   AddToConfigFuncT AddToConfigHandle = nullptr;

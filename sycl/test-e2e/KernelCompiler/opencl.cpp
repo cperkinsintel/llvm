@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-// REQUIRES: ocloc && (opencl || level_zero)
+// REQUIRES: opencl || level_zero
 
 // -- Test the kernel_compiler with OpenCL source.
 // RUN: %{build} -o %t.out
