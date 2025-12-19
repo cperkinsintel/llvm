@@ -47,6 +47,28 @@ NEOReadDebugKeys=1 UseBindlessMode=1 UseExternalAllocatorForSshAndDsh=1 ./ru_cp_
 clang++ -fsycl -fsycl-targets=spir64_gen -Xs '-device bmg' -DVERBOSE_PRINT=1 -I$VULKAN_SDK/include -L$VULKAN_SDK/lib -lvulkan -DTEST_L0_SUPPORTED_VK_FORMAT  -o rp_aot.bin reduce_prob.cpp
 
 
+
+
+$ NEOReadDebugKeys=1 UseBindlessMode=1 UseExternalAllocatorForSshAndDsh=1 ./ru_cp_res.bin
+...
+Calling into SYCL with interop memory and semaphore handles
+
+        Kernel submission failed! level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)
+
+$ dmesg -T | tail -n 10
+...
+// These show up after the UR_RESULT_ERROR_DEVICE_LOST
+[Thu Dec 18 11:47:21 2025] xe 0000:03:00.0: [drm] GT0: Engine reset: engine_class=ccs, logical_mask: 0x1, guc_id=2
+[Thu Dec 18 11:47:23 2025] xe 0000:03:00.0: [drm] exec queue reset detected
+[Thu Dec 18 11:47:24 2025] xe 0000:03:00.0: [drm] exec queue reset detected
+[Thu Dec 18 11:47:25 2025] xe 0000:03:00.0: [drm] exec queue reset detected
+
+
+
+
+Note: 	jfel-arl-799814.jf.intel.com   seems to have more space free
+
+
 */
 
 #include "../../CommonUtils/vulkan_common.hpp"
