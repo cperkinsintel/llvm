@@ -1,6 +1,6 @@
 //===--------- platform.cpp - Level Zero Adapter --------------------------===//
 //
-// Copyright (C) 2023 Intel Corporation
+// Copyright (C) 2023-2026 Intel Corporation
 //
 // Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM
 // Exceptions. See LICENSE.TXT
@@ -526,6 +526,42 @@ ur_result_t ur_platform_handle_t_::initialize() {
   ZeMemGetPitchFor2dImageExt.Supported =
       ZeMemGetPitchFor2dImageExt.zeMemGetPitchFor2dImage != nullptr;
 
+  // Populate Graph Extension structure.
+  std::unordered_map<std::string, void **> ZeGraphFuncNameToAddrMap = {
+      {"zeGraphCreateExp",
+       reinterpret_cast<void **>(&ZeGraphExt.zeGraphCreateExp)},
+      {"zeCommandListBeginGraphCaptureExp",
+       reinterpret_cast<void **>(
+           &ZeGraphExt.zeCommandListBeginGraphCaptureExp)},
+      {"zeCommandListBeginCaptureIntoGraphExp",
+       reinterpret_cast<void **>(
+           &ZeGraphExt.zeCommandListBeginCaptureIntoGraphExp)},
+      {"zeCommandListEndGraphCaptureExp",
+       reinterpret_cast<void **>(&ZeGraphExt.zeCommandListEndGraphCaptureExp)},
+      {"zeCommandListInstantiateGraphExp",
+       reinterpret_cast<void **>(&ZeGraphExt.zeCommandListInstantiateGraphExp)},
+      {"zeCommandListAppendGraphExp",
+       reinterpret_cast<void **>(&ZeGraphExt.zeCommandListAppendGraphExp)},
+      {"zeGraphDestroyExp",
+       reinterpret_cast<void **>(&ZeGraphExt.zeGraphDestroyExp)},
+      {"zeExecutableGraphDestroyExp",
+       reinterpret_cast<void **>(&ZeGraphExt.zeExecutableGraphDestroyExp)},
+      {"zeCommandListIsGraphCaptureEnabledExp",
+       reinterpret_cast<void **>(
+           &ZeGraphExt.zeCommandListIsGraphCaptureEnabledExp)},
+      {"zeGraphIsEmptyExp",
+       reinterpret_cast<void **>(&ZeGraphExt.zeGraphIsEmptyExp)},
+      {"zeGraphDumpContentsExp",
+       reinterpret_cast<void **>(&ZeGraphExt.zeGraphDumpContentsExp)},
+  };
+
+  ZeGraphExt.Supported = true;
+  for (auto &[funcName, funcAddr] : ZeGraphFuncNameToAddrMap) {
+    ZE_CALL_NOCHECK(zeDriverGetExtensionFunctionAddress,
+                    (ZeDriver, funcName.c_str(), funcAddr));
+    ZeGraphExt.Supported &= (*funcAddr != nullptr);
+  }
+
   if (this->isDriverVersionNewerOrSimilar(1, 14, 36035)) {
     ZeCommandListAppendLaunchKernelWithArgumentsExt.Supported = true;
   } else {
@@ -541,6 +577,16 @@ ur_result_t ur_platform_handle_t_::initialize() {
   ZeCommandListAppendLaunchKernelWithArgumentsExt
       .DisableZeLaunchKernelWithArgs =
       getenv_tobool("UR_L0_V2_DISABLE_ZE_LAUNCH_KERNEL_WITH_ARGS", false);
+
+  ZE_CALL_NOCHECK(zeDriverGetExtensionFunctionAddress,
+                  (ZeDriver, "zeCommandListAppendHostFunction",
+                   reinterpret_cast<void **>(
+                       &ZeHostTaskExt.zeCommandListAppendHostFunction)));
+
+  ZeHostTaskExt.Supported =
+      ZeHostTaskExt.zeCommandListAppendHostFunction != nullptr;
+
+  ZeCopyOffloadFlagSupported = this->isDriverVersionNewerOrSimilar(1, 14, 0);
 
   return UR_RESULT_SUCCESS;
 }
