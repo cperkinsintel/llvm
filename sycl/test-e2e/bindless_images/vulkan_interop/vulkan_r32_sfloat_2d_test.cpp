@@ -51,6 +51,20 @@ Sampled values from image:
 
  */
 
+ /*
+ * Minimal Vulkan Test: VK_FORMAT_R32_SFLOAT 2D Sampled Image
+ * 
+ * Compilation (Linux, clang++):
+ * clang++ -std=c++17 -o vulkan_r32_sfloat_2d_test vulkan_r32_sfloat_2d_test.cpp -lvulkan
+ * 
+ * Prerequisites:
+ * - Vulkan SDK installed
+ * - Vulkan loader library available
+ * 
+ * Run with:
+ * ./vulkan_r32_sfloat_2d_test
+ */
+
 #include <vulkan/vulkan.h>
 #include <iostream>
 #include <vector>
@@ -355,6 +369,113 @@ int main() {
     CHECK_VK(vkQueueWaitIdle(computeQueue), "Failed to wait for queue");
     std::cout << "✓ Uploaded test data to image" << std::endl;
 
+    // DIAGNOSTIC 1: Copy image back to a buffer to verify upload worked
+    std::cout << "\n=== Diagnostic: Verifying Upload ===" << std::endl;
+    
+    VkBufferCreateInfo verifyBufferInfo = {};
+    verifyBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    verifyBufferInfo.size = IMAGE_WIDTH * IMAGE_HEIGHT * sizeof(float);
+    verifyBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    verifyBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    VkBuffer verifyBuffer;
+    CHECK_VK(vkCreateBuffer(device, &verifyBufferInfo, nullptr, &verifyBuffer), "Failed to create verify buffer");
+
+    VkMemoryRequirements verifyMemReq;
+    vkGetBufferMemoryRequirements(device, verifyBuffer, &verifyMemReq);
+
+    VkMemoryAllocateInfo verifyAllocInfo = {};
+    verifyAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    verifyAllocInfo.allocationSize = verifyMemReq.size;
+    verifyAllocInfo.memoryTypeIndex = findMemoryType(physicalDevice, verifyMemReq.memoryTypeBits,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    VkDeviceMemory verifyMemory;
+    CHECK_VK(vkAllocateMemory(device, &verifyAllocInfo, nullptr, &verifyMemory), "Failed to allocate verify memory");
+    CHECK_VK(vkBindBufferMemory(device, verifyBuffer, verifyMemory, 0), "Failed to bind verify buffer");
+
+    // Copy image to verify buffer
+    vkResetCommandBuffer(commandBuffer, 0);
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    // Transition to TRANSFER_SRC
+    VkImageMemoryBarrier transferBarrier = {};
+    transferBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    transferBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    transferBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    transferBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    transferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    transferBarrier.image = image;
+    transferBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    transferBarrier.subresourceRange.baseMipLevel = 0;
+    transferBarrier.subresourceRange.levelCount = 1;
+    transferBarrier.subresourceRange.baseArrayLayer = 0;
+    transferBarrier.subresourceRange.layerCount = 1;
+    transferBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    transferBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+        0, 0, nullptr, 0, nullptr, 1, &transferBarrier);
+
+    VkBufferImageCopy copyRegion = {};
+    copyRegion.bufferOffset = 0;
+    copyRegion.bufferRowLength = 0;
+    copyRegion.bufferImageHeight = 0;
+    copyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    copyRegion.imageSubresource.mipLevel = 0;
+    copyRegion.imageSubresource.baseArrayLayer = 0;
+    copyRegion.imageSubresource.layerCount = 1;
+    copyRegion.imageOffset = {0, 0, 0};
+    copyRegion.imageExtent = {IMAGE_WIDTH, IMAGE_HEIGHT, 1};
+
+    vkCmdCopyImageToBuffer(commandBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, verifyBuffer, 1, &copyRegion);
+
+    // Transition back to SHADER_READ_ONLY
+    transferBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    transferBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    transferBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    transferBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        0, 0, nullptr, 0, nullptr, 1, &transferBarrier);
+
+    vkEndCommandBuffer(commandBuffer);
+
+    CHECK_VK(vkQueueSubmit(computeQueue, 1, &submitInfo, VK_NULL_HANDLE), "Failed to submit verify command");
+    CHECK_VK(vkQueueWaitIdle(computeQueue), "Failed to wait for queue");
+
+    // Read back verification data
+    void* verifyData;
+    vkMapMemory(device, verifyMemory, 0, verifyBufferInfo.size, 0, &verifyData);
+    float* verifyFloats = static_cast<float*>(verifyData);
+
+    std::cout << "Direct readback from image (bypass sampling):" << std::endl;
+    bool uploadWorked = true;
+    const float tolerance = 0.01f;
+    for (uint32_t y = 0; y < IMAGE_HEIGHT; y++) {
+        for (uint32_t x = 0; x < IMAGE_WIDTH; x++) {
+            uint32_t idx = y * IMAGE_WIDTH + x;
+            float expected = static_cast<float>(idx) / (IMAGE_WIDTH * IMAGE_HEIGHT - 1);
+            float actual = verifyFloats[idx];
+            bool match = std::fabs(actual - expected) < tolerance;
+            
+            std::cout << "[" << x << "," << y << "] = " << actual 
+                     << " (expected: " << expected << ") "
+                     << (match ? "✓" : "✗") << std::endl;
+            
+            if (!match) uploadWorked = false;
+        }
+    }
+
+    vkUnmapMemory(device, verifyMemory);
+    
+    if (uploadWorked) {
+        std::cout << "✓ Upload verification PASSED - data is in the image correctly" << std::endl;
+    } else {
+        std::cout << "✗ Upload verification FAILED - data didn't make it to the image!" << std::endl;
+    }
+    std::cout << std::endl;
+
     // Create image view
     VkImageViewCreateInfo viewInfo = {};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -533,9 +654,46 @@ int main() {
     vkResetCommandBuffer(commandBuffer, 0);
     vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
+    // DIAGNOSTIC 2: Add explicit memory barrier to ensure image is ready
+    VkImageMemoryBarrier preComputeBarrier = {};
+    preComputeBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    preComputeBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    preComputeBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    preComputeBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    preComputeBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    preComputeBarrier.image = image;
+    preComputeBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    preComputeBarrier.subresourceRange.baseMipLevel = 0;
+    preComputeBarrier.subresourceRange.levelCount = 1;
+    preComputeBarrier.subresourceRange.baseArrayLayer = 0;
+    preComputeBarrier.subresourceRange.layerCount = 1;
+    preComputeBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_SHADER_READ_BIT;
+    preComputeBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+    vkCmdPipelineBarrier(commandBuffer, 
+        VK_PIPELINE_STAGE_TRANSFER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        0, 0, nullptr, 0, nullptr, 1, &preComputeBarrier);
+
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
     vkCmdDispatch(commandBuffer, IMAGE_WIDTH, IMAGE_HEIGHT, 1);
+
+    // Add barrier to ensure compute writes are complete
+    VkBufferMemoryBarrier bufferBarrier = {};
+    bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    bufferBarrier.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
+    bufferBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bufferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bufferBarrier.buffer = outputBuffer;
+    bufferBarrier.offset = 0;
+    bufferBarrier.size = VK_WHOLE_SIZE;
+
+    vkCmdPipelineBarrier(commandBuffer,
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        VK_PIPELINE_STAGE_HOST_BIT,
+        0, 0, nullptr, 1, &bufferBarrier, 0, nullptr);
 
     vkEndCommandBuffer(commandBuffer);
 
@@ -551,14 +709,14 @@ int main() {
     std::cout << "\n=== Verification ===" << std::endl;
     std::cout << "Sampled values from image:" << std::endl;
     bool testPassed = true;
-    const float tolerance = 0.01f;
+    const float tolerance2 = 0.01f;
 
     for (uint32_t y = 0; y < IMAGE_HEIGHT; y++) {
         for (uint32_t x = 0; x < IMAGE_WIDTH; x++) {
             uint32_t idx = y * IMAGE_WIDTH + x;
             float expected = static_cast<float>(idx) / (IMAGE_WIDTH * IMAGE_HEIGHT - 1);
             float actual = outputFloats[idx];
-            bool match = std::fabs(actual - expected) < tolerance;
+            bool match = std::fabs(actual - expected) < tolerance2;
             
             std::cout << "[" << x << "," << y << "] = " << actual 
                      << " (expected: " << expected << ") "
@@ -578,6 +736,8 @@ int main() {
     }
 
     // Cleanup
+    vkDestroyBuffer(device, verifyBuffer, nullptr);
+    vkFreeMemory(device, verifyMemory, nullptr);
     vkDestroyPipeline(device, computePipeline, nullptr);
     vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     vkDestroyShaderModule(device, computeShaderModule, nullptr);
