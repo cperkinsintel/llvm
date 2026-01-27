@@ -320,7 +320,8 @@ bool run_test(sycl::range<NDims> dims, sycl::range<NDims> localSize,
   // Create input image memory
   auto inputImage = vkutil::createImage(
       imgType, format, {width, height, depth},
-      VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+      // cp adding sampled usage flag
+      VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
       1 /*mipLevels*/
 #ifdef ENABLE_LINEAR_TILING
       ,
