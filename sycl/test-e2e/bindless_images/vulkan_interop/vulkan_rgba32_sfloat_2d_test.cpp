@@ -230,14 +230,24 @@ int main() {
     queueCreateInfo.queueCount = 1;
     queueCreateInfo.pQueuePriorities = &queuePriority;
 
+    // Define the extensions we need for Interop
+    const char* deviceExtensions[] = {
+        VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME
+    };
+
     VkDeviceCreateInfo deviceCreateInfo = {};
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     deviceCreateInfo.queueCreateInfoCount = 1;
     deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+    
+    // --> ADD THIS: Enable the extensions
+    deviceCreateInfo.enabledExtensionCount = 2;
+    deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions;
 
     VkDevice device;
     CHECK_VK(vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device), "Failed to create device");
-    std::cout << "✓ Created logical device" << std::endl;
+    std::cout << "✓ Created logical device with External Memory extensions" << std::endl;
 
     VkQueue computeQueue;
     vkGetDeviceQueue(device, computeQueueFamily, 0, &computeQueue);
