@@ -33,49 +33,86 @@
 
 
 
+
 int main(int argc, char** argv) {
-    std::cout << "Running Unsampled Test..." << std::endl;
+    bool useSemaphores = false;
+    if (argc > 1 && std::string(argv[1]) == "--semaphores") {
+        useSemaphores = true;
+    }
+
+    std::cout << "Running Unsampled Test | Semaphores: "  << (useSemaphores ? "ON" : "OFF") << std::endl;
 
     // 1. Setup Vulkan
     VulkanContext vkCtx = createVulkanContext();
     VkExtent3D extent = {4, 4, 1};
     ImageResources imgRes = createExportableImage(vkCtx, extent, VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_TYPE_2D);
 
-    // 2. Upload Data (Transitions to GENERAL)
-    uploadAndVerify(vkCtx, imgRes);
+    // 2. Prepare Semaphore (if enabled)
+    VkSemaphore vkSem = VK_NULL_HANDLE;
+    if (useSemaphores) {
+        vkSem = createExportableSemaphore(vkCtx);
+    }
 
-    // 3. Export FD
-    int fd = getMemFd(vkCtx, imgRes.memory);
-    std::cout << "✓ Got FD: " << fd << std::endl;
+    // 3. Upload Data (Signals semaphore if provided)
+    uploadAndVerify(vkCtx, imgRes, vkSem);
 
-    // 4. SYCL Interop
+    // 4. Export Handles
+    int memFd = getMemFd(vkCtx, imgRes.memory);
+    int semFd = -1;
+    if (useSemaphores) {
+        semFd = getSemaphoreFd(vkCtx, vkSem);
+        std::cout << "Got Semaphore FD: " << semFd << std::endl;
+    }
+
+    // 5. SYCL Interop
     namespace syclexp = sycl::ext::oneapi::experimental;
     
     try {
         sycl::queue q;
-        std::cout << "✓ SYCL Device: " << q.get_device().get_info<sycl::info::device::name>() << std::endl;
         
-        // Import
+        // Import Memory
         size_t size = extent.width * extent.height * 4 * sizeof(float);
         syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{
-            fd, syclexp::external_mem_handle_type::opaque_fd, size
+            memFd, syclexp::external_mem_handle_type::opaque_fd, size
         };
         syclexp::external_mem extMem = syclexp::import_external_memory(extMemDesc, q.get_device(), q.get_context());
 
-        // Map
+        // Import Semaphore (If enabled)
+        syclexp::external_semaphore extSem;
+        if (useSemaphores) {
+             syclexp::external_semaphore_descriptor<syclexp::resource_fd> extSemDesc{
+                semFd, syclexp::external_semaphore_handle_type::opaque_fd
+            };
+            extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
+        }
+
+        // Map & Create Handle
         syclexp::image_descriptor imgDesc(
-            sycl::range<2>(extent.width, extent.height),
-            4, sycl::image_channel_type::fp32
+            sycl::range<2>(extent.width, extent.height), 4, sycl::image_channel_type::fp32
         );
         syclexp::image_mem_handle devHandle = syclexp::map_external_image_memory(extMem, imgDesc, q.get_device(), q.get_context());
-
-        // Create Unsampled Handle
         syclexp::unsampled_image_handle unsampledHandle = syclexp::create_image(devHandle, imgDesc, q.get_device(), q.get_context());
 
-        // Kernel
+        // Run Kernel
         sycl::buffer<float, 1> checkBuf(extent.width * extent.height);
+        
+        // Step A: Handle Semaphore Wait (as a separate submission)
+        sycl::event dependencyEvent;
+        if (useSemaphores) {
+            dependencyEvent = q.submit([&](sycl::handler& h) {
+                h.ext_oneapi_wait_external_semaphore(extSem);
+            });
+        }
+
+        // Step B: Submit the Kernel
         q.submit([&](sycl::handler& h) {
+            // If we have a semaphore wait event, depend on it
+            if (useSemaphores) {
+                h.depends_on(dependencyEvent);
+            }
+
             sycl::accessor outAcc(checkBuf, h, sycl::write_only);
+
             h.parallel_for(sycl::range<2>(extent.width, extent.height), [=](sycl::item<2> item) {
                 int x = item.get_id(0);
                 int y = item.get_id(1);
@@ -84,22 +121,25 @@ int main(int argc, char** argv) {
             });
         }).wait();
 
-        std::cout << "✓ SYCL Kernel Executed." << std::endl;
+        std::cout << "SYCL Kernel Executed." << std::endl;
         
-        // Verify
+        // ... [Verify Logic Same as Before] ...
         sycl::host_accessor hostAcc(checkBuf, sycl::read_only);
         bool passed = true;
         for(int i=0; i<16; ++i) {
             float expected = (float)i / 15.0f;
             if(std::abs(hostAcc[i] - expected) > 0.01f) passed = false;
         }
+        if(passed) std::cout << "SUCCESS!" << std::endl;
+        else std::cout << "FAILURE!" << std::endl;
 
-        if(passed) std::cout << "✓ SUCCESS!" << std::endl;
-        else std::cout << "✗ FAILURE!" << std::endl;
-
-        // Cleanup SYCL
+        // Cleanup
         syclexp::destroy_image_handle(unsampledHandle, q.get_device(), q.get_context());
         syclexp::release_external_memory(extMem, q.get_device(), q.get_context());
+        if (useSemaphores) {
+            syclexp::release_external_semaphore(extSem, q.get_device(), q.get_context());
+            vkDestroySemaphore(vkCtx.device, vkSem, nullptr);
+        }
 
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
