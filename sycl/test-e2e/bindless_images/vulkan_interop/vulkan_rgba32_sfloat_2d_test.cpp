@@ -1,14 +1,16 @@
 /*
- * Minimal Vulkan Test: VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image
- * 
- * Compilation (Linux, clang++):
- * clang++ -std=c++17 -o v_test.bin vulkan_rgba32_sfloat_2d_test.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
- * 
-    export VULTURE_SDK=/iusers/cperkins/sycl_workspace/1.4.328.1/x86_64/
-   clang++ -std=c++17 -o v_test.bin vulkan_r32_sfloat_2d_test.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
+  Minimal Vulkan Test: VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image
+
+  $VULKAN_SDK/bin/glslangValidator -V vulkan_shader.comp -o vulkan_shader.spv
+
+  clang++ -std=c++17 -o v_test.bin vulkan_rgba32_sfloat_2d_test.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
+  
+  export VULTURE_SDK=/iusers/cperkins/sycl_workspace/1.4.328.1/x86_64/
+  clang++ -std=c++17 -o v_test.bin vulkan_r32_sfloat_2d_test.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
 
 
     ./v_test.bin 
+
 Starting Vulkan VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image Test...
 ⚠ Validation layers not available
 ✓ Created Vulkan instance
@@ -268,6 +270,18 @@ int main() {
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = findMemoryType(physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+
+    // Enable the extension capability (requires VK_KHR_external_memory_fd)
+    VkExportMemoryAllocateInfo exportAllocInfo = {};
+    exportAllocInfo.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO;
+    // On Linux/Intel, use OPAQUE_FD. On Windows, use OPAQUE_WIN32.
+    exportAllocInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+    // Chain it to existing allocation info
+    allocInfo.pNext = &exportAllocInfo;
+
+
+
 
     VkDeviceMemory imageMemory;
     CHECK_VK(vkAllocateMemory(device, &allocInfo, nullptr, &imageMemory), "Failed to allocate image memory");
