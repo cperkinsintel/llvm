@@ -157,6 +157,18 @@ inline ImageResources createExportableImage(VulkanContext& ctx, VkExtent3D exten
     return res;
 }
 
+inline VkSemaphore createExportableSemaphore(VulkanContext& ctx) {
+    VkExportSemaphoreCreateInfo exportInfo = { VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO };
+    exportInfo.handleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
+
+    VkSemaphoreCreateInfo semInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+    semInfo.pNext = &exportInfo;
+
+    VkSemaphore sem;
+    CHECK_VK(vkCreateSemaphore(ctx.device, &semInfo, nullptr, &sem), "Semaphore creation");
+    return sem;
+}
+
 // Uploads gradient data and transitions layout to GENERAL
 // Returns true if the internal readback check passed
 inline bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes) {
@@ -271,6 +283,19 @@ inline int getMemFd(VulkanContext& ctx, VkDeviceMemory mem) {
     VkMemoryGetFdInfoKHR info = { VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR };
     info.memory = mem;
     info.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+    
+    int fd = -1;
+    func(ctx.device, &info, &fd);
+    return fd;
+}
+
+inline int getSemaphoreFd(VulkanContext& ctx, VkSemaphore sem) {
+    auto func = (PFN_vkGetSemaphoreFdKHR)vkGetDeviceProcAddr(ctx.device, "vkGetSemaphoreFdKHR");
+    if (!func) return -1;
+    
+    VkSemaphoreGetFdInfoKHR info = { VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR };
+    info.semaphore = sem;
+    info.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
     
     int fd = -1;
     func(ctx.device, &info, &fd);
