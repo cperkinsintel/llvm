@@ -9,6 +9,7 @@
   clang++ -fsycl -std=c++17 -o vsu_test.bin vulkan_sycl_unsampled.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
 
     ./vsu_test.bin 
+    ./vsu_test.bin --semaphores
 
 
 
