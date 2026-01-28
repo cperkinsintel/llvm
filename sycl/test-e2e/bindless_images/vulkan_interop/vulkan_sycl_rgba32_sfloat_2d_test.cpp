@@ -754,6 +754,8 @@ int main() {
     CHECK_VK(vkGetMemoryFdKHR(device, &fdInfo, &fd), "Failed to get file descriptor");
     std::cout << "✓ Got Opaque FD: " << fd << std::endl;
 
+    // ... inside main, after getting the FD ...
+
     // 2. SYCL SETUP
     try {
         sycl::queue q;
@@ -768,33 +770,39 @@ int main() {
             imgSize
         };
 
-        // FIX 1: Use 'auto' or 'syclexp::external_mem'. 
-        // Do not force it into 'image_mem_handle'.
+        // Step A: Import the raw FD
         syclexp::external_mem extMem = syclexp::import_external_memory(
             extMemDesc, q.get_device(), q.get_context());
-        
-        // Extract the actual handle for creation
-        //syclexp::image_mem_handle deviceMemHandle = extMem.get_handle();
-        // Extension: mapped memory handle from external memory
-         syclexp::image_mem_handle deviceMemHandle = syclexp::map_external_image_memory(extMem, desc, q.get_device(), q.get_context());
-        
-        std::cout << "✓ Imported FD into Bindless Memory" << std::endl;
+            
+        std::cout << "✓ Imported FD as External Memory" << std::endl;
 
-        // 4. CREATE BINDLESS IMAGE HANDLE
+        // Step B: Define the Image Descriptor EARLY
+        // We need this to tell the mapper how to interpret the raw bytes
         syclexp::image_descriptor imgDesc(
             sycl::range<2>(IMAGE_WIDTH, IMAGE_HEIGHT),
             4, // num_channels
             sycl::image_channel_type::fp32
         );
 
+        // Step C: Map External Memory to an Image Handle
+        // This was the missing link!
+        syclexp::image_mem_handle deviceMemHandle = syclexp::map_external_image_memory(
+            extMem, 
+            imgDesc, 
+            q.get_device(), 
+            q.get_context()
+        );
+        
+        std::cout << "✓ Mapped External Memory to Image Handle" << std::endl;
+
+        // 4. CREATE BINDLESS IMAGE HANDLE
         syclexp::bindless_image_sampler sampler(
             sycl::addressing_mode::clamp_to_edge,
             sycl::coordinate_normalization_mode::unnormalized,
             sycl::filtering_mode::linear
         );
 
-        // FIX 2: Argument Order and Types
-        // Order: (Handle, Sampler, Desc, Device, Context)
+        // Create the actual sampled view
         syclexp::sampled_image_handle imgHandle = syclexp::create_image(
             deviceMemHandle, 
             sampler, 
@@ -817,7 +825,6 @@ int main() {
 
                 sycl::float2 coords(x + 0.5f, y + 0.5f);
                 
-                // Explicit template argument <sycl::float4> required
                 sycl::float4 pixel = syclexp::sample_image<sycl::float4>(imgHandle, coords);
 
                 outAcc[y * IMAGE_WIDTH + x] = pixel.x();
@@ -827,13 +834,13 @@ int main() {
         std::cout << "✓ SYCL Bindless Kernel Executed" << std::endl;
 
         // 6. CLEANUP
-        // Destroy the image handle first
+        // Destroy the view
         syclexp::destroy_image_handle(imgHandle, q.get_device(), q.get_context());
         
-        // FIX 3: Release the *External* memory, do not use free_image_mem
+        // Release the import (this tears down the mapping too)
         syclexp::release_external_memory(extMem, q.get_device(), q.get_context());
         
-        // ... Verify Logic (Same as before) ...
+        // ... Verification Logic (Same as before) ...
         sycl::host_accessor hostAcc(checkBuf, sycl::read_only);
         
         std::cout << "\n=== SYCL Verification ===" << std::endl;
