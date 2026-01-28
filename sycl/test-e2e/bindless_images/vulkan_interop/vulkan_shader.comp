@@ -1,0 +1,18 @@
+#version 450
+
+// $VULKAN_SDK/bin/glslangValidator -V vulkan_shader.comp -o vulkan_shader.spv
+
+
+layout(local_size_x = 1, local_size_y = 1) in;
+
+layout(binding = 0) uniform sampler2D inputImage;
+layout(binding = 1, std430) buffer OutputBuffer {
+    float values[];
+};
+
+void main() {
+    // Center of pixel
+    vec2 uv = (vec2(gl_GlobalInvocationID.xy) + vec2(0.5)) / vec2(4.0, 4.0);
+    
+    values[gl_GlobalInvocationID.y * 4 + gl_GlobalInvocationID.x] = textureLod(inputImage, uv, 0.0).r;
+}

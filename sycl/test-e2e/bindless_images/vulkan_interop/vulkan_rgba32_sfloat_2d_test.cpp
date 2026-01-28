@@ -1,22 +1,20 @@
 /*
- * Minimal Vulkan Test: VK_FORMAT_R32_SFLOAT 2D Sampled Image
+ * Minimal Vulkan Test: VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image
  * 
  * Compilation (Linux, clang++):
- * clang++ -std=c++17 -o v_test.bin vulkan_r32_sfloat_2d_test.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
+ * clang++ -std=c++17 -o v_test.bin vulkan_rgba32_sfloat_2d_test.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
  * 
- * Prerequisites:
- * - Vulkan SDK installed
- * - Vulkan loader library available
- * 
- * Run with:
- * ./v_test.bin
+    export VULTURE_SDK=/iusers/cperkins/sycl_workspace/1.4.328.1/x86_64/
+   clang++ -std=c++17 -o v_test.bin vulkan_r32_sfloat_2d_test.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
 
- ./v_test.bin 
-Starting Vulkan R32_SFLOAT 2D Sampled Image Test...
+
+    ./v_test.bin 
+Starting Vulkan VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image Test...
+⚠ Validation layers not available
 ✓ Created Vulkan instance
 ✓ Using device: Intel(R) Graphics (BMG G21)
 ✓ Created logical device
-✓ Created 2D image (4x4, VK_FORMAT_R32_SFLOAT)
+✓ Created 2D image (4x4, VK_FORMAT_R32G32B32A32_SFLOAT)
 ✓ Allocated and bound image memory
 ✓ Filled staging buffer with test data
 ✓ Uploaded test data to image
@@ -51,39 +49,26 @@ Direct readback from image (bypass sampling):
 === Verification ===
 Sampled values from image:
 [0,0] = 0 (expected: 0) ✓
-[1,0] = 0 (expected: 0.0666667) ✗
-[2,0] = 0 (expected: 0.133333) ✗
-[3,0] = 0 (expected: 0.2) ✗
-[0,1] = 0 (expected: 0.266667) ✗
-[1,1] = 0 (expected: 0.333333) ✗
-[2,1] = 0 (expected: 0.4) ✗
-[3,1] = 0 (expected: 0.466667) ✗
-[0,2] = 0 (expected: 0.533333) ✗
-[1,2] = 0 (expected: 0.6) ✗
-[2,2] = 0 (expected: 0.666667) ✗
-[3,2] = 0 (expected: 0.733333) ✗
-[0,3] = 0 (expected: 0.8) ✗
-[1,3] = 0 (expected: 0.866667) ✗
-[2,3] = 0 (expected: 0.933333) ✗
-[3,3] = 0 (expected: 1) ✗
+[1,0] = 0.0666667 (expected: 0.0666667) ✓
+[2,0] = 0.133333 (expected: 0.133333) ✓
+[3,0] = 0.2 (expected: 0.2) ✓
+[0,1] = 0.266667 (expected: 0.266667) ✓
+[1,1] = 0.333333 (expected: 0.333333) ✓
+[2,1] = 0.4 (expected: 0.4) ✓
+[3,1] = 0.466667 (expected: 0.466667) ✓
+[0,2] = 0.533333 (expected: 0.533333) ✓
+[1,2] = 0.6 (expected: 0.6) ✓
+[2,2] = 0.666667 (expected: 0.666667) ✓
+[3,2] = 0.733333 (expected: 0.733333) ✓
+[0,3] = 0.8 (expected: 0.8) ✓
+[1,3] = 0.866667 (expected: 0.866667) ✓
+[2,3] = 0.933333 (expected: 0.933333) ✓
+[3,3] = 1 (expected: 1) ✓
 
 === Test Result ===
-✗ TEST FAILED: Some sampled values do not match!
+✓ TEST PASSED: All sampled values match expected values!
 
- */
 
- /*
- * Minimal Vulkan Test: VK_FORMAT_R32_SFLOAT 2D Sampled Image
- * 
- * Compilation (Linux, clang++):
- * clang++ -std=c++17 -o vulkan_r32_sfloat_2d_test vulkan_r32_sfloat_2d_test.cpp -lvulkan
- * 
- * Prerequisites:
- * - Vulkan SDK installed
- * - Vulkan loader library available
- * 
- * Run with:
- * ./vulkan_r32_sfloat_2d_test
  */
 
 #include <vulkan/vulkan.h>
@@ -91,6 +76,7 @@ Sampled values from image:
 #include <vector>
 #include <cstring>
 #include <cmath>
+#include <fstream>
 
 #define CHECK_VK(result, msg) \
     if (result != VK_SUCCESS) { \
@@ -98,7 +84,8 @@ Sampled values from image:
         return 1; \
     }
 
-// Simple compute shader that samples from an image and writes to a buffer
+// Compute shader using imageLoad (storage image) with r32f format
+// Compute shader using texture() with sampler for RGBA32F
 // SPIR-V compiled from:
 // #version 450
 // layout(binding = 0) uniform sampler2D inputImage;
@@ -106,51 +93,9 @@ Sampled values from image:
 // layout(local_size_x = 1, local_size_y = 1) in;
 // void main() {
 //     vec2 uv = (vec2(gl_GlobalInvocationID.xy) + vec2(0.5)) / vec2(4.0, 4.0);
-//     values[gl_GlobalInvocationID.y * 4 + gl_GlobalInvocationID.x] = texture(inputImage, uv).r;
+//     values[gl_GlobalInvocationID.y * 4 + gl_GlobalInvocationID.x] = texture(inputImage, uv, 0.0).r;   // <-- 0.0 for textureLod
 // }
-const uint32_t SAMPLE_SHADER_SPIRV[] = {
-    0x07230203, 0x00010000, 0x0008000a, 0x0000003d, 0x00000000, 0x00020011, 0x00000001, 0x0006000b,
-    0x00000001, 0x4c534c47, 0x6474732e, 0x3035342e, 0x00000000, 0x0003000e, 0x00000000, 0x00000001,
-    0x0006000f, 0x00000005, 0x00000004, 0x6e69616d, 0x00000000, 0x0000000d, 0x00060010, 0x00000004,
-    0x00000011, 0x00000001, 0x00000001, 0x00000001, 0x00030003, 0x00000002, 0x000001c2, 0x00040005,
-    0x00000004, 0x6e69616d, 0x00000000, 0x00030005, 0x00000009, 0x00007675, 0x00080005, 0x0000000d,
-    0x475f6c67, 0x61626f6c, 0x766e496c, 0x7461636f, 0x496e6f69, 0x00000044, 0x00050005, 0x0000001c,
-    0x70747561, 0x6d497475, 0x00656761, 0x00060005, 0x00000023, 0x7074754f, 0x75427475, 0x72656666,
-    0x00000000, 0x00060006, 0x00000023, 0x00000000, 0x756c6176, 0x00007365, 0x00000000, 0x00030005,
-    0x00000025, 0x00000000, 0x00040047, 0x0000000d, 0x0000000b, 0x0000001c, 0x00040047, 0x0000001c,
-    0x00000022, 0x00000000, 0x00040047, 0x0000001c, 0x00000021, 0x00000000, 0x00050048, 0x00000023,
-    0x00000000, 0x00000023, 0x00000000, 0x00030047, 0x00000023, 0x00000003, 0x00040047, 0x00000024,
-    0x00000022, 0x00000000, 0x00040047, 0x00000024, 0x00000021, 0x00000001, 0x00040047, 0x0000003c,
-    0x0000000b, 0x00000019, 0x00020013, 0x00000002, 0x00030021, 0x00000003, 0x00000002, 0x00030016,
-    0x00000006, 0x00000020, 0x00040017, 0x00000007, 0x00000006, 0x00000002, 0x00040020, 0x00000008,
-    0x00000007, 0x00000007, 0x00040015, 0x0000000a, 0x00000020, 0x00000000, 0x00040017, 0x0000000b,
-    0x0000000a, 0x00000003, 0x00040020, 0x0000000c, 0x00000001, 0x0000000b, 0x0004003b, 0x0000000c,
-    0x0000000d, 0x00000001, 0x00040017, 0x0000000e, 0x0000000a, 0x00000002, 0x0004002b, 0x00000006,
-    0x00000011, 0x3f000000, 0x0005002c, 0x00000007, 0x00000012, 0x00000011, 0x00000011, 0x0004002b,
-    0x00000006, 0x00000015, 0x40800000, 0x0005002c, 0x00000007, 0x00000016, 0x00000015, 0x00000015,
-    0x00090019, 0x00000019, 0x00000006, 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000001,
-    0x00000000, 0x0003001b, 0x0000001a, 0x00000019, 0x00040020, 0x0000001b, 0x00000000, 0x0000001a,
-    0x0004003b, 0x0000001b, 0x0000001c, 0x00000000, 0x00040017, 0x0000001e, 0x00000006, 0x00000004,
-    0x0003001d, 0x00000022, 0x00000006, 0x0003001e, 0x00000023, 0x00000022, 0x00040020, 0x00000024,
-    0x00000002, 0x00000023, 0x0004003b, 0x00000024, 0x00000025, 0x00000002, 0x00040015, 0x00000026,
-    0x00000020, 0x00000001, 0x0004002b, 0x00000026, 0x00000027, 0x00000000, 0x00040020, 0x00000029,
-    0x00000001, 0x0000000a, 0x0004002b, 0x0000000a, 0x0000002c, 0x00000001, 0x0004002b, 0x0000000a,
-    0x00000031, 0x00000000, 0x0004002b, 0x0000000a, 0x00000035, 0x00000004, 0x00040020, 0x00000039,
-    0x00000002, 0x00000006, 0x0004002b, 0x0000000a, 0x0000003b, 0x00000001, 0x0006002c, 0x0000000b,
-    0x0000003c, 0x0000003b, 0x0000003b, 0x0000003b, 0x00050036, 0x00000002, 0x00000004, 0x00000000,
-    0x00000003, 0x000200f8, 0x00000005, 0x0004003b, 0x00000008, 0x00000009, 0x00000007, 0x0004003d,
-    0x0000000b, 0x0000000f, 0x0000000d, 0x0007004f, 0x0000000e, 0x00000010, 0x0000000f, 0x0000000f,
-    0x00000000, 0x00000001, 0x00040070, 0x00000007, 0x00000013, 0x00000010, 0x00050081, 0x00000007,
-    0x00000014, 0x00000013, 0x00000012, 0x00050088, 0x00000007, 0x00000017, 0x00000014, 0x00000016,
-    0x0003003e, 0x00000009, 0x00000017, 0x0004003d, 0x0000001a, 0x0000001d, 0x0000001c, 0x0004003d,
-    0x00000007, 0x0000001f, 0x00000009, 0x00050057, 0x0000001e, 0x00000020, 0x0000001d, 0x0000001f,
-    0x00050051, 0x00000006, 0x00000021, 0x00000020, 0x00000000, 0x00050041, 0x00000029, 0x0000002a,
-    0x0000000d, 0x0000002c, 0x0004003d, 0x0000000a, 0x0000002b, 0x0000002a, 0x00050041, 0x00000029,
-    0x0000002d, 0x0000000d, 0x00000031, 0x0004003d, 0x0000000a, 0x0000002e, 0x0000002d, 0x00050084,
-    0x0000000a, 0x00000030, 0x0000002b, 0x00000035, 0x00050080, 0x0000000a, 0x00000032, 0x00000030,
-    0x0000002e, 0x00060041, 0x00000039, 0x0000003a, 0x00000025, 0x00000027, 0x00000032, 0x0003003e,
-    0x0000003a, 0x00000021, 0x000100fd, 0x00010038
-};
+
 
 uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties) {
     VkPhysicalDeviceMemoryProperties memProperties;
@@ -164,13 +109,41 @@ uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, Vk
     return UINT32_MAX;
 }
 
+static std::vector<char> readFile(const std::string& filename) {
+    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+    if (!file.is_open()) {
+        throw std::runtime_error("failed to open file: " + filename);
+    }
+
+    size_t fileSize = (size_t) file.tellg();
+    std::vector<char> buffer(fileSize);
+
+    file.seekg(0);
+    file.read(buffer.data(), fileSize);
+    file.close();
+
+    return buffer;
+}
+
 int main() {
-    std::cout << "Starting Vulkan R32_SFLOAT 2D Sampled Image Test..." << std::endl;
+    std::cout << "Starting Vulkan VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image Test..." << std::endl;
+
+
+    // Load the SPIR-V binary from disk
+    // Make sure "vulkan_shader.spv" is in the same directory where you run the binary
+    std::vector<char> shaderCode;
+    try {
+        shaderCode = readFile("vulkan_shader.spv");
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
 
     // Constants for test
     const uint32_t IMAGE_WIDTH = 4;
     const uint32_t IMAGE_HEIGHT = 4;
-    const VkFormat IMAGE_FORMAT = VK_FORMAT_R32_SFLOAT;
+    const VkFormat IMAGE_FORMAT = VK_FORMAT_R32G32B32A32_SFLOAT;
 
     // Create instance
     VkApplicationInfo appInfo = {};
@@ -184,6 +157,29 @@ int main() {
     VkInstanceCreateInfo instanceCreateInfo = {};
     instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instanceCreateInfo.pApplicationInfo = &appInfo;
+    
+    // Enable validation layers for better error messages
+    const char* validationLayers[] = {"VK_LAYER_KHRONOS_validation"};
+    uint32_t layerCount = 0;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+    std::vector<VkLayerProperties> availableLayers(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+    
+    bool validationAvailable = false;
+    for (const auto& layerProps : availableLayers) {
+        if (strcmp(layerProps.layerName, "VK_LAYER_KHRONOS_validation") == 0) {
+            validationAvailable = true;
+            break;
+        }
+    }
+    
+    if (validationAvailable) {
+        instanceCreateInfo.enabledLayerCount = 1;
+        instanceCreateInfo.ppEnabledLayerNames = validationLayers;
+        std::cout << "✓ Validation layers enabled" << std::endl;
+    } else {
+        std::cout << "⚠ Validation layers not available" << std::endl;
+    }
 
     VkInstance instance;
     CHECK_VK(vkCreateInstance(&instanceCreateInfo, nullptr, &instance), "Failed to create instance");
@@ -256,13 +252,13 @@ int main() {
     imageInfo.arrayLayers = 1;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imageInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    imageInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
     VkImage image;
     CHECK_VK(vkCreateImage(device, &imageInfo, nullptr, &image), "Failed to create image");
-    std::cout << "✓ Created 2D image (" << IMAGE_WIDTH << "x" << IMAGE_HEIGHT << ", VK_FORMAT_R32_SFLOAT)" << std::endl;
+    std::cout << "✓ Created 2D image (" << IMAGE_WIDTH << "x" << IMAGE_HEIGHT << ", VK_FORMAT_R32G32B32A32_SFLOAT)" << std::endl;
 
     // Allocate image memory
     VkMemoryRequirements memRequirements;
@@ -281,7 +277,7 @@ int main() {
     // Create staging buffer for uploading data
     VkBufferCreateInfo stagingBufferInfo = {};
     stagingBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    stagingBufferInfo.size = IMAGE_WIDTH * IMAGE_HEIGHT * sizeof(float);
+    stagingBufferInfo.size = IMAGE_WIDTH * IMAGE_HEIGHT * 4 * sizeof(float); // 4 channels
     stagingBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     stagingBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -301,13 +297,18 @@ int main() {
     CHECK_VK(vkAllocateMemory(device, &stagingAllocInfo, nullptr, &stagingMemory), "Failed to allocate staging memory");
     CHECK_VK(vkBindBufferMemory(device, stagingBuffer, stagingMemory, 0), "Failed to bind staging buffer");
 
-    // Fill staging buffer with test data (simple gradient pattern)
+    // Fill staging buffer with test data (simple gradient pattern in all 4 channels)
     void* data;
     vkMapMemory(device, stagingMemory, 0, stagingBufferInfo.size, 0, &data);
     float* floatData = static_cast<float*>(data);
     for (uint32_t y = 0; y < IMAGE_HEIGHT; y++) {
         for (uint32_t x = 0; x < IMAGE_WIDTH; x++) {
-            floatData[y * IMAGE_WIDTH + x] = static_cast<float>(x + y * IMAGE_WIDTH) / (IMAGE_WIDTH * IMAGE_HEIGHT - 1);
+            float value = static_cast<float>(x + y * IMAGE_WIDTH) / (IMAGE_WIDTH * IMAGE_HEIGHT - 1);
+            uint32_t idx = (y * IMAGE_WIDTH + x) * 4;
+            floatData[idx + 0] = value;  // R
+            floatData[idx + 1] = 0.0f;   // G  
+            floatData[idx + 2] = 0.0f;   // B
+            floatData[idx + 3] = 1.0f;   // A
         }
     }
     vkUnmapMemory(device, stagingMemory);
@@ -397,7 +398,7 @@ int main() {
     
     VkBufferCreateInfo verifyBufferInfo = {};
     verifyBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    verifyBufferInfo.size = IMAGE_WIDTH * IMAGE_HEIGHT * sizeof(float);
+    verifyBufferInfo.size = IMAGE_WIDTH * IMAGE_HEIGHT * 4 * sizeof(float); // 4 channels
     verifyBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     verifyBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -477,9 +478,9 @@ int main() {
     const float tolerance = 0.01f;
     for (uint32_t y = 0; y < IMAGE_HEIGHT; y++) {
         for (uint32_t x = 0; x < IMAGE_WIDTH; x++) {
-            uint32_t idx = y * IMAGE_WIDTH + x;
-            float expected = static_cast<float>(idx) / (IMAGE_WIDTH * IMAGE_HEIGHT - 1);
-            float actual = verifyFloats[idx];
+            uint32_t idx = (y * IMAGE_WIDTH + x) * 4;  // 4 channels
+            float expected = static_cast<float>(x + y * IMAGE_WIDTH) / (IMAGE_WIDTH * IMAGE_HEIGHT - 1);
+            float actual = verifyFloats[idx];  // Check R channel
             bool match = std::fabs(actual - expected) < tolerance;
             
             std::cout << "[" << x << "," << y << "] = " << actual 
@@ -497,6 +498,10 @@ int main() {
     } else {
         std::cout << "✗ Upload verification FAILED - data didn't make it to the image!" << std::endl;
     }
+    
+    // Cleanup verification resources immediately to avoid hitting driver limits
+    vkDestroyBuffer(device, verifyBuffer, nullptr);
+    vkFreeMemory(device, verifyMemory, nullptr);
     std::cout << std::endl;
 
     // Create image view
@@ -559,7 +564,7 @@ int main() {
     CHECK_VK(vkBindBufferMemory(device, outputBuffer, outputMemory, 0), "Failed to bind output buffer");
     std::cout << "✓ Created output buffer" << std::endl;
 
-    // Create descriptor set layout
+    // Create descriptor set layout  
     VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
     samplerLayoutBinding.binding = 0;
     samplerLayoutBinding.descriptorCount = 1;
@@ -642,8 +647,10 @@ int main() {
     // Create compute shader module
     VkShaderModuleCreateInfo shaderModuleInfo = {};
     shaderModuleInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    shaderModuleInfo.codeSize = sizeof(SAMPLE_SHADER_SPIRV);
-    shaderModuleInfo.pCode = SAMPLE_SHADER_SPIRV;
+    shaderModuleInfo.codeSize = shaderCode.size();
+    shaderModuleInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
+    //shaderModuleInfo.codeSize = sizeof(SAMPLE_SHADER_SPIRV);
+    //shaderModuleInfo.pCode = SAMPLE_SHADER_SPIRV;
 
     VkShaderModule computeShaderModule;
     CHECK_VK(vkCreateShaderModule(device, &shaderModuleInfo, nullptr, &computeShaderModule), "Failed to create shader module");
@@ -759,8 +766,6 @@ int main() {
     }
 
     // Cleanup
-    vkDestroyBuffer(device, verifyBuffer, nullptr);
-    vkFreeMemory(device, verifyMemory, nullptr);
     vkDestroyPipeline(device, computePipeline, nullptr);
     vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     vkDestroyShaderModule(device, computeShaderModule, nullptr);
@@ -780,3 +785,4 @@ int main() {
 
     return testPassed ? 0 : 1;
 }
+
