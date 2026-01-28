@@ -3,12 +3,12 @@
 
   $VULKAN_SDK/bin/glslangValidator -V vulkan_shader.comp -o vulkan_shader.spv
 
-  clang++ -fsycl -std=c++17 -o g_vsu_test.bin golden_vulkan_sycl_unsamp_rgba32_sfloat_2d_test.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
+  clang++ -fsycl -std=c++17 -o vsu_test.bin vulkan_sycl_unsampled.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
   export VULTURE_SDK=/iusers/cperkins/sycl_workspace/1.4.328.1/x86_64/
-  clang++ -fsycl -std=c++17 -o g_vsu_test.bin golden_vulkan_sycl_unsamp_rgba32_sfloat_2d_test.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
+  clang++ -fsycl -std=c++17 -o vsu_test.bin vulkan_sycl_unsampled.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
 
-    ./g_vsu_test.bin 
+    ./vsu_test.bin 
 
 
 

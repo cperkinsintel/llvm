@@ -3,13 +3,13 @@
 
   $VULKAN_SDK/bin/glslangValidator -V vulkan_shader.comp -o vulkan_shader.spv
 
-  clang++ -std=c++17 -o v_test.bin vulkan_rgba32_sfloat_2d_test.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
+  clang++ -std=c++17 -o g_v_test.bin golden_vulkan_rgba32_sfloat_2d_test.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
   export VULTURE_SDK=/iusers/cperkins/sycl_workspace/1.4.328.1/x86_64/
-  clang++ -std=c++17 -o v_test.bin vulkan_r32_sfloat_2d_test.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
+  clang++ -std=c++17 -o g_v_test.bin golden_vulkan_rgba32_sfloat_2d_test.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
 
 
-    ./v_test.bin 
+    ./g_v_test.bin 
 
 Starting Vulkan VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image Test...
 ⚠ Validation layers not available

@@ -1,16 +1,73 @@
 /*
-  Minimal Vulkan/SYCL Test: VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image
+  Minimal Vulkan Test: VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image
 
   $VULKAN_SDK/bin/glslangValidator -V vulkan_shader.comp -o vulkan_shader.spv
 
-  clang++ -fsycl -std=c++17 -o g_vs_test.bin golden_vulkan_sycl_rgba32_sfloat_2d_test.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
+  clang++ -std=c++17 -o v_test.bin vulkan_only.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
   export VULTURE_SDK=/iusers/cperkins/sycl_workspace/1.4.328.1/x86_64/
-  clang++ -fsycl -std=c++17 -o g_vs_test.bin golden_vulkan_sycl_rgba32_sfloat_2d_test.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
+  clang++ -std=c++17 -o v_test.bin vulkan_only.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
 
-    ./vs_test.bin 
+    ./v_test.bin 
 
+Starting Vulkan VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image Test...
+⚠ Validation layers not available
+✓ Created Vulkan instance
+✓ Using device: Intel(R) Graphics (BMG G21)
+✓ Created logical device
+✓ Created 2D image (4x4, VK_FORMAT_R32G32B32A32_SFLOAT)
+✓ Allocated and bound image memory
+✓ Filled staging buffer with test data
+✓ Uploaded test data to image
 
+=== Diagnostic: Verifying Upload ===
+Direct readback from image (bypass sampling):
+[0,0] = 0 (expected: 0) ✓
+[1,0] = 0.0666667 (expected: 0.0666667) ✓
+[2,0] = 0.133333 (expected: 0.133333) ✓
+[3,0] = 0.2 (expected: 0.2) ✓
+[0,1] = 0.266667 (expected: 0.266667) ✓
+[1,1] = 0.333333 (expected: 0.333333) ✓
+[2,1] = 0.4 (expected: 0.4) ✓
+[3,1] = 0.466667 (expected: 0.466667) ✓
+[0,2] = 0.533333 (expected: 0.533333) ✓
+[1,2] = 0.6 (expected: 0.6) ✓
+[2,2] = 0.666667 (expected: 0.666667) ✓
+[3,2] = 0.733333 (expected: 0.733333) ✓
+[0,3] = 0.8 (expected: 0.8) ✓
+[1,3] = 0.866667 (expected: 0.866667) ✓
+[2,3] = 0.933333 (expected: 0.933333) ✓
+[3,3] = 1 (expected: 1) ✓
+✓ Upload verification PASSED - data is in the image correctly
+
+✓ Created image view
+✓ Created sampler
+✓ Created output buffer
+✓ Updated descriptor sets
+✓ Created compute pipeline
+✓ Executed compute shader (sampling image)
+
+=== Verification ===
+Sampled values from image:
+[0,0] = 0 (expected: 0) ✓
+[1,0] = 0.0666667 (expected: 0.0666667) ✓
+[2,0] = 0.133333 (expected: 0.133333) ✓
+[3,0] = 0.2 (expected: 0.2) ✓
+[0,1] = 0.266667 (expected: 0.266667) ✓
+[1,1] = 0.333333 (expected: 0.333333) ✓
+[2,1] = 0.4 (expected: 0.4) ✓
+[3,1] = 0.466667 (expected: 0.466667) ✓
+[0,2] = 0.533333 (expected: 0.533333) ✓
+[1,2] = 0.6 (expected: 0.6) ✓
+[2,2] = 0.666667 (expected: 0.666667) ✓
+[3,2] = 0.733333 (expected: 0.733333) ✓
+[0,3] = 0.8 (expected: 0.8) ✓
+[1,3] = 0.866667 (expected: 0.866667) ✓
+[2,3] = 0.933333 (expected: 0.933333) ✓
+[3,3] = 1 (expected: 1) ✓
+
+=== Test Result ===
+✓ TEST PASSED: All sampled values match expected values!
 
 
  */
@@ -21,11 +78,6 @@
 #include <cstring>
 #include <cmath>
 #include <fstream>
-
-
-#include <sycl/sycl.hpp>
-#include <sycl/ext/oneapi/bindless_images.hpp>
-#include <sycl/ext/oneapi/bindless_images_interop.hpp>
 
 #define CHECK_VK(result, msg) \
     if (result != VK_SUCCESS) { \
@@ -76,7 +128,7 @@ static std::vector<char> readFile(const std::string& filename) {
 }
 
 int main() {
-    std::cout << "Starting Vulkan and SYCL VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image Test..." << std::endl;
+    std::cout << "Starting Vulkan VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image Test..." << std::endl;
 
 
     // Load the SPIR-V binary from disk
@@ -97,7 +149,7 @@ int main() {
     // Create instance
     VkApplicationInfo appInfo = {};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "Vulkan and SYCL Image Test";
+    appInfo.pApplicationName = "Vulkan Image Test";
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.pEngineName = "No Engine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -735,140 +787,6 @@ int main() {
     } else {
         std::cout << "✗ TEST FAILED: Some sampled values do not match!" << std::endl;
     }
-
-    // ---------------------------------------------------------
-    // PHASE 2: SYCL BINDLESS INTEROP (CORRECTED V2)
-    // ---------------------------------------------------------
-    namespace syclexp = sycl::ext::oneapi::experimental;
-
-    // 1. GET THE FILE DESCRIPTOR (Same as before)
-    auto vkGetMemoryFdKHR = (PFN_vkGetMemoryFdKHR)vkGetDeviceProcAddr(device, "vkGetMemoryFdKHR");
-    if (!vkGetMemoryFdKHR) return 1;
-
-    VkMemoryGetFdInfoKHR fdInfo = {};
-    fdInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR;
-    fdInfo.memory = imageMemory;
-    fdInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
-
-    int fd = -1;
-    CHECK_VK(vkGetMemoryFdKHR(device, &fdInfo, &fd), "Failed to get file descriptor");
-    std::cout << "✓ Got Opaque FD: " << fd << std::endl;
-
-    // ... inside main, after getting the FD ...
-
-    // 2. SYCL SETUP
-    try {
-        sycl::queue q;
-        std::cout << "✓ SYCL running on: " << q.get_device().get_info<sycl::info::device::name>() << std::endl;
-
-        // 3. IMPORT EXTERNAL MEMORY
-        size_t imgSize = IMAGE_WIDTH * IMAGE_HEIGHT * 4 * sizeof(float);
-        
-        syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{
-            fd, 
-            syclexp::external_mem_handle_type::opaque_fd, 
-            imgSize
-        };
-
-        // Step A: Import the raw FD
-        syclexp::external_mem extMem = syclexp::import_external_memory(
-            extMemDesc, q.get_device(), q.get_context());
-            
-        std::cout << "✓ Imported FD as External Memory" << std::endl;
-
-        // Step B: Define the Image Descriptor EARLY
-        // We need this to tell the mapper how to interpret the raw bytes
-        syclexp::image_descriptor imgDesc(
-            sycl::range<2>(IMAGE_WIDTH, IMAGE_HEIGHT),
-            4, // num_channels
-            sycl::image_channel_type::fp32
-        );
-
-        // Step C: Map External Memory to an Image Handle
-        // This was the missing link!
-        syclexp::image_mem_handle deviceMemHandle = syclexp::map_external_image_memory(
-            extMem, 
-            imgDesc, 
-            q.get_device(), 
-            q.get_context()
-        );
-        
-        std::cout << "✓ Mapped External Memory to Image Handle" << std::endl;
-
-        // 4. CREATE BINDLESS IMAGE HANDLE
-        syclexp::bindless_image_sampler sampler(
-            sycl::addressing_mode::clamp_to_edge,
-            sycl::coordinate_normalization_mode::unnormalized,
-            sycl::filtering_mode::linear
-        );
-
-        // Create the actual sampled view
-        syclexp::sampled_image_handle imgHandle = syclexp::create_image(
-            deviceMemHandle, 
-            sampler, 
-            imgDesc, 
-            q.get_device(), 
-            q.get_context()
-        );
-
-        std::cout << "✓ Created Bindless Sampled Image Handle" << std::endl;
-
-        // 5. RUN KERNEL
-        sycl::buffer<float, 1> checkBuf(IMAGE_WIDTH * IMAGE_HEIGHT);
-
-        q.submit([&](sycl::handler& h) {
-            sycl::accessor outAcc(checkBuf, h, sycl::write_only);
-            
-            h.parallel_for(sycl::range<2>(IMAGE_WIDTH, IMAGE_HEIGHT), [=](sycl::item<2> item) {
-                int x = item.get_id(0);
-                int y = item.get_id(1);
-
-                sycl::float2 coords(x + 0.5f, y + 0.5f);
-                
-                sycl::float4 pixel = syclexp::sample_image<sycl::float4>(imgHandle, coords);
-
-                outAcc[y * IMAGE_WIDTH + x] = pixel.x();
-            });
-        }).wait();
-        
-        std::cout << "✓ SYCL Bindless Kernel Executed" << std::endl;
-
-        // 6. CLEANUP
-        // Destroy the view
-        syclexp::destroy_image_handle(imgHandle, q.get_device(), q.get_context());
-        
-        // Release the import (this tears down the mapping too)
-        syclexp::release_external_memory(extMem, q.get_device(), q.get_context());
-        
-        // ... Verification Logic (Same as before) ...
-        sycl::host_accessor hostAcc(checkBuf, sycl::read_only);
-        
-        std::cout << "\n=== SYCL Verification ===" << std::endl;
-        bool syclPassed = true;
-        for (uint32_t y = 0; y < IMAGE_HEIGHT; y++) {
-            for (uint32_t x = 0; x < IMAGE_WIDTH; x++) {
-                uint32_t idx = y * IMAGE_WIDTH + x;
-                float expected = static_cast<float>(idx) / (IMAGE_WIDTH * IMAGE_HEIGHT - 1);
-                float actual = hostAcc[idx];
-                
-                bool match = std::fabs(actual - expected) < 0.01f;
-                if (!match) {
-                    syclPassed = false;
-                    std::cout << "SYCL Mismatch [" << x << "," << y << "] " << actual << " != " << expected << std::endl;
-                }
-            }
-        }
-        
-        if (syclPassed) std::cout << "✓ SYCL PASSED: Data matches!" << std::endl;
-        else std::cout << "✗ SYCL FAILED" << std::endl;
-
-    } catch (sycl::exception& e) {
-        std::cerr << "SYCL Exception: " << e.what() << std::endl;
-        return 1;
-    }
-
-
-
 
     // Cleanup
     vkDestroyPipeline(device, computePipeline, nullptr);
