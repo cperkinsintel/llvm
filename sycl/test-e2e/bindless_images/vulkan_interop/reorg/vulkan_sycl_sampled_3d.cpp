@@ -1,55 +1,87 @@
 /*
-  Minimal Vulkan/SYCL Test: VK_FORMAT_R32G32B32A32_SFLOAT 3D Sampled Image
+  Minimal Vulkan/SYCL Test: VK_FORMAT_XXXX_SFLOAT 3D Sampled Image
 
   $VULKAN_SDK/bin/glslangValidator -V vulkan_shader_3d.comp -o vulkan_shader_3d.spv
 
   clang++ -fsycl -std=c++17 -o vss_3d_test.bin vulkan_sycl_sampled_3d.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
-  export VULTURE_SDK=/iusers/cperkins/sycl_workspace/1.4.328.1/x86_64/
-  clang++ -fsycl -std=c++17 -o vss_3d_test.bin vulkan_sycl_sampled_3d.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
+  
+   FLAGS
+    --semaphores   Use Vulkan Semaphores for SYCL Interop Sync
+    --linear       Use LINEAR tiling for the Vulkan Image (default is OPTIMAL)
+    --channels  X  Set number of channels (1, 2, or 4). Default is 4 (RGBA)
+    WxHxD          Set custom Width x Height x Depth (e.g. 8x4x2)
+
 
     ./vss_3d_test.bin 
-    ./vss_3d_test.bin --semaphores
+    ./vss_3d_test.bin --semaphores --linear --channels 2 128x128x16
 
 
 
  */
-#include "vulkan_interop_common.hpp"
+ #include "vulkan_interop_common.hpp"
 
 #include <sycl/sycl.hpp>
 #include <sycl/ext/oneapi/bindless_images.hpp>
 #include <sycl/ext/oneapi/bindless_images_interop.hpp>
+#include <string>
 
 int main(int argc, char** argv) {
+    // Defaults
+    int width = 4;
+    int height = 4;
+    int depth = 4;
+    int channels = 4;
+    bool useLinear = false;
     bool useSemaphores = false;
-    if (argc > 1 && std::string(argv[1]) == "--semaphores") {
-        useSemaphores = true;
+
+    // Argument Parsing
+    for(int i=1; i<argc; ++i) {
+        std::string arg = argv[i];
+        if(arg == "--semaphores") useSemaphores = true;
+        else if(arg == "--linear") useLinear = true;
+        else if(arg == "--channels" && i+1 < argc) {
+            channels = std::stoi(argv[++i]);
+        }
+        else if(arg.find("x") != std::string::npos) {
+            size_t x1 = arg.find("x");
+            size_t x2 = arg.find("x", x1 + 1);
+            try {
+                width = std::stoi(arg.substr(0, x1));
+                if (x2 != std::string::npos) {
+                    height = std::stoi(arg.substr(x1 + 1, x2 - x1 - 1));
+                    depth = std::stoi(arg.substr(x2 + 1));
+                } else {
+                    height = std::stoi(arg.substr(x1 + 1));
+                }
+            } catch (...) { }
+        }
     }
 
-    std::cout << "Running SAMPLED 3D Test | Semaphores: " 
-              << (useSemaphores ? "ON" : "OFF") << std::endl;
+    if (channels != 1 && channels != 2 && channels != 4) {
+        std::cerr << "Error: Only 1, 2, or 4 channels supported." << std::endl;
+        return 1;
+    }
 
-    // 1. Setup Vulkan (8x4x2)
+    VkImageTiling tiling = useLinear ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
+    VkFormat vkFormat = getFloatFormat(channels);
+
+    std::cout << "Running SAMPLED 3D Test | Size: " << width << "x" << height << "x" << depth
+              << " | Channels: " << channels
+              << " | Tiling: " << (useLinear ? "LINEAR" : "OPTIMAL")
+              << " | Semaphores: " << (useSemaphores ? "ON" : "OFF") << std::endl;
+
+    // 1. Setup Vulkan
     VulkanContext vkCtx = createVulkanContext();
-    VkExtent3D extent = {8, 4, 2}; 
-    
-    // Note: VK_IMAGE_TYPE_3D
-    ImageResources imgRes = createExportableImage(vkCtx, extent, VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_TYPE_3D, VK_IMAGE_TILING_LINEAR);
+    VkExtent3D extent = {(uint32_t)width, (uint32_t)height, (uint32_t)depth};
+    ImageResources imgRes = createExportableImage(vkCtx, extent, vkFormat, VK_IMAGE_TYPE_3D, tiling);
 
-    // IMPORTANT: Load the 3D Shader!
-    // We manually load the shader here because the common helper doesn't know about it.
-    // For this test, we skip the Vulkan Compute Shader verification (Diagnostic 2) 
-    // because writing a generic 3D compute dispatch harness is complex.
-    // We rely on 'uploadAndVerify' (Diagnostic 1) which we know works.
-
-    // 2. Prepare Semaphore
+    // 2. Semaphores
     VkSemaphore vkSem = VK_NULL_HANDLE;
-    if (useSemaphores) {
-        vkSem = createExportableSemaphore(vkCtx);
-    }
+    if (useSemaphores) vkSem = createExportableSemaphore(vkCtx);
 
-    // 3. Upload Data (Diagnostic 1 passes here)
-    if (!uploadAndVerify(vkCtx, imgRes, vkSem)) {
+    // 3. Upload Data
+    if (!uploadAndVerify(vkCtx, imgRes, vkSem, channels)) {
         std::cerr << "Vulkan Upload Failed!" << std::endl;
         return 1;
     }
@@ -57,9 +89,7 @@ int main(int argc, char** argv) {
     // 4. Export Handles
     int memFd = getMemFd(vkCtx, imgRes.memory);
     int semFd = -1;
-    if (useSemaphores) {
-        semFd = getSemaphoreFd(vkCtx, vkSem);
-    }
+    if (useSemaphores) semFd = getSemaphoreFd(vkCtx, vkSem);
 
     // 5. SYCL Interop
     namespace syclexp = sycl::ext::oneapi::experimental;
@@ -67,14 +97,11 @@ int main(int argc, char** argv) {
     try {
         sycl::queue q;
         
-        // Import Memory
-        // Note: Use the REAL allocation size from the helper
         syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{
             memFd, syclexp::external_mem_handle_type::opaque_fd, imgRes.allocationSize
         };
         syclexp::external_mem extMem = syclexp::import_external_memory(extMemDesc, q.get_device(), q.get_context());
 
-        // Import Semaphore
         syclexp::external_semaphore extSem;
         if (useSemaphores) {
              syclexp::external_semaphore_descriptor<syclexp::resource_fd> extSemDesc{
@@ -83,31 +110,21 @@ int main(int argc, char** argv) {
             extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
         }
 
-        // Map Image (Range<3>)
-        syclexp::image_descriptor imgDesc(
-            sycl::range<3>(extent.width, extent.height, extent.depth), 
-            4, 
-            sycl::image_channel_type::fp32
-        );
+        syclexp::image_descriptor imgDesc(sycl::range<3>(width, height, depth), channels, sycl::image_channel_type::fp32);
         syclexp::image_mem_handle devHandle = syclexp::map_external_image_memory(extMem, imgDesc, q.get_device(), q.get_context());
-
-        // Define Sampler
+        
         syclexp::bindless_image_sampler sampler(
             sycl::addressing_mode::clamp_to_edge,
-            sycl::coordinate_normalization_mode::unnormalized, // Pixel coords
-            sycl::filtering_mode::nearest // Use Nearest to avoid interpolation confusion during verify
+            sycl::coordinate_normalization_mode::unnormalized,
+            sycl::filtering_mode::nearest
         );
 
-        // Create Sampled Handle
-        syclexp::sampled_image_handle sampledHandle = syclexp::create_image(
-            devHandle, sampler, imgDesc, q.get_device(), q.get_context()
-        );
+        syclexp::sampled_image_handle sampledHandle = syclexp::create_image(devHandle, sampler, imgDesc, q.get_device(), q.get_context());
 
-        // Kernel
-        size_t totalPixels = extent.width * extent.height * extent.depth;
-        sycl::buffer<float, 1> checkBuf(totalPixels);
+        // Output Buffer
+        size_t totalValues = width * height * depth * channels;
+        sycl::buffer<float, 1> checkBuf(totalValues);
         
-        // A. Wait Semaphore
         sycl::event dependencyEvent;
         if (useSemaphores) {
             dependencyEvent = q.submit([&](sycl::handler& h) {
@@ -115,52 +132,62 @@ int main(int argc, char** argv) {
             });
         }
 
-        // B. Run Kernel
         q.submit([&](sycl::handler& h) {
-            if (useSemaphores) {
-                h.depends_on(dependencyEvent);
-            }
-
+            if (useSemaphores) h.depends_on(dependencyEvent);
             sycl::accessor outAcc(checkBuf, h, sycl::write_only);
             
-            h.parallel_for(sycl::range<3>(extent.width, extent.height, extent.depth), [=](sycl::item<3> item) {
+            h.parallel_for(sycl::range<3>(width, height, depth), [=](sycl::item<3> item) {
                 int x = item.get_id(0);
                 int y = item.get_id(1);
                 int z = item.get_id(2);
                 
-                // Sampled uses Float coordinates. Add 0.5f to hit pixel center.
+                // Sample 3D
                 sycl::float3 coords(x + 0.5f, y + 0.5f, z + 0.5f);
-                
                 sycl::float4 px = syclexp::sample_image<sycl::float4>(sampledHandle, coords);
                 
-                size_t linearIdx = z * (extent.width * extent.height) + y * extent.width + x;
-                outAcc[linearIdx] = px.x();
+                size_t baseIdx = (z * width * height + y * width + x) * channels;
+                
+                outAcc[baseIdx + 0] = px.x();
+                if (channels >= 2) outAcc[baseIdx + 1] = px.y();
+                if (channels >= 4) {
+                    outAcc[baseIdx + 2] = px.z();
+                    outAcc[baseIdx + 3] = px.w();
+                }
             });
         }).wait();
 
-        std::cout << "SYCL Sampled 3D Kernel Executed." << std::endl;
+        std::cout << "SYCL Kernel Executed." << std::endl;
         
         // Verify
         sycl::host_accessor hostAcc(checkBuf, sycl::read_only);
         bool passed = true;
         int errorCount = 0;
+        size_t totalPixels = width * height * depth;
 
-        for(size_t i=0; i < totalPixels; ++i) {
-            float expected = (float)i / (float)(totalPixels - 1);
+        for(size_t i=0; i < totalValues; ++i) {
+            size_t pixelIdx = i / channels;
+            int channelIdx = i % channels;
+            
+            float baseVal = (float)pixelIdx / (float)(totalPixels > 1 ? totalPixels - 1 : 1);
+            float expected = baseVal + (float)channelIdx * 0.1f;
+
             if(std::abs(hostAcc[i] - expected) > 0.01f) {
                 passed = false;
-                if (errorCount < 10) {
-                     std::cout << "Mismatch at idx " << i 
-                               << " Got: " << hostAcc[i] << " Exp: " << expected << std::endl;
+                if (errorCount < 5) {
+                    int z = pixelIdx / (width * height);
+                    int rem = pixelIdx % (width * height);
+                    int y = rem / width;
+                    int x = rem % width;
+                    std::cout << "Mismatch at " << x << "," << y << "," << z << " (ch" << channelIdx << ") "
+                              << " Got: " << hostAcc[i] << " Exp: " << expected << std::endl;
                 }
                 errorCount++;
             }
         }
 
         if(passed) std::cout << "SUCCESS!" << std::endl;
-        else std::cout << "FAILURE! Total Errors: " << errorCount << std::endl;
+        else std::cout << "FAILURE! (" << errorCount << " errors)" << std::endl;
 
-        // Cleanup
         syclexp::destroy_image_handle(sampledHandle, q.get_device(), q.get_context());
         syclexp::release_external_memory(extMem, q.get_device(), q.get_context());
         if (useSemaphores) {
@@ -169,10 +196,10 @@ int main(int argc, char** argv) {
         }
 
     } catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "SYCL Exception: " << e.what() << std::endl;
+        return 1;
     }
 
     cleanupVulkan(vkCtx, imgRes);
     return 0;
 }
-

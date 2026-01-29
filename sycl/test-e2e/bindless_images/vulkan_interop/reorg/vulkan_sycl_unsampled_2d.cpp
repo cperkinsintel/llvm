@@ -1,5 +1,5 @@
 /*
-  Minimal Vulkan/SYCL Test: VK_FORMAT_R32G32B32A32_SFLOAT 2D UnSampled Image
+  Minimal Vulkan/SYCL Test: VK_FORMAT_XXXX_SFLOAT 2D UnSampled Image
 
   $VULKAN_SDK/bin/glslangValidator -V vulkan_shader_2d.comp -o vulkan_shader_2d.spv
 
@@ -15,7 +15,7 @@
     WxH            Set custom Width x Height (e.g. 8x4)
 
 
-    ./vsu_2d_test.bin --semaphores --linear 8x4
+    ./vsu_2d_test.bin --semaphores --channels 2 --linear 8x4
 
 
     NOTE: presently --linear is not working with 2D.
