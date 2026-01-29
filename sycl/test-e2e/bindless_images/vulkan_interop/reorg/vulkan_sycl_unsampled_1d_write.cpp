@@ -11,14 +11,14 @@
     FLAGS
     --semaphores   Use Vulkan Semaphores for SYCL Interop Sync
     --linear       Use LINEAR tiling for the Vulkan Image (default is OPTIMAL)
-    --Wx          Set custom Width .  Put "x" after 
+    --channels  X  Set number of channels (1, 2, or 4). Default is 4 (RGBA)
+    Wx             Set custom Width .  Put "x" after 
 
-    ./vsu_1d_w_test.bin --semaphores --linear 64x
+    ./vsu_1d_w_test.bin --semaphores --channels 2 --linear 64x
 
 
 
  */
-
 
 #include "vulkan_interop_common.hpp"
 
@@ -30,6 +30,7 @@
 int main(int argc, char** argv) {
     // Defaults
     int width = 16;
+    int channels = 4;
     bool useLinear = false;
     bool useSemaphores = false;
 
@@ -38,32 +39,38 @@ int main(int argc, char** argv) {
         std::string arg = argv[i];
         if(arg == "--semaphores") useSemaphores = true;
         else if(arg == "--linear") useLinear = true;
+        else if(arg == "--channels" && i+1 < argc) {
+            channels = std::stoi(argv[++i]);
+        }
         else if(arg.find("x") != std::string::npos) {
-            try {
-                width = std::stoi(arg); 
-            } catch (...) {
+             try { width = std::stoi(arg); } catch (...) {
                  size_t xPos = arg.find("x");
                  if (xPos != std::string::npos) width = std::stoi(arg.substr(0, xPos));
-            }
+             }
         } else {
              try { width = std::stoi(arg); } catch(...) {}
         }
     }
 
+    if (channels != 1 && channels != 2 && channels != 4) {
+        std::cerr << "Error: Only 1, 2, or 4 channels supported." << std::endl;
+        return 1;
+    }
+
     VkImageTiling tiling = useLinear ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
+    VkFormat vkFormat = getFloatFormat(channels);
 
     std::cout << "Running UNSAMPLED 1D WRITE Test | Width: " << width
+              << " | Channels: " << channels
               << " | Tiling: " << (useLinear ? "LINEAR" : "OPTIMAL")
               << " | Semaphores: " << (useSemaphores ? "ON" : "OFF") << std::endl;
 
     // 1. Setup Vulkan
     VulkanContext vkCtx = createVulkanContext();
     VkExtent3D extent = {(uint32_t)width, 1, 1};
-    
-    // Create Image (Empty) - VK_IMAGE_TYPE_1D
-    ImageResources imgRes = createExportableImage(vkCtx, extent, VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_TYPE_1D, tiling);
+    ImageResources imgRes = createExportableImage(vkCtx, extent, vkFormat, VK_IMAGE_TYPE_1D, tiling);
 
-    // Initial Transition to GENERAL
+    // 2. Initial Transition to GENERAL
     {
         VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
         poolInfo.queueFamilyIndex = vkCtx.queueFamilyIndex;
@@ -101,7 +108,7 @@ int main(int argc, char** argv) {
         vkDestroyCommandPool(vkCtx.device, pool, nullptr);
     }
 
-    // 2. Export Handles
+    // 3. Export Handles
     int memFd = getMemFd(vkCtx, imgRes.memory);
     int semFd = -1;
     VkSemaphore vkSem = VK_NULL_HANDLE;
@@ -110,7 +117,7 @@ int main(int argc, char** argv) {
         semFd = getSemaphoreFd(vkCtx, vkSem);
     }
 
-    // 3. SYCL Interop
+    // 4. SYCL Interop
     namespace syclexp = sycl::ext::oneapi::experimental;
     
     try {
@@ -129,8 +136,7 @@ int main(int argc, char** argv) {
             extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
         }
 
-        // Map 1D Image
-        syclexp::image_descriptor imgDesc(sycl::range<1>(width), 4, sycl::image_channel_type::fp32);
+        syclexp::image_descriptor imgDesc(sycl::range<1>(width), channels, sycl::image_channel_type::fp32);
         syclexp::image_mem_handle devHandle = syclexp::map_external_image_memory(extMem, imgDesc, q.get_device(), q.get_context());
         syclexp::unsampled_image_handle unsampledHandle = syclexp::create_image(devHandle, imgDesc, q.get_device(), q.get_context());
 
@@ -139,12 +145,20 @@ int main(int argc, char** argv) {
             h.parallel_for(sycl::range<1>(width), [=](sycl::item<1> item) {
                 int x = item.get_id(0);
                 
-                // Gradient: x / total
+                // Gradient Base: x / total
                 float val = (float)x / (float)(width - 1);
-                sycl::float4 pixel(val, 0.0f, 0.0f, 1.0f);
                 
-                // 1D Write uses int coordinate
-                syclexp::write_image(unsampledHandle, x, pixel);
+                if (channels == 1) {
+                    syclexp::write_image(unsampledHandle, x, val);
+                } 
+                else if (channels == 2) {
+                    sycl::float2 px(val, val + 0.1f);
+                    syclexp::write_image(unsampledHandle, x, px);
+                } 
+                else { // 4
+                    sycl::float4 px(val, val + 0.1f, val + 0.2f, val + 0.3f);
+                    syclexp::write_image(unsampledHandle, x, px);
+                }
             });
         });
 
@@ -170,12 +184,12 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // 4. Vulkan Verification
+    // 5. Vulkan Verification
     vkDeviceWaitIdle(vkCtx.device);
 
     VkBuffer verifyBuffer;
     VkDeviceMemory verifyMem;
-    size_t dataSize = width * 1 * 4 * sizeof(float);
+    size_t dataSize = width * channels * sizeof(float);
     
     VkBufferCreateInfo bi = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
     bi.size = dataSize;
@@ -235,9 +249,14 @@ int main(int argc, char** argv) {
     
     int errorCount = 0;
     
-    for(int i=0; i < width; ++i) {
-        float expected = (float)i / (float)(width - 1);
-        float actual = verifyFloats[i * 4];
+    for(size_t i=0; i < width * channels; ++i) {
+        size_t pixelIdx = i / channels;
+        int channelIdx = i % channels;
+        
+        float baseVal = (float)pixelIdx / (float)(width - 1);
+        float expected = baseVal + (float)channelIdx * 0.1f;
+        float actual = verifyFloats[i];
+
         if(std::abs(actual - expected) > 0.01f) {
             passed = false;
             if (errorCount < 5) {
