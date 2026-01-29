@@ -9,6 +9,7 @@
     --semaphores   Use Vulkan Semaphores for SYCL Interop Sync
     --linear       Use LINEAR tiling for the Vulkan Image (default is OPTIMAL)
     --channels  X  Set number of channels (1, 2, or 4). Default is 4 (RGBA)
+    --type  XXX    Set data type (float, int32, uint8). Default is float
     WxH            Set custom Width x Height (e.g. 8x4)
     
     ./vsu_2d_w_test.bin --semaphores --channels 2 --linear 8x4
@@ -21,49 +22,69 @@
 #include <sycl/ext/oneapi/bindless_images_interop.hpp>
 #include <string>
 
-int main(int argc, char** argv) {
-    // Defaults
-    int width = 4;
-    int height = 4;
-    int channels = 4;
-    bool useLinear = false;
-    bool useSemaphores = false;
+// ---------------------------------------------------------
+// TYPE MAPPING HELPERS
+// ---------------------------------------------------------
+template <typename T> VkFormat getVulkanFormat(int channels);
 
-    // Argument Parsing
-    for(int i=1; i<argc; ++i) {
-        std::string arg = argv[i];
-        if(arg == "--semaphores") useSemaphores = true;
-        else if(arg == "--linear") useLinear = true;
-        else if(arg == "--channels" && i+1 < argc) {
-            channels = std::stoi(argv[++i]);
-        }
-        else if(arg.find("x") != std::string::npos) {
-            size_t xPos = arg.find("x");
-            try {
-                width = std::stoi(arg.substr(0, xPos));
-                height = std::stoi(arg.substr(xPos+1));
-            } catch (...) { }
-        }
+template <> VkFormat getVulkanFormat<float>(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R32_SFLOAT;
+        case 2: return VK_FORMAT_R32G32_SFLOAT;
+        case 4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+        default: throw std::runtime_error("Unsupported channels for float");
     }
+}
 
-    if (channels != 1 && channels != 2 && channels != 4) {
-        std::cerr << "Error: Only 1, 2, or 4 channels supported." << std::endl;
-        return 1;
+template <> VkFormat getVulkanFormat<int32_t>(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R32_SINT;
+        case 2: return VK_FORMAT_R32G32_SINT;
+        case 4: return VK_FORMAT_R32G32B32A32_SINT;
+        default: throw std::runtime_error("Unsupported channels for int32");
     }
+}
 
+template <> VkFormat getVulkanFormat<uint8_t>(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R8_UINT;
+        case 2: return VK_FORMAT_R8G8_UINT;
+        case 4: return VK_FORMAT_R8G8B8A8_UINT;
+        default: throw std::runtime_error("Unsupported channels for uint8");
+    }
+}
+
+template <typename T> sycl::image_channel_type getSyclChannelType();
+template <> sycl::image_channel_type getSyclChannelType<float>() { return sycl::image_channel_type::fp32; }
+template <> sycl::image_channel_type getSyclChannelType<int32_t>() { return sycl::image_channel_type::signed_int32; }
+template <> sycl::image_channel_type getSyclChannelType<uint8_t>() { return sycl::image_channel_type::unsigned_int8; }
+
+// ---------------------------------------------------------
+// KERNEL GENERATOR HELPER
+// (Must match generateTestValue in common header)
+// ---------------------------------------------------------
+template <typename T>
+T getKernelValue(size_t index, int channel, size_t rangeMax) {
+    if constexpr (std::is_floating_point_v<T>) {
+        float val = (float)index / (float)(rangeMax > 1 ? rangeMax - 1 : 1);
+        return static_cast<T>(val + (float)channel * 0.1f);
+    } else {
+        // Integer pattern: (index + channel*10) % 127
+        return static_cast<T>((index + channel * 10) % 127);
+    }
+}
+
+// ---------------------------------------------------------
+// TEMPLATED TEST RUNNER
+// ---------------------------------------------------------
+template <typename T>
+int runTest(int width, int height, int channels, bool useLinear, bool useSemaphores) {
     VkImageTiling tiling = useLinear ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
-    VkFormat vkFormat = getFloatFormat(channels);
-
-    std::cout << "Running UNSAMPLED 2D WRITE Test | Size: " << width << "x" << height 
-              << " | Channels: " << channels
-              << " | Tiling: " << (useLinear ? "LINEAR" : "OPTIMAL")
-              << " | Semaphores: " << (useSemaphores ? "ON" : "OFF") << std::endl;
+    VkFormat vkFormat = getVulkanFormat<T>(channels);
 
     // 1. Setup Vulkan
     VulkanContext vkCtx = createVulkanContext();
     VkExtent3D extent = {(uint32_t)width, (uint32_t)height, 1};
-    
-    // Create Empty Image
     ImageResources imgRes = createExportableImage(vkCtx, extent, vkFormat, VK_IMAGE_TYPE_2D, tiling);
 
     // Initial Transition to GENERAL
@@ -92,7 +113,6 @@ int main(int argc, char** argv) {
         barrier.dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT; 
         
         vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0,0,nullptr,0,nullptr,1,&barrier);
-        
         vkEndCommandBuffer(cmd);
         
         VkSubmitInfo submit = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
@@ -100,7 +120,6 @@ int main(int argc, char** argv) {
         submit.pCommandBuffers = &cmd;
         vkQueueSubmit(vkCtx.queue, 1, &submit, VK_NULL_HANDLE);
         vkQueueWaitIdle(vkCtx.queue);
-        
         vkDestroyCommandPool(vkCtx.device, pool, nullptr);
     }
 
@@ -132,7 +151,7 @@ int main(int argc, char** argv) {
             extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
         }
 
-        syclexp::image_descriptor imgDesc(sycl::range<2>(width, height), channels, sycl::image_channel_type::fp32);
+        syclexp::image_descriptor imgDesc(sycl::range<2>(width, height), channels, getSyclChannelType<T>());
         syclexp::image_mem_handle devHandle = syclexp::map_external_image_memory(extMem, imgDesc, q.get_device(), q.get_context());
         syclexp::unsampled_image_handle unsampledHandle = syclexp::create_image(devHandle, imgDesc, q.get_device(), q.get_context());
 
@@ -142,19 +161,25 @@ int main(int argc, char** argv) {
                 int x = item.get_id(0);
                 int y = item.get_id(1);
                 
-                // Gradient Base: (x + y*w) / total
-                float val = (float)(x + y * width) / (float)(width * height - 1);
+                size_t index = y * width + x;
+                size_t totalPixels = width * height;
                 
-                // Write based on channel count
                 if (channels == 1) {
+                    T val = getKernelValue<T>(index, 0, totalPixels);
                     syclexp::write_image(unsampledHandle, sycl::int2(x, y), val);
                 } 
                 else if (channels == 2) {
-                    sycl::float2 px(val, val + 0.1f);
+                    using Vec2 = sycl::vec<T, 2>;
+                    Vec2 px(getKernelValue<T>(index, 0, totalPixels), 
+                            getKernelValue<T>(index, 1, totalPixels));
                     syclexp::write_image(unsampledHandle, sycl::int2(x, y), px);
                 } 
                 else { // 4
-                    sycl::float4 px(val, val + 0.1f, val + 0.2f, val + 0.3f);
+                    using Vec4 = sycl::vec<T, 4>;
+                    Vec4 px(getKernelValue<T>(index, 0, totalPixels), 
+                            getKernelValue<T>(index, 1, totalPixels),
+                            getKernelValue<T>(index, 2, totalPixels),
+                            getKernelValue<T>(index, 3, totalPixels));
                     syclexp::write_image(unsampledHandle, sycl::int2(x, y), px);
                 }
             });
@@ -187,7 +212,7 @@ int main(int argc, char** argv) {
 
     VkBuffer verifyBuffer;
     VkDeviceMemory verifyMem;
-    size_t dataSize = width * height * channels * sizeof(float);
+    size_t dataSize = width * height * channels * sizeof(T);
     
     VkBufferCreateInfo bi = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
     bi.size = dataSize;
@@ -217,7 +242,6 @@ int main(int argc, char** argv) {
     VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
     vkBeginCommandBuffer(cmd, &beginInfo);
     
-    // Copy GENERAL -> Buffer
     VkBufferImageCopy region = {};
     region.imageSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
     region.imageExtent = extent;
@@ -243,7 +267,7 @@ int main(int argc, char** argv) {
     bool passed = true;
     void* verifyPtr;
     vkMapMemory(vkCtx.device, verifyMem, 0, dataSize, 0, &verifyPtr);
-    float* verifyFloats = (float*)verifyPtr;
+    T* verifyData = (T*)verifyPtr;
     
     size_t totalPixels = width * height;
     int errorCount = 0;
@@ -252,15 +276,14 @@ int main(int argc, char** argv) {
         size_t pixelIdx = i / channels;
         int channelIdx = i % channels;
         
-        float baseVal = (float)pixelIdx / (float)(totalPixels > 1 ? totalPixels - 1 : 1);
-        float expected = baseVal + (float)channelIdx * 0.1f;
+        // Use the SHARED generator logic to verify (same as kernel logic)
+        T expected = generateTestValue<T>(pixelIdx, channelIdx, totalPixels);
+        T actual = verifyData[i];
 
-        float actual = verifyFloats[i];
-        if(std::abs(actual - expected) > 0.01f) {
+        if(!checkValue(actual, expected)) {
             passed = false;
             if (errorCount < 5) {
-                std::cout << "Mismatch at " << i 
-                          << " Got: " << actual << " Exp: " << expected << std::endl;
+                std::cout << "Mismatch at " << i << " Got: " << (double)actual << " Exp: " << (double)expected << std::endl;
             }
             errorCount++;
         }
@@ -277,4 +300,49 @@ int main(int argc, char** argv) {
     cleanupVulkan(vkCtx, imgRes);
 
     return 0;
+}
+
+// ---------------------------------------------------------
+// MAIN DISPATCHER
+// ---------------------------------------------------------
+int main(int argc, char** argv) {
+    int width = 4;
+    int height = 4;
+    int channels = 4;
+    bool useLinear = false;
+    bool useSemaphores = false;
+    std::string type = "float";
+
+    for(int i=1; i<argc; ++i) {
+        std::string arg = argv[i];
+        if(arg == "--semaphores") useSemaphores = true;
+        else if(arg == "--linear") useLinear = true;
+        else if(arg == "--channels" && i+1 < argc) channels = std::stoi(argv[++i]);
+        else if(arg == "--type" && i+1 < argc) type = argv[++i];
+        else if(arg.find("x") != std::string::npos) {
+            size_t xPos = arg.find("x");
+            try {
+                width = std::stoi(arg.substr(0, xPos));
+                height = std::stoi(arg.substr(xPos+1));
+            } catch (...) { }
+        }
+    }
+
+    if (channels != 1 && channels != 2 && channels != 4) {
+        std::cerr << "Error: Only 1, 2, or 4 channels supported." << std::endl;
+        return 1;
+    }
+
+    std::cout << "Running UNSAMPLED 2D WRITE Test | Type: " << type
+              << " | Size: " << width << "x" << height 
+              << " | Channels: " << channels
+              << " | Tiling: " << (useLinear ? "LINEAR" : "OPTIMAL")
+              << " | Semaphores: " << (useSemaphores ? "ON" : "OFF") << std::endl;
+
+    if (type == "float") return runTest<float>(width, height, channels, useLinear, useSemaphores);
+    if (type == "int32") return runTest<int32_t>(width, height, channels, useLinear, useSemaphores);
+    if (type == "uint8") return runTest<uint8_t>(width, height, channels, useLinear, useSemaphores);
+
+    std::cerr << "Unknown type: " << type << std::endl;
+    return 1;
 }

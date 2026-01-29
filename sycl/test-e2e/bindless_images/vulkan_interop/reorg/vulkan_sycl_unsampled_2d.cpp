@@ -12,6 +12,7 @@
     --semaphores   Use Vulkan Semaphores for SYCL Interop Sync
     --linear       Use LINEAR tiling for the Vulkan Image (default is OPTIMAL)
     --channels  X  Set number of channels (1, 2, or 4). Default is 4 (RGBA)
+    --type  XXX    Set data type (float, int32, uint8). Default is float
     WxH            Set custom Width x Height (e.g. 8x4)
 
 
