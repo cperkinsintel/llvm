@@ -11,12 +11,14 @@
     FLAGS
     --semaphores   Use Vulkan Semaphores for SYCL Interop Sync
     --linear       Use LINEAR tiling for the Vulkan Image (default is OPTIMAL)
-    --WxH          Set custom Width x Height (e.g. 8x4)
+    --channels  X  Set number of channels (1, 2, or 4). Default is 4 (RGBA)
+    WxH            Set custom Width x Height (e.g. 8x4)
+
 
     ./vsu_2d_test.bin --semaphores --linear 8x4
 
 
-
+    NOTE: presently --linear is not working with 2D.
  */
 /*
   Vulkan/SYCL Test: Unsampled (Storage) Image Interop
