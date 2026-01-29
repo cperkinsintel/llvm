@@ -1,28 +1,13 @@
-/*
-    vulkan_interop_common.hpp
-
-    This is pure Vulkan, no SYCL. 
-
-
-*/
-
 #pragma once
 
 #include <vulkan/vulkan.h>
 #include <iostream>
 #include <vector>
 #include <cstring>
-#include <cmath>
-#include <fstream>
 #include <stdexcept>
-
-// --- Macros & Utilities ---
-
-#define CHECK_VK(result, msg) \
-    if (result != VK_SUCCESS) { \
-        std::cerr << "Vulkan error: " << msg << " (code: " << result << ")" << std::endl; \
-        exit(1); \
-    }
+#include <cmath>
+#include <unistd.h>
+#include <algorithm>
 
 struct VulkanContext {
     VkInstance instance;
@@ -35,12 +20,19 @@ struct VulkanContext {
 struct ImageResources {
     VkImage image;
     VkDeviceMemory memory;
-    VkExtent3D extent;
-    VkFormat format;
     VkDeviceSize allocationSize;
+    VkExtent3D extent; // We store extent here to recall it later
 };
 
-// --- Helper Functions ---
+// Safe Macro: uses __vk_res to avoid variable shadowing
+#define VK_CHECK(f) \
+{ \
+    VkResult __vk_res = (f); \
+    if (__vk_res != VK_SUCCESS) { \
+        std::cerr << "Vulkan Error at line " << __LINE__ << ": " << __vk_res << std::endl; \
+        throw std::runtime_error("Vulkan Error"); \
+    } \
+}
 
 inline uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties) {
     VkPhysicalDeviceMemoryProperties memProperties;
@@ -50,275 +42,320 @@ inline uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFil
             return i;
         }
     }
-    throw std::runtime_error("Failed to find suitable memory type!");
+    throw std::runtime_error("failed to find suitable memory type!");
 }
 
 inline VulkanContext createVulkanContext() {
-    VulkanContext ctx = {};
-
-    // 1. Instance
-    VkApplicationInfo appInfo = {};
+    VulkanContext ctx;
+    VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "Interop Test";
     appInfo.apiVersion = VK_API_VERSION_1_2;
 
-    VkInstanceCreateInfo instanceInfo = {};
-    instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    instanceInfo.pApplicationInfo = &appInfo;
+    VkInstanceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pApplicationInfo = &appInfo;
 
-    CHECK_VK(vkCreateInstance(&instanceInfo, nullptr, &ctx.instance), "Instance creation");
+    VK_CHECK(vkCreateInstance(&createInfo, nullptr, &ctx.instance));
 
-    // 2. Physical Device
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(ctx.instance, &deviceCount, nullptr);
+    if (deviceCount == 0) throw std::runtime_error("failed to find GPUs with Vulkan support!");
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(ctx.instance, &deviceCount, devices.data());
     ctx.physicalDevice = devices[0];
 
-    // 3. Queue Family
     uint32_t queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(ctx.physicalDevice, &queueFamilyCount, nullptr);
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(ctx.physicalDevice, &queueFamilyCount, queueFamilies.data());
 
-    ctx.queueFamilyIndex = UINT32_MAX;
+    ctx.queueFamilyIndex = -1;
     for (uint32_t i = 0; i < queueFamilyCount; i++) {
-        if (queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT) {
+        if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             ctx.queueFamilyIndex = i;
             break;
         }
     }
+    if (ctx.queueFamilyIndex == -1) throw std::runtime_error("failed to find a graphics queue family!");
 
-    // 4. Logical Device with Extensions
-    float priority = 1.0f;
-    VkDeviceQueueCreateInfo queueInfo = {};
-    queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueInfo.queueFamilyIndex = ctx.queueFamilyIndex;
-    queueInfo.queueCount = 1;
-    queueInfo.pQueuePriorities = &priority;
+    VkDeviceQueueCreateInfo queueCreateInfo{};
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.queueFamilyIndex = ctx.queueFamilyIndex;
+    queueCreateInfo.queueCount = 1;
+    float queuePriority = 1.0f;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
 
-    const char* extensions[] = {
+    VkDeviceCreateInfo deviceCreateInfo{};
+    deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+    deviceCreateInfo.queueCreateInfoCount = 1;
+    
+    const char* deviceExtensions[] = {
         VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
         VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME,
-        VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME,    // Added for future Semaphore work
-        VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME // Added for future Semaphore work
+        VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME
     };
+    deviceCreateInfo.enabledExtensionCount = 4;
+    deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions;
 
-    VkDeviceCreateInfo deviceInfo = {};
-    deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    deviceInfo.queueCreateInfoCount = 1;
-    deviceInfo.pQueueCreateInfos = &queueInfo;
-    deviceInfo.enabledExtensionCount = 4;
-    deviceInfo.ppEnabledExtensionNames = extensions;
-
-    CHECK_VK(vkCreateDevice(ctx.physicalDevice, &deviceInfo, nullptr, &ctx.device), "Device creation");
+    VK_CHECK(vkCreateDevice(ctx.physicalDevice, &deviceCreateInfo, nullptr, &ctx.device));
     vkGetDeviceQueue(ctx.device, ctx.queueFamilyIndex, 0, &ctx.queue);
 
     return ctx;
 }
 
-inline ImageResources createExportableImage(VulkanContext& ctx, VkExtent3D extent, VkFormat format, VkImageType type, VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL) {
-    ImageResources res = {};
-    res.extent = extent;
-    res.format = format;
+inline VkFormat getFloatFormat(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R32_SFLOAT;
+        case 2: return VK_FORMAT_R32G32_SFLOAT;
+        case 4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+        default: throw std::runtime_error("Unsupported channel count (Use 1, 2, or 4)");
+    }
+}
 
-    VkImageCreateInfo imageInfo = {};
+inline ImageResources createExportableImage(VulkanContext& ctx, VkExtent3D extent, VkFormat format, VkImageType type, VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL) {
+    ImageResources res;
+    res.extent = extent;
+
+    VkExternalMemoryImageCreateInfo extImageCreateInfo{};
+    extImageCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
+    extImageCreateInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+
+    VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.pNext = &extImageCreateInfo;
     imageInfo.imageType = type;
-    imageInfo.format = format;
     imageInfo.extent = extent;
     imageInfo.mipLevels = 1;
     imageInfo.arrayLayers = 1;
-    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.format = format;
     imageInfo.tiling = tiling; 
-    // We enable ALL usage bits here to support both Sampled and Storage tests
-    imageInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | 
-                      VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
-    CHECK_VK(vkCreateImage(ctx.device, &imageInfo, nullptr, &res.image), "Image creation");
+    VK_CHECK(vkCreateImage(ctx.device, &imageInfo, nullptr, &res.image));
 
-    VkMemoryRequirements memReq;
-    vkGetImageMemoryRequirements(ctx.device, res.image, &memReq);
+    VkMemoryRequirements memRequirements;
+    vkGetImageMemoryRequirements(ctx.device, res.image, &memRequirements);
+    res.allocationSize = memRequirements.size;
 
-    VkExportMemoryAllocateInfo exportAllocInfo = {};
+    VkExportMemoryAllocateInfo exportAllocInfo{};
     exportAllocInfo.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO;
     exportAllocInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
 
-    // Save the real size
-    res.allocationSize = memReq.size;
-
-    VkMemoryAllocateInfo allocInfo = {};
+    VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memReq.size;
-    allocInfo.memoryTypeIndex = findMemoryType(ctx.physicalDevice, memReq.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
     allocInfo.pNext = &exportAllocInfo;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = findMemoryType(ctx.physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    CHECK_VK(vkAllocateMemory(ctx.device, &allocInfo, nullptr, &res.memory), "Memory allocation");
-    CHECK_VK(vkBindImageMemory(ctx.device, res.image, res.memory, 0), "Memory bind");
+    VK_CHECK(vkAllocateMemory(ctx.device, &allocInfo, nullptr, &res.memory));
+    VK_CHECK(vkBindImageMemory(ctx.device, res.image, res.memory, 0));
 
     return res;
 }
 
 inline VkSemaphore createExportableSemaphore(VulkanContext& ctx) {
-    VkExportSemaphoreCreateInfo exportInfo = { VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO };
+    VkExportSemaphoreCreateInfo exportInfo{};
+    exportInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO;
     exportInfo.handleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
 
-    VkSemaphoreCreateInfo semInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
-    semInfo.pNext = &exportInfo;
+    VkSemaphoreCreateInfo semaphoreInfo{};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    semaphoreInfo.pNext = &exportInfo;
 
-    VkSemaphore sem;
-    CHECK_VK(vkCreateSemaphore(ctx.device, &semInfo, nullptr, &sem), "Semaphore creation");
-    return sem;
+    VkSemaphore semaphore;
+    VK_CHECK(vkCreateSemaphore(ctx.device, &semaphoreInfo, nullptr, &semaphore));
+    return semaphore;
 }
 
-// Uploads gradient data and transitions layout to GENERAL
-// Returns true if the internal readback check passed
-// Uploads gradient data, performs a round-trip check (Image -> VerifyBuffer), 
-// and transitions layout to GENERAL.
-// Returns true only if the Vulkan-side data verification passes.
-inline bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaphore signalSem = VK_NULL_HANDLE) {
-    size_t pixelCount = imgRes.extent.width * imgRes.extent.height * imgRes.extent.depth;
-    size_t dataSize = pixelCount * 4 * sizeof(float); // Assuming RGBA32F
+inline int getMemFd(VulkanContext& ctx, VkDeviceMemory memory) {
+    VkMemoryGetFdInfoKHR getFdInfo{};
+    getFdInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR;
+    getFdInfo.memory = memory;
+    getFdInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
 
-    // 1. Create Staging Buffer (Src) and Verify Buffer (Dst)
-    VkBuffer stagingBuffer, verifyBuffer;
-    VkDeviceMemory stagingMem, verifyMem;
-    
-    // Helper lambda for buffer creation to keep this clean
-    auto createBuf = [&](VkBufferUsageFlags usage, VkBuffer& buf, VkDeviceMemory& mem) {
-        VkBufferCreateInfo bi = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
-        bi.size = dataSize;
-        bi.usage = usage;
-        vkCreateBuffer(ctx.device, &bi, nullptr, &buf);
-        
-        VkMemoryRequirements req;
-        vkGetBufferMemoryRequirements(ctx.device, buf, &req);
-        VkMemoryAllocateInfo ai = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
-        ai.allocationSize = req.size;
-        ai.memoryTypeIndex = findMemoryType(ctx.physicalDevice, req.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        vkAllocateMemory(ctx.device, &ai, nullptr, &mem);
-        vkBindBufferMemory(ctx.device, buf, mem, 0);
-    };
+    int fd;
+    auto func = (PFN_vkGetMemoryFdKHR) vkGetDeviceProcAddr(ctx.device, "vkGetMemoryFdKHR");
+    if (!func) throw std::runtime_error("Failed to load vkGetMemoryFdKHR");
+    VK_CHECK(func(ctx.device, &getFdInfo, &fd));
+    return fd;
+}
 
-    createBuf(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer, stagingMem);
-    createBuf(VK_BUFFER_USAGE_TRANSFER_DST_BIT, verifyBuffer, verifyMem);
+inline int getSemaphoreFd(VulkanContext& ctx, VkSemaphore semaphore) {
+    VkSemaphoreGetFdInfoKHR getFdInfo{};
+    getFdInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
+    getFdInfo.semaphore = semaphore;
+    getFdInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
 
-    // 2. Fill Staging Buffer with Gradient
+    int fd;
+    auto func = (PFN_vkGetSemaphoreFdKHR) vkGetDeviceProcAddr(ctx.device, "vkGetSemaphoreFdKHR");
+    if (!func) throw std::runtime_error("Failed to load vkGetSemaphoreFdKHR");
+    VK_CHECK(func(ctx.device, &getFdInfo, &fd));
+    return fd;
+}
+
+// Fixed uploadAndVerify
+inline bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaphore signalSemaphore = VK_NULL_HANDLE, int channels = 4) {
+    size_t texWidth = imgRes.extent.width;
+    size_t texHeight = imgRes.extent.height;
+    size_t texDepth = imgRes.extent.depth;
+    VkDeviceSize imageSize = texWidth * texHeight * texDepth * channels * sizeof(float);
+
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = imageSize;
+    bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+
+    VK_CHECK(vkCreateBuffer(ctx.device, &bufferInfo, nullptr, &stagingBuffer));
+
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements(ctx.device, stagingBuffer, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = findMemoryType(ctx.physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    VK_CHECK(vkAllocateMemory(ctx.device, &allocInfo, nullptr, &stagingBufferMemory));
+    VK_CHECK(vkBindBufferMemory(ctx.device, stagingBuffer, stagingBufferMemory, 0));
+
     void* data;
-    vkMapMemory(ctx.device, stagingMem, 0, dataSize, 0, &data);
-    float* floatData = (float*)data;
-    for (size_t i = 0; i < pixelCount; i++) {
-        floatData[i * 4 + 0] = (float)i / (float)(pixelCount - 1); // R
-        floatData[i * 4 + 1] = 0.0f; // G
-        floatData[i * 4 + 2] = 0.0f; // B
-        floatData[i * 4 + 3] = 1.0f; // A
-    }
-    vkUnmapMemory(ctx.device, stagingMem);
-
-    // 3. Command Recording
-    VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
-    poolInfo.queueFamilyIndex = ctx.queueFamilyIndex;
-    VkCommandPool commandPool;
-    vkCreateCommandPool(ctx.device, &poolInfo, nullptr, &commandPool);
-
-    VkCommandBuffer cmd;
-    VkCommandBufferAllocateInfo cmdAlloc = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-    cmdAlloc.commandPool = commandPool;
-    cmdAlloc.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    cmdAlloc.commandBufferCount = 1;
-    vkAllocateCommandBuffers(ctx.device, &cmdAlloc, &cmd);
-
-    VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-    vkBeginCommandBuffer(cmd, &beginInfo);
-
-    // A. Undefined -> Transfer Dst
-    VkImageMemoryBarrier bar1 = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-    bar1.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    bar1.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    bar1.image = imgRes.image;
-    bar1.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-    bar1.srcAccessMask = 0;
-    bar1.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,0,nullptr,0,nullptr,1,&bar1);
-
-    // B. Copy Staging -> Image
-    VkBufferImageCopy region = {};
-    region.imageSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
-    region.imageExtent = imgRes.extent;
-    vkCmdCopyBufferToImage(cmd, stagingBuffer, imgRes.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
-
-    // C. Transfer Dst -> Transfer Src (For Verification Readback)
-    VkImageMemoryBarrier bar2 = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-    bar2.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    bar2.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-    bar2.image = imgRes.image;
-    bar2.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-    bar2.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    bar2.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,0,nullptr,0,nullptr,1,&bar2);
-
-    // D. Copy Image -> Verify Buffer
-    vkCmdCopyImageToBuffer(cmd, imgRes.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, verifyBuffer, 1, &region);
-
-    // E. Transfer Src -> General (Final State for Interop)
-    VkImageMemoryBarrier bar3 = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-    bar3.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-    bar3.newLayout = VK_IMAGE_LAYOUT_GENERAL;
-    bar3.image = imgRes.image;
-    bar3.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-    bar3.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-    bar3.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT;
+    vkMapMemory(ctx.device, stagingBufferMemory, 0, imageSize, 0, &data);
+    float* pixelData = (float*)data;
     
-    // Bottom of pipe ensures transition completes before command buffer retires
-    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0,0,nullptr,0,nullptr,1,&bar3);
-
-    vkEndCommandBuffer(cmd);
-
-    // 4. Submit
-    VkSubmitInfo submit = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-    submit.commandBufferCount = 1;
-    submit.pCommandBuffers = &cmd;
-    if (signalSem != VK_NULL_HANDLE) {
-        submit.signalSemaphoreCount = 1;
-        submit.pSignalSemaphores = &signalSem;
-    }
-
-    vkQueueSubmit(ctx.queue, 1, &submit, VK_NULL_HANDLE);
-    // We MUST WaitIdle to read the verification buffer, even if using semaphores for interop.
-    vkQueueWaitIdle(ctx.queue);
-
-    // 5. Verify Readback
-    bool passed = true;
-    void* verifyPtr;
-    vkMapMemory(ctx.device, verifyMem, 0, dataSize, 0, &verifyPtr);
-    float* verifyFloats = (float*)verifyPtr;
-    
-    for (size_t i = 0; i < pixelCount; i++) {
-        float expected = (float)i / (float)(pixelCount - 1);
-        float actual = verifyFloats[i * 4]; 
-        if (std::abs(actual - expected) > 0.01f) {
-            passed = false;
-            std::cerr << "VULKAN UPLOAD CHECK FAILED at index " << i 
-                      << ": Expected " << expected << ", Got " << actual << std::endl;
-            break; 
+    size_t totalPixels = texWidth * texHeight * texDepth;
+    for (size_t i = 0; i < totalPixels; i++) {
+        float val = (float)i / (float)(totalPixels > 1 ? totalPixels - 1 : 1);
+        for(int c=0; c<channels; ++c) {
+            pixelData[i * channels + c] = val + (float)c * 0.1f; 
         }
     }
-    vkUnmapMemory(ctx.device, verifyMem);
+    vkUnmapMemory(ctx.device, stagingBufferMemory);
 
-    if (passed) {
-        std::cout << "✓ Vulkan Data Verified (Internal Round-Trip Passed)" << std::endl;
+    VkCommandPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.queueFamilyIndex = ctx.queueFamilyIndex;
+    VkCommandPool commandPool;
+    VK_CHECK(vkCreateCommandPool(ctx.device, &poolInfo, nullptr, &commandPool));
+
+    VkCommandBufferAllocateInfo cmdAllocInfo{};
+    cmdAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    cmdAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    cmdAllocInfo.commandPool = commandPool;
+    cmdAllocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer commandBuffer;
+    VK_CHECK(vkAllocateCommandBuffers(ctx.device, &cmdAllocInfo, &commandBuffer));
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = imgRes.image;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+    barrier.srcAccessMask = 0;
+    barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+    VkBufferImageCopy region{};
+    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.imageSubresource.layerCount = 1;
+    region.imageExtent = imgRes.extent;
+
+    vkCmdCopyBufferToImage(commandBuffer, stagingBuffer, imgRes.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+
+    VkImageMemoryBarrier barrier2 = barrier;
+    barrier2.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barrier2.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    barrier2.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier2.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+
+    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier2);
+
+    vkEndCommandBuffer(commandBuffer);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+    
+    if (signalSemaphore != VK_NULL_HANDLE) {
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = &signalSemaphore;
     }
 
-    // Cleanup
+    VK_CHECK(vkQueueSubmit(ctx.queue, 1, &submitInfo, VK_NULL_HANDLE));
+    vkQueueWaitIdle(ctx.queue);
+
+    // Round Trip Verify
+    vkResetCommandBuffer(commandBuffer, 0);
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+    
+    VkImageMemoryBarrier barrier3 = barrier2;
+    barrier3.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+    barrier3.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    barrier3.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+    barrier3.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,0,nullptr,0,nullptr, 1, &barrier3);
+    
+    vkCmdCopyImageToBuffer(commandBuffer, imgRes.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, stagingBuffer, 1, &region);
+    
+    VkImageMemoryBarrier barrier4 = barrier3;
+    barrier4.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    barrier4.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    barrier4.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    barrier4.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0,0,nullptr,0,nullptr, 1, &barrier4);
+
+    vkEndCommandBuffer(commandBuffer);
+    VK_CHECK(vkQueueSubmit(ctx.queue, 1, &submitInfo, VK_NULL_HANDLE));
+    vkQueueWaitIdle(ctx.queue);
+
+    vkMapMemory(ctx.device, stagingBufferMemory, 0, imageSize, 0, &data);
+    float* checkData = (float*)data;
+    
+    bool valid = true;
+    for (size_t i = 0; i < totalPixels * channels; i++) {
+        size_t pixelIdx = i / channels;
+        int channelIdx = i % channels;
+        float baseVal = (float)pixelIdx / (float)(totalPixels > 1 ? totalPixels - 1 : 1);
+        float expected = baseVal + (float)channelIdx * 0.1f;
+        
+        if (std::abs(checkData[i] - expected) > 0.001f) {
+            valid = false;
+            break;
+        }
+    }
+    vkUnmapMemory(ctx.device, stagingBufferMemory);
+
+    if(valid) std::cout << "✓ Vulkan Data Verified (Internal Round-Trip Passed)" << std::endl;
+    else std::cerr << "X Vulkan Data Verification Failed!" << std::endl;
+
     vkDestroyBuffer(ctx.device, stagingBuffer, nullptr);
-    vkFreeMemory(ctx.device, stagingMem, nullptr);
-    vkDestroyBuffer(ctx.device, verifyBuffer, nullptr);
-    vkFreeMemory(ctx.device, verifyMem, nullptr);
+    vkFreeMemory(ctx.device, stagingBufferMemory, nullptr);
     vkDestroyCommandPool(ctx.device, commandPool, nullptr);
 
-    return passed;
+    return valid;
 }
 
 inline void cleanupVulkan(VulkanContext& ctx, ImageResources& res) {
@@ -326,30 +363,4 @@ inline void cleanupVulkan(VulkanContext& ctx, ImageResources& res) {
     vkFreeMemory(ctx.device, res.memory, nullptr);
     vkDestroyDevice(ctx.device, nullptr);
     vkDestroyInstance(ctx.instance, nullptr);
-}
-
-inline int getMemFd(VulkanContext& ctx, VkDeviceMemory mem) {
-    auto func = (PFN_vkGetMemoryFdKHR)vkGetDeviceProcAddr(ctx.device, "vkGetMemoryFdKHR");
-    if (!func) return -1;
-    
-    VkMemoryGetFdInfoKHR info = { VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR };
-    info.memory = mem;
-    info.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
-    
-    int fd = -1;
-    func(ctx.device, &info, &fd);
-    return fd;
-}
-
-inline int getSemaphoreFd(VulkanContext& ctx, VkSemaphore sem) {
-    auto func = (PFN_vkGetSemaphoreFdKHR)vkGetDeviceProcAddr(ctx.device, "vkGetSemaphoreFdKHR");
-    if (!func) return -1;
-    
-    VkSemaphoreGetFdInfoKHR info = { VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR };
-    info.semaphore = sem;
-    info.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
-    
-    int fd = -1;
-    func(ctx.device, &info, &fd);
-    return fd;
 }
