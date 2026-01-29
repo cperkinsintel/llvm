@@ -1,0 +1,16 @@
+#version 450
+
+// $VULKAN_SDK/bin/glslangValidator -V vulkan_shader_1d.comp -o vulkan_shader_1d.spv
+
+
+layout(binding = 0) uniform sampler1D inputImage; // changed from sampler2D
+layout(binding = 1, std430) buffer OutputBuffer { float values[]; };
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+void main() {
+    // 1D UV: Normalized 0.0 to 1.0 based on Width only
+    float u = (float(gl_GlobalInvocationID.x) + 0.5) / 4.0;
+    
+    // texture() takes float coord for 1D
+    values[gl_GlobalInvocationID.x] = texture(inputImage, u).r;
+}

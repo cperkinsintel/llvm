@@ -1,0 +1,17 @@
+#version 450
+
+// $VULKAN_SDK/bin/glslangValidator -V vulkan_shader_3d.comp -o vulkan_shader_3d.spv
+
+
+layout(binding = 0) uniform sampler3D inputImage; // changed from sampler2D
+layout(binding = 1, std430) buffer OutputBuffer { float values[]; };
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+void main() {
+    // 3D UVW
+    vec3 uvw = (vec3(gl_GlobalInvocationID.xyz) + vec3(0.5)) / vec3(4.0, 4.0, 4.0);
+    
+    // texture() takes vec3 for 3D
+    uint idx = gl_GlobalInvocationID.z * 16 + gl_GlobalInvocationID.y * 4 + gl_GlobalInvocationID.x;
+    values[idx] = texture(inputImage, uvw).r;
+}
