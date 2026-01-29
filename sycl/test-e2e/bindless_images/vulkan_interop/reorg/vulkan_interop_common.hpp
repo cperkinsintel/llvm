@@ -117,7 +117,7 @@ inline VulkanContext createVulkanContext() {
     return ctx;
 }
 
-inline ImageResources createExportableImage(VulkanContext& ctx, VkExtent3D extent, VkFormat format, VkImageType type) {
+inline ImageResources createExportableImage(VulkanContext& ctx, VkExtent3D extent, VkFormat format, VkImageType type, VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL) {
     ImageResources res = {};
     res.extent = extent;
     res.format = format;
@@ -130,7 +130,7 @@ inline ImageResources createExportableImage(VulkanContext& ctx, VkExtent3D exten
     imageInfo.mipLevels = 1;
     imageInfo.arrayLayers = 1;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageInfo.tiling = tiling; 
     // We enable ALL usage bits here to support both Sampled and Storage tests
     imageInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | 
                       VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;

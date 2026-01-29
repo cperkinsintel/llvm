@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 
     // 1. Setup Vulkan
     VulkanContext vkCtx = createVulkanContext();
-    VkExtent3D extent = {4, 4, 1}; 
+    VkExtent3D extent = {4, 2, 1}; 
     
     // Create Image (OPTIMAL Tiling)
     ImageResources imgRes = createExportableImage(vkCtx, extent, VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_TYPE_2D, VK_IMAGE_TILING_OPTIMAL);

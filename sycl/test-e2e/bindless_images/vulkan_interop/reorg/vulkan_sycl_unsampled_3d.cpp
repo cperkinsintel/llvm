@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
     // 1. Setup Vulkan (Asymmetric: 4x3x2)
     VulkanContext vkCtx = createVulkanContext();
     // Width=4, Height=3, Depth=2
-    VkExtent3D extent = {4, 3, 2}; 
+    VkExtent3D extent = {8,4,2}; //{4, 3, 2}; 
     
     ImageResources imgRes = createExportableImage(vkCtx, extent, VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_TYPE_3D);
 

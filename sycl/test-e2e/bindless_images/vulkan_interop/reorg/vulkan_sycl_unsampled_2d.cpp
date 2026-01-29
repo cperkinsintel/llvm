@@ -45,7 +45,8 @@ int main(int argc, char** argv) {
 
     // 1. Setup Vulkan
     VulkanContext vkCtx = createVulkanContext();
-    VkExtent3D extent = {4, 4, 1};
+    VkExtent3D extent = {4, 3, 1};
+    unsigned long numPixels = extent.width * extent.height * extent.depth;
     ImageResources imgRes = createExportableImage(vkCtx, extent, VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_TYPE_2D);
 
     // 2. Prepare Semaphore (if enabled)
@@ -127,9 +128,23 @@ int main(int argc, char** argv) {
         // ... [Verify Logic Same as Before] ...
         sycl::host_accessor hostAcc(checkBuf, sycl::read_only);
         bool passed = true;
-        for(int i=0; i<16; ++i) {
-            float expected = (float)i / 15.0f;
-            if(std::abs(hostAcc[i] - expected) > 0.01f) passed = false;
+        int errorCount = 0;
+        size_t totalPixels = extent.width * extent.height;
+
+        for(size_t i=0; i < totalPixels; ++i) {
+            float expected = (float)i / (float)(totalPixels - 1);
+            float actual = hostAcc[i];
+            
+            if(std::abs(actual - expected) > 0.01f) {
+                passed = false;
+                if (errorCount < 10) {
+                     int x = i % extent.width;
+                     int y = i / extent.width;
+                     std::cout << "Mismatch at idx " << i << " (Coords: " << x << "," << y << ")"
+                               << " Got: " << actual << " Exp: " << expected << std::endl;
+                }
+                errorCount++;
+            }
         }
         if(passed) std::cout << "SUCCESS!" << std::endl;
         else std::cout << "FAILURE!" << std::endl;
