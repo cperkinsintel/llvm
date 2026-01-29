@@ -10,283 +10,178 @@
     --semaphores   Use Vulkan Semaphores for SYCL Interop Sync
     --linear       Use LINEAR tiling for the Vulkan Image (default is OPTIMAL)
     --channels  X  Set number of channels (1, 2, or 4). Default is 4 (RGBA)
+    --type  XXX    Set data type (float, int32, uint8). Default is float
     WxHxD          Set custom Width x Height x Depth (e.g. 8x4x2)
   
     ./vsu_3d_w_test.bin 
     ./vsu_3d_w_test.bin --semaphores --linear --channels 2 128x128x16
  */
-
 #include "vulkan_interop_common.hpp"
-
 #include <sycl/sycl.hpp>
 #include <sycl/ext/oneapi/bindless_images.hpp>
 #include <sycl/ext/oneapi/bindless_images_interop.hpp>
 #include <string>
 
-int main(int argc, char** argv) {
-    // Defaults
-    int width = 4;
-    int height = 4;
-    int depth = 4;
-    int channels = 4;
-    bool useLinear = false;
-    bool useSemaphores = false;
+// TYPE MAPPING
+template <typename T> VkFormat getVulkanFormat(int channels);
+template <> VkFormat getVulkanFormat<float>(int channels) { switch(channels) { case 1: return VK_FORMAT_R32_SFLOAT; case 2: return VK_FORMAT_R32G32_SFLOAT; case 4: return VK_FORMAT_R32G32B32A32_SFLOAT; default: throw std::runtime_error("Unsupported"); }}
+template <> VkFormat getVulkanFormat<int32_t>(int channels) { switch(channels) { case 1: return VK_FORMAT_R32_SINT; case 2: return VK_FORMAT_R32G32_SINT; case 4: return VK_FORMAT_R32G32B32A32_SINT; default: throw std::runtime_error("Unsupported"); }}
+template <> VkFormat getVulkanFormat<uint8_t>(int channels) { switch(channels) { case 1: return VK_FORMAT_R8_UINT; case 2: return VK_FORMAT_R8G8_UINT; case 4: return VK_FORMAT_R8G8B8A8_UINT; default: throw std::runtime_error("Unsupported"); }}
 
-    // Argument Parsing
-    for(int i=1; i<argc; ++i) {
-        std::string arg = argv[i];
-        if(arg == "--semaphores") useSemaphores = true;
-        else if(arg == "--linear") useLinear = true;
-        else if(arg == "--channels" && i+1 < argc) {
-            channels = std::stoi(argv[++i]);
-        }
-        else if(arg.find("x") != std::string::npos) {
-            size_t x1 = arg.find("x");
-            size_t x2 = arg.find("x", x1 + 1);
-            try {
-                width = std::stoi(arg.substr(0, x1));
-                if (x2 != std::string::npos) {
-                    height = std::stoi(arg.substr(x1 + 1, x2 - x1 - 1));
-                    depth = std::stoi(arg.substr(x2 + 1));
-                } else {
-                    height = std::stoi(arg.substr(x1 + 1));
-                }
-            } catch (...) { }
-        }
-    }
+template <typename T> sycl::image_channel_type getSyclChannelType();
+template <> sycl::image_channel_type getSyclChannelType<float>() { return sycl::image_channel_type::fp32; }
+template <> sycl::image_channel_type getSyclChannelType<int32_t>() { return sycl::image_channel_type::signed_int32; }
+template <> sycl::image_channel_type getSyclChannelType<uint8_t>() { return sycl::image_channel_type::unsigned_int8; }
 
-    if (channels != 1 && channels != 2 && channels != 4) {
-        std::cerr << "Error: Only 1, 2, or 4 channels supported." << std::endl;
-        return 1;
-    }
+// KERNEL VALUE GENERATOR
+template <typename T>
+T getKernelValue(size_t index, int channel, size_t rangeMax) {
+    if constexpr (std::is_floating_point_v<T>) {
+        float val = (float)index / (float)(rangeMax > 1 ? rangeMax - 1 : 1);
+        return static_cast<T>(val + (float)channel * 0.1f);
+    } else { return static_cast<T>((index + channel * 10) % 127); }
+}
 
+template <typename T>
+int runTest(int width, int height, int depth, int channels, bool useLinear, bool useSemaphores) {
     VkImageTiling tiling = useLinear ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
-    VkFormat vkFormat = getFloatFormat(channels);
-
-    std::cout << "Running UNSAMPLED 3D WRITE Test | Size: " << width << "x" << height << "x" << depth
-              << " | Channels: " << channels
-              << " | Tiling: " << (useLinear ? "LINEAR" : "OPTIMAL")
-              << " | Semaphores: " << (useSemaphores ? "ON" : "OFF") << std::endl;
-
-    // 1. Setup Vulkan
+    VkFormat vkFormat = getVulkanFormat<T>(channels);
     VulkanContext vkCtx = createVulkanContext();
     VkExtent3D extent = {(uint32_t)width, (uint32_t)height, (uint32_t)depth};
     ImageResources imgRes = createExportableImage(vkCtx, extent, vkFormat, VK_IMAGE_TYPE_3D, tiling);
 
     // Initial Transition
     {
-        VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
-        poolInfo.queueFamilyIndex = vkCtx.queueFamilyIndex;
-        VkCommandPool pool;
-        vkCreateCommandPool(vkCtx.device, &poolInfo, nullptr, &pool);
-        
-        VkCommandBuffer cmd;
-        VkCommandBufferAllocateInfo cmdAlloc = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-        cmdAlloc.commandPool = pool;
-        cmdAlloc.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        cmdAlloc.commandBufferCount = 1;
-        vkAllocateCommandBuffers(vkCtx.device, &cmdAlloc, &cmd);
-        
-        VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-        vkBeginCommandBuffer(cmd, &beginInfo);
-        
-        VkImageMemoryBarrier barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-        barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
-        barrier.image = imgRes.image;
-        barrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-        barrier.srcAccessMask = 0;
-        barrier.dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT; 
-        
-        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0,0,nullptr,0,nullptr,1,&barrier);
-        
+        VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO }; poolInfo.queueFamilyIndex = vkCtx.queueFamilyIndex;
+        VkCommandPool pool; vkCreateCommandPool(vkCtx.device, &poolInfo, nullptr, &pool);
+        VkCommandBuffer cmd; VkCommandBufferAllocateInfo ca = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO}; ca.commandPool=pool; ca.level=VK_COMMAND_BUFFER_LEVEL_PRIMARY; ca.commandBufferCount=1;
+        vkAllocateCommandBuffers(vkCtx.device, &ca, &cmd);
+        VkCommandBufferBeginInfo bi = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; vkBeginCommandBuffer(cmd, &bi);
+        VkImageMemoryBarrier bar = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER}; bar.oldLayout=VK_IMAGE_LAYOUT_UNDEFINED; bar.newLayout=VK_IMAGE_LAYOUT_GENERAL; bar.image=imgRes.image; bar.subresourceRange={VK_IMAGE_ASPECT_COLOR_BIT,0,1,0,1}; bar.srcAccessMask=0; bar.dstAccessMask=VK_ACCESS_MEMORY_WRITE_BIT;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0,0,nullptr,0,nullptr,1,&bar);
         vkEndCommandBuffer(cmd);
-        
-        VkSubmitInfo submit = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-        submit.commandBufferCount = 1;
-        submit.pCommandBuffers = &cmd;
-        vkQueueSubmit(vkCtx.queue, 1, &submit, VK_NULL_HANDLE);
-        vkQueueWaitIdle(vkCtx.queue);
-        
-        vkDestroyCommandPool(vkCtx.device, pool, nullptr);
+        VkSubmitInfo si = {VK_STRUCTURE_TYPE_SUBMIT_INFO}; si.commandBufferCount=1; si.pCommandBuffers=&cmd;
+        vkQueueSubmit(vkCtx.queue, 1, &si, VK_NULL_HANDLE); vkQueueWaitIdle(vkCtx.queue); vkDestroyCommandPool(vkCtx.device, pool, nullptr);
     }
 
-    // 2. Export Handles
+    VkSemaphore vkSem = VK_NULL_HANDLE;
+    if (useSemaphores) vkSem = createExportableSemaphore(vkCtx);
+
     int memFd = getMemFd(vkCtx, imgRes.memory);
     int semFd = -1;
-    VkSemaphore vkSem = VK_NULL_HANDLE;
-    if (useSemaphores) {
-        vkSem = createExportableSemaphore(vkCtx);
-        semFd = getSemaphoreFd(vkCtx, vkSem);
-    }
+    if (useSemaphores) semFd = getSemaphoreFd(vkCtx, vkSem);
 
-    // 3. SYCL Interop
     namespace syclexp = sycl::ext::oneapi::experimental;
-    
     try {
         sycl::queue q;
-        
-        syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{
-            memFd, syclexp::external_mem_handle_type::opaque_fd, imgRes.allocationSize
-        };
+        syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{memFd, syclexp::external_mem_handle_type::opaque_fd, imgRes.allocationSize};
         syclexp::external_mem extMem = syclexp::import_external_memory(extMemDesc, q.get_device(), q.get_context());
-
+        
         syclexp::external_semaphore extSem;
         if (useSemaphores) {
-             syclexp::external_semaphore_descriptor<syclexp::resource_fd> extSemDesc{
-                semFd, syclexp::external_semaphore_handle_type::opaque_fd
-            };
+             syclexp::external_semaphore_descriptor<syclexp::resource_fd> extSemDesc{semFd, syclexp::external_semaphore_handle_type::opaque_fd};
             extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
         }
 
-        syclexp::image_descriptor imgDesc(sycl::range<3>(width, height, depth), channels, sycl::image_channel_type::fp32);
+        syclexp::image_descriptor imgDesc(sycl::range<3>(width, height, depth), channels, getSyclChannelType<T>());
         syclexp::image_mem_handle devHandle = syclexp::map_external_image_memory(extMem, imgDesc, q.get_device(), q.get_context());
         syclexp::unsampled_image_handle unsampledHandle = syclexp::create_image(devHandle, imgDesc, q.get_device(), q.get_context());
 
-        // Step A: Kernel
         sycl::event kernelEvent = q.submit([&](sycl::handler& h) {
             h.parallel_for(sycl::range<3>(width, height, depth), [=](sycl::item<3> item) {
-                int x = item.get_id(0);
-                int y = item.get_id(1);
-                int z = item.get_id(2);
-                
-                // Gradient Base: (x + y*w) / total (ignoring Z for simplicity, or we can add it)
-                float val = (float)(z * width * height + y * width + x) / (float)(width * height * depth - 1);
+                int x = item.get_id(0); int y = item.get_id(1); int z = item.get_id(2);
+                size_t index = z * width * height + y * width + x;
+                size_t totalPixels = width * height * depth;
                 
                 if (channels == 1) {
-                    syclexp::write_image(unsampledHandle, sycl::int3(x, y, z), val);
-                } 
-                else if (channels == 2) {
-                    sycl::float2 px(val, val + 0.1f);
-                    syclexp::write_image(unsampledHandle, sycl::int3(x, y, z), px);
-                } 
-                else { // 4
-                    sycl::float4 px(val, val + 0.1f, val + 0.2f, val + 0.3f);
-                    syclexp::write_image(unsampledHandle, sycl::int3(x, y, z), px);
+                    T val = getKernelValue<T>(index, 0, totalPixels);
+                    syclexp::write_image(unsampledHandle, sycl::int3(x,y,z), val);
+                } else if (channels == 2) {
+                    using Vec2 = sycl::vec<T, 2>;
+                    Vec2 px(getKernelValue<T>(index,0,totalPixels), getKernelValue<T>(index,1,totalPixels));
+                    syclexp::write_image(unsampledHandle, sycl::int3(x,y,z), px);
+                } else {
+                    using Vec4 = sycl::vec<T, 4>;
+                    Vec4 px(getKernelValue<T>(index,0,totalPixels), getKernelValue<T>(index,1,totalPixels), getKernelValue<T>(index,2,totalPixels), getKernelValue<T>(index,3,totalPixels));
+                    syclexp::write_image(unsampledHandle, sycl::int3(x,y,z), px);
                 }
             });
         });
 
-        // Step B: Signal
-        if (useSemaphores) {
-            q.submit([&](sycl::handler& h) {
-                h.depends_on(kernelEvent);
-                h.ext_oneapi_signal_external_semaphore(extSem);
-            });
-        }
-
+        if (useSemaphores) q.submit([&](sycl::handler& h) { h.depends_on(kernelEvent); h.ext_oneapi_signal_external_semaphore(extSem); });
         q.wait();
-        std::cout << "SYCL Write Kernel Executed." << std::endl;
 
         syclexp::destroy_image_handle(unsampledHandle, q.get_device(), q.get_context());
         syclexp::release_external_memory(extMem, q.get_device(), q.get_context());
-        if (useSemaphores) {
-            syclexp::release_external_semaphore(extSem, q.get_device(), q.get_context());
-        }
+        if (useSemaphores) { syclexp::release_external_semaphore(extSem, q.get_device(), q.get_context()); }
+    } catch (std::exception& e) { std::cerr << "SYCL Exception: " << e.what() << std::endl; return 1; }
 
-    } catch (std::exception& e) {
-        std::cerr << "SYCL Exception: " << e.what() << std::endl;
-        return 1;
-    }
-
-    // 4. Vulkan Verification
+    // Vulkan Verify
     vkDeviceWaitIdle(vkCtx.device);
-
-    VkBuffer verifyBuffer;
-    VkDeviceMemory verifyMem;
-    size_t dataSize = width * height * depth * channels * sizeof(float);
-    
-    VkBufferCreateInfo bi = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
-    bi.size = dataSize;
-    bi.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    VkBuffer verifyBuffer; VkDeviceMemory verifyMem;
+    size_t dataSize = width * height * depth * channels * sizeof(T);
+    VkBufferCreateInfo bi = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO}; bi.size=dataSize; bi.usage=VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     vkCreateBuffer(vkCtx.device, &bi, nullptr, &verifyBuffer);
+    VkMemoryRequirements req; vkGetBufferMemoryRequirements(vkCtx.device, verifyBuffer, &req);
+    VkMemoryAllocateInfo ai = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO}; ai.allocationSize=req.size; ai.memoryTypeIndex=findMemoryType(vkCtx.physicalDevice, req.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT|VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    vkAllocateMemory(vkCtx.device, &ai, nullptr, &verifyMem); vkBindBufferMemory(vkCtx.device, verifyBuffer, verifyMem, 0);
 
-    VkMemoryRequirements req;
-    vkGetBufferMemoryRequirements(vkCtx.device, verifyBuffer, &req);
-    VkMemoryAllocateInfo ai = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
-    ai.allocationSize = req.size;
-    ai.memoryTypeIndex = findMemoryType(vkCtx.physicalDevice, req.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    vkAllocateMemory(vkCtx.device, &ai, nullptr, &verifyMem);
-    vkBindBufferMemory(vkCtx.device, verifyBuffer, verifyMem, 0);
-
-    VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
-    poolInfo.queueFamilyIndex = vkCtx.queueFamilyIndex;
-    VkCommandPool pool;
-    vkCreateCommandPool(vkCtx.device, &poolInfo, nullptr, &pool);
-
-    VkCommandBuffer cmd;
-    VkCommandBufferAllocateInfo cmdAlloc = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-    cmdAlloc.commandPool = pool;
-    cmdAlloc.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    cmdAlloc.commandBufferCount = 1;
-    vkAllocateCommandBuffers(vkCtx.device, &cmdAlloc, &cmd);
-
-    VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-    vkBeginCommandBuffer(cmd, &beginInfo);
-    
-    // Copy GENERAL -> Buffer
-    VkBufferImageCopy region = {};
-    region.imageSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
-    region.imageExtent = extent;
-    vkCmdCopyImageToBuffer(cmd, imgRes.image, VK_IMAGE_LAYOUT_GENERAL, verifyBuffer, 1, &region);
-    
-    vkEndCommandBuffer(cmd);
-
-    VkSubmitInfo submit = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-    submit.commandBufferCount = 1;
-    submit.pCommandBuffers = &cmd;
-    
-    std::vector<VkPipelineStageFlags> waitStages = { VK_PIPELINE_STAGE_TRANSFER_BIT };
-    if (useSemaphores) {
-        submit.waitSemaphoreCount = 1;
-        submit.pWaitSemaphores = &vkSem;
-        submit.pWaitDstStageMask = waitStages.data();
+    {
+        VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO }; poolInfo.queueFamilyIndex = vkCtx.queueFamilyIndex;
+        VkCommandPool pool; vkCreateCommandPool(vkCtx.device, &poolInfo, nullptr, &pool);
+        VkCommandBuffer cmd; VkCommandBufferAllocateInfo ca = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO}; ca.commandPool=pool; ca.level=VK_COMMAND_BUFFER_LEVEL_PRIMARY; ca.commandBufferCount=1;
+        vkAllocateCommandBuffers(vkCtx.device, &ca, &cmd);
+        VkCommandBufferBeginInfo bi = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; vkBeginCommandBuffer(cmd, &bi);
+        VkBufferImageCopy reg = {}; reg.imageSubresource={VK_IMAGE_ASPECT_COLOR_BIT,0,0,1}; reg.imageExtent=extent;
+        vkCmdCopyImageToBuffer(cmd, imgRes.image, VK_IMAGE_LAYOUT_GENERAL, verifyBuffer, 1, &reg);
+        vkEndCommandBuffer(cmd);
+        VkSubmitInfo si = {VK_STRUCTURE_TYPE_SUBMIT_INFO}; si.commandBufferCount=1; si.pCommandBuffers=&cmd;
+        std::vector<VkPipelineStageFlags> waitStages = { VK_PIPELINE_STAGE_TRANSFER_BIT };
+        if (useSemaphores) { si.waitSemaphoreCount=1; si.pWaitSemaphores=&vkSem; si.pWaitDstStageMask=waitStages.data(); }
+        vkQueueSubmit(vkCtx.queue, 1, &si, VK_NULL_HANDLE); vkQueueWaitIdle(vkCtx.queue); vkDestroyCommandPool(vkCtx.device, pool, nullptr);
     }
 
-    vkQueueSubmit(vkCtx.queue, 1, &submit, VK_NULL_HANDLE);
-    vkQueueWaitIdle(vkCtx.queue);
-
-    // Verify Data
-    bool passed = true;
-    void* verifyPtr;
-    vkMapMemory(vkCtx.device, verifyMem, 0, dataSize, 0, &verifyPtr);
-    float* verifyFloats = (float*)verifyPtr;
-    
-    int errorCount = 0;
-    size_t totalValues = width * height * depth * channels;
+    void* ptr; vkMapMemory(vkCtx.device, verifyMem, 0, dataSize, 0, &ptr);
+    T* vData = (T*)ptr;
+    bool passed = true; int errorCount = 0;
     size_t totalPixels = width * height * depth;
-
-    for(size_t i=0; i < totalValues; ++i) {
-        size_t pixelIdx = i / channels;
-        int channelIdx = i % channels;
-        
-        float baseVal = (float)pixelIdx / (float)(totalPixels > 1 ? totalPixels - 1 : 1);
-        float expected = baseVal + (float)channelIdx * 0.1f;
-        float actual = verifyFloats[i];
-
-        if(std::abs(actual - expected) > 0.01f) {
-            passed = false;
-            if (errorCount < 5) {
-                int z = pixelIdx / (width * height);
-                int rem = pixelIdx % (width * height);
-                int y = rem / width;
-                int x = rem % width;
-                std::cout << "Mismatch at " << x << "," << y << "," << z << " (ch" << channelIdx << ") "
-                          << " Got: " << actual << " Exp: " << expected << std::endl;
-            }
-            errorCount++;
+    for(size_t i=0; i < totalPixels * channels; ++i) {
+        T expected = generateTestValue<T>(i/channels, i%channels, totalPixels);
+        if(!checkValue(vData[i], expected)) {
+             passed = false;
+             if(errorCount++ < 5) std::cout << "Mismatch at " << i << " Got: " << (double)vData[i] << " Exp: " << (double)expected << std::endl;
         }
     }
     vkUnmapMemory(vkCtx.device, verifyMem);
-    
-    if(passed) std::cout << "SUCCESS!" << std::endl;
-    else std::cout << "FAILURE! (" << errorCount << " errors)" << std::endl;
+    if(passed) std::cout << "SUCCESS!" << std::endl; else std::cout << "FAILURE! (" << errorCount << " errors)" << std::endl;
 
-    vkDestroyCommandPool(vkCtx.device, pool, nullptr);
-    vkDestroyBuffer(vkCtx.device, verifyBuffer, nullptr);
-    vkFreeMemory(vkCtx.device, verifyMem, nullptr);
+    vkDestroyBuffer(vkCtx.device, verifyBuffer, nullptr); vkFreeMemory(vkCtx.device, verifyMem, nullptr);
     if(useSemaphores) vkDestroySemaphore(vkCtx.device, vkSem, nullptr);
     cleanupVulkan(vkCtx, imgRes);
-
     return 0;
+}
+
+int main(int argc, char** argv) {
+    int width = 4, height = 4, depth = 4, channels = 4;
+    bool useLinear = false, useSemaphores = false;
+    std::string type = "float";
+    for(int i=1; i<argc; ++i) {
+        std::string arg = argv[i];
+        if(arg == "--semaphores") useSemaphores = true;
+        else if(arg == "--linear") useLinear = true;
+        else if(arg == "--channels" && i+1 < argc) channels = std::stoi(argv[++i]);
+        else if(arg == "--type" && i+1 < argc) type = argv[++i];
+        else if(arg.find("x") != std::string::npos) {
+            size_t x1 = arg.find("x"); size_t x2 = arg.find("x", x1 + 1);
+            try { width = std::stoi(arg.substr(0, x1));
+                if (x2 != std::string::npos) { height = std::stoi(arg.substr(x1+1, x2-x1-1)); depth = std::stoi(arg.substr(x2+1)); }
+                else { height = std::stoi(arg.substr(x1+1)); }
+            } catch (...) { }
+        }
+    }
+    std::cout << "Running UNSAMPLED 3D WRITE Test | Type: " << type << " | Size: " << width << "x" << height << "x" << depth << " | Channels: " << channels << std::endl;
+    if (type == "float") return runTest<float>(width, height, depth, channels, useLinear, useSemaphores);
+    if (type == "int32") return runTest<int32_t>(width, height, depth, channels, useLinear, useSemaphores);
+    if (type == "uint8") return runTest<uint8_t>(width, height, depth, channels, useLinear, useSemaphores);
+    return 1;
 }
