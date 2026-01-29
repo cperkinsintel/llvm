@@ -30,62 +30,76 @@
   5. Imports into SYCL as 'unsampled_image_handle'.
   6. Reads data using 'fetch_image' (Data Port).
 */
+
 #include "vulkan_interop_common.hpp"
 
 #include <sycl/sycl.hpp>
 #include <sycl/ext/oneapi/bindless_images.hpp>
 #include <sycl/ext/oneapi/bindless_images_interop.hpp>
 #include <string>
+#include <map>
 
-int main(int argc, char** argv) {
-    // Defaults
-    int width = 4;
-    int height = 4;
-    int channels = 4; // Default to RGBA
-    bool useLinear = false;
-    bool useSemaphores = false;
+// ---------------------------------------------------------
+// TYPE MAPPING HELPERS
+// ---------------------------------------------------------
 
-    // Argument Parsing
-    for(int i=1; i<argc; ++i) {
-        std::string arg = argv[i];
-        if(arg == "--semaphores") useSemaphores = true;
-        else if(arg == "--linear") useLinear = true;
-        else if(arg == "--channels" && i+1 < argc) {
-            channels = std::stoi(argv[++i]);
-        }
-        else if(arg.find("x") != std::string::npos) {
-            size_t xPos = arg.find("x");
-            try {
-                width = std::stoi(arg.substr(0, xPos));
-                height = std::stoi(arg.substr(xPos+1));
-            } catch (...) { }
-        }
+template <typename T>
+VkFormat getVulkanFormat(int channels);
+
+template <> VkFormat getVulkanFormat<float>(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R32_SFLOAT;
+        case 2: return VK_FORMAT_R32G32_SFLOAT;
+        case 4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+        default: throw std::runtime_error("Unsupported channels for float");
     }
+}
 
-    if (channels != 1 && channels != 2 && channels != 4) {
-        std::cerr << "Error: Only 1, 2, or 4 channels supported for this test." << std::endl;
-        return 1;
+template <> VkFormat getVulkanFormat<int32_t>(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R32_SINT;
+        case 2: return VK_FORMAT_R32G32_SINT;
+        case 4: return VK_FORMAT_R32G32B32A32_SINT;
+        default: throw std::runtime_error("Unsupported channels for int32");
     }
+}
 
+template <> VkFormat getVulkanFormat<uint8_t>(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R8_UINT;
+        case 2: return VK_FORMAT_R8G8_UINT;
+        case 4: return VK_FORMAT_R8G8B8A8_UINT;
+        default: throw std::runtime_error("Unsupported channels for uint8");
+    }
+}
+
+template <typename T>
+sycl::image_channel_type getSyclChannelType();
+
+template <> sycl::image_channel_type getSyclChannelType<float>() { return sycl::image_channel_type::fp32; }
+template <> sycl::image_channel_type getSyclChannelType<int32_t>() { return sycl::image_channel_type::signed_int32; }
+template <> sycl::image_channel_type getSyclChannelType<uint8_t>() { return sycl::image_channel_type::unsigned_int8; }
+
+
+// ---------------------------------------------------------
+// TEMPLATED TEST RUNNER
+// ---------------------------------------------------------
+template <typename T>
+int runTest(int width, int height, int channels, bool useLinear, bool useSemaphores) {
     VkImageTiling tiling = useLinear ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
-    VkFormat vkFormat = getFloatFormat(channels);
-
-    std::cout << "Running UNSAMPLED 2D Read Test | Size: " << width << "x" << height 
-              << " | Channels: " << channels
-              << " | Tiling: " << (useLinear ? "LINEAR" : "OPTIMAL")
-              << " | Semaphores: " << (useSemaphores ? "ON" : "OFF") << std::endl;
+    VkFormat vkFormat = getVulkanFormat<T>(channels);
 
     // 1. Setup Vulkan
     VulkanContext vkCtx = createVulkanContext();
     VkExtent3D extent = {(uint32_t)width, (uint32_t)height, 1};
     ImageResources imgRes = createExportableImage(vkCtx, extent, vkFormat, VK_IMAGE_TYPE_2D, tiling);
 
-    // 2. Prepare Semaphore
+    // 2. Semaphores
     VkSemaphore vkSem = VK_NULL_HANDLE;
     if (useSemaphores) vkSem = createExportableSemaphore(vkCtx);
 
-    // 3. Upload Data (Passing channel count)
-    if (!uploadAndVerify(vkCtx, imgRes, vkSem, channels)) {
+    // 3. Upload Data (Explicit Template Call)
+    if (!uploadAndVerify<T>(vkCtx, imgRes, vkSem, channels)) {
         std::cerr << "Vulkan Upload Failed!" << std::endl;
         return 1;
     }
@@ -114,13 +128,13 @@ int main(int argc, char** argv) {
             extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
         }
 
-        syclexp::image_descriptor imgDesc(sycl::range<2>(width, height), channels, sycl::image_channel_type::fp32);
+        syclexp::image_descriptor imgDesc(sycl::range<2>(width, height), channels, getSyclChannelType<T>());
         syclexp::image_mem_handle devHandle = syclexp::map_external_image_memory(extMem, imgDesc, q.get_device(), q.get_context());
         syclexp::unsampled_image_handle unsampledHandle = syclexp::create_image(devHandle, imgDesc, q.get_device(), q.get_context());
 
-        // Output buffer size depends on channels
+        // Output Buffer
         size_t totalValues = width * height * channels;
-        sycl::buffer<float, 1> checkBuf(totalValues);
+        sycl::buffer<T, 1> checkBuf(totalValues);
         
         sycl::event dependencyEvent;
         if (useSemaphores) {
@@ -137,16 +151,18 @@ int main(int argc, char** argv) {
                 int x = item.get_id(0);
                 int y = item.get_id(1);
                 
-                // Fetch logic depends on channels
+                // Templated Fetch!
                 if (channels == 1) {
-                    float px = syclexp::fetch_image<float>(unsampledHandle, sycl::int2(x, y));
+                    T px = syclexp::fetch_image<T>(unsampledHandle, sycl::int2(x, y));
                     outAcc[y * width + x] = px;
                 } else if (channels == 2) {
-                    sycl::float2 px = syclexp::fetch_image<sycl::float2>(unsampledHandle, sycl::int2(x, y));
+                    using Vec2 = sycl::vec<T, 2>;
+                    Vec2 px = syclexp::fetch_image<Vec2>(unsampledHandle, sycl::int2(x, y));
                     outAcc[(y * width + x) * 2 + 0] = px.x();
                     outAcc[(y * width + x) * 2 + 1] = px.y();
                 } else { // 4
-                    sycl::float4 px = syclexp::fetch_image<sycl::float4>(unsampledHandle, sycl::int2(x, y));
+                    using Vec4 = sycl::vec<T, 4>;
+                    Vec4 px = syclexp::fetch_image<Vec4>(unsampledHandle, sycl::int2(x, y));
                     outAcc[(y * width + x) * 4 + 0] = px.x();
                     outAcc[(y * width + x) * 4 + 1] = px.y();
                     outAcc[(y * width + x) * 4 + 2] = px.z();
@@ -164,17 +180,15 @@ int main(int argc, char** argv) {
         size_t totalPixels = width * height;
 
         for(size_t i=0; i < totalValues; ++i) {
-            // Reconstruct expectation matching uploadAndVerify
             size_t pixelIdx = i / channels;
             int channelIdx = i % channels;
             
-            float baseVal = (float)pixelIdx / (float)(totalPixels > 1 ? totalPixels - 1 : 1);
-            float expected = baseVal + (float)channelIdx * 0.1f;
-
-            if(std::abs(hostAcc[i] - expected) > 0.01f) {
+            T expected = generateTestValue<T>(pixelIdx, channelIdx, totalPixels);
+            
+            if(!checkValue(hostAcc[i], expected)) {
                 passed = false;
                 if (errorCount < 5) {
-                     std::cout << "Mismatch at idx " << i << " Got: " << hostAcc[i] << " Exp: " << expected << std::endl;
+                     std::cout << "Mismatch at idx " << i << " Got: " << (double)hostAcc[i] << " Exp: " << (double)expected << std::endl;
                 }
                 errorCount++;
             }
@@ -192,9 +206,55 @@ int main(int argc, char** argv) {
 
     } catch (std::exception& e) {
         std::cerr << "SYCL Exception: " << e.what() << std::endl;
+        cleanupVulkan(vkCtx, imgRes);
         return 1;
     }
 
     cleanupVulkan(vkCtx, imgRes);
     return 0;
+}
+
+// ---------------------------------------------------------
+// MAIN DISPATCHER
+// ---------------------------------------------------------
+int main(int argc, char** argv) {
+    int width = 4;
+    int height = 4;
+    int channels = 4;
+    bool useLinear = false;
+    bool useSemaphores = false;
+    std::string type = "float"; // Default
+
+    for(int i=1; i<argc; ++i) {
+        std::string arg = argv[i];
+        if(arg == "--semaphores") useSemaphores = true;
+        else if(arg == "--linear") useLinear = true;
+        else if(arg == "--channels" && i+1 < argc) channels = std::stoi(argv[++i]);
+        else if(arg == "--type" && i+1 < argc) type = argv[++i];
+        else if(arg.find("x") != std::string::npos) {
+            size_t xPos = arg.find("x");
+            try {
+                width = std::stoi(arg.substr(0, xPos));
+                height = std::stoi(arg.substr(xPos+1));
+            } catch (...) { }
+        }
+    }
+
+    if (channels != 1 && channels != 2 && channels != 4) {
+        std::cerr << "Error: Only 1, 2, or 4 channels supported." << std::endl;
+        return 1;
+    }
+
+    std::cout << "Running UNSAMPLED 2D Read Test | Type: " << type 
+              << " | Size: " << width << "x" << height 
+              << " | Channels: " << channels
+              << " | Tiling: " << (useLinear ? "LINEAR" : "OPTIMAL")
+              << " | Semaphores: " << (useSemaphores ? "ON" : "OFF") << std::endl;
+
+    if (type == "float") return runTest<float>(width, height, channels, useLinear, useSemaphores);
+    if (type == "int32") return runTest<int32_t>(width, height, channels, useLinear, useSemaphores);
+    if (type == "uint8") return runTest<uint8_t>(width, height, channels, useLinear, useSemaphores);
+
+    std::cerr << "Unknown type: " << type << std::endl;
+    return 1;
 }

@@ -8,6 +8,7 @@
 #include <cmath>
 #include <unistd.h>
 #include <algorithm>
+#include <type_traits>
 
 struct VulkanContext {
     VkInstance instance;
@@ -21,10 +22,9 @@ struct ImageResources {
     VkImage image;
     VkDeviceMemory memory;
     VkDeviceSize allocationSize;
-    VkExtent3D extent; // We store extent here to recall it later
+    VkExtent3D extent; 
 };
 
-// Safe Macro: uses __vk_res to avoid variable shadowing
 #define VK_CHECK(f) \
 { \
     VkResult __vk_res = (f); \
@@ -59,7 +59,6 @@ inline VulkanContext createVulkanContext() {
 
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(ctx.instance, &deviceCount, nullptr);
-    if (deviceCount == 0) throw std::runtime_error("failed to find GPUs with Vulkan support!");
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(ctx.instance, &deviceCount, devices.data());
     ctx.physicalDevice = devices[0];
@@ -76,7 +75,6 @@ inline VulkanContext createVulkanContext() {
             break;
         }
     }
-    if (ctx.queueFamilyIndex == -1) throw std::runtime_error("failed to find a graphics queue family!");
 
     VkDeviceQueueCreateInfo queueCreateInfo{};
     queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -103,15 +101,6 @@ inline VulkanContext createVulkanContext() {
     vkGetDeviceQueue(ctx.device, ctx.queueFamilyIndex, 0, &ctx.queue);
 
     return ctx;
-}
-
-inline VkFormat getFloatFormat(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R32_SFLOAT;
-        case 2: return VK_FORMAT_R32G32_SFLOAT;
-        case 4: return VK_FORMAT_R32G32B32A32_SFLOAT;
-        default: throw std::runtime_error("Unsupported channel count (Use 1, 2, or 4)");
-    }
 }
 
 inline ImageResources createExportableImage(VulkanContext& ctx, VkExtent3D extent, VkFormat format, VkImageType type, VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL) {
@@ -198,12 +187,42 @@ inline int getSemaphoreFd(VulkanContext& ctx, VkSemaphore semaphore) {
     return fd;
 }
 
-// Fixed uploadAndVerify
-inline bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaphore signalSemaphore = VK_NULL_HANDLE, int channels = 4) {
+// -----------------------------------------------------------
+//  GENERIC DATA GENERATION & VERIFICATION
+// -----------------------------------------------------------
+
+// Helper to generate a test value for a given index and channel
+template <typename T>
+T generateTestValue(size_t index, int channel, size_t rangeMax) {
+    if constexpr (std::is_floating_point_v<T>) {
+        // Floating point: 0.0 to 1.0 gradient
+        float val = (float)index / (float)(rangeMax > 1 ? rangeMax - 1 : 1);
+        return static_cast<T>(val + (float)channel * 0.1f);
+    } else {
+        // Integer: Sequential numbers wrapping around
+        // e.g. (index + channel)
+        return static_cast<T>((index + channel * 10) % 127); 
+    }
+}
+
+// Helper to compare with tolerance
+template <typename T>
+bool checkValue(T actual, T expected) {
+    if constexpr (std::is_floating_point_v<T>) {
+        return std::abs(actual - expected) < 0.01f;
+    } else {
+        return actual == expected;
+    }
+}
+
+// Templated Upload And Verify
+template <typename T>
+bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaphore signalSemaphore = VK_NULL_HANDLE, int channels = 4) {
     size_t texWidth = imgRes.extent.width;
     size_t texHeight = imgRes.extent.height;
     size_t texDepth = imgRes.extent.depth;
-    VkDeviceSize imageSize = texWidth * texHeight * texDepth * channels * sizeof(float);
+    size_t totalPixels = texWidth * texHeight * texDepth;
+    VkDeviceSize imageSize = totalPixels * channels * sizeof(T);
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -226,19 +245,19 @@ inline bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaph
     VK_CHECK(vkAllocateMemory(ctx.device, &allocInfo, nullptr, &stagingBufferMemory));
     VK_CHECK(vkBindBufferMemory(ctx.device, stagingBuffer, stagingBufferMemory, 0));
 
+    // GENERATE DATA
     void* data;
     vkMapMemory(ctx.device, stagingBufferMemory, 0, imageSize, 0, &data);
-    float* pixelData = (float*)data;
+    T* pixelData = (T*)data;
     
-    size_t totalPixels = texWidth * texHeight * texDepth;
     for (size_t i = 0; i < totalPixels; i++) {
-        float val = (float)i / (float)(totalPixels > 1 ? totalPixels - 1 : 1);
         for(int c=0; c<channels; ++c) {
-            pixelData[i * channels + c] = val + (float)c * 0.1f; 
+            pixelData[i * channels + c] = generateTestValue<T>(i, c, totalPixels);
         }
     }
     vkUnmapMemory(ctx.device, stagingBufferMemory);
 
+    // COPY TO IMAGE
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     poolInfo.queueFamilyIndex = ctx.queueFamilyIndex;
@@ -307,7 +326,7 @@ inline bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaph
     VK_CHECK(vkQueueSubmit(ctx.queue, 1, &submitInfo, VK_NULL_HANDLE));
     vkQueueWaitIdle(ctx.queue);
 
-    // Round Trip Verify
+    // COPY BACK (Round Trip Verify)
     vkResetCommandBuffer(commandBuffer, 0);
     vkBeginCommandBuffer(commandBuffer, &beginInfo);
     
@@ -332,17 +351,18 @@ inline bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaph
     vkQueueWaitIdle(ctx.queue);
 
     vkMapMemory(ctx.device, stagingBufferMemory, 0, imageSize, 0, &data);
-    float* checkData = (float*)data;
+    T* checkData = (T*)data;
     
     bool valid = true;
     for (size_t i = 0; i < totalPixels * channels; i++) {
         size_t pixelIdx = i / channels;
         int channelIdx = i % channels;
-        float baseVal = (float)pixelIdx / (float)(totalPixels > 1 ? totalPixels - 1 : 1);
-        float expected = baseVal + (float)channelIdx * 0.1f;
+        T expected = generateTestValue<T>(pixelIdx, channelIdx, totalPixels);
         
-        if (std::abs(checkData[i] - expected) > 0.001f) {
+        if (!checkValue(checkData[i], expected)) {
             valid = false;
+            // Uncomment for debugging
+            // std::cout << "RoundTrip Mismatch: " << (float)checkData[i] << " != " << (float)expected << std::endl;
             break;
         }
     }
