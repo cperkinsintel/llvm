@@ -3,17 +3,15 @@
 
   clang++ -fsycl -std=c++17 -o vsu_2d_w_test.bin vulkan_sycl_unsampled_2d_write.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
-  export VULTURE_SDK=/iusers/cperkins/sycl_workspace/1.4.328.1/x86_64/
-  clang++ -fsycl -std=c++17 -o vsu_2d_w_test.bin vulkan_sycl_unsampled_2d_write.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
-
     ./vsu_2d_w_test.bin 
 
     FLAGS
     --semaphores   Use Vulkan Semaphores for SYCL Interop Sync
     --linear       Use LINEAR tiling for the Vulkan Image (default is OPTIMAL)
-    --WxH          Set custom Width x Height (e.g. 8x4)
-
-    ./vsu_2d_w_test.bin --semaphores --linear 8x4
+    --channels  X  Set number of channels (1, 2, or 4). Default is 4 (RGBA)
+    WxH            Set custom Width x Height (e.g. 8x4)
+    
+    ./vsu_2d_w_test.bin --semaphores --channels 2 --linear 8x4
 
 */
 #include "vulkan_interop_common.hpp"
@@ -27,6 +25,7 @@ int main(int argc, char** argv) {
     // Defaults
     int width = 4;
     int height = 4;
+    int channels = 4;
     bool useLinear = false;
     bool useSemaphores = false;
 
@@ -35,21 +34,28 @@ int main(int argc, char** argv) {
         std::string arg = argv[i];
         if(arg == "--semaphores") useSemaphores = true;
         else if(arg == "--linear") useLinear = true;
+        else if(arg == "--channels" && i+1 < argc) {
+            channels = std::stoi(argv[++i]);
+        }
         else if(arg.find("x") != std::string::npos) {
             size_t xPos = arg.find("x");
             try {
                 width = std::stoi(arg.substr(0, xPos));
                 height = std::stoi(arg.substr(xPos+1));
-            } catch (...) {
-                std::cerr << "Invalid size format. Use WxH (e.g. 8x4)" << std::endl;
-                return 1;
-            }
+            } catch (...) { }
         }
     }
 
-    VkImageTiling tiling = useLinear ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
+    if (channels != 1 && channels != 2 && channels != 4) {
+        std::cerr << "Error: Only 1, 2, or 4 channels supported." << std::endl;
+        return 1;
+    }
 
-    std::cout << "Running UNSAMPLED WRITE Test | Size: " << width << "x" << height 
+    VkImageTiling tiling = useLinear ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
+    VkFormat vkFormat = getFloatFormat(channels);
+
+    std::cout << "Running UNSAMPLED 2D WRITE Test | Size: " << width << "x" << height 
+              << " | Channels: " << channels
               << " | Tiling: " << (useLinear ? "LINEAR" : "OPTIMAL")
               << " | Semaphores: " << (useSemaphores ? "ON" : "OFF") << std::endl;
 
@@ -57,10 +63,10 @@ int main(int argc, char** argv) {
     VulkanContext vkCtx = createVulkanContext();
     VkExtent3D extent = {(uint32_t)width, (uint32_t)height, 1};
     
-    // Create Image (Empty)
-    ImageResources imgRes = createExportableImage(vkCtx, extent, VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_TYPE_2D, tiling);
+    // Create Empty Image
+    ImageResources imgRes = createExportableImage(vkCtx, extent, vkFormat, VK_IMAGE_TYPE_2D, tiling);
 
-    // Initial Transition to GENERAL (Manual, because we aren't uploading data)
+    // Initial Transition to GENERAL
     {
         VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
         poolInfo.queueFamilyIndex = vkCtx.queueFamilyIndex;
@@ -126,7 +132,7 @@ int main(int argc, char** argv) {
             extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
         }
 
-        syclexp::image_descriptor imgDesc(sycl::range<2>(width, height), 4, sycl::image_channel_type::fp32);
+        syclexp::image_descriptor imgDesc(sycl::range<2>(width, height), channels, sycl::image_channel_type::fp32);
         syclexp::image_mem_handle devHandle = syclexp::map_external_image_memory(extMem, imgDesc, q.get_device(), q.get_context());
         syclexp::unsampled_image_handle unsampledHandle = syclexp::create_image(devHandle, imgDesc, q.get_device(), q.get_context());
 
@@ -136,11 +142,21 @@ int main(int argc, char** argv) {
                 int x = item.get_id(0);
                 int y = item.get_id(1);
                 
-                // Gradient: (x + y*w) / total
+                // Gradient Base: (x + y*w) / total
                 float val = (float)(x + y * width) / (float)(width * height - 1);
-                sycl::float4 pixel(val, 0.0f, 0.0f, 1.0f);
                 
-                syclexp::write_image(unsampledHandle, sycl::int2(x, y), pixel);
+                // Write based on channel count
+                if (channels == 1) {
+                    syclexp::write_image(unsampledHandle, sycl::int2(x, y), val);
+                } 
+                else if (channels == 2) {
+                    sycl::float2 px(val, val + 0.1f);
+                    syclexp::write_image(unsampledHandle, sycl::int2(x, y), px);
+                } 
+                else { // 4
+                    sycl::float4 px(val, val + 0.1f, val + 0.2f, val + 0.3f);
+                    syclexp::write_image(unsampledHandle, sycl::int2(x, y), px);
+                }
             });
         });
 
@@ -171,7 +187,7 @@ int main(int argc, char** argv) {
 
     VkBuffer verifyBuffer;
     VkDeviceMemory verifyMem;
-    size_t dataSize = width * height * 4 * sizeof(float);
+    size_t dataSize = width * height * channels * sizeof(float);
     
     VkBufferCreateInfo bi = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
     bi.size = dataSize;
@@ -232,13 +248,18 @@ int main(int argc, char** argv) {
     size_t totalPixels = width * height;
     int errorCount = 0;
     
-    for(size_t i=0; i < totalPixels; ++i) {
-        float expected = (float)i / (float)(totalPixels - 1);
-        float actual = verifyFloats[i * 4];
+    for(size_t i=0; i < totalPixels * channels; ++i) {
+        size_t pixelIdx = i / channels;
+        int channelIdx = i % channels;
+        
+        float baseVal = (float)pixelIdx / (float)(totalPixels > 1 ? totalPixels - 1 : 1);
+        float expected = baseVal + (float)channelIdx * 0.1f;
+
+        float actual = verifyFloats[i];
         if(std::abs(actual - expected) > 0.01f) {
             passed = false;
             if (errorCount < 5) {
-                std::cout << "Mismatch at " << i << " (" << i%width << "," << i/width << ")"
+                std::cout << "Mismatch at " << i 
                           << " Got: " << actual << " Exp: " << expected << std::endl;
             }
             errorCount++;
