@@ -8,31 +8,59 @@
 
     ./vsu_2d_w_test.bin 
 
-*/
+    FLAGS
+    --semaphores   Use Vulkan Semaphores for SYCL Interop Sync
+    --linear       Use LINEAR tiling for the Vulkan Image (default is OPTIMAL)
+    --WxH          Set custom Width x Height (e.g. 8x4)
 
+    ./vsu_2d_w_test.bin --semaphores --linear 8x4
+
+*/
 #include "vulkan_interop_common.hpp"
 
 #include <sycl/sycl.hpp>
 #include <sycl/ext/oneapi/bindless_images.hpp>
 #include <sycl/ext/oneapi/bindless_images_interop.hpp>
+#include <string>
 
 int main(int argc, char** argv) {
+    // Defaults
+    int width = 4;
+    int height = 4;
+    bool useLinear = false;
     bool useSemaphores = false;
-    if (argc > 1 && std::string(argv[1]) == "--semaphores") {
-        useSemaphores = true;
+
+    // Argument Parsing
+    for(int i=1; i<argc; ++i) {
+        std::string arg = argv[i];
+        if(arg == "--semaphores") useSemaphores = true;
+        else if(arg == "--linear") useLinear = true;
+        else if(arg.find("x") != std::string::npos) {
+            size_t xPos = arg.find("x");
+            try {
+                width = std::stoi(arg.substr(0, xPos));
+                height = std::stoi(arg.substr(xPos+1));
+            } catch (...) {
+                std::cerr << "Invalid size format. Use WxH (e.g. 8x4)" << std::endl;
+                return 1;
+            }
+        }
     }
 
-    std::cout << "Running UNSAMPLED WRITE Test | Semaphores: " 
-              << (useSemaphores ? "ON" : "OFF") << std::endl;
+    VkImageTiling tiling = useLinear ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
+
+    std::cout << "Running UNSAMPLED WRITE Test | Size: " << width << "x" << height 
+              << " | Tiling: " << (useLinear ? "LINEAR" : "OPTIMAL")
+              << " | Semaphores: " << (useSemaphores ? "ON" : "OFF") << std::endl;
 
     // 1. Setup Vulkan
     VulkanContext vkCtx = createVulkanContext();
-    VkExtent3D extent = {4, 2, 1}; 
+    VkExtent3D extent = {(uint32_t)width, (uint32_t)height, 1};
     
-    // Create Image (OPTIMAL Tiling)
-    ImageResources imgRes = createExportableImage(vkCtx, extent, VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_TYPE_2D, VK_IMAGE_TILING_OPTIMAL);
+    // Create Image (Empty)
+    ImageResources imgRes = createExportableImage(vkCtx, extent, VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_TYPE_2D, tiling);
 
-    // Initial Transition to GENERAL
+    // Initial Transition to GENERAL (Manual, because we aren't uploading data)
     {
         VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
         poolInfo.queueFamilyIndex = vkCtx.queueFamilyIndex;
@@ -98,24 +126,25 @@ int main(int argc, char** argv) {
             extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
         }
 
-        syclexp::image_descriptor imgDesc(sycl::range<2>(extent.width, extent.height), 4, sycl::image_channel_type::fp32);
+        syclexp::image_descriptor imgDesc(sycl::range<2>(width, height), 4, sycl::image_channel_type::fp32);
         syclexp::image_mem_handle devHandle = syclexp::map_external_image_memory(extMem, imgDesc, q.get_device(), q.get_context());
         syclexp::unsampled_image_handle unsampledHandle = syclexp::create_image(devHandle, imgDesc, q.get_device(), q.get_context());
 
-        // FIX: Chain submissions. Kernel First -> Then Signal.
-        
-        // Step A: The Kernel (returns an event)
+        // Step A: Kernel
         sycl::event kernelEvent = q.submit([&](sycl::handler& h) {
-            h.parallel_for(sycl::range<2>(extent.width, extent.height), [=](sycl::item<2> item) {
+            h.parallel_for(sycl::range<2>(width, height), [=](sycl::item<2> item) {
                 int x = item.get_id(0);
                 int y = item.get_id(1);
-                float val = (float)(x + y * extent.width) / (float)(extent.width * extent.height - 1);
+                
+                // Gradient: (x + y*w) / total
+                float val = (float)(x + y * width) / (float)(width * height - 1);
                 sycl::float4 pixel(val, 0.0f, 0.0f, 1.0f);
+                
                 syclexp::write_image(unsampledHandle, sycl::int2(x, y), pixel);
             });
         });
 
-        // Step B: The Signal (Depends on Kernel)
+        // Step B: Signal
         if (useSemaphores) {
             q.submit([&](sycl::handler& h) {
                 h.depends_on(kernelEvent);
@@ -123,11 +152,9 @@ int main(int argc, char** argv) {
             });
         }
 
-        q.wait(); // Wait for submission to hit the GPU
-
+        q.wait();
         std::cout << "SYCL Write Kernel Executed." << std::endl;
 
-        // Cleanup SYCL objects
         syclexp::destroy_image_handle(unsampledHandle, q.get_device(), q.get_context());
         syclexp::release_external_memory(extMem, q.get_device(), q.get_context());
         if (useSemaphores) {
@@ -135,19 +162,17 @@ int main(int argc, char** argv) {
         }
 
     } catch (std::exception& e) {
-        std::cerr << "SYCL Error: " << e.what() << std::endl;
+        std::cerr << "SYCL Exception: " << e.what() << std::endl;
         return 1;
     }
 
     // 4. Vulkan Verification
-    // Use heavy barriers just to be safe, but rely on Semaphores if enabled.
     vkDeviceWaitIdle(vkCtx.device);
 
     VkBuffer verifyBuffer;
     VkDeviceMemory verifyMem;
-    size_t dataSize = extent.width * extent.height * 4 * sizeof(float);
+    size_t dataSize = width * height * 4 * sizeof(float);
     
-    // Buffer Setup
     VkBufferCreateInfo bi = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
     bi.size = dataSize;
     bi.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
@@ -161,7 +186,6 @@ int main(int argc, char** argv) {
     vkAllocateMemory(vkCtx.device, &ai, nullptr, &verifyMem);
     vkBindBufferMemory(vkCtx.device, verifyBuffer, verifyMem, 0);
 
-    // Command Buffer
     VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
     poolInfo.queueFamilyIndex = vkCtx.queueFamilyIndex;
     VkCommandPool pool;
@@ -174,7 +198,6 @@ int main(int argc, char** argv) {
     cmdAlloc.commandBufferCount = 1;
     vkAllocateCommandBuffers(vkCtx.device, &cmdAlloc, &cmd);
 
-    // FIX: Pass valid begin info
     VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
     vkBeginCommandBuffer(cmd, &beginInfo);
     
@@ -186,12 +209,10 @@ int main(int argc, char** argv) {
     
     vkEndCommandBuffer(cmd);
 
-    // Submit
     VkSubmitInfo submit = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
     submit.commandBufferCount = 1;
     submit.pCommandBuffers = &cmd;
     
-    // Wait for Semaphore (The critical part)
     std::vector<VkPipelineStageFlags> waitStages = { VK_PIPELINE_STAGE_TRANSFER_BIT };
     if (useSemaphores) {
         submit.waitSemaphoreCount = 1;
@@ -202,28 +223,32 @@ int main(int argc, char** argv) {
     vkQueueSubmit(vkCtx.queue, 1, &submit, VK_NULL_HANDLE);
     vkQueueWaitIdle(vkCtx.queue);
 
-    // Check Data
+    // Verify Data
     bool passed = true;
     void* verifyPtr;
     vkMapMemory(vkCtx.device, verifyMem, 0, dataSize, 0, &verifyPtr);
     float* verifyFloats = (float*)verifyPtr;
     
-    size_t totalPixels = extent.width * extent.height;
+    size_t totalPixels = width * height;
+    int errorCount = 0;
+    
     for(size_t i=0; i < totalPixels; ++i) {
         float expected = (float)i / (float)(totalPixels - 1);
         float actual = verifyFloats[i * 4];
         if(std::abs(actual - expected) > 0.01f) {
             passed = false;
-            std::cout << "Mismatch at " << i << " Got: " << actual << " Exp: " << expected << std::endl;
-            break;
+            if (errorCount < 5) {
+                std::cout << "Mismatch at " << i << " (" << i%width << "," << i/width << ")"
+                          << " Got: " << actual << " Exp: " << expected << std::endl;
+            }
+            errorCount++;
         }
     }
     vkUnmapMemory(vkCtx.device, verifyMem);
     
     if(passed) std::cout << "SUCCESS!" << std::endl;
-    else std::cout << "FAILURE!" << std::endl;
+    else std::cout << "FAILURE! (" << errorCount << " errors)" << std::endl;
 
-    // Cleanup
     vkDestroyCommandPool(vkCtx.device, pool, nullptr);
     vkDestroyBuffer(vkCtx.device, verifyBuffer, nullptr);
     vkFreeMemory(vkCtx.device, verifyMem, nullptr);
