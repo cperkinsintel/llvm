@@ -37,6 +37,7 @@ struct ImageResources {
     VkDeviceMemory memory;
     VkExtent3D extent;
     VkFormat format;
+    VkDeviceSize allocationSize;
 };
 
 // --- Helper Functions ---
@@ -144,6 +145,9 @@ inline ImageResources createExportableImage(VulkanContext& ctx, VkExtent3D exten
     VkExportMemoryAllocateInfo exportAllocInfo = {};
     exportAllocInfo.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO;
     exportAllocInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+
+    // Save the real size
+    res.allocationSize = memReq.size;
 
     VkMemoryAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;

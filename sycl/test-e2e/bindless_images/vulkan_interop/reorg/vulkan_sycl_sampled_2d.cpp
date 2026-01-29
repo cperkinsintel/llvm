@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
         sycl::queue q;
         
         // Import Memory
-        size_t size = extent.width * extent.height * 4 * sizeof(float);
+        size_t size = imgRes.allocationSize;
         syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{
             memFd, syclexp::external_mem_handle_type::opaque_fd, size
         };
