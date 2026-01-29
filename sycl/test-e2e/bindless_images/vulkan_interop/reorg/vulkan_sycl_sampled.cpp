@@ -1,7 +1,7 @@
 /*
   Minimal Vulkan/SYCL Test: VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image
 
-  $VULKAN_SDK/bin/glslangValidator -V vulkan_shader.comp -o vulkan_shader.spv
+  $VULKAN_SDK/bin/glslangValidator -V vulkan_shader_2d.comp -o vulkan_shader_2d.spv
 
   clang++ -fsycl -std=c++17 -o vss_test.bin vulkan_sycl_sampled.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   

@@ -1,7 +1,7 @@
 /*
   Minimal Vulkan/SYCL Test: VK_FORMAT_R32G32B32A32_SFLOAT 2D Sampled Image
 
-  $VULKAN_SDK/bin/glslangValidator -V vulkan_shader.comp -o vulkan_shader.spv
+  $VULKAN_SDK/bin/glslangValidator -V vulkan_shader_2d.comp -o vulkan_shader_2d.spv
 
   clang++ -fsycl -std=c++17 -o g_vs_test.bin golden_vulkan_sycl_rgba32_sfloat_2d_test.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
@@ -80,10 +80,10 @@ int main() {
 
 
     // Load the SPIR-V binary from disk
-    // Make sure "vulkan_shader.spv" is in the same directory where you run the binary
+    // Make sure "vulkan_shader_2d.spv" is in the same directory where you run the binary
     std::vector<char> shaderCode;
     try {
-        shaderCode = readFile("vulkan_shader.spv");
+        shaderCode = readFile("vulkan_shader_2d.spv");
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
         return 1;

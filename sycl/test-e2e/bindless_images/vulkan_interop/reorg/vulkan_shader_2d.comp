@@ -1,6 +1,6 @@
 #version 450
 
-// $VULKAN_SDK/bin/glslangValidator -V vulkan_shader.comp -o vulkan_shader.spv
+// $VULKAN_SDK/bin/glslangValidator -V vulkan_shader_2d.comp -o vulkan_shader_2d.spv
 
 
 layout(local_size_x = 1, local_size_y = 1) in;
