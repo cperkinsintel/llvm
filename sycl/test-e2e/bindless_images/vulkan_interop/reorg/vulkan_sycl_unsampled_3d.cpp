@@ -16,7 +16,9 @@
     ./vsu_3d_test.bin --semaphores --linear --channels 2 128x128x16
 
  */
- #include "vulkan_interop_common.hpp"
+#include "test_verification.hpp"
+#include "vulkan_setup.hpp"
+
 #include <sycl/sycl.hpp>
 #include <sycl/ext/oneapi/bindless_images.hpp>
 #include <sycl/ext/oneapi/bindless_images_interop.hpp>

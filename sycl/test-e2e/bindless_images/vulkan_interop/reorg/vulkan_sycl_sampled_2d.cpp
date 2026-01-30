@@ -21,7 +21,8 @@
 
  */
  
- #include "vulkan_interop_common.hpp"
+#include "test_verification.hpp"
+#include "vulkan_setup.hpp"
 
 #include <sycl/sycl.hpp>
 #include <sycl/ext/oneapi/bindless_images.hpp>
@@ -29,51 +30,17 @@
 #include <string>
 
 // ---------------------------------------------------------
-// TYPE MAPPING
+// SYCL TYPE MAPPING HELPERS
 // ---------------------------------------------------------
-template <typename T> VkFormat getVulkanFormat(int channels);
-template <> VkFormat getVulkanFormat<float>(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R32_SFLOAT;
-        case 2: return VK_FORMAT_R32G32_SFLOAT;
-        case 4: return VK_FORMAT_R32G32B32A32_SFLOAT;
-        default: throw std::runtime_error("Unsupported channels");
-    }
-}
-template <> VkFormat getVulkanFormat<int32_t>(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R32_SINT;
-        case 2: return VK_FORMAT_R32G32_SINT;
-        case 4: return VK_FORMAT_R32G32B32A32_SINT;
-        default: throw std::runtime_error("Unsupported channels");
-    }
-}
-template <> VkFormat getVulkanFormat<uint8_t>(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R8_UINT;
-        case 2: return VK_FORMAT_R8G8_UINT;
-        case 4: return VK_FORMAT_R8G8B8A8_UINT;
-        default: throw std::runtime_error("Unsupported channels");
-    }
-}
 
-template <typename T> sycl::image_channel_type getSyclChannelType();
+template <typename T>
+sycl::image_channel_type getSyclChannelType();
+
 template <> sycl::image_channel_type getSyclChannelType<float>() { return sycl::image_channel_type::fp32; }
 template <> sycl::image_channel_type getSyclChannelType<int32_t>() { return sycl::image_channel_type::signed_int32; }
 template <> sycl::image_channel_type getSyclChannelType<uint8_t>() { return sycl::image_channel_type::unsigned_int8; }
 
-// ---------------------------------------------------------
-// GENERATOR (Must match Common Header)
-// ---------------------------------------------------------
-template <typename T>
-T getExpectedValue(size_t index, int channel, size_t rangeMax) {
-    if constexpr (std::is_floating_point_v<T>) {
-        float val = (float)index / (float)(rangeMax > 1 ? rangeMax - 1 : 1);
-        return static_cast<T>(val + (float)channel * 0.1f);
-    } else {
-        return static_cast<T>((index + channel * 10) % 127);
-    }
-}
+
 
 // ---------------------------------------------------------
 // TEMPLATED RUNNER
@@ -82,7 +49,7 @@ template <typename T>
 int runTest(int width, int height, int channels, bool useLinear, bool useSemaphores) {
     VkImageTiling tiling = useLinear ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
     VkFormat vkFormat = getVulkanFormat<T>(channels);
-
+    std::cout << "VK Format: " << getFormatString(vkFormat) << std::endl;
     // 1. Setup Vulkan
     VulkanContext vkCtx = createVulkanContext();
     VkExtent3D extent = {(uint32_t)width, (uint32_t)height, 1};
@@ -194,7 +161,7 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
             size_t pixelIdx = i / channels;
             int channelIdx = i % channels;
             
-            T expected = getExpectedValue<T>(pixelIdx, channelIdx, totalPixels);
+            T expected = generateTestValue<T>(pixelIdx, channelIdx, totalPixels);
             
             if(!checkValue(hostAcc[i], expected)) {
                 passed = false;

@@ -32,7 +32,8 @@
   6. Reads data using 'fetch_image' (Data Port).
 */
 
-#include "vulkan_interop_common.hpp"
+#include "test_verification.hpp"
+#include "vulkan_setup.hpp"
 
 #include <sycl/sycl.hpp>
 #include <sycl/ext/oneapi/bindless_images.hpp>
@@ -41,38 +42,8 @@
 #include <map>
 
 // ---------------------------------------------------------
-// TYPE MAPPING HELPERS
+// SYCL TYPE MAPPING HELPERS
 // ---------------------------------------------------------
-
-template <typename T>
-VkFormat getVulkanFormat(int channels);
-
-template <> VkFormat getVulkanFormat<float>(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R32_SFLOAT;
-        case 2: return VK_FORMAT_R32G32_SFLOAT;
-        case 4: return VK_FORMAT_R32G32B32A32_SFLOAT;
-        default: throw std::runtime_error("Unsupported channels for float");
-    }
-}
-
-template <> VkFormat getVulkanFormat<int32_t>(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R32_SINT;
-        case 2: return VK_FORMAT_R32G32_SINT;
-        case 4: return VK_FORMAT_R32G32B32A32_SINT;
-        default: throw std::runtime_error("Unsupported channels for int32");
-    }
-}
-
-template <> VkFormat getVulkanFormat<uint8_t>(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R8_UINT;
-        case 2: return VK_FORMAT_R8G8_UINT;
-        case 4: return VK_FORMAT_R8G8B8A8_UINT;
-        default: throw std::runtime_error("Unsupported channels for uint8");
-    }
-}
 
 template <typename T>
 sycl::image_channel_type getSyclChannelType();
@@ -83,12 +54,13 @@ template <> sycl::image_channel_type getSyclChannelType<uint8_t>() { return sycl
 
 
 // ---------------------------------------------------------
-// TEMPLATED TEST RUNNER
+//  TEST RUNNER
 // ---------------------------------------------------------
 template <typename T>
 int runTest(int width, int height, int channels, bool useLinear, bool useSemaphores) {
     VkImageTiling tiling = useLinear ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
     VkFormat vkFormat = getVulkanFormat<T>(channels);
+    std::cout << "VK Format: " << getFormatString(vkFormat) << std::endl;
 
     // 1. Setup Vulkan
     VulkanContext vkCtx = createVulkanContext();
