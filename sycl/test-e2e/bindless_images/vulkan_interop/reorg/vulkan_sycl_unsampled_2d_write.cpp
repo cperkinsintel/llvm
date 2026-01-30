@@ -9,7 +9,7 @@
     --semaphores   Use Vulkan Semaphores for SYCL Interop Sync
     --linear       Use LINEAR tiling for the Vulkan Image (default is OPTIMAL)
     --channels  X  Set number of channels (1, 2, or 4). Default is 4 (RGBA)
-    --type  XXX    Set data type (float, int32, uint8). Default is float
+    --type  XXX    Set data type (float, half, uint32, int32, uint16, int16, uint8, int8, unorm8). Default is float
     WxH            Set custom Width x Height (e.g. 8x4)
     
     ./vsu_2d_w_test.bin --semaphores --channels 2 --linear 8x4
@@ -22,6 +22,7 @@
 #include <sycl/ext/oneapi/bindless_images.hpp>
 #include <sycl/ext/oneapi/bindless_images_interop.hpp>
 #include <string>
+#include <optional>
 
 // ---------------------------------------------------------
 // SYCL TYPE MAPPING HELPERS
@@ -30,9 +31,30 @@
 template <typename T>
 sycl::image_channel_type getSyclChannelType();
 
-template <> sycl::image_channel_type getSyclChannelType<float>() { return sycl::image_channel_type::fp32; }
-template <> sycl::image_channel_type getSyclChannelType<int32_t>() { return sycl::image_channel_type::signed_int32; }
-template <> sycl::image_channel_type getSyclChannelType<uint8_t>() { return sycl::image_channel_type::unsigned_int8; }
+template <> inline sycl::image_channel_type getSyclChannelType<float>() { return sycl::image_channel_type::fp32; }
+
+template <> inline sycl::image_channel_type getSyclChannelType<int32_t>() { return sycl::image_channel_type::signed_int32; }
+template <> inline sycl::image_channel_type getSyclChannelType<uint32_t>() { return sycl::image_channel_type::unsigned_int32; }
+
+template <> inline sycl::image_channel_type getSyclChannelType<int16_t>() {  return sycl::image_channel_type::signed_int16; }
+template <> inline sycl::image_channel_type getSyclChannelType<uint16_t>() { return sycl::image_channel_type::unsigned_int16; }
+
+template <> inline sycl::image_channel_type getSyclChannelType<uint8_t>() { return sycl::image_channel_type::unsigned_int8; }
+template <> inline sycl::image_channel_type getSyclChannelType<int8_t>() { return sycl::image_channel_type::signed_int8; }
+
+
+
+// half
+template <> inline VkFormat getVulkanFormat<sycl::half>(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R16_SFLOAT;
+        case 2: return VK_FORMAT_R16G16_SFLOAT;
+        case 4: return VK_FORMAT_R16G16B16A16_SFLOAT;
+        default: throw std::runtime_error("Unsupported channels for half");
+    }
+}
+template <> inline sycl::image_channel_type getSyclChannelType<sycl::half>() { return sycl::image_channel_type::fp16; }
+
 
 // ---------------------------------------------------------
 // KERNEL GENERATOR HELPER
@@ -53,9 +75,13 @@ T getKernelValue(size_t index, int channel, size_t rangeMax) {
 // TEMPLATED TEST RUNNER
 // ---------------------------------------------------------
 template <typename T>
-int runTest(int width, int height, int channels, bool useLinear, bool useSemaphores) {
+int runTest(int width, int height, int channels, bool useLinear, bool useSemaphores, 
+            VkFormat fmtOverride = VK_FORMAT_UNDEFINED, 
+            std::optional<sycl::image_channel_type> syclOverride = std::nullopt)  {
     VkImageTiling tiling = useLinear ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
-    VkFormat vkFormat = getVulkanFormat<T>(channels);
+    VkFormat vkFormat = (fmtOverride != VK_FORMAT_UNDEFINED) 
+                      ? fmtOverride 
+                      : getVulkanFormat<T>(channels);
     std::cout << "VK Format: " << getFormatString(vkFormat) << std::endl;
     // 1. Setup Vulkan
     VulkanContext vkCtx = createVulkanContext();
@@ -126,7 +152,8 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
             extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
         }
 
-        syclexp::image_descriptor imgDesc(sycl::range<2>(width, height), channels, getSyclChannelType<T>());
+        sycl::image_channel_type syclType = syclOverride.has_value()  ? syclOverride.value() : getSyclChannelType<T>();
+        syclexp::image_descriptor imgDesc(sycl::range<2>(width, height), channels, syclType);
         syclexp::image_mem_handle devHandle = syclexp::map_external_image_memory(extMem, imgDesc, q.get_device(), q.get_context());
         syclexp::unsampled_image_handle unsampledHandle = syclexp::create_image(devHandle, imgDesc, q.get_device(), q.get_context());
 
@@ -135,9 +162,39 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
             h.parallel_for(sycl::range<2>(width, height), [=](sycl::item<2> item) {
                 int x = item.get_id(0);
                 int y = item.get_id(1);
-                
                 size_t index = y * width + x;
                 size_t totalPixels = width * height;
+
+
+                // unorm is special snowflake
+                bool isUnorm = (syclType == sycl::image_channel_type::unorm_int8);
+                if(isUnorm){
+                    // We are WRITING to the image. 
+                    // Input: Generated Bytes (0..255)
+                    // Output: Normalized Floats (0.0..1.0) to the GPU
+
+                    if (channels == 1) {
+                        float v = (float)getKernelValue<T>(index, 0, totalPixels) / 255.0f;
+                        syclexp::write_image(unsampledHandle, sycl::int2(x, y), v);
+                    } 
+                    else if (channels == 2) {
+                        float v1 = (float)getKernelValue<T>(index, 0, totalPixels) / 255.0f;
+                        float v2 = (float)getKernelValue<T>(index, 1, totalPixels) / 255.0f;
+                        syclexp::write_image(unsampledHandle, sycl::int2(x, y), sycl::float2(v1, v2));
+                    } 
+                    else { // 4
+                        float v1 = (float)getKernelValue<T>(index, 0, totalPixels) / 255.0f;
+                        float v2 = (float)getKernelValue<T>(index, 1, totalPixels) / 255.0f;
+                        float v3 = (float)getKernelValue<T>(index, 2, totalPixels) / 255.0f;
+                        float v4 = (float)getKernelValue<T>(index, 3, totalPixels) / 255.0f;
+                        syclexp::write_image(unsampledHandle, sycl::int2(x, y), sycl::float4(v1, v2, v3, v4));
+                    }
+                    
+                    return; // Early exit. special snowflake gets to leave early.
+                }
+
+                
+
                 
                 if (channels == 1) {
                     T val = getKernelValue<T>(index, 0, totalPixels);
@@ -308,15 +365,30 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    std::cout << "Running UNSAMPLED 2D WRITE Test | Type: " << type
+    std::cout << "Running UNSAMPLED 2D Write Test | Type: " << type 
               << " | Size: " << width << "x" << height 
               << " | Channels: " << channels
               << " | Tiling: " << (useLinear ? "LINEAR" : "OPTIMAL")
               << " | Semaphores: " << (useSemaphores ? "ON" : "OFF") << std::endl;
 
-    if (type == "float") return runTest<float>(width, height, channels, useLinear, useSemaphores);
-    if (type == "int32") return runTest<int32_t>(width, height, channels, useLinear, useSemaphores);
-    if (type == "uint8") return runTest<uint8_t>(width, height, channels, useLinear, useSemaphores);
+    if (type == "float")  return runTest<float>(width, height, channels, useLinear, useSemaphores);
+    if (type == "half")   return runTest<sycl::half>(width, height, channels, useLinear, useSemaphores);
+    
+    if (type == "int32")  return runTest<int32_t>(width, height, channels, useLinear, useSemaphores);
+    if (type == "uint32") return runTest<uint32_t>(width, height, channels, useLinear, useSemaphores);
+    
+    if (type == "int16")  return runTest<int16_t>(width, height, channels, useLinear, useSemaphores);
+    if (type == "uint16") return runTest<uint16_t>(width, height, channels, useLinear, useSemaphores);
+    
+    if (type == "uint8")  return runTest<uint8_t>(width, height, channels, useLinear, useSemaphores);
+    if (type == "int8")  return runTest<int8_t>(width, height, channels, useLinear, useSemaphores);
+
+    if (type == "unorm8") {
+        // unorm8 is one of those scaled floats. 0-1.0  
+        return runTest<uint8_t>(width, height, channels, useLinear, useSemaphores, 
+                              getUnorm8Format(channels), 
+                              sycl::image_channel_type::unorm_int8); 
+    }
 
     std::cerr << "Unknown type: " << type << std::endl;
     return 1;

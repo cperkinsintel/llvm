@@ -77,6 +77,11 @@ inline std::string getFormatString(VkFormat fmt) {
         case VK_FORMAT_R8_UINT: return "VK_FORMAT_R8_UINT";
         case VK_FORMAT_R8G8_UINT: return "VK_FORMAT_R8G8_UINT";
         case VK_FORMAT_R8G8B8A8_UINT: return "VK_FORMAT_R8G8B8A8_UINT";
+
+        // 8 bit UNORM.  Others (16, 32, SNORM) aren't really a thing.
+        case VK_FORMAT_R8_UNORM:       return "VK_FORMAT_R8_UNORM";
+        case VK_FORMAT_R8G8_UNORM:     return "VK_FORMAT_R8G8_UNORM";
+        case VK_FORMAT_R8G8B8A8_UNORM: return "VK_FORMAT_R8G8B8A8_UNORM";
         
         default: return "UNKNOWN_FORMAT (" + std::to_string(fmt) + ")";
     }
@@ -144,6 +149,16 @@ template <> inline VkFormat getVulkanFormat<int8_t>(int channels) {
         case 2: return VK_FORMAT_R8G8_SINT;
         case 4: return VK_FORMAT_R8G8B8A8_SINT;
         default: throw std::runtime_error("Unsupported channels for int8");
+    }
+}
+
+// UNORM is handled special.
+inline VkFormat getUnorm8Format(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R8_UNORM;
+        case 2: return VK_FORMAT_R8G8_UNORM;
+        case 4: return VK_FORMAT_R8G8B8A8_UNORM;
+        default: throw std::runtime_error("Unsupported channels for UNORM8");
     }
 }
 

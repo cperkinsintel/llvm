@@ -12,7 +12,7 @@
     --semaphores   Use Vulkan Semaphores for SYCL Interop Sync
     --linear       Use LINEAR tiling for the Vulkan Image (default is OPTIMAL)
     --channels  X  Set number of channels (1, 2, or 4). Default is 4 (RGBA)
-    --type  XXX    Set data type (float, half, uint32, int32, uint16, int16, uint8, int8). Default is float
+    --type  XXX    Set data type (float, half, uint32, int32, uint16, int16, uint8, int8, unorm8). Default is float
     WxH            Set custom Width x Height (e.g. 8x4)
 
 
@@ -40,6 +40,7 @@
 #include <sycl/ext/oneapi/bindless_images_interop.hpp>
 #include <string>
 #include <map>
+#include <optional>
 
 // ---------------------------------------------------------
 // SYCL TYPE MAPPING HELPERS
@@ -76,9 +77,15 @@ template <> inline sycl::image_channel_type getSyclChannelType<sycl::half>() { r
 //  TEST RUNNER
 // ---------------------------------------------------------
 template <typename T>
-int runTest(int width, int height, int channels, bool useLinear, bool useSemaphores) {
+int runTest(int width, int height, int channels, bool useLinear, bool useSemaphores, 
+            VkFormat fmtOverride = VK_FORMAT_UNDEFINED, 
+            std::optional<sycl::image_channel_type> syclOverride = std::nullopt)  {
+
     VkImageTiling tiling = useLinear ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
-    VkFormat vkFormat = getVulkanFormat<T>(channels);
+
+    VkFormat vkFormat = (fmtOverride != VK_FORMAT_UNDEFINED) 
+                      ? fmtOverride 
+                      : getVulkanFormat<T>(channels);
     std::cout << "VK Format: " << getFormatString(vkFormat) << std::endl;
 
     // 1. Setup Vulkan
@@ -120,7 +127,8 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
             extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
         }
 
-        syclexp::image_descriptor imgDesc(sycl::range<2>(width, height), channels, getSyclChannelType<T>());
+        sycl::image_channel_type syclType = syclOverride.has_value()  ? syclOverride.value() : getSyclChannelType<T>();
+        syclexp::image_descriptor imgDesc(sycl::range<2>(width, height), channels, syclType);
         syclexp::image_mem_handle devHandle = syclexp::map_external_image_memory(extMem, imgDesc, q.get_device(), q.get_context());
         syclexp::unsampled_image_handle unsampledHandle = syclexp::create_image(devHandle, imgDesc, q.get_device(), q.get_context());
 
@@ -142,8 +150,28 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
             h.parallel_for(sycl::range<2>(width, height), [=](sycl::item<2> item) {
                 int x = item.get_id(0);
                 int y = item.get_id(1);
+
+                // unorm is special snowflake
+                bool isUnorm = (syclType == sycl::image_channel_type::unorm_int8);
+                if(isUnorm){
+                    using Vec4 = sycl::vec<float, 4>;
+                    // Fetch normalized floats (0.0..1.0)
+                    Vec4 px = syclexp::fetch_image<Vec4>(unsampledHandle, sycl::int2(x, y));
+                    
+                    // Convert back to bytes (0..255) with rounding
+                    Vec4 scaled = px * 255.0f; // Scale up
+
+                    size_t baseIdx = (y * width + x) * channels;
+                    outAcc[baseIdx + 0] = static_cast<T>(sycl::round(scaled.x()));
+                    if(channels > 1) outAcc[baseIdx + 1] = static_cast<T>(sycl::round(scaled.y()));
+                    if(channels > 2) outAcc[baseIdx + 2] = static_cast<T>(sycl::round(scaled.z()));
+                    if(channels > 3) outAcc[baseIdx + 3] = static_cast<T>(sycl::round(scaled.w()));
+                    
+                    return; // Early exit. special snowflake gets to leave early.
+                }
+
+
                 
-                // Templated Fetch!
                 if (channels == 1) {
                     T px = syclexp::fetch_image<T>(unsampledHandle, sycl::int2(x, y));
                     outAcc[y * width + x] = px;
@@ -254,6 +282,13 @@ int main(int argc, char** argv) {
     
     if (type == "uint8")  return runTest<uint8_t>(width, height, channels, useLinear, useSemaphores);
     if (type == "int8")  return runTest<int8_t>(width, height, channels, useLinear, useSemaphores);
+
+    if (type == "unorm8") {
+        // unorm8 is one of those scaled floats. 0-1.0  
+        return runTest<uint8_t>(width, height, channels, useLinear, useSemaphores, 
+                              getUnorm8Format(channels), 
+                              sycl::image_channel_type::unorm_int8); 
+    }
 
     std::cerr << "Unknown type: " << type << std::endl;
     return 1;
