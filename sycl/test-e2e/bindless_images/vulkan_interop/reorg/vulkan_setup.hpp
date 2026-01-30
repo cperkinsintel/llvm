@@ -235,43 +235,56 @@ inline VulkanContext createVulkanContext() {
     return ctx;
 }
 
-inline ImageResources createExportableImage(VulkanContext& ctx, VkExtent3D extent, VkFormat format, VkImageType type, VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL) {
-    ImageResources res;
-    res.extent = extent;
-
-    VkExternalMemoryImageCreateInfo extImageCreateInfo{};
-    extImageCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
-    extImageCreateInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
-
-    VkImageCreateInfo imageInfo{};
-    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    imageInfo.pNext = &extImageCreateInfo;
+inline ImageResources createExportableImage(
+    VulkanContext& ctx, 
+    VkExtent3D extent, 
+    VkFormat format, 
+    VkImageType type, 
+    VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL,
+    // Default flags cover everything used in previous tests:
+    VkImageUsageFlags usage = VK_IMAGE_USAGE_STORAGE_BIT | 
+                              VK_IMAGE_USAGE_SAMPLED_BIT | 
+                              VK_IMAGE_USAGE_TRANSFER_SRC_BIT | 
+                              VK_IMAGE_USAGE_TRANSFER_DST_BIT
+) {
+    VkImageCreateInfo imageInfo = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
     imageInfo.imageType = type;
     imageInfo.extent = extent;
     imageInfo.mipLevels = 1;
     imageInfo.arrayLayers = 1;
     imageInfo.format = format;
-    imageInfo.tiling = tiling; 
+    imageInfo.tiling = tiling;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    
+    // USE THE ARGUMENT HERE:
+    imageInfo.usage = usage;
+    
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+
+    // Export Memory Support
+    VkExternalMemoryImageCreateInfo extMemInfo = {VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO};
+    extMemInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT; 
+    imageInfo.pNext = &extMemInfo;
+
+    ImageResources res;
+    res.extent = extent; // Save for later
 
     VK_CHECK(vkCreateImage(ctx.device, &imageInfo, nullptr, &res.image));
 
     VkMemoryRequirements memRequirements;
     vkGetImageMemoryRequirements(ctx.device, res.image, &memRequirements);
-    res.allocationSize = memRequirements.size;
 
-    VkExportMemoryAllocateInfo exportAllocInfo{};
-    exportAllocInfo.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO;
-    exportAllocInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.pNext = &exportAllocInfo;
+    VkMemoryAllocateInfo allocInfo = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = findMemoryType(ctx.physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    // Export Memory Allocation
+    VkExportMemoryAllocateInfo exportAllocInfo = {VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO};
+    exportAllocInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+    allocInfo.pNext = &exportAllocInfo;
+
+    res.allocationSize = allocInfo.allocationSize; // Save for later
 
     VK_CHECK(vkAllocateMemory(ctx.device, &allocInfo, nullptr, &res.memory));
     VK_CHECK(vkBindImageMemory(ctx.device, res.image, res.memory, 0));
@@ -347,7 +360,217 @@ inline int getSemaphoreFd(VulkanContext& ctx, VkSemaphore semaphore) {
 //     }
 // }
 
-// Templated Upload And Verify
+// ---------------------------------------------------------
+// HELPER: Upload Data (Host -> Staging -> Device)
+// ---------------------------------------------------------
+template <typename Functor>
+void uploadImage(VulkanContext& ctx, ImageResources& imgRes, int channels, VkSemaphore signalSemaphore, Functor generator) {
+    uint32_t width = imgRes.extent.width;
+    uint32_t height = imgRes.extent.height;
+    uint32_t depth = imgRes.extent.depth;
+    size_t totalPixels = width * height * depth;
+    
+    // 1. Create Staging Buffer
+    VkBuffer stagingBuffer; 
+    VkDeviceMemory stagingMemory;
+    VkDeviceSize dataSize = totalPixels * channels * 4; // Max safe size
+    
+    VkBufferCreateInfo bi = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO}; 
+    bi.size = dataSize; 
+    bi.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    VK_CHECK(vkCreateBuffer(ctx.device, &bi, nullptr, &stagingBuffer));
+
+    VkMemoryRequirements req; 
+    vkGetBufferMemoryRequirements(ctx.device, stagingBuffer, &req);
+    VkMemoryAllocateInfo ai = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO}; 
+    ai.allocationSize = req.size; 
+    ai.memoryTypeIndex = findMemoryType(ctx.physicalDevice, req.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    VK_CHECK(vkAllocateMemory(ctx.device, &ai, nullptr, &stagingMemory));
+    VK_CHECK(vkBindBufferMemory(ctx.device, stagingBuffer, stagingMemory, 0));
+
+    // 2. Map and Fill
+    void* data;
+    VK_CHECK(vkMapMemory(ctx.device, stagingMemory, 0, dataSize, 0, &data));
+    
+    using T = decltype(generator(0,0)); 
+    T* ptr = static_cast<T*>(data);
+
+    for(size_t i=0; i < totalPixels; ++i) {
+        for(int c=0; c < channels; ++c) {
+            ptr[i * channels + c] = generator(i, c);
+        }
+    }
+    vkUnmapMemory(ctx.device, stagingMemory);
+
+    // 3. Command Buffer
+    VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO }; 
+    poolInfo.queueFamilyIndex = ctx.queueFamilyIndex;
+    VkCommandPool pool; 
+    VK_CHECK(vkCreateCommandPool(ctx.device, &poolInfo, nullptr, &pool));
+
+    VkCommandBuffer cmd; 
+    VkCommandBufferAllocateInfo ca = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO}; 
+    ca.commandPool = pool; ca.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY; ca.commandBufferCount = 1;
+    vkAllocateCommandBuffers(ctx.device, &ca, &cmd);
+
+    VkCommandBufferBeginInfo beginInfo = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; 
+    vkBeginCommandBuffer(cmd, &beginInfo);
+
+    VkImageMemoryBarrier bar1 = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
+    bar1.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    bar1.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    bar1.image = imgRes.image;
+    bar1.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    bar1.srcAccessMask = 0;
+    bar1.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &bar1);
+
+    VkBufferImageCopy region = {};
+    region.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+    region.imageExtent = imgRes.extent; // Uses the 3D extent automatically
+    vkCmdCopyBufferToImage(cmd, stagingBuffer, imgRes.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+
+    VkImageMemoryBarrier bar2 = bar1;
+    bar2.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    bar2.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    bar2.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    bar2.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &bar2);
+
+    vkEndCommandBuffer(cmd);
+
+    VkSubmitInfo si = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
+    si.commandBufferCount = 1;
+    si.pCommandBuffers = &cmd;
+    if(signalSemaphore != VK_NULL_HANDLE) {
+        si.signalSemaphoreCount = 1;
+        si.pSignalSemaphores = &signalSemaphore;
+    }
+    vkQueueSubmit(ctx.queue, 1, &si, VK_NULL_HANDLE);
+    vkQueueWaitIdle(ctx.queue);
+
+    vkDestroyCommandPool(ctx.device, pool, nullptr);
+    vkDestroyBuffer(ctx.device, stagingBuffer, nullptr);
+    vkFreeMemory(ctx.device, stagingMemory, nullptr);
+}
+
+// ---------------------------------------------------------
+// HELPER: Verify Data (Device -> Staging -> Host)
+// ---------------------------------------------------------
+template <typename Functor>
+bool verifyImage(VulkanContext& ctx, ImageResources& imgRes, int channels, VkSemaphore waitSemaphore, Functor expectedGenerator) {
+    uint32_t width = imgRes.extent.width;
+    uint32_t height = imgRes.extent.height;
+    uint32_t depth = imgRes.extent.depth;
+    size_t totalPixels = width * height * depth;
+
+    VkBuffer stagingBuffer; 
+    VkDeviceMemory stagingMemory;
+    VkDeviceSize dataSize = totalPixels * channels * 4; 
+    
+    VkBufferCreateInfo bi = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO}; 
+    bi.size = dataSize; 
+    bi.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    vkCreateBuffer(ctx.device, &bi, nullptr, &stagingBuffer);
+
+    VkMemoryRequirements req; 
+    vkGetBufferMemoryRequirements(ctx.device, stagingBuffer, &req);
+    VkMemoryAllocateInfo ai = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO}; 
+    ai.allocationSize = req.size; 
+    ai.memoryTypeIndex = findMemoryType(ctx.physicalDevice, req.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    vkAllocateMemory(ctx.device, &ai, nullptr, &stagingMemory);
+    vkBindBufferMemory(ctx.device, stagingBuffer, stagingMemory, 0);
+
+    VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO }; 
+    poolInfo.queueFamilyIndex = ctx.queueFamilyIndex;
+    VkCommandPool pool; 
+    vkCreateCommandPool(ctx.device, &poolInfo, nullptr, &pool);
+
+    VkCommandBuffer cmd; 
+    VkCommandBufferAllocateInfo ca = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO}; 
+    ca.commandPool = pool; ca.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY; ca.commandBufferCount = 1;
+    vkAllocateCommandBuffers(ctx.device, &ca, &cmd);
+
+    vkBeginCommandBuffer(cmd, nullptr);
+    VkBufferImageCopy region = {};
+    region.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+    region.imageExtent = imgRes.extent;
+    vkCmdCopyImageToBuffer(cmd, imgRes.image, VK_IMAGE_LAYOUT_GENERAL, stagingBuffer, 1, &region);
+    vkEndCommandBuffer(cmd);
+
+    VkSubmitInfo si = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
+    si.commandBufferCount = 1;
+    si.pCommandBuffers = &cmd;
+    std::vector<VkPipelineStageFlags> waitStages = {VK_PIPELINE_STAGE_TRANSFER_BIT};
+    if(waitSemaphore != VK_NULL_HANDLE) {
+        si.waitSemaphoreCount = 1;
+        si.pWaitSemaphores = &waitSemaphore;
+        si.pWaitDstStageMask = waitStages.data();
+    }
+    vkQueueSubmit(ctx.queue, 1, &si, VK_NULL_HANDLE);
+    vkQueueWaitIdle(ctx.queue);
+
+    void* data;
+    vkMapMemory(ctx.device, stagingMemory, 0, dataSize, 0, &data);
+    
+    using T = decltype(expectedGenerator(0,0)); 
+    T* ptr = static_cast<T*>(data);
+    bool passed = true;
+    int errors = 0;
+
+    for(size_t i=0; i < totalPixels; ++i) {
+        for(int c=0; c < channels; ++c) {
+            T actual = ptr[i * channels + c];
+            T expected = expectedGenerator(i, c);
+            if(!checkValue(actual, expected)) {
+                passed = false;
+                if(errors++ < 5) std::cout << "Mismatch at " << i << " ch:" << c << " Got: " << (double)actual << " Exp: " << (double)expected << std::endl;
+            }
+        }
+    }
+
+    vkUnmapMemory(ctx.device, stagingMemory);
+    vkDestroyCommandPool(ctx.device, pool, nullptr);
+    vkDestroyBuffer(ctx.device, stagingBuffer, nullptr);
+    vkFreeMemory(ctx.device, stagingMemory, nullptr);
+    return passed;
+}
+
+// ---------------------------------------------------------
+// COMPATIBILITY SHIM (The "Old" API)
+// ---------------------------------------------------------
+// This allows your existing tests to call uploadAndVerify<T>(...) without changes.
+// template <typename T>
+// bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaphore signalSemaphore, int channels) {
+//     size_t totalPixels = imgRes.extent.width * imgRes.extent.height * imgRes.extent.depth;
+    
+//     // 1. Synchronous Upload
+//     uploadImage(ctx, imgRes, channels, VK_NULL_HANDLE, [&](size_t i, int c) {
+//         return generateTestValue<T>(i, c, totalPixels);
+//     });
+
+//     // 2. Synchronous Verify
+//     bool result = verifyImage(ctx, imgRes, channels, VK_NULL_HANDLE, [&](size_t i, int c) {
+//         return generateTestValue<T>(i, c, totalPixels);
+//     });
+
+//     if (!result) {
+//         std::cerr << "CRITICAL: Initial Vulkan upload/verify failed. SYCL will likely fail." << std::endl;
+//         return false;
+//     }
+
+//     // 3. Signal Semaphore for SYCL
+//     if (signalSemaphore != VK_NULL_HANDLE) {
+//         VkSubmitInfo si = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
+//         si.signalSemaphoreCount = 1;
+//         si.pSignalSemaphores = &signalSemaphore;
+//         vkQueueSubmit(ctx.queue, 1, &si, VK_NULL_HANDLE);
+//         // Do NOT wait idle here.
+//     }
+    
+//     return true;
+// }
+
 template <typename T>
 bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaphore signalSemaphore = VK_NULL_HANDLE, int channels = 4) {
     size_t texWidth = imgRes.extent.width;
@@ -508,6 +731,28 @@ bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaphore sig
     vkDestroyCommandPool(ctx.device, commandPool, nullptr);
 
     return valid;
+}
+
+// ---------------------------------------------------------
+// NEW GENERIC API (The "Boss" API)
+// ---------------------------------------------------------
+// Used by the Boss Battle to pass custom functors
+template <typename Functor>
+bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaphore signalSemaphore, int channels, Functor generator) {
+    // Same logic, but using the passed generator
+    uploadImage(ctx, imgRes, channels, VK_NULL_HANDLE, generator);
+    
+    if (!verifyImage(ctx, imgRes, channels, VK_NULL_HANDLE, generator)) {
+        return false;
+    }
+
+    if (signalSemaphore != VK_NULL_HANDLE) {
+        VkSubmitInfo si = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
+        si.signalSemaphoreCount = 1;
+        si.pSignalSemaphores = &signalSemaphore;
+        vkQueueSubmit(ctx.queue, 1, &si, VK_NULL_HANDLE);
+    }
+    return true;
 }
 
 inline void cleanupVulkan(VulkanContext& ctx, ImageResources& res) {
