@@ -253,6 +253,7 @@ int main(int argc, char** argv) {
     if (type == "uint16") return runTest<uint16_t>(width, height, channels, useLinear, useSemaphores);
     
     if (type == "uint8")  return runTest<uint8_t>(width, height, channels, useLinear, useSemaphores);
+    if (type == "int8")  return runTest<int8_t>(width, height, channels, useLinear, useSemaphores);
 
     std::cerr << "Unknown type: " << type << std::endl;
     return 1;

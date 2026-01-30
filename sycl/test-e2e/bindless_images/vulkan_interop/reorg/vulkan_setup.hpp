@@ -46,7 +46,7 @@ inline std::string getFormatString(VkFormat fmt) {
         case VK_FORMAT_R32G32_SFLOAT: return "VK_FORMAT_R32G32_SFLOAT";
         case VK_FORMAT_R32G32B32A32_SFLOAT: return "VK_FORMAT_R32G32B32A32_SFLOAT";
 
-        
+
         case VK_FORMAT_R16_SFLOAT: return "VK_FORMAT_R16_SFLOAT";
         case VK_FORMAT_R16G16_SFLOAT: return "VK_FORMAT_R16G16_SFLOAT";
         case VK_FORMAT_R16G16B16A16_SFLOAT: return "VK_FORMAT_R16G16B16A16_SFLOAT";
@@ -135,6 +135,15 @@ template <> inline VkFormat getVulkanFormat<uint8_t>(int channels) {
         case 2: return VK_FORMAT_R8G8_UINT;
         case 4: return VK_FORMAT_R8G8B8A8_UINT;
         default: throw std::runtime_error("Unsupported channels for uint8");
+    }
+}
+
+template <> inline VkFormat getVulkanFormat<int8_t>(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R8_SINT;
+        case 2: return VK_FORMAT_R8G8_SINT;
+        case 4: return VK_FORMAT_R8G8B8A8_SINT;
+        default: throw std::runtime_error("Unsupported channels for int8");
     }
 }
 
