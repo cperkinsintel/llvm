@@ -12,7 +12,7 @@
     --semaphores   Use Vulkan Semaphores for SYCL Interop Sync
     --linear       Use LINEAR tiling for the Vulkan Image (default is OPTIMAL)
     --channels  X  Set number of channels (1, 2, or 4). Default is 4 (RGBA)
-    --type  XXX    Set data type (float, int32, uint8). Default is float
+    --type  XXX    Set data type (float, half, uint32, int32, uint16, int16, uint8, int8). Default is float
     WxH            Set custom Width x Height (e.g. 8x4)
 
 
@@ -48,10 +48,29 @@
 template <typename T>
 sycl::image_channel_type getSyclChannelType();
 
-template <> sycl::image_channel_type getSyclChannelType<float>() { return sycl::image_channel_type::fp32; }
-template <> sycl::image_channel_type getSyclChannelType<int32_t>() { return sycl::image_channel_type::signed_int32; }
-template <> sycl::image_channel_type getSyclChannelType<uint8_t>() { return sycl::image_channel_type::unsigned_int8; }
+template <> inline sycl::image_channel_type getSyclChannelType<float>() { return sycl::image_channel_type::fp32; }
 
+template <> inline sycl::image_channel_type getSyclChannelType<int32_t>() { return sycl::image_channel_type::signed_int32; }
+template <> inline sycl::image_channel_type getSyclChannelType<uint32_t>() { return sycl::image_channel_type::unsigned_int32; }
+
+template <> inline sycl::image_channel_type getSyclChannelType<int16_t>() {  return sycl::image_channel_type::signed_int16; }
+template <> inline sycl::image_channel_type getSyclChannelType<uint16_t>() { return sycl::image_channel_type::unsigned_int16; }
+
+template <> inline sycl::image_channel_type getSyclChannelType<uint8_t>() { return sycl::image_channel_type::unsigned_int8; }
+template <> inline sycl::image_channel_type getSyclChannelType<int8_t>() { return sycl::image_channel_type::signed_int8; }
+
+
+
+// half
+template <> inline VkFormat getVulkanFormat<sycl::half>(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R16_SFLOAT;
+        case 2: return VK_FORMAT_R16G16_SFLOAT;
+        case 4: return VK_FORMAT_R16G16B16A16_SFLOAT;
+        default: throw std::runtime_error("Unsupported channels for half");
+    }
+}
+template <> inline sycl::image_channel_type getSyclChannelType<sycl::half>() { return sycl::image_channel_type::fp16; }
 
 // ---------------------------------------------------------
 //  TEST RUNNER
@@ -224,9 +243,16 @@ int main(int argc, char** argv) {
               << " | Tiling: " << (useLinear ? "LINEAR" : "OPTIMAL")
               << " | Semaphores: " << (useSemaphores ? "ON" : "OFF") << std::endl;
 
-    if (type == "float") return runTest<float>(width, height, channels, useLinear, useSemaphores);
-    if (type == "int32") return runTest<int32_t>(width, height, channels, useLinear, useSemaphores);
-    if (type == "uint8") return runTest<uint8_t>(width, height, channels, useLinear, useSemaphores);
+    if (type == "float")  return runTest<float>(width, height, channels, useLinear, useSemaphores);
+    if (type == "half")   return runTest<sycl::half>(width, height, channels, useLinear, useSemaphores);
+    
+    if (type == "int32")  return runTest<int32_t>(width, height, channels, useLinear, useSemaphores);
+    if (type == "uint32") return runTest<uint32_t>(width, height, channels, useLinear, useSemaphores);
+    
+    if (type == "int16")  return runTest<int16_t>(width, height, channels, useLinear, useSemaphores);
+    if (type == "uint16") return runTest<uint16_t>(width, height, channels, useLinear, useSemaphores);
+    
+    if (type == "uint8")  return runTest<uint8_t>(width, height, channels, useLinear, useSemaphores);
 
     std::cerr << "Unknown type: " << type << std::endl;
     return 1;

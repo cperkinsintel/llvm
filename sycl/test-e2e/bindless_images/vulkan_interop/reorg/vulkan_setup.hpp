@@ -45,11 +45,35 @@ inline std::string getFormatString(VkFormat fmt) {
         case VK_FORMAT_R32_SFLOAT: return "VK_FORMAT_R32_SFLOAT";
         case VK_FORMAT_R32G32_SFLOAT: return "VK_FORMAT_R32G32_SFLOAT";
         case VK_FORMAT_R32G32B32A32_SFLOAT: return "VK_FORMAT_R32G32B32A32_SFLOAT";
+
         
+        case VK_FORMAT_R16_SFLOAT: return "VK_FORMAT_R16_SFLOAT";
+        case VK_FORMAT_R16G16_SFLOAT: return "VK_FORMAT_R16G16_SFLOAT";
+        case VK_FORMAT_R16G16B16A16_SFLOAT: return "VK_FORMAT_R16G16B16A16_SFLOAT";
+        
+
         case VK_FORMAT_R32_SINT: return "VK_FORMAT_R32_SINT";
         case VK_FORMAT_R32G32_SINT: return "VK_FORMAT_R32G32_SINT";
         case VK_FORMAT_R32G32B32A32_SINT: return "VK_FORMAT_R32G32B32A32_SINT";
+
+        case VK_FORMAT_R32_UINT: return "VK_FORMAT_R32_UINT";
+        case VK_FORMAT_R32G32_UINT: return "VK_FORMAT_R32G32_UINT";
+        case VK_FORMAT_R32G32B32A32_UINT: return "VK_FORMAT_R32G32B32A32_UINT";
+
+
+        case VK_FORMAT_R16_SINT: return "VK_FORMAT_R16_SINT";
+        case VK_FORMAT_R16G16_SINT: return "VK_FORMAT_R16G16_SINT";
+        case VK_FORMAT_R16G16B16A16_SINT: return "VK_FORMAT_R16G16B16A16_SINT";
+
+        case VK_FORMAT_R16_UINT: return "VK_FORMAT_R16_UINT";
+        case VK_FORMAT_R16G16_UINT: return "VK_FORMAT_R16G16_UINT";
+        case VK_FORMAT_R16G16B16A16_UINT: return "VK_FORMAT_R16G16B16A16_UINT";
         
+
+        case VK_FORMAT_R8_SINT: return "VK_FORMAT_R8_SINT";
+        case VK_FORMAT_R8G8_SINT: return "VK_FORMAT_R8G8_SINT";
+        case VK_FORMAT_R8G8B8A8_SINT: return "VK_FORMAT_R8G8B8A8_SINT";
+
         case VK_FORMAT_R8_UINT: return "VK_FORMAT_R8_UINT";
         case VK_FORMAT_R8G8_UINT: return "VK_FORMAT_R8G8_UINT";
         case VK_FORMAT_R8G8B8A8_UINT: return "VK_FORMAT_R8G8B8A8_UINT";
@@ -75,6 +99,33 @@ template <> inline VkFormat getVulkanFormat<int32_t>(int channels) {
         case 2: return VK_FORMAT_R32G32_SINT;
         case 4: return VK_FORMAT_R32G32B32A32_SINT;
         default: throw std::runtime_error("Unsupported channels for int32");
+    }
+}
+
+template <> inline VkFormat getVulkanFormat<uint32_t>(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R32_UINT;
+        case 2: return VK_FORMAT_R32G32_UINT;
+        case 4: return VK_FORMAT_R32G32B32A32_UINT;
+        default: throw std::runtime_error("Unsupported channels for uint32");
+    }
+}
+
+template <> inline VkFormat getVulkanFormat<int16_t>(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R16_SINT;
+        case 2: return VK_FORMAT_R16G16_SINT;
+        case 4: return VK_FORMAT_R16G16B16A16_SINT;
+        default: throw std::runtime_error("Unsupported channels for int16");
+    }
+}
+
+template <> inline VkFormat getVulkanFormat<uint16_t>(int channels) {
+    switch(channels) {
+        case 1: return VK_FORMAT_R16_UINT;
+        case 2: return VK_FORMAT_R16G16_UINT;
+        case 4: return VK_FORMAT_R16G16B16A16_UINT;
+        default: throw std::runtime_error("Unsupported channels for uint16");
     }
 }
 
