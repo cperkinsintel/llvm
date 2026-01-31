@@ -3,6 +3,16 @@
   
   $VULKAN_SDK/bin/glslangValidator -V vulkan_shader_2d.comp -o vulkan_shader_2d.spv
   clang++ -fsycl -std=c++17 -o vs_2d_arith.bin vulkan_sycl_2d_arithmetic.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
+
+  FLAGS
+    --semaphores   Use Vulkan Semaphores for SYCL Interop Sync
+    --linear       Use LINEAR tiling for the Vulkan Image (default is OPTIMAL)
+    --channels  X  Set number of channels (1, 2, or 4). Default is 4 (RGBA)
+    --type  XXX    Set data type (float, half, uint32, int32, uint16, int16, uint8, int8, unorm8). Default is float
+    WxH            Set custom Width x Height (e.g. 8x4)
+
+
+    --sampled      A flag for THIS test only. Choose between sampled or unsampled.  
   
   ./vs_2d_arith.bin --type float --semaphores
   ./vs_2d_arith.bin --type unorm8 --sampled --semaphores
@@ -327,10 +337,19 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
     else std::cout << "FAILURE!" << std::endl;
 
     // Cleanup Vulkan
-    if(useSemaphores) { vkDestroySemaphore(vkCtx.device, semA, nullptr); vkDestroySemaphore(vkCtx.device, semB, nullptr); vkDestroySemaphore(vkCtx.device, semOutVk, nullptr); }
-    cleanupVulkan(vkCtx, imgA);
-    cleanupVulkan(vkCtx, imgB);
+    if(useSemaphores) { 
+        vkDestroySemaphore(vkCtx.device, semA, nullptr); 
+        vkDestroySemaphore(vkCtx.device, semB, nullptr); 
+        vkDestroySemaphore(vkCtx.device, semOutVk, nullptr); 
+    }
+
+    // 1. Gentle Cleanup for A and B (Keep Device Alive)
+    cleanupImageResources(vkCtx, imgA);
+    cleanupImageResources(vkCtx, imgB);
+
+    // 2. Final Cleanup (Destroys Output Image AND Device/Instance)
     cleanupVulkan(vkCtx, imgOut);
+    
     return passed ? 0 : 1;
 }
 

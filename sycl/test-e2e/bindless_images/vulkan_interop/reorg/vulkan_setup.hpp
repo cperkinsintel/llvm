@@ -462,8 +462,16 @@ bool verifyImage(VulkanContext& ctx, ImageResources& imgRes, int channels, VkSem
     uint32_t width = imgRes.extent.width;
     uint32_t height = imgRes.extent.height;
     uint32_t depth = imgRes.extent.depth;
+
+    // Dimensions Check
+    if (width == 0 || height == 0 || depth == 0) {
+        std::cerr << "[FATAL] verifyImage: Invalid Dimensions " << width << "x" << height << std::endl;
+        return false;
+    }
+
     size_t totalPixels = width * height * depth;
 
+    // 1. Create Staging Buffer
     VkBuffer stagingBuffer; 
     VkDeviceMemory stagingMemory;
     VkDeviceSize dataSize = totalPixels * channels * 4; 
@@ -471,33 +479,52 @@ bool verifyImage(VulkanContext& ctx, ImageResources& imgRes, int channels, VkSem
     VkBufferCreateInfo bi = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO}; 
     bi.size = dataSize; 
     bi.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-    vkCreateBuffer(ctx.device, &bi, nullptr, &stagingBuffer);
+    VK_CHECK(vkCreateBuffer(ctx.device, &bi, nullptr, &stagingBuffer));
 
     VkMemoryRequirements req; 
     vkGetBufferMemoryRequirements(ctx.device, stagingBuffer, &req);
     VkMemoryAllocateInfo ai = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO}; 
     ai.allocationSize = req.size; 
     ai.memoryTypeIndex = findMemoryType(ctx.physicalDevice, req.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    vkAllocateMemory(ctx.device, &ai, nullptr, &stagingMemory);
-    vkBindBufferMemory(ctx.device, stagingBuffer, stagingMemory, 0);
+    VK_CHECK(vkAllocateMemory(ctx.device, &ai, nullptr, &stagingMemory));
+    VK_CHECK(vkBindBufferMemory(ctx.device, stagingBuffer, stagingMemory, 0));
 
+    // 2. Command Buffer
     VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO }; 
     poolInfo.queueFamilyIndex = ctx.queueFamilyIndex;
     VkCommandPool pool; 
-    vkCreateCommandPool(ctx.device, &poolInfo, nullptr, &pool);
+    VK_CHECK(vkCreateCommandPool(ctx.device, &poolInfo, nullptr, &pool));
 
     VkCommandBuffer cmd; 
     VkCommandBufferAllocateInfo ca = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO}; 
     ca.commandPool = pool; ca.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY; ca.commandBufferCount = 1;
     vkAllocateCommandBuffers(ctx.device, &ca, &cmd);
 
-    vkBeginCommandBuffer(cmd, nullptr);
+    // --- FIX START: Use valid BeginInfo ---
+    VkCommandBufferBeginInfo beginInfo = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+    vkBeginCommandBuffer(cmd, &beginInfo);
+    // --- FIX END ---
+
+    // Safety Barrier: Ensure writes from SYCL (External) are visible before we transfer
+    VkImageMemoryBarrier barrier = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
+    barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL; // Assume SYCL left it in GENERAL
+    barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL; // We keep it in GENERAL
+    barrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT; // Wait for any writes
+    barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT; // Ready for us to read
+    barrier.image = imgRes.image;
+    barrier.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+    // Copy
     VkBufferImageCopy region = {};
     region.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
     region.imageExtent = imgRes.extent;
     vkCmdCopyImageToBuffer(cmd, imgRes.image, VK_IMAGE_LAYOUT_GENERAL, stagingBuffer, 1, &region);
+
     vkEndCommandBuffer(cmd);
 
+    // 3. Submit
     VkSubmitInfo si = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
     si.commandBufferCount = 1;
     si.pCommandBuffers = &cmd;
@@ -510,6 +537,7 @@ bool verifyImage(VulkanContext& ctx, ImageResources& imgRes, int channels, VkSem
     vkQueueSubmit(ctx.queue, 1, &si, VK_NULL_HANDLE);
     vkQueueWaitIdle(ctx.queue);
 
+    // 4. Verify Data
     void* data;
     vkMapMemory(ctx.device, stagingMemory, 0, dataSize, 0, &data);
     
@@ -522,7 +550,15 @@ bool verifyImage(VulkanContext& ctx, ImageResources& imgRes, int channels, VkSem
         for(int c=0; c < channels; ++c) {
             T actual = ptr[i * channels + c];
             T expected = expectedGenerator(i, c);
-            if(!checkValue(actual, expected)) {
+            
+            bool match = false;
+            if constexpr (std::is_floating_point_v<T>) {
+                 match = std::abs((float)actual - (float)expected) < 0.05f;
+            } else {
+                 match = (actual == expected);
+            }
+
+            if(!match) {
                 passed = false;
                 if(errors++ < 5) std::cout << "Mismatch at " << i << " ch:" << c << " Got: " << (double)actual << " Exp: " << (double)expected << std::endl;
             }
@@ -753,6 +789,20 @@ bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaphore sig
         vkQueueSubmit(ctx.queue, 1, &si, VK_NULL_HANDLE);
     }
     return true;
+}
+
+// ---------------------------------------------------------
+// HELPER: Cleanup Just Image Resources (Keep Device Alive)
+// ---------------------------------------------------------
+inline void cleanupImageResources(VulkanContext& ctx, ImageResources& res) {
+    if (res.image != VK_NULL_HANDLE) {
+        vkDestroyImage(ctx.device, res.image, nullptr);
+        res.image = VK_NULL_HANDLE;
+    }
+    if (res.memory != VK_NULL_HANDLE) {
+        vkFreeMemory(ctx.device, res.memory, nullptr);
+        res.memory = VK_NULL_HANDLE;
+    }
 }
 
 inline void cleanupVulkan(VulkanContext& ctx, ImageResources& res) {
