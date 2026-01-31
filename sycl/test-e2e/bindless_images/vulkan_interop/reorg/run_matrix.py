@@ -62,6 +62,8 @@ def main():
     
     failures = []
 
+    semaphore_system_alive = True  # <--- Circuit Breaker Flag
+
     for label, binary, default_flags in TESTS:
         if not os.path.exists(binary.split()[0]):
             print(f"Skipping {label} (Binary not found)")
@@ -74,23 +76,29 @@ def main():
                     # Standard: --type X --channels Y SIZE
                     # Optional: --semaphores
                     
-                    # 1. Basic Run
+                    # 1. Basic Run (Always run this)
                     flags = f"--type {type_name} --channels {ch} {size}"
-                    if "arith" in binary: flags += f"x{size}" # Arith uses WxH
+                    if "arith" in binary: flags += f"x{size}"
                     
                     cmd = f"{binary} {flags} {default_flags}"
                     success, output = run_cmd(cmd)
-                    
                     status = f"{GREEN}PASS{RESET}" if success else f"{RED}FAIL{RESET}"
                     print(f"{label:<25} | {type_name:<8} | {ch:<2} | {size:<8} | {'Basic':<20} | {status}")
                     if not success: failures.append(cmd)
 
-                    # 2. Semaphore Run (Critical for Sync)
-                    cmd_sem = f"{cmd} --semaphores"
-                    success, output = run_cmd(cmd_sem)
-                    status = f"{GREEN}PASS{RESET}" if success else f"{RED}FAIL{RESET}"
-                    print(f"{label:<25} | {type_name:<8} | {ch:<2} | {size:<8} | {'+Semaphores':<20} | {status}")
-                    if not success: failures.append(cmd_sem)
+                    # 2. Semaphore Run (Only if system is still alive)
+                    if semaphore_system_alive:
+                        cmd_sem = f"{cmd} --semaphores"
+                        success, output = run_cmd(cmd_sem)
+                        status = f"{GREEN}PASS{RESET}" if success else f"{RED}FAIL{RESET}"
+                        print(f"{label:<25} | {type_name:<8} | {ch:<2} | {size:<8} | {'+Semaphores':<20} | {status}")
+                        
+                        if not success: 
+                            failures.append(cmd_sem)
+                            print(f"{RED}!!! SEMAPHORE FAILURE DETECTED. DISABLING FUTURE SEMAPHORE TESTS !!!{RESET}")
+                            semaphore_system_alive = False
+                    else:
+                        print(f"{label:<25} | {type_name:<8} | {ch:<2} | {size:<8} | {'+Semaphores':<20} | {RED}SKIP (Poisoned){RESET}")
 
     print("-" * 100)
     if failures:
