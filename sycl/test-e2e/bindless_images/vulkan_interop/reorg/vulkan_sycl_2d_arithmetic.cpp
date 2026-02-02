@@ -166,24 +166,40 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
             h.parallel_for(sycl::range<2>(width, height), [=](sycl::item<2> item) {
                 int x = item.get_id(0);
                 int y = item.get_id(1);
-                float u = (float)x + 0.5f; float v = (float)y + 0.5f;
-                bool isUnorm = (syclType == sycl::image_channel_type::unorm_int8);
-                using Vec4 = sycl::vec<float, 4>;
                 
-                Vec4 valA = syclexp::sample_image<Vec4>(handleA, sycl::float2(u, v));
-                Vec4 valB = syclexp::sample_image<Vec4>(handleB, sycl::float2(u, v));
-                Vec4 sum = valA + valB;
-
+                // TYPE MATCHING LOGIC
+                // If Unorm, we MUST work in Float (0.0 - 1.0)
+                // If Integer/Float, we work in T (matching the underlying format)
+                bool isUnorm = (syclType == sycl::image_channel_type::unorm_int8);
+                
                 if (isUnorm) {
-                   sum.x() = sycl::clamp(sum.x(), 0.0f, 1.0f); sum.y() = sycl::clamp(sum.y(), 0.0f, 1.0f);
-                   sum.z() = sycl::clamp(sum.z(), 0.0f, 1.0f); sum.w() = sycl::clamp(sum.w(), 0.0f, 1.0f);
-                   if(channels==1) syclexp::write_image(handleOut, sycl::int2(x,y), sum.x());
-                   else if(channels==2) syclexp::write_image(handleOut, sycl::int2(x,y), sycl::float2(sum.x(), sum.y()));
-                   else syclexp::write_image(handleOut, sycl::int2(x,y), sum);
+                     using Vec4 = sycl::vec<float, 4>;
+                     
+                     // Sample as Float
+                     Vec4 valA = syclexp::sample_image<Vec4>(handleA, sycl::float2(x + 0.5f, y + 0.5f));
+                     Vec4 valB = syclexp::sample_image<Vec4>(handleB, sycl::float2(x + 0.5f, y + 0.5f));
+                     Vec4 sum = valA + valB;
+                     
+                     // Clamp & Write
+                     sum = sycl::clamp(sum, 0.0f, 1.0f);
+                     if(channels==1) syclexp::write_image(handleOut, sycl::int2(x,y), sum.x());
+                     else if(channels==2) syclexp::write_image(handleOut, sycl::int2(x,y), sycl::float2(sum.x(), sum.y()));
+                     else syclexp::write_image(handleOut, sycl::int2(x,y), sum);
+
                 } else {
-                   if(channels==1) syclexp::write_image(handleOut, sycl::int2(x,y), static_cast<T>(sum.x()));
-                   else if(channels==2) syclexp::write_image(handleOut, sycl::int2(x,y), sycl::vec<T,2>(static_cast<T>(sum.x()), static_cast<T>(sum.y())));
-                   else syclexp::write_image(handleOut, sycl::int2(x,y), sycl::vec<T,4>(static_cast<T>(sum.x()), static_cast<T>(sum.y()), static_cast<T>(sum.z()), static_cast<T>(sum.w())));
+                     // Standard Path (Float, Int, Half)
+                     // Using Vec4 = sycl::vec<T, 4> ensures we use the correct Sampler (Int vs Float)
+                     using Vec4 = sycl::vec<T, 4>;
+                     
+                     // Sample as T
+                     Vec4 valA = syclexp::sample_image<Vec4>(handleA, sycl::float2(x + 0.5f, y + 0.5f));
+                     Vec4 valB = syclexp::sample_image<Vec4>(handleB, sycl::float2(x + 0.5f, y + 0.5f));
+                     Vec4 sum = valA + valB;
+                     
+                     // Write
+                     if(channels==1) syclexp::write_image(handleOut, sycl::int2(x,y), static_cast<T>(sum.x()));
+                     else if(channels==2) syclexp::write_image(handleOut, sycl::int2(x,y), sycl::vec<T,2>(static_cast<T>(sum.x()), static_cast<T>(sum.y())));
+                     else syclexp::write_image(handleOut, sycl::int2(x,y), sycl::vec<T,4>(static_cast<T>(sum.x()), static_cast<T>(sum.y()), static_cast<T>(sum.z()), static_cast<T>(sum.w())));
                 }
             });
         });
@@ -257,9 +273,9 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
     syclexp::destroy_image_handle(handleOut, q.get_device(), q.get_context());
     
     // !!! FIX: Free Image Memory Handles created by Map !!!
-    syclexp::free_image_mem(imgMemA, q.get_device(), q.get_context());
-    syclexp::free_image_mem(imgMemB, q.get_device(), q.get_context());
-    syclexp::free_image_mem(imgMemOut, q.get_device(), q.get_context());
+    syclexp::free_image_mem(imgMemA, syclexp::image_type::standard, q.get_device(), q.get_context());
+    syclexp::free_image_mem(imgMemB, syclexp::image_type::standard, q.get_device(), q.get_context());
+    syclexp::free_image_mem(imgMemOut, syclexp::image_type::standard, q.get_device(), q.get_context());
 
     syclexp::release_external_memory(extMemA, q.get_device(), q.get_context());
     syclexp::release_external_memory(extMemB, q.get_device(), q.get_context());
@@ -313,6 +329,8 @@ int main(int argc, char** argv) {
     bool useSampled = false;
     std::string type = "float";
 
+    std::vector<int> dims;
+
     for(int i=1; i<argc; ++i) {
         std::string arg = argv[i];
         if(arg == "--semaphores") useSemaphores = true;
@@ -326,8 +344,17 @@ int main(int argc, char** argv) {
                 width = std::stoi(arg.substr(0, xPos));
                 height = std::stoi(arg.substr(xPos+1));
             } catch (...) { }
-        }
+        } 
+        // else {
+        //     // Space separated support
+        //     try { dims.push_back(std::stoi(arg)); } catch(...) {}
+        // }
     }
+    
+    // Apply space separated args
+    if (dims.size() >= 1) width = dims[0];
+    if (dims.size() >= 2) height = dims[1];
+    else if (dims.size() == 1) height = width;
 
     if (channels != 1 && channels != 2 && channels != 4) {
         std::cerr << "Error: Only 1, 2, or 4 channels supported." << std::endl;
@@ -338,6 +365,7 @@ int main(int argc, char** argv) {
               << " | Size: " << width << "x" << height 
               << " | Channels: " << channels
               << " | Tiling: " << (useLinear ? "LINEAR" : "OPTIMAL")
+              << " | Sampled: " << (useSampled ? "YES" : "NO")
               << " | Semaphores: " << (useSemaphores ? "ON" : "OFF") << std::endl;
 
 
