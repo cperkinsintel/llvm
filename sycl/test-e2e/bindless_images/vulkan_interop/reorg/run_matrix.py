@@ -19,9 +19,9 @@ TESTS = [
     #("1D Unsampled Write",  "./vsu_1d_w_test.bin",     ""),
     #("1D Sampled Read",     "./vss_1d_test.bin",       ""),
 
-    #("2D Unsampled Read",   "./vsu_2d_test.bin",       ""),
-    #("2D Unsampled Write",  "./vsu_2d_w_test.bin",     ""), 
-    #("2D Sampled Read",     "./vss_2d_test.bin",       ""),
+    ("2D Unsampled Read",   "./vsu_2d_test.bin",       ""),
+    ("2D Unsampled Write",  "./vsu_2d_w_test.bin",     ""), 
+    ("2D Sampled Read",     "./vss_2d_test.bin",       ""),
     
     # ("3D Unsampled Read",   "./vsu_3d_test.bin",       ""),
     # ("3D Unsampled Write",  "./vsu_3d_w_test.bin",     ""), 
