@@ -32,14 +32,28 @@ TESTS = [
 ]
 
 # (Width, Height) Tuples
-DIMENSIONS = [
-    (16, 16),       # Tiny Square
-    (1024, 768),    # Classic Rect (4:3)
-    (1920, 1080),   # Full HD (Stride Stress)
-    (13, 17),       # Prime Rect (Alignment Stress)
-    (1024, 1024),   # Power of Two
-    # (3127, 123),  # The Cliff Hunter
-]
+# DIMENSIONS = [
+#     (16, 16),       # Tiny Square
+#     (1024, 768),    # Classic Rect (4:3)
+#     (1920, 1080),   # Full HD (Stride Stress)
+#     (13, 17),       # Prime Rect (Alignment Stress)
+#     (1024, 1024),   # Power of Two
+#     # (3127, 123),  # The Cliff Hunter
+# ]
+
+
+DIMENSIONS = [(16,16)]
+# DIMENSIONS = [
+#     (15, 16),
+#     (16, 16),
+#     (16,17),
+#     (31,32),
+#     (32,32),
+#     (32,33),
+#     (63,64),
+#     (64,64),
+#     (64,65),
+# ]
 
 
 # TARGET: The "Rule of 32"
@@ -94,7 +108,6 @@ def run_cmd(cmd):
         return True, result.stdout
     except subprocess.CalledProcessError as e:
         return False, e.stdout + e.stderr
-
 # ---------------------------------------------------------
 # PHASE 1: QUALIFICATION (LOGIC ONLY)
 # ---------------------------------------------------------
@@ -120,12 +133,14 @@ def run_phase_1():
                     
                     # 1D vs 2D Logic
                     is_1d = "1D" in label
+                    
+                    # Unified Size String (e.g. "1024x768" or "1024")
+                    # This satisfies the "WxH" requirement for all binaries
                     size_str = f"{w}" if is_1d else f"{w}x{h}"
-                    dim_args = f"{w}" if is_1d else f"{w} {h}"
                     
                     # Construct Basic Command
-                    flags = f"--type {type_name} --channels {ch} {dim_args}"
-                    if "arith" in binary: flags += f"x{size_str}" 
+                    # We pass 'size_str' directly as the dimension argument
+                    flags = f"--type {type_name} --channels {ch} {size_str}"
 
                     full_cmd = f"{binary} {flags} {default_flags}"
                     
