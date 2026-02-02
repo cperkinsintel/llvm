@@ -1,33 +1,48 @@
-VK_FORMAT_R32_SFLOAT
-VK_FORMAT_R32G32_SFLOAT
-VK_FORMAT_R32G32B32A32_SFLOAT
+RECAP
+=====
 
-VK_FORMAT_R16_SFLOAT
-VK_FORMAT_R16G16_SFLOAT
-VK_FORMAT_R16G16B16_SFLOAT     ?? really
-VK_FORMAT_R16G16B16A16_SFLOAT
-
-
-
-VK_FORMAT_R8G8B8A8_UNORM
+- --linear works 1D.  Fails everywhere else.  (low priority)
+- 3D fails everywhere except 1x1x1.  (low priority)
+- 2D works for one direction(*) tests.  sampled read and unsampled read/write.  All formats and channel counts.
+- Semaphores work with one direction tests.  
+- 2D works for most arithmetic(**) tests, but fails at certain SIZES.  Format doesn't matter. Dimensions do. 
+- Semaphores fail utterly in the arithmetic tests. Driver cannot handle multiple semaphore dependencies. 
+- sempaphores exhibit an addiitonal problem: if there is ANY failure (like using --linear or 3D) then all semaphore usage after that failure fails or hangs.
 
 
+(*) One Direction Tests are Single Image, Data Handoff.
 
----
-
-VK_FORMAT_R32G32B32A32_UINT
-
-
-VK_FORMAT_R32G32B32A32_SINT
+READ: Vulkan => hand off to SYCL.  Sampled and Unampled. 
+WRITE: SYCL => Vulkan.     Unsampled Only 
 
 
-[x] VK_FORMAT_R32G32B32A32_SFLOAT   (and other channel variants)   --type float
-[ ]  VK_FORMAT_R16G16B16A16_SFLOAT                                 --type half
-[ ]  VK_FORMAT_R8G8B8A8_UNORM
-[ ]  VK_FORMAT_R8G8B8A8_SNORM
-[ ]  are 16 or 32 bit UNORM / SNORM a common thing?
-[ ] VK_FORMAT_R32G32B32A32_UINT   
-[x] VK_FORMAT_R32G32B32A32_SINT
-[ ] VK_FORMAT_R8G8B8A8_SINT
-[x] VK_FORMAT_R8G8B8A8_UINT
-[ ] and do we worry about 16 bit  UINT / SINT ?
+
+(**) Arithmetic tests are Multi-Input, Single Output. ImageC = Image A + Image B. 
+
+Pipeline:
+- Vulkan: Uploads data to Image A. Signals SemA.
+- Vulkan: Uploads data to Image B. Signals SemB.
+- SYCL: Waits for both SemA and SemB.
+- SYCL: Reads A and B, adds them, writes to Image C.
+- SYCL: Signals SemC.
+- Vulkan: Waits for SemC, reads back Image C.
+
+
+
+
+Linux BMG Arithmetic Unsampled
+
+TEST                      | TYPE     | CH | SIZE       | RESULT
+--------------------------------------------------------------------------------
+2D Arithmetic Unsampled   | float    | 1  | 16x16      | PASS
+2D Arithmetic Unsampled   | float    | 1  | 32x32      | PASS
+2D Arithmetic Unsampled   | float    | 1  | 32x31      | PASS
+2D Arithmetic Unsampled   | float    | 1  | 32x33      | PASS
+2D Arithmetic Unsampled   | float    | 1  | 31x32      | PASS
+2D Arithmetic Unsampled   | float    | 1  | 33x32      | FAIL
+2D Arithmetic Unsampled   | float    | 1  | 32x48      | PASS
+2D Arithmetic Unsampled   | float    | 1  | 64x64      | FAIL
+2D Arithmetic Unsampled   | float    | 1  | 64x63      | FAIL
+2D Arithmetic Unsampled   | float    | 1  | 64x65      | FAIL
+
+Also flaky. 64x64 usually passes. 

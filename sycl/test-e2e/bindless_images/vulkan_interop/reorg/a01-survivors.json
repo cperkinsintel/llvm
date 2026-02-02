@@ -1,0 +1,758 @@
+[
+  {
+    "label": "2D Arithmetic",
+    "type": "float",
+    "ch": "1",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type float --channels 1 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "float",
+    "ch": "1",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type float --channels 1 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "float",
+    "ch": "1",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type float --channels 1 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "float",
+    "ch": "1",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type float --channels 1 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "float",
+    "ch": "2",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type float --channels 2 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "float",
+    "ch": "2",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type float --channels 2 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "float",
+    "ch": "2",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type float --channels 2 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "float",
+    "ch": "2",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type float --channels 2 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "float",
+    "ch": "4",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type float --channels 4 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "float",
+    "ch": "4",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type float --channels 4 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "float",
+    "ch": "4",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type float --channels 4 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "float",
+    "ch": "4",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type float --channels 4 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "half",
+    "ch": "1",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type half --channels 1 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "half",
+    "ch": "1",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type half --channels 1 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "half",
+    "ch": "1",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type half --channels 1 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "half",
+    "ch": "1",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type half --channels 1 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "half",
+    "ch": "2",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type half --channels 2 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "half",
+    "ch": "2",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type half --channels 2 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "half",
+    "ch": "2",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type half --channels 2 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "half",
+    "ch": "2",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type half --channels 2 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "half",
+    "ch": "4",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type half --channels 4 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "half",
+    "ch": "4",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type half --channels 4 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "half",
+    "ch": "4",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type half --channels 4 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "half",
+    "ch": "4",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type half --channels 4 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int32",
+    "ch": "1",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 1 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int32",
+    "ch": "1",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 1 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int32",
+    "ch": "1",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 1 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int32",
+    "ch": "1",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 1 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int32",
+    "ch": "2",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 2 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int32",
+    "ch": "2",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 2 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int32",
+    "ch": "2",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 2 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int32",
+    "ch": "2",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 2 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int32",
+    "ch": "4",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 4 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int32",
+    "ch": "4",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 4 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int32",
+    "ch": "4",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 4 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int32",
+    "ch": "4",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 4 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint32",
+    "ch": "1",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 1 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint32",
+    "ch": "1",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 1 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint32",
+    "ch": "1",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 1 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint32",
+    "ch": "1",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 1 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint32",
+    "ch": "2",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 2 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint32",
+    "ch": "2",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 2 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint32",
+    "ch": "2",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 2 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint32",
+    "ch": "2",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 2 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint32",
+    "ch": "4",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 4 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint32",
+    "ch": "4",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 4 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint32",
+    "ch": "4",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 4 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint32",
+    "ch": "4",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 4 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int16",
+    "ch": "1",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 1 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int16",
+    "ch": "1",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 1 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int16",
+    "ch": "1",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 1 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int16",
+    "ch": "1",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 1 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int16",
+    "ch": "2",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 2 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int16",
+    "ch": "2",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 2 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int16",
+    "ch": "2",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 2 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int16",
+    "ch": "2",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 2 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int16",
+    "ch": "4",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 4 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int16",
+    "ch": "4",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 4 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int16",
+    "ch": "4",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 4 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int16",
+    "ch": "4",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 4 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint16",
+    "ch": "1",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 1 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint16",
+    "ch": "1",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 1 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint16",
+    "ch": "1",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 1 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint16",
+    "ch": "1",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 1 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint16",
+    "ch": "2",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint16",
+    "ch": "2",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint16",
+    "ch": "2",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint16",
+    "ch": "2",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint16",
+    "ch": "4",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 4 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint16",
+    "ch": "4",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 4 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint16",
+    "ch": "4",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 4 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint16",
+    "ch": "4",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 4 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint8",
+    "ch": "1",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 1 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint8",
+    "ch": "1",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 1 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint8",
+    "ch": "1",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 1 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint8",
+    "ch": "1",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 1 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint8",
+    "ch": "2",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint8",
+    "ch": "2",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint8",
+    "ch": "2",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint8",
+    "ch": "2",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint8",
+    "ch": "4",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 4 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint8",
+    "ch": "4",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 4 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint8",
+    "ch": "4",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 4 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "uint8",
+    "ch": "4",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 4 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int8",
+    "ch": "1",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 1 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int8",
+    "ch": "1",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 1 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int8",
+    "ch": "1",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 1 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int8",
+    "ch": "1",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 1 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int8",
+    "ch": "2",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 2 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int8",
+    "ch": "2",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 2 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int8",
+    "ch": "2",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 2 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int8",
+    "ch": "2",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 2 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int8",
+    "ch": "4",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 4 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int8",
+    "ch": "4",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 4 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int8",
+    "ch": "4",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 4 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "int8",
+    "ch": "4",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 4 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "unorm8",
+    "ch": "1",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "unorm8",
+    "ch": "1",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "unorm8",
+    "ch": "1",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "unorm8",
+    "ch": "1",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "unorm8",
+    "ch": "2",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "unorm8",
+    "ch": "2",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "unorm8",
+    "ch": "2",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "unorm8",
+    "ch": "2",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 1024 1024x1024x1024 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "unorm8",
+    "ch": "4",
+    "size": "16x16",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 16 16x16x16 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "unorm8",
+    "ch": "4",
+    "size": "1024x768",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 1024 768x1024x768 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "unorm8",
+    "ch": "4",
+    "size": "13x17",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 13 17x13x17 "
+  },
+  {
+    "label": "2D Arithmetic",
+    "type": "unorm8",
+    "ch": "4",
+    "size": "1024x1024",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 1024 1024x1024x1024 "
+  }
+]

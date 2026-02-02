@@ -2,29 +2,33 @@ import subprocess
 import sys
 import os
 import json
+import csv
 import argparse
 
 # ---------------------------------------------------------
 # CONFIGURATION
 # ---------------------------------------------------------
-SURVIVORS_FILE = "survivors.json"
+SURVIVORS_FILE = "a01-survivors.json"
+CASUALTIES_FILE = "a01-casualties.json"
+SUMMARY_FILE = "a01-summary.csv"
 
 # Map your binary names here
 TESTS = [
     # Label                  Binary Name               Default Flags
-    ("1D Unsampled Read",   "./vsu_1d_test.bin",       ""),
-    ("1D Unsampled Write",  "./vsu_1d_w_test.bin",     ""),
-    ("1D Sampled Read",     "./vss_1d_test.bin",       ""),
+    #("1D Unsampled Read",   "./vsu_1d_test.bin",       ""),
+    #("1D Unsampled Write",  "./vsu_1d_w_test.bin",     ""),
+    #("1D Sampled Read",     "./vss_1d_test.bin",       ""),
 
-    ("2D Unsampled Read",   "./vsu_2d_test.bin",       ""),
-    ("2D Unsampled Write",  "./vsu_2d_w_test.bin",     ""), 
-    ("2D Sampled Read",     "./vss_2d_test.bin",       ""),
+    #("2D Unsampled Read",   "./vsu_2d_test.bin",       ""),
+    #("2D Unsampled Write",  "./vsu_2d_w_test.bin",     ""), 
+    #("2D Sampled Read",     "./vss_2d_test.bin",       ""),
     
     # ("3D Unsampled Read",   "./vsu_3d_test.bin",       ""),
     # ("3D Unsampled Write",  "./vsu_3d_w_test.bin",     ""), 
     # ("3D Sampled Read",     "./vss_3d_test.bin",       ""),
 
-    ("2D Arithmetic",       "./vs_2d_arith.bin",       ""),
+    ("2D Arithmetic Unsampled",       "./vs_2d_arith.bin",       ""),
+    ("2D Arithmetic Sampled",         "./vs_2d_arith.bin",       "--sampled"),
 ]
 
 # (Width, Height) Tuples
@@ -36,6 +40,38 @@ DIMENSIONS = [
     (1024, 1024),   # Power of Two
     # (3127, 123),  # The Cliff Hunter
 ]
+
+
+# TARGET: The "Rule of 32"
+# We want to probe Height vs Width at 32, 64, 128, 256 boundaries.
+# DIMENSIONS = []
+
+# # 1. Tiny Control
+# DIMENSIONS.append((16, 16))
+
+# # 2. The Boundary Hunter
+# # Powers of 2 relevant to tiling (32 is the suspect, 64/128 are multiples)
+# BOUNDARIES = [32, 64, 128, 256]
+
+# for b in BOUNDARIES:
+#     # A. Perfect Alignment (Should PASS)
+#     DIMENSIONS.append((b, b))
+    
+#     # B. Vertical Alignment Stress (Height is the variable)
+#     DIMENSIONS.append((b, b-1))   # Just Under (e.g., 32x31) -> Expected PASS
+#     DIMENSIONS.append((b, b+1))   # Just Over  (e.g., 32x33) -> Expected CRASH/FAIL
+    
+#     # C. Horizontal Alignment Stress (Width is the variable)
+#     # We flip them to prove Width doesn't trigger the crash
+#     DIMENSIONS.append((b-1, b))   # (e.g., 31x32) -> Expected PASS
+#     DIMENSIONS.append((b+1, b))   # (e.g., 33x32) -> Expected PASS
+    
+#     # D. The "Half-Tile" Offset (e.g., 32x48)
+#     # To see if it's strictly Power-of-2 or just Multiples of 32
+#     DIMENSIONS.append((b, b + 16)) 
+
+# # 3. The "Full HD" Control (To confirm the 1920 issue aligns with this)
+# DIMENSIONS.append((1920, 1080)) # 1080 is NOT divisible by 32 (33.75) -> Expected FAIL
 
 TYPES = [
     "float", "half", "int32", "uint32", 
@@ -68,6 +104,9 @@ def run_phase_1():
     print("-" * 80)
     
     survivors = []
+    casualties = []
+    all_results = [] # For CSV
+    
     failures = 0
 
     for label, binary, default_flags in TESTS:
@@ -86,7 +125,7 @@ def run_phase_1():
                     
                     # Construct Basic Command
                     flags = f"--type {type_name} --channels {ch} {dim_args}"
-                    if "arith" in binary: flags += f"x{size_str}" # Special case for arithmetic if needed, or rely on main() logic
+                    if "arith" in binary: flags += f"x{size_str}" 
 
                     full_cmd = f"{binary} {flags} {default_flags}"
                     
@@ -94,27 +133,56 @@ def run_phase_1():
                     success, output = run_cmd(full_cmd)
                     
                     status = f"{GREEN}PASS{RESET}" if success else f"{RED}FAIL{RESET}"
+                    status_clean = "PASS" if success else "FAIL"
+                    
                     print(f"{label:<25} | {type_name:<8} | {ch:<2} | {size_str:<10} | {status}")
                     
+                    # Record Data
+                    record = {
+                        "label": label,
+                        "type": type_name,
+                        "ch": ch,
+                        "size": size_str,
+                        "cmd": full_cmd
+                    }
+                    
+                    all_results.append({
+                        "Test Name": label,
+                        "Data Type": type_name,
+                        "Channels": ch,
+                        "Dimensions": size_str,
+                        "Phase 1 Result": status_clean,
+                        "Command": full_cmd
+                    })
+
                     if success:
-                        # Save the command template for Phase 2
-                        survivors.append({
-                            "label": label,
-                            "type": type_name,
-                            "ch": ch,
-                            "size": size_str,
-                            "cmd": full_cmd
-                        })
+                        survivors.append(record)
                     else:
                         failures += 1
+                        casualties.append(record)
 
-    # Save Survivors
+    # 1. Save Survivors (JSON)
     with open(SURVIVORS_FILE, 'w') as f:
         json.dump(survivors, f, indent=2)
+
+    # 2. Save Casualties (JSON) - For JIRA
+    with open(CASUALTIES_FILE, 'w') as f:
+        json.dump(casualties, f, indent=2)
+
+    # 3. Save Summary (CSV) - For Management
+    keys = all_results[0].keys() if all_results else []
+    with open(SUMMARY_FILE, 'w', newline='') as f:
+        dict_writer = csv.DictWriter(f, fieldnames=keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(all_results)
     
     print("-" * 80)
     print(f"Phase 1 Complete. {len(survivors)} passed. {failures} failed.")
-    print(f"Survivors saved to {SURVIVORS_FILE}")
+    print(f"Files Generated:")
+    print(f"  - {SURVIVORS_FILE} (Ready for Phase 2)")
+    print(f"  - {CASUALTIES_FILE} (Failures for JIRA)")
+    print(f"  - {SUMMARY_FILE}    (Report for Management)")
+    
     return len(survivors) > 0
 
 # ---------------------------------------------------------
@@ -141,7 +209,6 @@ def run_phase_2():
             print(f"{test['label']:<25} | {test['type']:<8} | {test['ch']:<2} | {test['size']:<10} | {RED}SKIP (Poisoned){RESET}")
             continue
 
-        # Append Semaphore Flag
         cmd_sem = f"{test['cmd']} --semaphores"
         
         success, output = run_cmd(cmd_sem)
@@ -154,7 +221,6 @@ def run_phase_2():
             print(f"Failed Command: {cmd_sem}")
             print(f"Stopping Phase 2 to preserve system state.{RESET}\n")
             semaphore_system_alive = False
-            # We do NOT delete the survivors file, so you can retry specific ones if needed.
 
 # ---------------------------------------------------------
 # MAIN DISPATCHER

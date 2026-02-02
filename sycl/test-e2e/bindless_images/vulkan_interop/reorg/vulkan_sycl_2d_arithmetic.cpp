@@ -354,21 +354,41 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
 }
 
 int main(int argc, char** argv) {
-    int width = 16, height = 16, channels = 4;
-    bool useLinear = false, useSemaphores = false, useSampled = false;
+    int width = 4;
+    int height = 4;
+    int channels = 4;
+    bool useLinear = false;
+    bool useSemaphores = false;
+    bool useSampled = false;
     std::string type = "float";
 
     for(int i=1; i<argc; ++i) {
         std::string arg = argv[i];
         if(arg == "--semaphores") useSemaphores = true;
         else if(arg == "--linear") useLinear = true;
-        else if(arg == "--sampled") useSampled = true;
         else if(arg == "--channels" && i+1 < argc) channels = std::stoi(argv[++i]);
         else if(arg == "--type" && i+1 < argc) type = argv[++i];
-        else { try { width = std::stoi(arg); height = width; } catch(...) {} }
+        else if(arg == "--sampled") useSampled = true;
+        else if(arg.find("x") != std::string::npos) {
+            size_t xPos = arg.find("x");
+            try {
+                width = std::stoi(arg.substr(0, xPos));
+                height = std::stoi(arg.substr(xPos+1));
+            } catch (...) { }
+        }
     }
 
-    std::cout << "Running 2D ARITHMETIC Test (C = A + B) | Type: " << type << " | Size: " << width << "x" << height << " | Channels: " << channels << std::endl;
+    if (channels != 1 && channels != 2 && channels != 4) {
+        std::cerr << "Error: Only 1, 2, or 4 channels supported." << std::endl;
+        return 1;
+    }
+
+    std::cout << "Running 2D ARITHMETIC Test (C = A + B) | Type: " << type 
+              << " | Size: " << width << "x" << height 
+              << " | Channels: " << channels
+              << " | Tiling: " << (useLinear ? "LINEAR" : "OPTIMAL")
+              << " | Semaphores: " << (useSemaphores ? "ON" : "OFF") << std::endl;
+
 
     // Dispatcher
     if (type == "float")  return runTest<float>(width, height, channels, useLinear, useSemaphores, useSampled);
