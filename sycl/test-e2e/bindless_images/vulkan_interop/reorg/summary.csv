@@ -404,543 +404,678 @@ Test Name,Data Type,Channels,Dimensions,Phase 1 Result,Command
 1D Sampled Read,unorm8,4,1920,PASS,./vss_1d_test.bin --type unorm8 --channels 4 1920 
 1D Sampled Read,unorm8,4,13,PASS,./vss_1d_test.bin --type unorm8 --channels 4 13 
 1D Sampled Read,unorm8,4,1024,PASS,./vss_1d_test.bin --type unorm8 --channels 4 1024 
-2D Unsampled Read,float,1,16x16,PASS,./vsu_2d_test.bin --type float --channels 1 16 16 
-2D Unsampled Read,float,1,1024x768,PASS,./vsu_2d_test.bin --type float --channels 1 1024 768 
-2D Unsampled Read,float,1,1920x1080,PASS,./vsu_2d_test.bin --type float --channels 1 1920 1080 
-2D Unsampled Read,float,1,13x17,PASS,./vsu_2d_test.bin --type float --channels 1 13 17 
-2D Unsampled Read,float,1,1024x1024,PASS,./vsu_2d_test.bin --type float --channels 1 1024 1024 
-2D Unsampled Read,float,2,16x16,PASS,./vsu_2d_test.bin --type float --channels 2 16 16 
-2D Unsampled Read,float,2,1024x768,PASS,./vsu_2d_test.bin --type float --channels 2 1024 768 
-2D Unsampled Read,float,2,1920x1080,PASS,./vsu_2d_test.bin --type float --channels 2 1920 1080 
-2D Unsampled Read,float,2,13x17,PASS,./vsu_2d_test.bin --type float --channels 2 13 17 
-2D Unsampled Read,float,2,1024x1024,PASS,./vsu_2d_test.bin --type float --channels 2 1024 1024 
-2D Unsampled Read,float,4,16x16,PASS,./vsu_2d_test.bin --type float --channels 4 16 16 
-2D Unsampled Read,float,4,1024x768,PASS,./vsu_2d_test.bin --type float --channels 4 1024 768 
-2D Unsampled Read,float,4,1920x1080,PASS,./vsu_2d_test.bin --type float --channels 4 1920 1080 
-2D Unsampled Read,float,4,13x17,PASS,./vsu_2d_test.bin --type float --channels 4 13 17 
-2D Unsampled Read,float,4,1024x1024,PASS,./vsu_2d_test.bin --type float --channels 4 1024 1024 
-2D Unsampled Read,half,1,16x16,PASS,./vsu_2d_test.bin --type half --channels 1 16 16 
-2D Unsampled Read,half,1,1024x768,PASS,./vsu_2d_test.bin --type half --channels 1 1024 768 
-2D Unsampled Read,half,1,1920x1080,PASS,./vsu_2d_test.bin --type half --channels 1 1920 1080 
-2D Unsampled Read,half,1,13x17,PASS,./vsu_2d_test.bin --type half --channels 1 13 17 
-2D Unsampled Read,half,1,1024x1024,PASS,./vsu_2d_test.bin --type half --channels 1 1024 1024 
-2D Unsampled Read,half,2,16x16,PASS,./vsu_2d_test.bin --type half --channels 2 16 16 
-2D Unsampled Read,half,2,1024x768,PASS,./vsu_2d_test.bin --type half --channels 2 1024 768 
-2D Unsampled Read,half,2,1920x1080,PASS,./vsu_2d_test.bin --type half --channels 2 1920 1080 
-2D Unsampled Read,half,2,13x17,PASS,./vsu_2d_test.bin --type half --channels 2 13 17 
-2D Unsampled Read,half,2,1024x1024,PASS,./vsu_2d_test.bin --type half --channels 2 1024 1024 
-2D Unsampled Read,half,4,16x16,PASS,./vsu_2d_test.bin --type half --channels 4 16 16 
-2D Unsampled Read,half,4,1024x768,PASS,./vsu_2d_test.bin --type half --channels 4 1024 768 
-2D Unsampled Read,half,4,1920x1080,PASS,./vsu_2d_test.bin --type half --channels 4 1920 1080 
-2D Unsampled Read,half,4,13x17,PASS,./vsu_2d_test.bin --type half --channels 4 13 17 
-2D Unsampled Read,half,4,1024x1024,PASS,./vsu_2d_test.bin --type half --channels 4 1024 1024 
-2D Unsampled Read,int32,1,16x16,PASS,./vsu_2d_test.bin --type int32 --channels 1 16 16 
-2D Unsampled Read,int32,1,1024x768,PASS,./vsu_2d_test.bin --type int32 --channels 1 1024 768 
-2D Unsampled Read,int32,1,1920x1080,PASS,./vsu_2d_test.bin --type int32 --channels 1 1920 1080 
-2D Unsampled Read,int32,1,13x17,PASS,./vsu_2d_test.bin --type int32 --channels 1 13 17 
-2D Unsampled Read,int32,1,1024x1024,PASS,./vsu_2d_test.bin --type int32 --channels 1 1024 1024 
-2D Unsampled Read,int32,2,16x16,PASS,./vsu_2d_test.bin --type int32 --channels 2 16 16 
-2D Unsampled Read,int32,2,1024x768,PASS,./vsu_2d_test.bin --type int32 --channels 2 1024 768 
-2D Unsampled Read,int32,2,1920x1080,PASS,./vsu_2d_test.bin --type int32 --channels 2 1920 1080 
-2D Unsampled Read,int32,2,13x17,PASS,./vsu_2d_test.bin --type int32 --channels 2 13 17 
-2D Unsampled Read,int32,2,1024x1024,PASS,./vsu_2d_test.bin --type int32 --channels 2 1024 1024 
-2D Unsampled Read,int32,4,16x16,PASS,./vsu_2d_test.bin --type int32 --channels 4 16 16 
-2D Unsampled Read,int32,4,1024x768,PASS,./vsu_2d_test.bin --type int32 --channels 4 1024 768 
-2D Unsampled Read,int32,4,1920x1080,PASS,./vsu_2d_test.bin --type int32 --channels 4 1920 1080 
-2D Unsampled Read,int32,4,13x17,PASS,./vsu_2d_test.bin --type int32 --channels 4 13 17 
-2D Unsampled Read,int32,4,1024x1024,PASS,./vsu_2d_test.bin --type int32 --channels 4 1024 1024 
-2D Unsampled Read,uint32,1,16x16,PASS,./vsu_2d_test.bin --type uint32 --channels 1 16 16 
-2D Unsampled Read,uint32,1,1024x768,PASS,./vsu_2d_test.bin --type uint32 --channels 1 1024 768 
-2D Unsampled Read,uint32,1,1920x1080,PASS,./vsu_2d_test.bin --type uint32 --channels 1 1920 1080 
-2D Unsampled Read,uint32,1,13x17,PASS,./vsu_2d_test.bin --type uint32 --channels 1 13 17 
-2D Unsampled Read,uint32,1,1024x1024,PASS,./vsu_2d_test.bin --type uint32 --channels 1 1024 1024 
-2D Unsampled Read,uint32,2,16x16,PASS,./vsu_2d_test.bin --type uint32 --channels 2 16 16 
-2D Unsampled Read,uint32,2,1024x768,PASS,./vsu_2d_test.bin --type uint32 --channels 2 1024 768 
-2D Unsampled Read,uint32,2,1920x1080,PASS,./vsu_2d_test.bin --type uint32 --channels 2 1920 1080 
-2D Unsampled Read,uint32,2,13x17,PASS,./vsu_2d_test.bin --type uint32 --channels 2 13 17 
-2D Unsampled Read,uint32,2,1024x1024,PASS,./vsu_2d_test.bin --type uint32 --channels 2 1024 1024 
-2D Unsampled Read,uint32,4,16x16,PASS,./vsu_2d_test.bin --type uint32 --channels 4 16 16 
-2D Unsampled Read,uint32,4,1024x768,PASS,./vsu_2d_test.bin --type uint32 --channels 4 1024 768 
-2D Unsampled Read,uint32,4,1920x1080,PASS,./vsu_2d_test.bin --type uint32 --channels 4 1920 1080 
-2D Unsampled Read,uint32,4,13x17,PASS,./vsu_2d_test.bin --type uint32 --channels 4 13 17 
-2D Unsampled Read,uint32,4,1024x1024,PASS,./vsu_2d_test.bin --type uint32 --channels 4 1024 1024 
-2D Unsampled Read,int16,1,16x16,PASS,./vsu_2d_test.bin --type int16 --channels 1 16 16 
-2D Unsampled Read,int16,1,1024x768,PASS,./vsu_2d_test.bin --type int16 --channels 1 1024 768 
-2D Unsampled Read,int16,1,1920x1080,PASS,./vsu_2d_test.bin --type int16 --channels 1 1920 1080 
-2D Unsampled Read,int16,1,13x17,PASS,./vsu_2d_test.bin --type int16 --channels 1 13 17 
-2D Unsampled Read,int16,1,1024x1024,PASS,./vsu_2d_test.bin --type int16 --channels 1 1024 1024 
-2D Unsampled Read,int16,2,16x16,PASS,./vsu_2d_test.bin --type int16 --channels 2 16 16 
-2D Unsampled Read,int16,2,1024x768,PASS,./vsu_2d_test.bin --type int16 --channels 2 1024 768 
-2D Unsampled Read,int16,2,1920x1080,PASS,./vsu_2d_test.bin --type int16 --channels 2 1920 1080 
-2D Unsampled Read,int16,2,13x17,PASS,./vsu_2d_test.bin --type int16 --channels 2 13 17 
-2D Unsampled Read,int16,2,1024x1024,PASS,./vsu_2d_test.bin --type int16 --channels 2 1024 1024 
-2D Unsampled Read,int16,4,16x16,PASS,./vsu_2d_test.bin --type int16 --channels 4 16 16 
-2D Unsampled Read,int16,4,1024x768,PASS,./vsu_2d_test.bin --type int16 --channels 4 1024 768 
-2D Unsampled Read,int16,4,1920x1080,PASS,./vsu_2d_test.bin --type int16 --channels 4 1920 1080 
-2D Unsampled Read,int16,4,13x17,PASS,./vsu_2d_test.bin --type int16 --channels 4 13 17 
-2D Unsampled Read,int16,4,1024x1024,PASS,./vsu_2d_test.bin --type int16 --channels 4 1024 1024 
-2D Unsampled Read,uint16,1,16x16,PASS,./vsu_2d_test.bin --type uint16 --channels 1 16 16 
-2D Unsampled Read,uint16,1,1024x768,PASS,./vsu_2d_test.bin --type uint16 --channels 1 1024 768 
-2D Unsampled Read,uint16,1,1920x1080,PASS,./vsu_2d_test.bin --type uint16 --channels 1 1920 1080 
-2D Unsampled Read,uint16,1,13x17,PASS,./vsu_2d_test.bin --type uint16 --channels 1 13 17 
-2D Unsampled Read,uint16,1,1024x1024,PASS,./vsu_2d_test.bin --type uint16 --channels 1 1024 1024 
-2D Unsampled Read,uint16,2,16x16,PASS,./vsu_2d_test.bin --type uint16 --channels 2 16 16 
-2D Unsampled Read,uint16,2,1024x768,PASS,./vsu_2d_test.bin --type uint16 --channels 2 1024 768 
-2D Unsampled Read,uint16,2,1920x1080,PASS,./vsu_2d_test.bin --type uint16 --channels 2 1920 1080 
-2D Unsampled Read,uint16,2,13x17,PASS,./vsu_2d_test.bin --type uint16 --channels 2 13 17 
-2D Unsampled Read,uint16,2,1024x1024,PASS,./vsu_2d_test.bin --type uint16 --channels 2 1024 1024 
-2D Unsampled Read,uint16,4,16x16,PASS,./vsu_2d_test.bin --type uint16 --channels 4 16 16 
-2D Unsampled Read,uint16,4,1024x768,PASS,./vsu_2d_test.bin --type uint16 --channels 4 1024 768 
-2D Unsampled Read,uint16,4,1920x1080,PASS,./vsu_2d_test.bin --type uint16 --channels 4 1920 1080 
-2D Unsampled Read,uint16,4,13x17,PASS,./vsu_2d_test.bin --type uint16 --channels 4 13 17 
-2D Unsampled Read,uint16,4,1024x1024,PASS,./vsu_2d_test.bin --type uint16 --channels 4 1024 1024 
-2D Unsampled Read,uint8,1,16x16,PASS,./vsu_2d_test.bin --type uint8 --channels 1 16 16 
-2D Unsampled Read,uint8,1,1024x768,PASS,./vsu_2d_test.bin --type uint8 --channels 1 1024 768 
-2D Unsampled Read,uint8,1,1920x1080,PASS,./vsu_2d_test.bin --type uint8 --channels 1 1920 1080 
-2D Unsampled Read,uint8,1,13x17,PASS,./vsu_2d_test.bin --type uint8 --channels 1 13 17 
-2D Unsampled Read,uint8,1,1024x1024,PASS,./vsu_2d_test.bin --type uint8 --channels 1 1024 1024 
-2D Unsampled Read,uint8,2,16x16,PASS,./vsu_2d_test.bin --type uint8 --channels 2 16 16 
-2D Unsampled Read,uint8,2,1024x768,PASS,./vsu_2d_test.bin --type uint8 --channels 2 1024 768 
-2D Unsampled Read,uint8,2,1920x1080,PASS,./vsu_2d_test.bin --type uint8 --channels 2 1920 1080 
-2D Unsampled Read,uint8,2,13x17,PASS,./vsu_2d_test.bin --type uint8 --channels 2 13 17 
-2D Unsampled Read,uint8,2,1024x1024,PASS,./vsu_2d_test.bin --type uint8 --channels 2 1024 1024 
-2D Unsampled Read,uint8,4,16x16,PASS,./vsu_2d_test.bin --type uint8 --channels 4 16 16 
-2D Unsampled Read,uint8,4,1024x768,PASS,./vsu_2d_test.bin --type uint8 --channels 4 1024 768 
-2D Unsampled Read,uint8,4,1920x1080,PASS,./vsu_2d_test.bin --type uint8 --channels 4 1920 1080 
-2D Unsampled Read,uint8,4,13x17,PASS,./vsu_2d_test.bin --type uint8 --channels 4 13 17 
-2D Unsampled Read,uint8,4,1024x1024,PASS,./vsu_2d_test.bin --type uint8 --channels 4 1024 1024 
-2D Unsampled Read,int8,1,16x16,PASS,./vsu_2d_test.bin --type int8 --channels 1 16 16 
-2D Unsampled Read,int8,1,1024x768,PASS,./vsu_2d_test.bin --type int8 --channels 1 1024 768 
-2D Unsampled Read,int8,1,1920x1080,PASS,./vsu_2d_test.bin --type int8 --channels 1 1920 1080 
-2D Unsampled Read,int8,1,13x17,PASS,./vsu_2d_test.bin --type int8 --channels 1 13 17 
-2D Unsampled Read,int8,1,1024x1024,PASS,./vsu_2d_test.bin --type int8 --channels 1 1024 1024 
-2D Unsampled Read,int8,2,16x16,PASS,./vsu_2d_test.bin --type int8 --channels 2 16 16 
-2D Unsampled Read,int8,2,1024x768,PASS,./vsu_2d_test.bin --type int8 --channels 2 1024 768 
-2D Unsampled Read,int8,2,1920x1080,PASS,./vsu_2d_test.bin --type int8 --channels 2 1920 1080 
-2D Unsampled Read,int8,2,13x17,PASS,./vsu_2d_test.bin --type int8 --channels 2 13 17 
-2D Unsampled Read,int8,2,1024x1024,PASS,./vsu_2d_test.bin --type int8 --channels 2 1024 1024 
-2D Unsampled Read,int8,4,16x16,PASS,./vsu_2d_test.bin --type int8 --channels 4 16 16 
-2D Unsampled Read,int8,4,1024x768,PASS,./vsu_2d_test.bin --type int8 --channels 4 1024 768 
-2D Unsampled Read,int8,4,1920x1080,PASS,./vsu_2d_test.bin --type int8 --channels 4 1920 1080 
-2D Unsampled Read,int8,4,13x17,PASS,./vsu_2d_test.bin --type int8 --channels 4 13 17 
-2D Unsampled Read,int8,4,1024x1024,PASS,./vsu_2d_test.bin --type int8 --channels 4 1024 1024 
-2D Unsampled Read,unorm8,1,16x16,PASS,./vsu_2d_test.bin --type unorm8 --channels 1 16 16 
-2D Unsampled Read,unorm8,1,1024x768,PASS,./vsu_2d_test.bin --type unorm8 --channels 1 1024 768 
-2D Unsampled Read,unorm8,1,1920x1080,PASS,./vsu_2d_test.bin --type unorm8 --channels 1 1920 1080 
-2D Unsampled Read,unorm8,1,13x17,PASS,./vsu_2d_test.bin --type unorm8 --channels 1 13 17 
-2D Unsampled Read,unorm8,1,1024x1024,PASS,./vsu_2d_test.bin --type unorm8 --channels 1 1024 1024 
-2D Unsampled Read,unorm8,2,16x16,PASS,./vsu_2d_test.bin --type unorm8 --channels 2 16 16 
-2D Unsampled Read,unorm8,2,1024x768,PASS,./vsu_2d_test.bin --type unorm8 --channels 2 1024 768 
-2D Unsampled Read,unorm8,2,1920x1080,PASS,./vsu_2d_test.bin --type unorm8 --channels 2 1920 1080 
-2D Unsampled Read,unorm8,2,13x17,PASS,./vsu_2d_test.bin --type unorm8 --channels 2 13 17 
-2D Unsampled Read,unorm8,2,1024x1024,PASS,./vsu_2d_test.bin --type unorm8 --channels 2 1024 1024 
-2D Unsampled Read,unorm8,4,16x16,PASS,./vsu_2d_test.bin --type unorm8 --channels 4 16 16 
-2D Unsampled Read,unorm8,4,1024x768,PASS,./vsu_2d_test.bin --type unorm8 --channels 4 1024 768 
-2D Unsampled Read,unorm8,4,1920x1080,PASS,./vsu_2d_test.bin --type unorm8 --channels 4 1920 1080 
-2D Unsampled Read,unorm8,4,13x17,PASS,./vsu_2d_test.bin --type unorm8 --channels 4 13 17 
-2D Unsampled Read,unorm8,4,1024x1024,PASS,./vsu_2d_test.bin --type unorm8 --channels 4 1024 1024 
-2D Unsampled Write,float,1,16x16,PASS,./vsu_2d_w_test.bin --type float --channels 1 16 16 
-2D Unsampled Write,float,1,1024x768,PASS,./vsu_2d_w_test.bin --type float --channels 1 1024 768 
-2D Unsampled Write,float,1,1920x1080,PASS,./vsu_2d_w_test.bin --type float --channels 1 1920 1080 
-2D Unsampled Write,float,1,13x17,PASS,./vsu_2d_w_test.bin --type float --channels 1 13 17 
-2D Unsampled Write,float,1,1024x1024,PASS,./vsu_2d_w_test.bin --type float --channels 1 1024 1024 
-2D Unsampled Write,float,2,16x16,PASS,./vsu_2d_w_test.bin --type float --channels 2 16 16 
-2D Unsampled Write,float,2,1024x768,PASS,./vsu_2d_w_test.bin --type float --channels 2 1024 768 
-2D Unsampled Write,float,2,1920x1080,PASS,./vsu_2d_w_test.bin --type float --channels 2 1920 1080 
-2D Unsampled Write,float,2,13x17,PASS,./vsu_2d_w_test.bin --type float --channels 2 13 17 
-2D Unsampled Write,float,2,1024x1024,PASS,./vsu_2d_w_test.bin --type float --channels 2 1024 1024 
-2D Unsampled Write,float,4,16x16,PASS,./vsu_2d_w_test.bin --type float --channels 4 16 16 
-2D Unsampled Write,float,4,1024x768,PASS,./vsu_2d_w_test.bin --type float --channels 4 1024 768 
-2D Unsampled Write,float,4,1920x1080,PASS,./vsu_2d_w_test.bin --type float --channels 4 1920 1080 
-2D Unsampled Write,float,4,13x17,PASS,./vsu_2d_w_test.bin --type float --channels 4 13 17 
-2D Unsampled Write,float,4,1024x1024,PASS,./vsu_2d_w_test.bin --type float --channels 4 1024 1024 
-2D Unsampled Write,half,1,16x16,PASS,./vsu_2d_w_test.bin --type half --channels 1 16 16 
-2D Unsampled Write,half,1,1024x768,PASS,./vsu_2d_w_test.bin --type half --channels 1 1024 768 
-2D Unsampled Write,half,1,1920x1080,PASS,./vsu_2d_w_test.bin --type half --channels 1 1920 1080 
-2D Unsampled Write,half,1,13x17,PASS,./vsu_2d_w_test.bin --type half --channels 1 13 17 
-2D Unsampled Write,half,1,1024x1024,PASS,./vsu_2d_w_test.bin --type half --channels 1 1024 1024 
-2D Unsampled Write,half,2,16x16,PASS,./vsu_2d_w_test.bin --type half --channels 2 16 16 
-2D Unsampled Write,half,2,1024x768,PASS,./vsu_2d_w_test.bin --type half --channels 2 1024 768 
-2D Unsampled Write,half,2,1920x1080,PASS,./vsu_2d_w_test.bin --type half --channels 2 1920 1080 
-2D Unsampled Write,half,2,13x17,PASS,./vsu_2d_w_test.bin --type half --channels 2 13 17 
-2D Unsampled Write,half,2,1024x1024,PASS,./vsu_2d_w_test.bin --type half --channels 2 1024 1024 
-2D Unsampled Write,half,4,16x16,PASS,./vsu_2d_w_test.bin --type half --channels 4 16 16 
-2D Unsampled Write,half,4,1024x768,PASS,./vsu_2d_w_test.bin --type half --channels 4 1024 768 
-2D Unsampled Write,half,4,1920x1080,PASS,./vsu_2d_w_test.bin --type half --channels 4 1920 1080 
-2D Unsampled Write,half,4,13x17,PASS,./vsu_2d_w_test.bin --type half --channels 4 13 17 
-2D Unsampled Write,half,4,1024x1024,PASS,./vsu_2d_w_test.bin --type half --channels 4 1024 1024 
-2D Unsampled Write,int32,1,16x16,PASS,./vsu_2d_w_test.bin --type int32 --channels 1 16 16 
-2D Unsampled Write,int32,1,1024x768,PASS,./vsu_2d_w_test.bin --type int32 --channels 1 1024 768 
-2D Unsampled Write,int32,1,1920x1080,PASS,./vsu_2d_w_test.bin --type int32 --channels 1 1920 1080 
-2D Unsampled Write,int32,1,13x17,PASS,./vsu_2d_w_test.bin --type int32 --channels 1 13 17 
-2D Unsampled Write,int32,1,1024x1024,PASS,./vsu_2d_w_test.bin --type int32 --channels 1 1024 1024 
-2D Unsampled Write,int32,2,16x16,PASS,./vsu_2d_w_test.bin --type int32 --channels 2 16 16 
-2D Unsampled Write,int32,2,1024x768,PASS,./vsu_2d_w_test.bin --type int32 --channels 2 1024 768 
-2D Unsampled Write,int32,2,1920x1080,PASS,./vsu_2d_w_test.bin --type int32 --channels 2 1920 1080 
-2D Unsampled Write,int32,2,13x17,PASS,./vsu_2d_w_test.bin --type int32 --channels 2 13 17 
-2D Unsampled Write,int32,2,1024x1024,PASS,./vsu_2d_w_test.bin --type int32 --channels 2 1024 1024 
-2D Unsampled Write,int32,4,16x16,PASS,./vsu_2d_w_test.bin --type int32 --channels 4 16 16 
-2D Unsampled Write,int32,4,1024x768,PASS,./vsu_2d_w_test.bin --type int32 --channels 4 1024 768 
-2D Unsampled Write,int32,4,1920x1080,PASS,./vsu_2d_w_test.bin --type int32 --channels 4 1920 1080 
-2D Unsampled Write,int32,4,13x17,PASS,./vsu_2d_w_test.bin --type int32 --channels 4 13 17 
-2D Unsampled Write,int32,4,1024x1024,PASS,./vsu_2d_w_test.bin --type int32 --channels 4 1024 1024 
-2D Unsampled Write,uint32,1,16x16,PASS,./vsu_2d_w_test.bin --type uint32 --channels 1 16 16 
-2D Unsampled Write,uint32,1,1024x768,PASS,./vsu_2d_w_test.bin --type uint32 --channels 1 1024 768 
-2D Unsampled Write,uint32,1,1920x1080,PASS,./vsu_2d_w_test.bin --type uint32 --channels 1 1920 1080 
-2D Unsampled Write,uint32,1,13x17,PASS,./vsu_2d_w_test.bin --type uint32 --channels 1 13 17 
-2D Unsampled Write,uint32,1,1024x1024,PASS,./vsu_2d_w_test.bin --type uint32 --channels 1 1024 1024 
-2D Unsampled Write,uint32,2,16x16,PASS,./vsu_2d_w_test.bin --type uint32 --channels 2 16 16 
-2D Unsampled Write,uint32,2,1024x768,PASS,./vsu_2d_w_test.bin --type uint32 --channels 2 1024 768 
-2D Unsampled Write,uint32,2,1920x1080,PASS,./vsu_2d_w_test.bin --type uint32 --channels 2 1920 1080 
-2D Unsampled Write,uint32,2,13x17,PASS,./vsu_2d_w_test.bin --type uint32 --channels 2 13 17 
-2D Unsampled Write,uint32,2,1024x1024,PASS,./vsu_2d_w_test.bin --type uint32 --channels 2 1024 1024 
-2D Unsampled Write,uint32,4,16x16,PASS,./vsu_2d_w_test.bin --type uint32 --channels 4 16 16 
-2D Unsampled Write,uint32,4,1024x768,PASS,./vsu_2d_w_test.bin --type uint32 --channels 4 1024 768 
-2D Unsampled Write,uint32,4,1920x1080,PASS,./vsu_2d_w_test.bin --type uint32 --channels 4 1920 1080 
-2D Unsampled Write,uint32,4,13x17,PASS,./vsu_2d_w_test.bin --type uint32 --channels 4 13 17 
-2D Unsampled Write,uint32,4,1024x1024,PASS,./vsu_2d_w_test.bin --type uint32 --channels 4 1024 1024 
-2D Unsampled Write,int16,1,16x16,PASS,./vsu_2d_w_test.bin --type int16 --channels 1 16 16 
-2D Unsampled Write,int16,1,1024x768,PASS,./vsu_2d_w_test.bin --type int16 --channels 1 1024 768 
-2D Unsampled Write,int16,1,1920x1080,PASS,./vsu_2d_w_test.bin --type int16 --channels 1 1920 1080 
-2D Unsampled Write,int16,1,13x17,PASS,./vsu_2d_w_test.bin --type int16 --channels 1 13 17 
-2D Unsampled Write,int16,1,1024x1024,PASS,./vsu_2d_w_test.bin --type int16 --channels 1 1024 1024 
-2D Unsampled Write,int16,2,16x16,PASS,./vsu_2d_w_test.bin --type int16 --channels 2 16 16 
-2D Unsampled Write,int16,2,1024x768,PASS,./vsu_2d_w_test.bin --type int16 --channels 2 1024 768 
-2D Unsampled Write,int16,2,1920x1080,PASS,./vsu_2d_w_test.bin --type int16 --channels 2 1920 1080 
-2D Unsampled Write,int16,2,13x17,PASS,./vsu_2d_w_test.bin --type int16 --channels 2 13 17 
-2D Unsampled Write,int16,2,1024x1024,PASS,./vsu_2d_w_test.bin --type int16 --channels 2 1024 1024 
-2D Unsampled Write,int16,4,16x16,PASS,./vsu_2d_w_test.bin --type int16 --channels 4 16 16 
-2D Unsampled Write,int16,4,1024x768,PASS,./vsu_2d_w_test.bin --type int16 --channels 4 1024 768 
-2D Unsampled Write,int16,4,1920x1080,PASS,./vsu_2d_w_test.bin --type int16 --channels 4 1920 1080 
-2D Unsampled Write,int16,4,13x17,PASS,./vsu_2d_w_test.bin --type int16 --channels 4 13 17 
-2D Unsampled Write,int16,4,1024x1024,PASS,./vsu_2d_w_test.bin --type int16 --channels 4 1024 1024 
-2D Unsampled Write,uint16,1,16x16,PASS,./vsu_2d_w_test.bin --type uint16 --channels 1 16 16 
-2D Unsampled Write,uint16,1,1024x768,PASS,./vsu_2d_w_test.bin --type uint16 --channels 1 1024 768 
-2D Unsampled Write,uint16,1,1920x1080,PASS,./vsu_2d_w_test.bin --type uint16 --channels 1 1920 1080 
-2D Unsampled Write,uint16,1,13x17,PASS,./vsu_2d_w_test.bin --type uint16 --channels 1 13 17 
-2D Unsampled Write,uint16,1,1024x1024,PASS,./vsu_2d_w_test.bin --type uint16 --channels 1 1024 1024 
-2D Unsampled Write,uint16,2,16x16,PASS,./vsu_2d_w_test.bin --type uint16 --channels 2 16 16 
-2D Unsampled Write,uint16,2,1024x768,PASS,./vsu_2d_w_test.bin --type uint16 --channels 2 1024 768 
-2D Unsampled Write,uint16,2,1920x1080,PASS,./vsu_2d_w_test.bin --type uint16 --channels 2 1920 1080 
-2D Unsampled Write,uint16,2,13x17,PASS,./vsu_2d_w_test.bin --type uint16 --channels 2 13 17 
-2D Unsampled Write,uint16,2,1024x1024,PASS,./vsu_2d_w_test.bin --type uint16 --channels 2 1024 1024 
-2D Unsampled Write,uint16,4,16x16,PASS,./vsu_2d_w_test.bin --type uint16 --channels 4 16 16 
-2D Unsampled Write,uint16,4,1024x768,PASS,./vsu_2d_w_test.bin --type uint16 --channels 4 1024 768 
-2D Unsampled Write,uint16,4,1920x1080,PASS,./vsu_2d_w_test.bin --type uint16 --channels 4 1920 1080 
-2D Unsampled Write,uint16,4,13x17,PASS,./vsu_2d_w_test.bin --type uint16 --channels 4 13 17 
-2D Unsampled Write,uint16,4,1024x1024,PASS,./vsu_2d_w_test.bin --type uint16 --channels 4 1024 1024 
-2D Unsampled Write,uint8,1,16x16,PASS,./vsu_2d_w_test.bin --type uint8 --channels 1 16 16 
-2D Unsampled Write,uint8,1,1024x768,PASS,./vsu_2d_w_test.bin --type uint8 --channels 1 1024 768 
-2D Unsampled Write,uint8,1,1920x1080,PASS,./vsu_2d_w_test.bin --type uint8 --channels 1 1920 1080 
-2D Unsampled Write,uint8,1,13x17,PASS,./vsu_2d_w_test.bin --type uint8 --channels 1 13 17 
-2D Unsampled Write,uint8,1,1024x1024,PASS,./vsu_2d_w_test.bin --type uint8 --channels 1 1024 1024 
-2D Unsampled Write,uint8,2,16x16,PASS,./vsu_2d_w_test.bin --type uint8 --channels 2 16 16 
-2D Unsampled Write,uint8,2,1024x768,PASS,./vsu_2d_w_test.bin --type uint8 --channels 2 1024 768 
-2D Unsampled Write,uint8,2,1920x1080,PASS,./vsu_2d_w_test.bin --type uint8 --channels 2 1920 1080 
-2D Unsampled Write,uint8,2,13x17,PASS,./vsu_2d_w_test.bin --type uint8 --channels 2 13 17 
-2D Unsampled Write,uint8,2,1024x1024,PASS,./vsu_2d_w_test.bin --type uint8 --channels 2 1024 1024 
-2D Unsampled Write,uint8,4,16x16,PASS,./vsu_2d_w_test.bin --type uint8 --channels 4 16 16 
-2D Unsampled Write,uint8,4,1024x768,PASS,./vsu_2d_w_test.bin --type uint8 --channels 4 1024 768 
-2D Unsampled Write,uint8,4,1920x1080,PASS,./vsu_2d_w_test.bin --type uint8 --channels 4 1920 1080 
-2D Unsampled Write,uint8,4,13x17,PASS,./vsu_2d_w_test.bin --type uint8 --channels 4 13 17 
-2D Unsampled Write,uint8,4,1024x1024,PASS,./vsu_2d_w_test.bin --type uint8 --channels 4 1024 1024 
-2D Unsampled Write,int8,1,16x16,PASS,./vsu_2d_w_test.bin --type int8 --channels 1 16 16 
-2D Unsampled Write,int8,1,1024x768,PASS,./vsu_2d_w_test.bin --type int8 --channels 1 1024 768 
-2D Unsampled Write,int8,1,1920x1080,PASS,./vsu_2d_w_test.bin --type int8 --channels 1 1920 1080 
-2D Unsampled Write,int8,1,13x17,PASS,./vsu_2d_w_test.bin --type int8 --channels 1 13 17 
-2D Unsampled Write,int8,1,1024x1024,PASS,./vsu_2d_w_test.bin --type int8 --channels 1 1024 1024 
-2D Unsampled Write,int8,2,16x16,PASS,./vsu_2d_w_test.bin --type int8 --channels 2 16 16 
-2D Unsampled Write,int8,2,1024x768,PASS,./vsu_2d_w_test.bin --type int8 --channels 2 1024 768 
-2D Unsampled Write,int8,2,1920x1080,PASS,./vsu_2d_w_test.bin --type int8 --channels 2 1920 1080 
-2D Unsampled Write,int8,2,13x17,PASS,./vsu_2d_w_test.bin --type int8 --channels 2 13 17 
-2D Unsampled Write,int8,2,1024x1024,PASS,./vsu_2d_w_test.bin --type int8 --channels 2 1024 1024 
-2D Unsampled Write,int8,4,16x16,PASS,./vsu_2d_w_test.bin --type int8 --channels 4 16 16 
-2D Unsampled Write,int8,4,1024x768,PASS,./vsu_2d_w_test.bin --type int8 --channels 4 1024 768 
-2D Unsampled Write,int8,4,1920x1080,PASS,./vsu_2d_w_test.bin --type int8 --channels 4 1920 1080 
-2D Unsampled Write,int8,4,13x17,PASS,./vsu_2d_w_test.bin --type int8 --channels 4 13 17 
-2D Unsampled Write,int8,4,1024x1024,PASS,./vsu_2d_w_test.bin --type int8 --channels 4 1024 1024 
-2D Unsampled Write,unorm8,1,16x16,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 1 16 16 
-2D Unsampled Write,unorm8,1,1024x768,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 1 1024 768 
-2D Unsampled Write,unorm8,1,1920x1080,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 1 1920 1080 
-2D Unsampled Write,unorm8,1,13x17,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 1 13 17 
-2D Unsampled Write,unorm8,1,1024x1024,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 1 1024 1024 
-2D Unsampled Write,unorm8,2,16x16,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 2 16 16 
-2D Unsampled Write,unorm8,2,1024x768,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 2 1024 768 
-2D Unsampled Write,unorm8,2,1920x1080,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 2 1920 1080 
-2D Unsampled Write,unorm8,2,13x17,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 2 13 17 
-2D Unsampled Write,unorm8,2,1024x1024,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 2 1024 1024 
-2D Unsampled Write,unorm8,4,16x16,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 4 16 16 
-2D Unsampled Write,unorm8,4,1024x768,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 4 1024 768 
-2D Unsampled Write,unorm8,4,1920x1080,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 4 1920 1080 
-2D Unsampled Write,unorm8,4,13x17,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 4 13 17 
-2D Unsampled Write,unorm8,4,1024x1024,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 4 1024 1024 
-2D Sampled Read,float,1,16x16,PASS,./vss_2d_test.bin --type float --channels 1 16 16 
-2D Sampled Read,float,1,1024x768,PASS,./vss_2d_test.bin --type float --channels 1 1024 768 
-2D Sampled Read,float,1,1920x1080,PASS,./vss_2d_test.bin --type float --channels 1 1920 1080 
-2D Sampled Read,float,1,13x17,PASS,./vss_2d_test.bin --type float --channels 1 13 17 
-2D Sampled Read,float,1,1024x1024,PASS,./vss_2d_test.bin --type float --channels 1 1024 1024 
-2D Sampled Read,float,2,16x16,PASS,./vss_2d_test.bin --type float --channels 2 16 16 
-2D Sampled Read,float,2,1024x768,PASS,./vss_2d_test.bin --type float --channels 2 1024 768 
-2D Sampled Read,float,2,1920x1080,PASS,./vss_2d_test.bin --type float --channels 2 1920 1080 
-2D Sampled Read,float,2,13x17,PASS,./vss_2d_test.bin --type float --channels 2 13 17 
-2D Sampled Read,float,2,1024x1024,PASS,./vss_2d_test.bin --type float --channels 2 1024 1024 
-2D Sampled Read,float,4,16x16,PASS,./vss_2d_test.bin --type float --channels 4 16 16 
-2D Sampled Read,float,4,1024x768,PASS,./vss_2d_test.bin --type float --channels 4 1024 768 
-2D Sampled Read,float,4,1920x1080,PASS,./vss_2d_test.bin --type float --channels 4 1920 1080 
-2D Sampled Read,float,4,13x17,PASS,./vss_2d_test.bin --type float --channels 4 13 17 
-2D Sampled Read,float,4,1024x1024,PASS,./vss_2d_test.bin --type float --channels 4 1024 1024 
-2D Sampled Read,half,1,16x16,PASS,./vss_2d_test.bin --type half --channels 1 16 16 
-2D Sampled Read,half,1,1024x768,PASS,./vss_2d_test.bin --type half --channels 1 1024 768 
-2D Sampled Read,half,1,1920x1080,PASS,./vss_2d_test.bin --type half --channels 1 1920 1080 
-2D Sampled Read,half,1,13x17,PASS,./vss_2d_test.bin --type half --channels 1 13 17 
-2D Sampled Read,half,1,1024x1024,PASS,./vss_2d_test.bin --type half --channels 1 1024 1024 
-2D Sampled Read,half,2,16x16,PASS,./vss_2d_test.bin --type half --channels 2 16 16 
-2D Sampled Read,half,2,1024x768,PASS,./vss_2d_test.bin --type half --channels 2 1024 768 
-2D Sampled Read,half,2,1920x1080,PASS,./vss_2d_test.bin --type half --channels 2 1920 1080 
-2D Sampled Read,half,2,13x17,PASS,./vss_2d_test.bin --type half --channels 2 13 17 
-2D Sampled Read,half,2,1024x1024,PASS,./vss_2d_test.bin --type half --channels 2 1024 1024 
-2D Sampled Read,half,4,16x16,PASS,./vss_2d_test.bin --type half --channels 4 16 16 
-2D Sampled Read,half,4,1024x768,PASS,./vss_2d_test.bin --type half --channels 4 1024 768 
-2D Sampled Read,half,4,1920x1080,PASS,./vss_2d_test.bin --type half --channels 4 1920 1080 
-2D Sampled Read,half,4,13x17,PASS,./vss_2d_test.bin --type half --channels 4 13 17 
-2D Sampled Read,half,4,1024x1024,PASS,./vss_2d_test.bin --type half --channels 4 1024 1024 
-2D Sampled Read,int32,1,16x16,PASS,./vss_2d_test.bin --type int32 --channels 1 16 16 
-2D Sampled Read,int32,1,1024x768,PASS,./vss_2d_test.bin --type int32 --channels 1 1024 768 
-2D Sampled Read,int32,1,1920x1080,PASS,./vss_2d_test.bin --type int32 --channels 1 1920 1080 
-2D Sampled Read,int32,1,13x17,PASS,./vss_2d_test.bin --type int32 --channels 1 13 17 
-2D Sampled Read,int32,1,1024x1024,PASS,./vss_2d_test.bin --type int32 --channels 1 1024 1024 
-2D Sampled Read,int32,2,16x16,PASS,./vss_2d_test.bin --type int32 --channels 2 16 16 
-2D Sampled Read,int32,2,1024x768,PASS,./vss_2d_test.bin --type int32 --channels 2 1024 768 
-2D Sampled Read,int32,2,1920x1080,PASS,./vss_2d_test.bin --type int32 --channels 2 1920 1080 
-2D Sampled Read,int32,2,13x17,PASS,./vss_2d_test.bin --type int32 --channels 2 13 17 
-2D Sampled Read,int32,2,1024x1024,PASS,./vss_2d_test.bin --type int32 --channels 2 1024 1024 
-2D Sampled Read,int32,4,16x16,PASS,./vss_2d_test.bin --type int32 --channels 4 16 16 
-2D Sampled Read,int32,4,1024x768,PASS,./vss_2d_test.bin --type int32 --channels 4 1024 768 
-2D Sampled Read,int32,4,1920x1080,PASS,./vss_2d_test.bin --type int32 --channels 4 1920 1080 
-2D Sampled Read,int32,4,13x17,PASS,./vss_2d_test.bin --type int32 --channels 4 13 17 
-2D Sampled Read,int32,4,1024x1024,PASS,./vss_2d_test.bin --type int32 --channels 4 1024 1024 
-2D Sampled Read,uint32,1,16x16,PASS,./vss_2d_test.bin --type uint32 --channels 1 16 16 
-2D Sampled Read,uint32,1,1024x768,PASS,./vss_2d_test.bin --type uint32 --channels 1 1024 768 
-2D Sampled Read,uint32,1,1920x1080,PASS,./vss_2d_test.bin --type uint32 --channels 1 1920 1080 
-2D Sampled Read,uint32,1,13x17,PASS,./vss_2d_test.bin --type uint32 --channels 1 13 17 
-2D Sampled Read,uint32,1,1024x1024,PASS,./vss_2d_test.bin --type uint32 --channels 1 1024 1024 
-2D Sampled Read,uint32,2,16x16,PASS,./vss_2d_test.bin --type uint32 --channels 2 16 16 
-2D Sampled Read,uint32,2,1024x768,PASS,./vss_2d_test.bin --type uint32 --channels 2 1024 768 
-2D Sampled Read,uint32,2,1920x1080,PASS,./vss_2d_test.bin --type uint32 --channels 2 1920 1080 
-2D Sampled Read,uint32,2,13x17,PASS,./vss_2d_test.bin --type uint32 --channels 2 13 17 
-2D Sampled Read,uint32,2,1024x1024,PASS,./vss_2d_test.bin --type uint32 --channels 2 1024 1024 
-2D Sampled Read,uint32,4,16x16,PASS,./vss_2d_test.bin --type uint32 --channels 4 16 16 
-2D Sampled Read,uint32,4,1024x768,PASS,./vss_2d_test.bin --type uint32 --channels 4 1024 768 
-2D Sampled Read,uint32,4,1920x1080,PASS,./vss_2d_test.bin --type uint32 --channels 4 1920 1080 
-2D Sampled Read,uint32,4,13x17,PASS,./vss_2d_test.bin --type uint32 --channels 4 13 17 
-2D Sampled Read,uint32,4,1024x1024,PASS,./vss_2d_test.bin --type uint32 --channels 4 1024 1024 
-2D Sampled Read,int16,1,16x16,PASS,./vss_2d_test.bin --type int16 --channels 1 16 16 
-2D Sampled Read,int16,1,1024x768,PASS,./vss_2d_test.bin --type int16 --channels 1 1024 768 
-2D Sampled Read,int16,1,1920x1080,PASS,./vss_2d_test.bin --type int16 --channels 1 1920 1080 
-2D Sampled Read,int16,1,13x17,PASS,./vss_2d_test.bin --type int16 --channels 1 13 17 
-2D Sampled Read,int16,1,1024x1024,PASS,./vss_2d_test.bin --type int16 --channels 1 1024 1024 
-2D Sampled Read,int16,2,16x16,PASS,./vss_2d_test.bin --type int16 --channels 2 16 16 
-2D Sampled Read,int16,2,1024x768,PASS,./vss_2d_test.bin --type int16 --channels 2 1024 768 
-2D Sampled Read,int16,2,1920x1080,PASS,./vss_2d_test.bin --type int16 --channels 2 1920 1080 
-2D Sampled Read,int16,2,13x17,PASS,./vss_2d_test.bin --type int16 --channels 2 13 17 
-2D Sampled Read,int16,2,1024x1024,PASS,./vss_2d_test.bin --type int16 --channels 2 1024 1024 
-2D Sampled Read,int16,4,16x16,PASS,./vss_2d_test.bin --type int16 --channels 4 16 16 
-2D Sampled Read,int16,4,1024x768,PASS,./vss_2d_test.bin --type int16 --channels 4 1024 768 
-2D Sampled Read,int16,4,1920x1080,PASS,./vss_2d_test.bin --type int16 --channels 4 1920 1080 
-2D Sampled Read,int16,4,13x17,PASS,./vss_2d_test.bin --type int16 --channels 4 13 17 
-2D Sampled Read,int16,4,1024x1024,PASS,./vss_2d_test.bin --type int16 --channels 4 1024 1024 
-2D Sampled Read,uint16,1,16x16,PASS,./vss_2d_test.bin --type uint16 --channels 1 16 16 
-2D Sampled Read,uint16,1,1024x768,PASS,./vss_2d_test.bin --type uint16 --channels 1 1024 768 
-2D Sampled Read,uint16,1,1920x1080,PASS,./vss_2d_test.bin --type uint16 --channels 1 1920 1080 
-2D Sampled Read,uint16,1,13x17,PASS,./vss_2d_test.bin --type uint16 --channels 1 13 17 
-2D Sampled Read,uint16,1,1024x1024,PASS,./vss_2d_test.bin --type uint16 --channels 1 1024 1024 
-2D Sampled Read,uint16,2,16x16,PASS,./vss_2d_test.bin --type uint16 --channels 2 16 16 
-2D Sampled Read,uint16,2,1024x768,PASS,./vss_2d_test.bin --type uint16 --channels 2 1024 768 
-2D Sampled Read,uint16,2,1920x1080,PASS,./vss_2d_test.bin --type uint16 --channels 2 1920 1080 
-2D Sampled Read,uint16,2,13x17,PASS,./vss_2d_test.bin --type uint16 --channels 2 13 17 
-2D Sampled Read,uint16,2,1024x1024,PASS,./vss_2d_test.bin --type uint16 --channels 2 1024 1024 
-2D Sampled Read,uint16,4,16x16,PASS,./vss_2d_test.bin --type uint16 --channels 4 16 16 
-2D Sampled Read,uint16,4,1024x768,PASS,./vss_2d_test.bin --type uint16 --channels 4 1024 768 
-2D Sampled Read,uint16,4,1920x1080,PASS,./vss_2d_test.bin --type uint16 --channels 4 1920 1080 
-2D Sampled Read,uint16,4,13x17,PASS,./vss_2d_test.bin --type uint16 --channels 4 13 17 
-2D Sampled Read,uint16,4,1024x1024,PASS,./vss_2d_test.bin --type uint16 --channels 4 1024 1024 
-2D Sampled Read,uint8,1,16x16,PASS,./vss_2d_test.bin --type uint8 --channels 1 16 16 
-2D Sampled Read,uint8,1,1024x768,PASS,./vss_2d_test.bin --type uint8 --channels 1 1024 768 
-2D Sampled Read,uint8,1,1920x1080,PASS,./vss_2d_test.bin --type uint8 --channels 1 1920 1080 
-2D Sampled Read,uint8,1,13x17,PASS,./vss_2d_test.bin --type uint8 --channels 1 13 17 
-2D Sampled Read,uint8,1,1024x1024,PASS,./vss_2d_test.bin --type uint8 --channels 1 1024 1024 
-2D Sampled Read,uint8,2,16x16,PASS,./vss_2d_test.bin --type uint8 --channels 2 16 16 
-2D Sampled Read,uint8,2,1024x768,PASS,./vss_2d_test.bin --type uint8 --channels 2 1024 768 
-2D Sampled Read,uint8,2,1920x1080,PASS,./vss_2d_test.bin --type uint8 --channels 2 1920 1080 
-2D Sampled Read,uint8,2,13x17,PASS,./vss_2d_test.bin --type uint8 --channels 2 13 17 
-2D Sampled Read,uint8,2,1024x1024,PASS,./vss_2d_test.bin --type uint8 --channels 2 1024 1024 
-2D Sampled Read,uint8,4,16x16,PASS,./vss_2d_test.bin --type uint8 --channels 4 16 16 
-2D Sampled Read,uint8,4,1024x768,PASS,./vss_2d_test.bin --type uint8 --channels 4 1024 768 
-2D Sampled Read,uint8,4,1920x1080,PASS,./vss_2d_test.bin --type uint8 --channels 4 1920 1080 
-2D Sampled Read,uint8,4,13x17,PASS,./vss_2d_test.bin --type uint8 --channels 4 13 17 
-2D Sampled Read,uint8,4,1024x1024,PASS,./vss_2d_test.bin --type uint8 --channels 4 1024 1024 
-2D Sampled Read,int8,1,16x16,PASS,./vss_2d_test.bin --type int8 --channels 1 16 16 
-2D Sampled Read,int8,1,1024x768,PASS,./vss_2d_test.bin --type int8 --channels 1 1024 768 
-2D Sampled Read,int8,1,1920x1080,PASS,./vss_2d_test.bin --type int8 --channels 1 1920 1080 
-2D Sampled Read,int8,1,13x17,PASS,./vss_2d_test.bin --type int8 --channels 1 13 17 
-2D Sampled Read,int8,1,1024x1024,PASS,./vss_2d_test.bin --type int8 --channels 1 1024 1024 
-2D Sampled Read,int8,2,16x16,PASS,./vss_2d_test.bin --type int8 --channels 2 16 16 
-2D Sampled Read,int8,2,1024x768,PASS,./vss_2d_test.bin --type int8 --channels 2 1024 768 
-2D Sampled Read,int8,2,1920x1080,PASS,./vss_2d_test.bin --type int8 --channels 2 1920 1080 
-2D Sampled Read,int8,2,13x17,PASS,./vss_2d_test.bin --type int8 --channels 2 13 17 
-2D Sampled Read,int8,2,1024x1024,PASS,./vss_2d_test.bin --type int8 --channels 2 1024 1024 
-2D Sampled Read,int8,4,16x16,PASS,./vss_2d_test.bin --type int8 --channels 4 16 16 
-2D Sampled Read,int8,4,1024x768,PASS,./vss_2d_test.bin --type int8 --channels 4 1024 768 
-2D Sampled Read,int8,4,1920x1080,PASS,./vss_2d_test.bin --type int8 --channels 4 1920 1080 
-2D Sampled Read,int8,4,13x17,PASS,./vss_2d_test.bin --type int8 --channels 4 13 17 
-2D Sampled Read,int8,4,1024x1024,PASS,./vss_2d_test.bin --type int8 --channels 4 1024 1024 
-2D Sampled Read,unorm8,1,16x16,PASS,./vss_2d_test.bin --type unorm8 --channels 1 16 16 
-2D Sampled Read,unorm8,1,1024x768,PASS,./vss_2d_test.bin --type unorm8 --channels 1 1024 768 
-2D Sampled Read,unorm8,1,1920x1080,PASS,./vss_2d_test.bin --type unorm8 --channels 1 1920 1080 
-2D Sampled Read,unorm8,1,13x17,PASS,./vss_2d_test.bin --type unorm8 --channels 1 13 17 
-2D Sampled Read,unorm8,1,1024x1024,PASS,./vss_2d_test.bin --type unorm8 --channels 1 1024 1024 
-2D Sampled Read,unorm8,2,16x16,PASS,./vss_2d_test.bin --type unorm8 --channels 2 16 16 
-2D Sampled Read,unorm8,2,1024x768,PASS,./vss_2d_test.bin --type unorm8 --channels 2 1024 768 
-2D Sampled Read,unorm8,2,1920x1080,PASS,./vss_2d_test.bin --type unorm8 --channels 2 1920 1080 
-2D Sampled Read,unorm8,2,13x17,PASS,./vss_2d_test.bin --type unorm8 --channels 2 13 17 
-2D Sampled Read,unorm8,2,1024x1024,PASS,./vss_2d_test.bin --type unorm8 --channels 2 1024 1024 
-2D Sampled Read,unorm8,4,16x16,PASS,./vss_2d_test.bin --type unorm8 --channels 4 16 16 
-2D Sampled Read,unorm8,4,1024x768,PASS,./vss_2d_test.bin --type unorm8 --channels 4 1024 768 
-2D Sampled Read,unorm8,4,1920x1080,PASS,./vss_2d_test.bin --type unorm8 --channels 4 1920 1080 
-2D Sampled Read,unorm8,4,13x17,PASS,./vss_2d_test.bin --type unorm8 --channels 4 13 17 
-2D Sampled Read,unorm8,4,1024x1024,PASS,./vss_2d_test.bin --type unorm8 --channels 4 1024 1024 
-2D Arithmetic,float,1,16x16,PASS,./vs_2d_arith.bin --type float --channels 1 16 16x16x16 
-2D Arithmetic,float,1,1024x768,PASS,./vs_2d_arith.bin --type float --channels 1 1024 768x1024x768 
-2D Arithmetic,float,1,1920x1080,FAIL,./vs_2d_arith.bin --type float --channels 1 1920 1080x1920x1080 
-2D Arithmetic,float,1,13x17,PASS,./vs_2d_arith.bin --type float --channels 1 13 17x13x17 
-2D Arithmetic,float,1,1024x1024,PASS,./vs_2d_arith.bin --type float --channels 1 1024 1024x1024x1024 
-2D Arithmetic,float,2,16x16,PASS,./vs_2d_arith.bin --type float --channels 2 16 16x16x16 
-2D Arithmetic,float,2,1024x768,PASS,./vs_2d_arith.bin --type float --channels 2 1024 768x1024x768 
-2D Arithmetic,float,2,1920x1080,FAIL,./vs_2d_arith.bin --type float --channels 2 1920 1080x1920x1080 
-2D Arithmetic,float,2,13x17,PASS,./vs_2d_arith.bin --type float --channels 2 13 17x13x17 
-2D Arithmetic,float,2,1024x1024,PASS,./vs_2d_arith.bin --type float --channels 2 1024 1024x1024x1024 
-2D Arithmetic,float,4,16x16,PASS,./vs_2d_arith.bin --type float --channels 4 16 16x16x16 
-2D Arithmetic,float,4,1024x768,PASS,./vs_2d_arith.bin --type float --channels 4 1024 768x1024x768 
-2D Arithmetic,float,4,1920x1080,FAIL,./vs_2d_arith.bin --type float --channels 4 1920 1080x1920x1080 
-2D Arithmetic,float,4,13x17,PASS,./vs_2d_arith.bin --type float --channels 4 13 17x13x17 
-2D Arithmetic,float,4,1024x1024,PASS,./vs_2d_arith.bin --type float --channels 4 1024 1024x1024x1024 
-2D Arithmetic,half,1,16x16,PASS,./vs_2d_arith.bin --type half --channels 1 16 16x16x16 
-2D Arithmetic,half,1,1024x768,PASS,./vs_2d_arith.bin --type half --channels 1 1024 768x1024x768 
-2D Arithmetic,half,1,1920x1080,FAIL,./vs_2d_arith.bin --type half --channels 1 1920 1080x1920x1080 
-2D Arithmetic,half,1,13x17,PASS,./vs_2d_arith.bin --type half --channels 1 13 17x13x17 
-2D Arithmetic,half,1,1024x1024,PASS,./vs_2d_arith.bin --type half --channels 1 1024 1024x1024x1024 
-2D Arithmetic,half,2,16x16,PASS,./vs_2d_arith.bin --type half --channels 2 16 16x16x16 
-2D Arithmetic,half,2,1024x768,PASS,./vs_2d_arith.bin --type half --channels 2 1024 768x1024x768 
-2D Arithmetic,half,2,1920x1080,FAIL,./vs_2d_arith.bin --type half --channels 2 1920 1080x1920x1080 
-2D Arithmetic,half,2,13x17,PASS,./vs_2d_arith.bin --type half --channels 2 13 17x13x17 
-2D Arithmetic,half,2,1024x1024,PASS,./vs_2d_arith.bin --type half --channels 2 1024 1024x1024x1024 
-2D Arithmetic,half,4,16x16,PASS,./vs_2d_arith.bin --type half --channels 4 16 16x16x16 
-2D Arithmetic,half,4,1024x768,PASS,./vs_2d_arith.bin --type half --channels 4 1024 768x1024x768 
-2D Arithmetic,half,4,1920x1080,FAIL,./vs_2d_arith.bin --type half --channels 4 1920 1080x1920x1080 
-2D Arithmetic,half,4,13x17,PASS,./vs_2d_arith.bin --type half --channels 4 13 17x13x17 
-2D Arithmetic,half,4,1024x1024,PASS,./vs_2d_arith.bin --type half --channels 4 1024 1024x1024x1024 
-2D Arithmetic,int32,1,16x16,PASS,./vs_2d_arith.bin --type int32 --channels 1 16 16x16x16 
-2D Arithmetic,int32,1,1024x768,PASS,./vs_2d_arith.bin --type int32 --channels 1 1024 768x1024x768 
-2D Arithmetic,int32,1,1920x1080,FAIL,./vs_2d_arith.bin --type int32 --channels 1 1920 1080x1920x1080 
-2D Arithmetic,int32,1,13x17,PASS,./vs_2d_arith.bin --type int32 --channels 1 13 17x13x17 
-2D Arithmetic,int32,1,1024x1024,PASS,./vs_2d_arith.bin --type int32 --channels 1 1024 1024x1024x1024 
-2D Arithmetic,int32,2,16x16,PASS,./vs_2d_arith.bin --type int32 --channels 2 16 16x16x16 
-2D Arithmetic,int32,2,1024x768,PASS,./vs_2d_arith.bin --type int32 --channels 2 1024 768x1024x768 
-2D Arithmetic,int32,2,1920x1080,FAIL,./vs_2d_arith.bin --type int32 --channels 2 1920 1080x1920x1080 
-2D Arithmetic,int32,2,13x17,PASS,./vs_2d_arith.bin --type int32 --channels 2 13 17x13x17 
-2D Arithmetic,int32,2,1024x1024,PASS,./vs_2d_arith.bin --type int32 --channels 2 1024 1024x1024x1024 
-2D Arithmetic,int32,4,16x16,PASS,./vs_2d_arith.bin --type int32 --channels 4 16 16x16x16 
-2D Arithmetic,int32,4,1024x768,PASS,./vs_2d_arith.bin --type int32 --channels 4 1024 768x1024x768 
-2D Arithmetic,int32,4,1920x1080,FAIL,./vs_2d_arith.bin --type int32 --channels 4 1920 1080x1920x1080 
-2D Arithmetic,int32,4,13x17,PASS,./vs_2d_arith.bin --type int32 --channels 4 13 17x13x17 
-2D Arithmetic,int32,4,1024x1024,PASS,./vs_2d_arith.bin --type int32 --channels 4 1024 1024x1024x1024 
-2D Arithmetic,uint32,1,16x16,PASS,./vs_2d_arith.bin --type uint32 --channels 1 16 16x16x16 
-2D Arithmetic,uint32,1,1024x768,PASS,./vs_2d_arith.bin --type uint32 --channels 1 1024 768x1024x768 
-2D Arithmetic,uint32,1,1920x1080,FAIL,./vs_2d_arith.bin --type uint32 --channels 1 1920 1080x1920x1080 
-2D Arithmetic,uint32,1,13x17,PASS,./vs_2d_arith.bin --type uint32 --channels 1 13 17x13x17 
-2D Arithmetic,uint32,1,1024x1024,PASS,./vs_2d_arith.bin --type uint32 --channels 1 1024 1024x1024x1024 
-2D Arithmetic,uint32,2,16x16,PASS,./vs_2d_arith.bin --type uint32 --channels 2 16 16x16x16 
-2D Arithmetic,uint32,2,1024x768,PASS,./vs_2d_arith.bin --type uint32 --channels 2 1024 768x1024x768 
-2D Arithmetic,uint32,2,1920x1080,FAIL,./vs_2d_arith.bin --type uint32 --channels 2 1920 1080x1920x1080 
-2D Arithmetic,uint32,2,13x17,PASS,./vs_2d_arith.bin --type uint32 --channels 2 13 17x13x17 
-2D Arithmetic,uint32,2,1024x1024,PASS,./vs_2d_arith.bin --type uint32 --channels 2 1024 1024x1024x1024 
-2D Arithmetic,uint32,4,16x16,PASS,./vs_2d_arith.bin --type uint32 --channels 4 16 16x16x16 
-2D Arithmetic,uint32,4,1024x768,PASS,./vs_2d_arith.bin --type uint32 --channels 4 1024 768x1024x768 
-2D Arithmetic,uint32,4,1920x1080,FAIL,./vs_2d_arith.bin --type uint32 --channels 4 1920 1080x1920x1080 
-2D Arithmetic,uint32,4,13x17,PASS,./vs_2d_arith.bin --type uint32 --channels 4 13 17x13x17 
-2D Arithmetic,uint32,4,1024x1024,PASS,./vs_2d_arith.bin --type uint32 --channels 4 1024 1024x1024x1024 
-2D Arithmetic,int16,1,16x16,PASS,./vs_2d_arith.bin --type int16 --channels 1 16 16x16x16 
-2D Arithmetic,int16,1,1024x768,PASS,./vs_2d_arith.bin --type int16 --channels 1 1024 768x1024x768 
-2D Arithmetic,int16,1,1920x1080,FAIL,./vs_2d_arith.bin --type int16 --channels 1 1920 1080x1920x1080 
-2D Arithmetic,int16,1,13x17,PASS,./vs_2d_arith.bin --type int16 --channels 1 13 17x13x17 
-2D Arithmetic,int16,1,1024x1024,PASS,./vs_2d_arith.bin --type int16 --channels 1 1024 1024x1024x1024 
-2D Arithmetic,int16,2,16x16,PASS,./vs_2d_arith.bin --type int16 --channels 2 16 16x16x16 
-2D Arithmetic,int16,2,1024x768,PASS,./vs_2d_arith.bin --type int16 --channels 2 1024 768x1024x768 
-2D Arithmetic,int16,2,1920x1080,FAIL,./vs_2d_arith.bin --type int16 --channels 2 1920 1080x1920x1080 
-2D Arithmetic,int16,2,13x17,PASS,./vs_2d_arith.bin --type int16 --channels 2 13 17x13x17 
-2D Arithmetic,int16,2,1024x1024,PASS,./vs_2d_arith.bin --type int16 --channels 2 1024 1024x1024x1024 
-2D Arithmetic,int16,4,16x16,PASS,./vs_2d_arith.bin --type int16 --channels 4 16 16x16x16 
-2D Arithmetic,int16,4,1024x768,PASS,./vs_2d_arith.bin --type int16 --channels 4 1024 768x1024x768 
-2D Arithmetic,int16,4,1920x1080,FAIL,./vs_2d_arith.bin --type int16 --channels 4 1920 1080x1920x1080 
-2D Arithmetic,int16,4,13x17,PASS,./vs_2d_arith.bin --type int16 --channels 4 13 17x13x17 
-2D Arithmetic,int16,4,1024x1024,PASS,./vs_2d_arith.bin --type int16 --channels 4 1024 1024x1024x1024 
-2D Arithmetic,uint16,1,16x16,PASS,./vs_2d_arith.bin --type uint16 --channels 1 16 16x16x16 
-2D Arithmetic,uint16,1,1024x768,PASS,./vs_2d_arith.bin --type uint16 --channels 1 1024 768x1024x768 
-2D Arithmetic,uint16,1,1920x1080,FAIL,./vs_2d_arith.bin --type uint16 --channels 1 1920 1080x1920x1080 
-2D Arithmetic,uint16,1,13x17,PASS,./vs_2d_arith.bin --type uint16 --channels 1 13 17x13x17 
-2D Arithmetic,uint16,1,1024x1024,PASS,./vs_2d_arith.bin --type uint16 --channels 1 1024 1024x1024x1024 
-2D Arithmetic,uint16,2,16x16,PASS,./vs_2d_arith.bin --type uint16 --channels 2 16 16x16x16 
-2D Arithmetic,uint16,2,1024x768,PASS,./vs_2d_arith.bin --type uint16 --channels 2 1024 768x1024x768 
-2D Arithmetic,uint16,2,1920x1080,FAIL,./vs_2d_arith.bin --type uint16 --channels 2 1920 1080x1920x1080 
-2D Arithmetic,uint16,2,13x17,PASS,./vs_2d_arith.bin --type uint16 --channels 2 13 17x13x17 
-2D Arithmetic,uint16,2,1024x1024,PASS,./vs_2d_arith.bin --type uint16 --channels 2 1024 1024x1024x1024 
-2D Arithmetic,uint16,4,16x16,PASS,./vs_2d_arith.bin --type uint16 --channels 4 16 16x16x16 
-2D Arithmetic,uint16,4,1024x768,PASS,./vs_2d_arith.bin --type uint16 --channels 4 1024 768x1024x768 
-2D Arithmetic,uint16,4,1920x1080,FAIL,./vs_2d_arith.bin --type uint16 --channels 4 1920 1080x1920x1080 
-2D Arithmetic,uint16,4,13x17,PASS,./vs_2d_arith.bin --type uint16 --channels 4 13 17x13x17 
-2D Arithmetic,uint16,4,1024x1024,PASS,./vs_2d_arith.bin --type uint16 --channels 4 1024 1024x1024x1024 
-2D Arithmetic,uint8,1,16x16,PASS,./vs_2d_arith.bin --type uint8 --channels 1 16 16x16x16 
-2D Arithmetic,uint8,1,1024x768,PASS,./vs_2d_arith.bin --type uint8 --channels 1 1024 768x1024x768 
-2D Arithmetic,uint8,1,1920x1080,FAIL,./vs_2d_arith.bin --type uint8 --channels 1 1920 1080x1920x1080 
-2D Arithmetic,uint8,1,13x17,PASS,./vs_2d_arith.bin --type uint8 --channels 1 13 17x13x17 
-2D Arithmetic,uint8,1,1024x1024,PASS,./vs_2d_arith.bin --type uint8 --channels 1 1024 1024x1024x1024 
-2D Arithmetic,uint8,2,16x16,PASS,./vs_2d_arith.bin --type uint8 --channels 2 16 16x16x16 
-2D Arithmetic,uint8,2,1024x768,PASS,./vs_2d_arith.bin --type uint8 --channels 2 1024 768x1024x768 
-2D Arithmetic,uint8,2,1920x1080,FAIL,./vs_2d_arith.bin --type uint8 --channels 2 1920 1080x1920x1080 
-2D Arithmetic,uint8,2,13x17,PASS,./vs_2d_arith.bin --type uint8 --channels 2 13 17x13x17 
-2D Arithmetic,uint8,2,1024x1024,PASS,./vs_2d_arith.bin --type uint8 --channels 2 1024 1024x1024x1024 
-2D Arithmetic,uint8,4,16x16,PASS,./vs_2d_arith.bin --type uint8 --channels 4 16 16x16x16 
-2D Arithmetic,uint8,4,1024x768,PASS,./vs_2d_arith.bin --type uint8 --channels 4 1024 768x1024x768 
-2D Arithmetic,uint8,4,1920x1080,FAIL,./vs_2d_arith.bin --type uint8 --channels 4 1920 1080x1920x1080 
-2D Arithmetic,uint8,4,13x17,PASS,./vs_2d_arith.bin --type uint8 --channels 4 13 17x13x17 
-2D Arithmetic,uint8,4,1024x1024,PASS,./vs_2d_arith.bin --type uint8 --channels 4 1024 1024x1024x1024 
-2D Arithmetic,int8,1,16x16,PASS,./vs_2d_arith.bin --type int8 --channels 1 16 16x16x16 
-2D Arithmetic,int8,1,1024x768,PASS,./vs_2d_arith.bin --type int8 --channels 1 1024 768x1024x768 
-2D Arithmetic,int8,1,1920x1080,FAIL,./vs_2d_arith.bin --type int8 --channels 1 1920 1080x1920x1080 
-2D Arithmetic,int8,1,13x17,PASS,./vs_2d_arith.bin --type int8 --channels 1 13 17x13x17 
-2D Arithmetic,int8,1,1024x1024,PASS,./vs_2d_arith.bin --type int8 --channels 1 1024 1024x1024x1024 
-2D Arithmetic,int8,2,16x16,PASS,./vs_2d_arith.bin --type int8 --channels 2 16 16x16x16 
-2D Arithmetic,int8,2,1024x768,PASS,./vs_2d_arith.bin --type int8 --channels 2 1024 768x1024x768 
-2D Arithmetic,int8,2,1920x1080,FAIL,./vs_2d_arith.bin --type int8 --channels 2 1920 1080x1920x1080 
-2D Arithmetic,int8,2,13x17,PASS,./vs_2d_arith.bin --type int8 --channels 2 13 17x13x17 
-2D Arithmetic,int8,2,1024x1024,PASS,./vs_2d_arith.bin --type int8 --channels 2 1024 1024x1024x1024 
-2D Arithmetic,int8,4,16x16,PASS,./vs_2d_arith.bin --type int8 --channels 4 16 16x16x16 
-2D Arithmetic,int8,4,1024x768,PASS,./vs_2d_arith.bin --type int8 --channels 4 1024 768x1024x768 
-2D Arithmetic,int8,4,1920x1080,FAIL,./vs_2d_arith.bin --type int8 --channels 4 1920 1080x1920x1080 
-2D Arithmetic,int8,4,13x17,PASS,./vs_2d_arith.bin --type int8 --channels 4 13 17x13x17 
-2D Arithmetic,int8,4,1024x1024,PASS,./vs_2d_arith.bin --type int8 --channels 4 1024 1024x1024x1024 
-2D Arithmetic,unorm8,1,16x16,PASS,./vs_2d_arith.bin --type unorm8 --channels 1 16 16x16x16 
-2D Arithmetic,unorm8,1,1024x768,PASS,./vs_2d_arith.bin --type unorm8 --channels 1 1024 768x1024x768 
-2D Arithmetic,unorm8,1,1920x1080,FAIL,./vs_2d_arith.bin --type unorm8 --channels 1 1920 1080x1920x1080 
-2D Arithmetic,unorm8,1,13x17,PASS,./vs_2d_arith.bin --type unorm8 --channels 1 13 17x13x17 
-2D Arithmetic,unorm8,1,1024x1024,PASS,./vs_2d_arith.bin --type unorm8 --channels 1 1024 1024x1024x1024 
-2D Arithmetic,unorm8,2,16x16,PASS,./vs_2d_arith.bin --type unorm8 --channels 2 16 16x16x16 
-2D Arithmetic,unorm8,2,1024x768,PASS,./vs_2d_arith.bin --type unorm8 --channels 2 1024 768x1024x768 
-2D Arithmetic,unorm8,2,1920x1080,FAIL,./vs_2d_arith.bin --type unorm8 --channels 2 1920 1080x1920x1080 
-2D Arithmetic,unorm8,2,13x17,PASS,./vs_2d_arith.bin --type unorm8 --channels 2 13 17x13x17 
-2D Arithmetic,unorm8,2,1024x1024,PASS,./vs_2d_arith.bin --type unorm8 --channels 2 1024 1024x1024x1024 
-2D Arithmetic,unorm8,4,16x16,PASS,./vs_2d_arith.bin --type unorm8 --channels 4 16 16x16x16 
-2D Arithmetic,unorm8,4,1024x768,PASS,./vs_2d_arith.bin --type unorm8 --channels 4 1024 768x1024x768 
-2D Arithmetic,unorm8,4,1920x1080,FAIL,./vs_2d_arith.bin --type unorm8 --channels 4 1920 1080x1920x1080 
-2D Arithmetic,unorm8,4,13x17,PASS,./vs_2d_arith.bin --type unorm8 --channels 4 13 17x13x17 
-2D Arithmetic,unorm8,4,1024x1024,PASS,./vs_2d_arith.bin --type unorm8 --channels 4 1024 1024x1024x1024 
+2D Unsampled Read,float,1,16x16,PASS,./vsu_2d_test.bin --type float --channels 1 16x16 
+2D Unsampled Read,float,1,1024x768,PASS,./vsu_2d_test.bin --type float --channels 1 1024x768 
+2D Unsampled Read,float,1,1920x1080,PASS,./vsu_2d_test.bin --type float --channels 1 1920x1080 
+2D Unsampled Read,float,1,13x17,PASS,./vsu_2d_test.bin --type float --channels 1 13x17 
+2D Unsampled Read,float,1,1024x1024,PASS,./vsu_2d_test.bin --type float --channels 1 1024x1024 
+2D Unsampled Read,float,2,16x16,PASS,./vsu_2d_test.bin --type float --channels 2 16x16 
+2D Unsampled Read,float,2,1024x768,PASS,./vsu_2d_test.bin --type float --channels 2 1024x768 
+2D Unsampled Read,float,2,1920x1080,PASS,./vsu_2d_test.bin --type float --channels 2 1920x1080 
+2D Unsampled Read,float,2,13x17,PASS,./vsu_2d_test.bin --type float --channels 2 13x17 
+2D Unsampled Read,float,2,1024x1024,PASS,./vsu_2d_test.bin --type float --channels 2 1024x1024 
+2D Unsampled Read,float,4,16x16,PASS,./vsu_2d_test.bin --type float --channels 4 16x16 
+2D Unsampled Read,float,4,1024x768,PASS,./vsu_2d_test.bin --type float --channels 4 1024x768 
+2D Unsampled Read,float,4,1920x1080,PASS,./vsu_2d_test.bin --type float --channels 4 1920x1080 
+2D Unsampled Read,float,4,13x17,PASS,./vsu_2d_test.bin --type float --channels 4 13x17 
+2D Unsampled Read,float,4,1024x1024,PASS,./vsu_2d_test.bin --type float --channels 4 1024x1024 
+2D Unsampled Read,half,1,16x16,PASS,./vsu_2d_test.bin --type half --channels 1 16x16 
+2D Unsampled Read,half,1,1024x768,PASS,./vsu_2d_test.bin --type half --channels 1 1024x768 
+2D Unsampled Read,half,1,1920x1080,FAIL,./vsu_2d_test.bin --type half --channels 1 1920x1080 
+2D Unsampled Read,half,1,13x17,PASS,./vsu_2d_test.bin --type half --channels 1 13x17 
+2D Unsampled Read,half,1,1024x1024,PASS,./vsu_2d_test.bin --type half --channels 1 1024x1024 
+2D Unsampled Read,half,2,16x16,PASS,./vsu_2d_test.bin --type half --channels 2 16x16 
+2D Unsampled Read,half,2,1024x768,PASS,./vsu_2d_test.bin --type half --channels 2 1024x768 
+2D Unsampled Read,half,2,1920x1080,PASS,./vsu_2d_test.bin --type half --channels 2 1920x1080 
+2D Unsampled Read,half,2,13x17,PASS,./vsu_2d_test.bin --type half --channels 2 13x17 
+2D Unsampled Read,half,2,1024x1024,PASS,./vsu_2d_test.bin --type half --channels 2 1024x1024 
+2D Unsampled Read,half,4,16x16,PASS,./vsu_2d_test.bin --type half --channels 4 16x16 
+2D Unsampled Read,half,4,1024x768,PASS,./vsu_2d_test.bin --type half --channels 4 1024x768 
+2D Unsampled Read,half,4,1920x1080,PASS,./vsu_2d_test.bin --type half --channels 4 1920x1080 
+2D Unsampled Read,half,4,13x17,PASS,./vsu_2d_test.bin --type half --channels 4 13x17 
+2D Unsampled Read,half,4,1024x1024,PASS,./vsu_2d_test.bin --type half --channels 4 1024x1024 
+2D Unsampled Read,int32,1,16x16,PASS,./vsu_2d_test.bin --type int32 --channels 1 16x16 
+2D Unsampled Read,int32,1,1024x768,PASS,./vsu_2d_test.bin --type int32 --channels 1 1024x768 
+2D Unsampled Read,int32,1,1920x1080,PASS,./vsu_2d_test.bin --type int32 --channels 1 1920x1080 
+2D Unsampled Read,int32,1,13x17,PASS,./vsu_2d_test.bin --type int32 --channels 1 13x17 
+2D Unsampled Read,int32,1,1024x1024,PASS,./vsu_2d_test.bin --type int32 --channels 1 1024x1024 
+2D Unsampled Read,int32,2,16x16,PASS,./vsu_2d_test.bin --type int32 --channels 2 16x16 
+2D Unsampled Read,int32,2,1024x768,PASS,./vsu_2d_test.bin --type int32 --channels 2 1024x768 
+2D Unsampled Read,int32,2,1920x1080,PASS,./vsu_2d_test.bin --type int32 --channels 2 1920x1080 
+2D Unsampled Read,int32,2,13x17,PASS,./vsu_2d_test.bin --type int32 --channels 2 13x17 
+2D Unsampled Read,int32,2,1024x1024,PASS,./vsu_2d_test.bin --type int32 --channels 2 1024x1024 
+2D Unsampled Read,int32,4,16x16,PASS,./vsu_2d_test.bin --type int32 --channels 4 16x16 
+2D Unsampled Read,int32,4,1024x768,PASS,./vsu_2d_test.bin --type int32 --channels 4 1024x768 
+2D Unsampled Read,int32,4,1920x1080,PASS,./vsu_2d_test.bin --type int32 --channels 4 1920x1080 
+2D Unsampled Read,int32,4,13x17,PASS,./vsu_2d_test.bin --type int32 --channels 4 13x17 
+2D Unsampled Read,int32,4,1024x1024,PASS,./vsu_2d_test.bin --type int32 --channels 4 1024x1024 
+2D Unsampled Read,uint32,1,16x16,PASS,./vsu_2d_test.bin --type uint32 --channels 1 16x16 
+2D Unsampled Read,uint32,1,1024x768,PASS,./vsu_2d_test.bin --type uint32 --channels 1 1024x768 
+2D Unsampled Read,uint32,1,1920x1080,PASS,./vsu_2d_test.bin --type uint32 --channels 1 1920x1080 
+2D Unsampled Read,uint32,1,13x17,PASS,./vsu_2d_test.bin --type uint32 --channels 1 13x17 
+2D Unsampled Read,uint32,1,1024x1024,PASS,./vsu_2d_test.bin --type uint32 --channels 1 1024x1024 
+2D Unsampled Read,uint32,2,16x16,PASS,./vsu_2d_test.bin --type uint32 --channels 2 16x16 
+2D Unsampled Read,uint32,2,1024x768,PASS,./vsu_2d_test.bin --type uint32 --channels 2 1024x768 
+2D Unsampled Read,uint32,2,1920x1080,PASS,./vsu_2d_test.bin --type uint32 --channels 2 1920x1080 
+2D Unsampled Read,uint32,2,13x17,PASS,./vsu_2d_test.bin --type uint32 --channels 2 13x17 
+2D Unsampled Read,uint32,2,1024x1024,PASS,./vsu_2d_test.bin --type uint32 --channels 2 1024x1024 
+2D Unsampled Read,uint32,4,16x16,PASS,./vsu_2d_test.bin --type uint32 --channels 4 16x16 
+2D Unsampled Read,uint32,4,1024x768,PASS,./vsu_2d_test.bin --type uint32 --channels 4 1024x768 
+2D Unsampled Read,uint32,4,1920x1080,PASS,./vsu_2d_test.bin --type uint32 --channels 4 1920x1080 
+2D Unsampled Read,uint32,4,13x17,PASS,./vsu_2d_test.bin --type uint32 --channels 4 13x17 
+2D Unsampled Read,uint32,4,1024x1024,PASS,./vsu_2d_test.bin --type uint32 --channels 4 1024x1024 
+2D Unsampled Read,int16,1,16x16,PASS,./vsu_2d_test.bin --type int16 --channels 1 16x16 
+2D Unsampled Read,int16,1,1024x768,PASS,./vsu_2d_test.bin --type int16 --channels 1 1024x768 
+2D Unsampled Read,int16,1,1920x1080,FAIL,./vsu_2d_test.bin --type int16 --channels 1 1920x1080 
+2D Unsampled Read,int16,1,13x17,PASS,./vsu_2d_test.bin --type int16 --channels 1 13x17 
+2D Unsampled Read,int16,1,1024x1024,PASS,./vsu_2d_test.bin --type int16 --channels 1 1024x1024 
+2D Unsampled Read,int16,2,16x16,PASS,./vsu_2d_test.bin --type int16 --channels 2 16x16 
+2D Unsampled Read,int16,2,1024x768,PASS,./vsu_2d_test.bin --type int16 --channels 2 1024x768 
+2D Unsampled Read,int16,2,1920x1080,PASS,./vsu_2d_test.bin --type int16 --channels 2 1920x1080 
+2D Unsampled Read,int16,2,13x17,PASS,./vsu_2d_test.bin --type int16 --channels 2 13x17 
+2D Unsampled Read,int16,2,1024x1024,PASS,./vsu_2d_test.bin --type int16 --channels 2 1024x1024 
+2D Unsampled Read,int16,4,16x16,PASS,./vsu_2d_test.bin --type int16 --channels 4 16x16 
+2D Unsampled Read,int16,4,1024x768,PASS,./vsu_2d_test.bin --type int16 --channels 4 1024x768 
+2D Unsampled Read,int16,4,1920x1080,PASS,./vsu_2d_test.bin --type int16 --channels 4 1920x1080 
+2D Unsampled Read,int16,4,13x17,PASS,./vsu_2d_test.bin --type int16 --channels 4 13x17 
+2D Unsampled Read,int16,4,1024x1024,PASS,./vsu_2d_test.bin --type int16 --channels 4 1024x1024 
+2D Unsampled Read,uint16,1,16x16,PASS,./vsu_2d_test.bin --type uint16 --channels 1 16x16 
+2D Unsampled Read,uint16,1,1024x768,PASS,./vsu_2d_test.bin --type uint16 --channels 1 1024x768 
+2D Unsampled Read,uint16,1,1920x1080,FAIL,./vsu_2d_test.bin --type uint16 --channels 1 1920x1080 
+2D Unsampled Read,uint16,1,13x17,PASS,./vsu_2d_test.bin --type uint16 --channels 1 13x17 
+2D Unsampled Read,uint16,1,1024x1024,PASS,./vsu_2d_test.bin --type uint16 --channels 1 1024x1024 
+2D Unsampled Read,uint16,2,16x16,PASS,./vsu_2d_test.bin --type uint16 --channels 2 16x16 
+2D Unsampled Read,uint16,2,1024x768,PASS,./vsu_2d_test.bin --type uint16 --channels 2 1024x768 
+2D Unsampled Read,uint16,2,1920x1080,PASS,./vsu_2d_test.bin --type uint16 --channels 2 1920x1080 
+2D Unsampled Read,uint16,2,13x17,PASS,./vsu_2d_test.bin --type uint16 --channels 2 13x17 
+2D Unsampled Read,uint16,2,1024x1024,PASS,./vsu_2d_test.bin --type uint16 --channels 2 1024x1024 
+2D Unsampled Read,uint16,4,16x16,PASS,./vsu_2d_test.bin --type uint16 --channels 4 16x16 
+2D Unsampled Read,uint16,4,1024x768,PASS,./vsu_2d_test.bin --type uint16 --channels 4 1024x768 
+2D Unsampled Read,uint16,4,1920x1080,PASS,./vsu_2d_test.bin --type uint16 --channels 4 1920x1080 
+2D Unsampled Read,uint16,4,13x17,PASS,./vsu_2d_test.bin --type uint16 --channels 4 13x17 
+2D Unsampled Read,uint16,4,1024x1024,PASS,./vsu_2d_test.bin --type uint16 --channels 4 1024x1024 
+2D Unsampled Read,uint8,1,16x16,PASS,./vsu_2d_test.bin --type uint8 --channels 1 16x16 
+2D Unsampled Read,uint8,1,1024x768,PASS,./vsu_2d_test.bin --type uint8 --channels 1 1024x768 
+2D Unsampled Read,uint8,1,1920x1080,FAIL,./vsu_2d_test.bin --type uint8 --channels 1 1920x1080 
+2D Unsampled Read,uint8,1,13x17,PASS,./vsu_2d_test.bin --type uint8 --channels 1 13x17 
+2D Unsampled Read,uint8,1,1024x1024,PASS,./vsu_2d_test.bin --type uint8 --channels 1 1024x1024 
+2D Unsampled Read,uint8,2,16x16,PASS,./vsu_2d_test.bin --type uint8 --channels 2 16x16 
+2D Unsampled Read,uint8,2,1024x768,PASS,./vsu_2d_test.bin --type uint8 --channels 2 1024x768 
+2D Unsampled Read,uint8,2,1920x1080,FAIL,./vsu_2d_test.bin --type uint8 --channels 2 1920x1080 
+2D Unsampled Read,uint8,2,13x17,PASS,./vsu_2d_test.bin --type uint8 --channels 2 13x17 
+2D Unsampled Read,uint8,2,1024x1024,PASS,./vsu_2d_test.bin --type uint8 --channels 2 1024x1024 
+2D Unsampled Read,uint8,4,16x16,PASS,./vsu_2d_test.bin --type uint8 --channels 4 16x16 
+2D Unsampled Read,uint8,4,1024x768,PASS,./vsu_2d_test.bin --type uint8 --channels 4 1024x768 
+2D Unsampled Read,uint8,4,1920x1080,PASS,./vsu_2d_test.bin --type uint8 --channels 4 1920x1080 
+2D Unsampled Read,uint8,4,13x17,PASS,./vsu_2d_test.bin --type uint8 --channels 4 13x17 
+2D Unsampled Read,uint8,4,1024x1024,PASS,./vsu_2d_test.bin --type uint8 --channels 4 1024x1024 
+2D Unsampled Read,int8,1,16x16,PASS,./vsu_2d_test.bin --type int8 --channels 1 16x16 
+2D Unsampled Read,int8,1,1024x768,PASS,./vsu_2d_test.bin --type int8 --channels 1 1024x768 
+2D Unsampled Read,int8,1,1920x1080,FAIL,./vsu_2d_test.bin --type int8 --channels 1 1920x1080 
+2D Unsampled Read,int8,1,13x17,PASS,./vsu_2d_test.bin --type int8 --channels 1 13x17 
+2D Unsampled Read,int8,1,1024x1024,PASS,./vsu_2d_test.bin --type int8 --channels 1 1024x1024 
+2D Unsampled Read,int8,2,16x16,PASS,./vsu_2d_test.bin --type int8 --channels 2 16x16 
+2D Unsampled Read,int8,2,1024x768,PASS,./vsu_2d_test.bin --type int8 --channels 2 1024x768 
+2D Unsampled Read,int8,2,1920x1080,FAIL,./vsu_2d_test.bin --type int8 --channels 2 1920x1080 
+2D Unsampled Read,int8,2,13x17,PASS,./vsu_2d_test.bin --type int8 --channels 2 13x17 
+2D Unsampled Read,int8,2,1024x1024,PASS,./vsu_2d_test.bin --type int8 --channels 2 1024x1024 
+2D Unsampled Read,int8,4,16x16,PASS,./vsu_2d_test.bin --type int8 --channels 4 16x16 
+2D Unsampled Read,int8,4,1024x768,PASS,./vsu_2d_test.bin --type int8 --channels 4 1024x768 
+2D Unsampled Read,int8,4,1920x1080,PASS,./vsu_2d_test.bin --type int8 --channels 4 1920x1080 
+2D Unsampled Read,int8,4,13x17,PASS,./vsu_2d_test.bin --type int8 --channels 4 13x17 
+2D Unsampled Read,int8,4,1024x1024,PASS,./vsu_2d_test.bin --type int8 --channels 4 1024x1024 
+2D Unsampled Read,unorm8,1,16x16,PASS,./vsu_2d_test.bin --type unorm8 --channels 1 16x16 
+2D Unsampled Read,unorm8,1,1024x768,PASS,./vsu_2d_test.bin --type unorm8 --channels 1 1024x768 
+2D Unsampled Read,unorm8,1,1920x1080,FAIL,./vsu_2d_test.bin --type unorm8 --channels 1 1920x1080 
+2D Unsampled Read,unorm8,1,13x17,PASS,./vsu_2d_test.bin --type unorm8 --channels 1 13x17 
+2D Unsampled Read,unorm8,1,1024x1024,PASS,./vsu_2d_test.bin --type unorm8 --channels 1 1024x1024 
+2D Unsampled Read,unorm8,2,16x16,PASS,./vsu_2d_test.bin --type unorm8 --channels 2 16x16 
+2D Unsampled Read,unorm8,2,1024x768,PASS,./vsu_2d_test.bin --type unorm8 --channels 2 1024x768 
+2D Unsampled Read,unorm8,2,1920x1080,FAIL,./vsu_2d_test.bin --type unorm8 --channels 2 1920x1080 
+2D Unsampled Read,unorm8,2,13x17,PASS,./vsu_2d_test.bin --type unorm8 --channels 2 13x17 
+2D Unsampled Read,unorm8,2,1024x1024,PASS,./vsu_2d_test.bin --type unorm8 --channels 2 1024x1024 
+2D Unsampled Read,unorm8,4,16x16,PASS,./vsu_2d_test.bin --type unorm8 --channels 4 16x16 
+2D Unsampled Read,unorm8,4,1024x768,PASS,./vsu_2d_test.bin --type unorm8 --channels 4 1024x768 
+2D Unsampled Read,unorm8,4,1920x1080,PASS,./vsu_2d_test.bin --type unorm8 --channels 4 1920x1080 
+2D Unsampled Read,unorm8,4,13x17,PASS,./vsu_2d_test.bin --type unorm8 --channels 4 13x17 
+2D Unsampled Read,unorm8,4,1024x1024,PASS,./vsu_2d_test.bin --type unorm8 --channels 4 1024x1024 
+2D Unsampled Write,float,1,16x16,PASS,./vsu_2d_w_test.bin --type float --channels 1 16x16 
+2D Unsampled Write,float,1,1024x768,PASS,./vsu_2d_w_test.bin --type float --channels 1 1024x768 
+2D Unsampled Write,float,1,1920x1080,FAIL,./vsu_2d_w_test.bin --type float --channels 1 1920x1080 
+2D Unsampled Write,float,1,13x17,PASS,./vsu_2d_w_test.bin --type float --channels 1 13x17 
+2D Unsampled Write,float,1,1024x1024,PASS,./vsu_2d_w_test.bin --type float --channels 1 1024x1024 
+2D Unsampled Write,float,2,16x16,PASS,./vsu_2d_w_test.bin --type float --channels 2 16x16 
+2D Unsampled Write,float,2,1024x768,PASS,./vsu_2d_w_test.bin --type float --channels 2 1024x768 
+2D Unsampled Write,float,2,1920x1080,PASS,./vsu_2d_w_test.bin --type float --channels 2 1920x1080 
+2D Unsampled Write,float,2,13x17,PASS,./vsu_2d_w_test.bin --type float --channels 2 13x17 
+2D Unsampled Write,float,2,1024x1024,PASS,./vsu_2d_w_test.bin --type float --channels 2 1024x1024 
+2D Unsampled Write,float,4,16x16,PASS,./vsu_2d_w_test.bin --type float --channels 4 16x16 
+2D Unsampled Write,float,4,1024x768,PASS,./vsu_2d_w_test.bin --type float --channels 4 1024x768 
+2D Unsampled Write,float,4,1920x1080,PASS,./vsu_2d_w_test.bin --type float --channels 4 1920x1080 
+2D Unsampled Write,float,4,13x17,PASS,./vsu_2d_w_test.bin --type float --channels 4 13x17 
+2D Unsampled Write,float,4,1024x1024,PASS,./vsu_2d_w_test.bin --type float --channels 4 1024x1024 
+2D Unsampled Write,half,1,16x16,PASS,./vsu_2d_w_test.bin --type half --channels 1 16x16 
+2D Unsampled Write,half,1,1024x768,PASS,./vsu_2d_w_test.bin --type half --channels 1 1024x768 
+2D Unsampled Write,half,1,1920x1080,FAIL,./vsu_2d_w_test.bin --type half --channels 1 1920x1080 
+2D Unsampled Write,half,1,13x17,PASS,./vsu_2d_w_test.bin --type half --channels 1 13x17 
+2D Unsampled Write,half,1,1024x1024,PASS,./vsu_2d_w_test.bin --type half --channels 1 1024x1024 
+2D Unsampled Write,half,2,16x16,PASS,./vsu_2d_w_test.bin --type half --channels 2 16x16 
+2D Unsampled Write,half,2,1024x768,PASS,./vsu_2d_w_test.bin --type half --channels 2 1024x768 
+2D Unsampled Write,half,2,1920x1080,FAIL,./vsu_2d_w_test.bin --type half --channels 2 1920x1080 
+2D Unsampled Write,half,2,13x17,PASS,./vsu_2d_w_test.bin --type half --channels 2 13x17 
+2D Unsampled Write,half,2,1024x1024,PASS,./vsu_2d_w_test.bin --type half --channels 2 1024x1024 
+2D Unsampled Write,half,4,16x16,PASS,./vsu_2d_w_test.bin --type half --channels 4 16x16 
+2D Unsampled Write,half,4,1024x768,PASS,./vsu_2d_w_test.bin --type half --channels 4 1024x768 
+2D Unsampled Write,half,4,1920x1080,PASS,./vsu_2d_w_test.bin --type half --channels 4 1920x1080 
+2D Unsampled Write,half,4,13x17,PASS,./vsu_2d_w_test.bin --type half --channels 4 13x17 
+2D Unsampled Write,half,4,1024x1024,PASS,./vsu_2d_w_test.bin --type half --channels 4 1024x1024 
+2D Unsampled Write,int32,1,16x16,PASS,./vsu_2d_w_test.bin --type int32 --channels 1 16x16 
+2D Unsampled Write,int32,1,1024x768,PASS,./vsu_2d_w_test.bin --type int32 --channels 1 1024x768 
+2D Unsampled Write,int32,1,1920x1080,FAIL,./vsu_2d_w_test.bin --type int32 --channels 1 1920x1080 
+2D Unsampled Write,int32,1,13x17,PASS,./vsu_2d_w_test.bin --type int32 --channels 1 13x17 
+2D Unsampled Write,int32,1,1024x1024,PASS,./vsu_2d_w_test.bin --type int32 --channels 1 1024x1024 
+2D Unsampled Write,int32,2,16x16,PASS,./vsu_2d_w_test.bin --type int32 --channels 2 16x16 
+2D Unsampled Write,int32,2,1024x768,PASS,./vsu_2d_w_test.bin --type int32 --channels 2 1024x768 
+2D Unsampled Write,int32,2,1920x1080,PASS,./vsu_2d_w_test.bin --type int32 --channels 2 1920x1080 
+2D Unsampled Write,int32,2,13x17,PASS,./vsu_2d_w_test.bin --type int32 --channels 2 13x17 
+2D Unsampled Write,int32,2,1024x1024,PASS,./vsu_2d_w_test.bin --type int32 --channels 2 1024x1024 
+2D Unsampled Write,int32,4,16x16,PASS,./vsu_2d_w_test.bin --type int32 --channels 4 16x16 
+2D Unsampled Write,int32,4,1024x768,PASS,./vsu_2d_w_test.bin --type int32 --channels 4 1024x768 
+2D Unsampled Write,int32,4,1920x1080,PASS,./vsu_2d_w_test.bin --type int32 --channels 4 1920x1080 
+2D Unsampled Write,int32,4,13x17,PASS,./vsu_2d_w_test.bin --type int32 --channels 4 13x17 
+2D Unsampled Write,int32,4,1024x1024,PASS,./vsu_2d_w_test.bin --type int32 --channels 4 1024x1024 
+2D Unsampled Write,uint32,1,16x16,PASS,./vsu_2d_w_test.bin --type uint32 --channels 1 16x16 
+2D Unsampled Write,uint32,1,1024x768,PASS,./vsu_2d_w_test.bin --type uint32 --channels 1 1024x768 
+2D Unsampled Write,uint32,1,1920x1080,FAIL,./vsu_2d_w_test.bin --type uint32 --channels 1 1920x1080 
+2D Unsampled Write,uint32,1,13x17,PASS,./vsu_2d_w_test.bin --type uint32 --channels 1 13x17 
+2D Unsampled Write,uint32,1,1024x1024,PASS,./vsu_2d_w_test.bin --type uint32 --channels 1 1024x1024 
+2D Unsampled Write,uint32,2,16x16,PASS,./vsu_2d_w_test.bin --type uint32 --channels 2 16x16 
+2D Unsampled Write,uint32,2,1024x768,PASS,./vsu_2d_w_test.bin --type uint32 --channels 2 1024x768 
+2D Unsampled Write,uint32,2,1920x1080,PASS,./vsu_2d_w_test.bin --type uint32 --channels 2 1920x1080 
+2D Unsampled Write,uint32,2,13x17,PASS,./vsu_2d_w_test.bin --type uint32 --channels 2 13x17 
+2D Unsampled Write,uint32,2,1024x1024,PASS,./vsu_2d_w_test.bin --type uint32 --channels 2 1024x1024 
+2D Unsampled Write,uint32,4,16x16,PASS,./vsu_2d_w_test.bin --type uint32 --channels 4 16x16 
+2D Unsampled Write,uint32,4,1024x768,PASS,./vsu_2d_w_test.bin --type uint32 --channels 4 1024x768 
+2D Unsampled Write,uint32,4,1920x1080,PASS,./vsu_2d_w_test.bin --type uint32 --channels 4 1920x1080 
+2D Unsampled Write,uint32,4,13x17,PASS,./vsu_2d_w_test.bin --type uint32 --channels 4 13x17 
+2D Unsampled Write,uint32,4,1024x1024,PASS,./vsu_2d_w_test.bin --type uint32 --channels 4 1024x1024 
+2D Unsampled Write,int16,1,16x16,PASS,./vsu_2d_w_test.bin --type int16 --channels 1 16x16 
+2D Unsampled Write,int16,1,1024x768,PASS,./vsu_2d_w_test.bin --type int16 --channels 1 1024x768 
+2D Unsampled Write,int16,1,1920x1080,FAIL,./vsu_2d_w_test.bin --type int16 --channels 1 1920x1080 
+2D Unsampled Write,int16,1,13x17,PASS,./vsu_2d_w_test.bin --type int16 --channels 1 13x17 
+2D Unsampled Write,int16,1,1024x1024,PASS,./vsu_2d_w_test.bin --type int16 --channels 1 1024x1024 
+2D Unsampled Write,int16,2,16x16,PASS,./vsu_2d_w_test.bin --type int16 --channels 2 16x16 
+2D Unsampled Write,int16,2,1024x768,PASS,./vsu_2d_w_test.bin --type int16 --channels 2 1024x768 
+2D Unsampled Write,int16,2,1920x1080,FAIL,./vsu_2d_w_test.bin --type int16 --channels 2 1920x1080 
+2D Unsampled Write,int16,2,13x17,PASS,./vsu_2d_w_test.bin --type int16 --channels 2 13x17 
+2D Unsampled Write,int16,2,1024x1024,PASS,./vsu_2d_w_test.bin --type int16 --channels 2 1024x1024 
+2D Unsampled Write,int16,4,16x16,PASS,./vsu_2d_w_test.bin --type int16 --channels 4 16x16 
+2D Unsampled Write,int16,4,1024x768,PASS,./vsu_2d_w_test.bin --type int16 --channels 4 1024x768 
+2D Unsampled Write,int16,4,1920x1080,PASS,./vsu_2d_w_test.bin --type int16 --channels 4 1920x1080 
+2D Unsampled Write,int16,4,13x17,PASS,./vsu_2d_w_test.bin --type int16 --channels 4 13x17 
+2D Unsampled Write,int16,4,1024x1024,PASS,./vsu_2d_w_test.bin --type int16 --channels 4 1024x1024 
+2D Unsampled Write,uint16,1,16x16,PASS,./vsu_2d_w_test.bin --type uint16 --channels 1 16x16 
+2D Unsampled Write,uint16,1,1024x768,PASS,./vsu_2d_w_test.bin --type uint16 --channels 1 1024x768 
+2D Unsampled Write,uint16,1,1920x1080,FAIL,./vsu_2d_w_test.bin --type uint16 --channels 1 1920x1080 
+2D Unsampled Write,uint16,1,13x17,PASS,./vsu_2d_w_test.bin --type uint16 --channels 1 13x17 
+2D Unsampled Write,uint16,1,1024x1024,PASS,./vsu_2d_w_test.bin --type uint16 --channels 1 1024x1024 
+2D Unsampled Write,uint16,2,16x16,PASS,./vsu_2d_w_test.bin --type uint16 --channels 2 16x16 
+2D Unsampled Write,uint16,2,1024x768,PASS,./vsu_2d_w_test.bin --type uint16 --channels 2 1024x768 
+2D Unsampled Write,uint16,2,1920x1080,FAIL,./vsu_2d_w_test.bin --type uint16 --channels 2 1920x1080 
+2D Unsampled Write,uint16,2,13x17,PASS,./vsu_2d_w_test.bin --type uint16 --channels 2 13x17 
+2D Unsampled Write,uint16,2,1024x1024,PASS,./vsu_2d_w_test.bin --type uint16 --channels 2 1024x1024 
+2D Unsampled Write,uint16,4,16x16,PASS,./vsu_2d_w_test.bin --type uint16 --channels 4 16x16 
+2D Unsampled Write,uint16,4,1024x768,PASS,./vsu_2d_w_test.bin --type uint16 --channels 4 1024x768 
+2D Unsampled Write,uint16,4,1920x1080,PASS,./vsu_2d_w_test.bin --type uint16 --channels 4 1920x1080 
+2D Unsampled Write,uint16,4,13x17,PASS,./vsu_2d_w_test.bin --type uint16 --channels 4 13x17 
+2D Unsampled Write,uint16,4,1024x1024,PASS,./vsu_2d_w_test.bin --type uint16 --channels 4 1024x1024 
+2D Unsampled Write,uint8,1,16x16,PASS,./vsu_2d_w_test.bin --type uint8 --channels 1 16x16 
+2D Unsampled Write,uint8,1,1024x768,PASS,./vsu_2d_w_test.bin --type uint8 --channels 1 1024x768 
+2D Unsampled Write,uint8,1,1920x1080,FAIL,./vsu_2d_w_test.bin --type uint8 --channels 1 1920x1080 
+2D Unsampled Write,uint8,1,13x17,PASS,./vsu_2d_w_test.bin --type uint8 --channels 1 13x17 
+2D Unsampled Write,uint8,1,1024x1024,PASS,./vsu_2d_w_test.bin --type uint8 --channels 1 1024x1024 
+2D Unsampled Write,uint8,2,16x16,PASS,./vsu_2d_w_test.bin --type uint8 --channels 2 16x16 
+2D Unsampled Write,uint8,2,1024x768,PASS,./vsu_2d_w_test.bin --type uint8 --channels 2 1024x768 
+2D Unsampled Write,uint8,2,1920x1080,FAIL,./vsu_2d_w_test.bin --type uint8 --channels 2 1920x1080 
+2D Unsampled Write,uint8,2,13x17,PASS,./vsu_2d_w_test.bin --type uint8 --channels 2 13x17 
+2D Unsampled Write,uint8,2,1024x1024,PASS,./vsu_2d_w_test.bin --type uint8 --channels 2 1024x1024 
+2D Unsampled Write,uint8,4,16x16,PASS,./vsu_2d_w_test.bin --type uint8 --channels 4 16x16 
+2D Unsampled Write,uint8,4,1024x768,PASS,./vsu_2d_w_test.bin --type uint8 --channels 4 1024x768 
+2D Unsampled Write,uint8,4,1920x1080,FAIL,./vsu_2d_w_test.bin --type uint8 --channels 4 1920x1080 
+2D Unsampled Write,uint8,4,13x17,PASS,./vsu_2d_w_test.bin --type uint8 --channels 4 13x17 
+2D Unsampled Write,uint8,4,1024x1024,PASS,./vsu_2d_w_test.bin --type uint8 --channels 4 1024x1024 
+2D Unsampled Write,int8,1,16x16,PASS,./vsu_2d_w_test.bin --type int8 --channels 1 16x16 
+2D Unsampled Write,int8,1,1024x768,PASS,./vsu_2d_w_test.bin --type int8 --channels 1 1024x768 
+2D Unsampled Write,int8,1,1920x1080,FAIL,./vsu_2d_w_test.bin --type int8 --channels 1 1920x1080 
+2D Unsampled Write,int8,1,13x17,PASS,./vsu_2d_w_test.bin --type int8 --channels 1 13x17 
+2D Unsampled Write,int8,1,1024x1024,PASS,./vsu_2d_w_test.bin --type int8 --channels 1 1024x1024 
+2D Unsampled Write,int8,2,16x16,PASS,./vsu_2d_w_test.bin --type int8 --channels 2 16x16 
+2D Unsampled Write,int8,2,1024x768,PASS,./vsu_2d_w_test.bin --type int8 --channels 2 1024x768 
+2D Unsampled Write,int8,2,1920x1080,FAIL,./vsu_2d_w_test.bin --type int8 --channels 2 1920x1080 
+2D Unsampled Write,int8,2,13x17,PASS,./vsu_2d_w_test.bin --type int8 --channels 2 13x17 
+2D Unsampled Write,int8,2,1024x1024,PASS,./vsu_2d_w_test.bin --type int8 --channels 2 1024x1024 
+2D Unsampled Write,int8,4,16x16,PASS,./vsu_2d_w_test.bin --type int8 --channels 4 16x16 
+2D Unsampled Write,int8,4,1024x768,PASS,./vsu_2d_w_test.bin --type int8 --channels 4 1024x768 
+2D Unsampled Write,int8,4,1920x1080,FAIL,./vsu_2d_w_test.bin --type int8 --channels 4 1920x1080 
+2D Unsampled Write,int8,4,13x17,PASS,./vsu_2d_w_test.bin --type int8 --channels 4 13x17 
+2D Unsampled Write,int8,4,1024x1024,PASS,./vsu_2d_w_test.bin --type int8 --channels 4 1024x1024 
+2D Unsampled Write,unorm8,1,16x16,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 1 16x16 
+2D Unsampled Write,unorm8,1,1024x768,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 1 1024x768 
+2D Unsampled Write,unorm8,1,1920x1080,FAIL,./vsu_2d_w_test.bin --type unorm8 --channels 1 1920x1080 
+2D Unsampled Write,unorm8,1,13x17,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 1 13x17 
+2D Unsampled Write,unorm8,1,1024x1024,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 1 1024x1024 
+2D Unsampled Write,unorm8,2,16x16,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 2 16x16 
+2D Unsampled Write,unorm8,2,1024x768,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 2 1024x768 
+2D Unsampled Write,unorm8,2,1920x1080,FAIL,./vsu_2d_w_test.bin --type unorm8 --channels 2 1920x1080 
+2D Unsampled Write,unorm8,2,13x17,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 2 13x17 
+2D Unsampled Write,unorm8,2,1024x1024,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 2 1024x1024 
+2D Unsampled Write,unorm8,4,16x16,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 4 16x16 
+2D Unsampled Write,unorm8,4,1024x768,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 4 1024x768 
+2D Unsampled Write,unorm8,4,1920x1080,FAIL,./vsu_2d_w_test.bin --type unorm8 --channels 4 1920x1080 
+2D Unsampled Write,unorm8,4,13x17,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 4 13x17 
+2D Unsampled Write,unorm8,4,1024x1024,PASS,./vsu_2d_w_test.bin --type unorm8 --channels 4 1024x1024 
+2D Sampled Read,float,1,16x16,PASS,./vss_2d_test.bin --type float --channels 1 16x16 
+2D Sampled Read,float,1,1024x768,PASS,./vss_2d_test.bin --type float --channels 1 1024x768 
+2D Sampled Read,float,1,1920x1080,PASS,./vss_2d_test.bin --type float --channels 1 1920x1080 
+2D Sampled Read,float,1,13x17,PASS,./vss_2d_test.bin --type float --channels 1 13x17 
+2D Sampled Read,float,1,1024x1024,PASS,./vss_2d_test.bin --type float --channels 1 1024x1024 
+2D Sampled Read,float,2,16x16,PASS,./vss_2d_test.bin --type float --channels 2 16x16 
+2D Sampled Read,float,2,1024x768,PASS,./vss_2d_test.bin --type float --channels 2 1024x768 
+2D Sampled Read,float,2,1920x1080,PASS,./vss_2d_test.bin --type float --channels 2 1920x1080 
+2D Sampled Read,float,2,13x17,PASS,./vss_2d_test.bin --type float --channels 2 13x17 
+2D Sampled Read,float,2,1024x1024,PASS,./vss_2d_test.bin --type float --channels 2 1024x1024 
+2D Sampled Read,float,4,16x16,PASS,./vss_2d_test.bin --type float --channels 4 16x16 
+2D Sampled Read,float,4,1024x768,PASS,./vss_2d_test.bin --type float --channels 4 1024x768 
+2D Sampled Read,float,4,1920x1080,PASS,./vss_2d_test.bin --type float --channels 4 1920x1080 
+2D Sampled Read,float,4,13x17,PASS,./vss_2d_test.bin --type float --channels 4 13x17 
+2D Sampled Read,float,4,1024x1024,PASS,./vss_2d_test.bin --type float --channels 4 1024x1024 
+2D Sampled Read,half,1,16x16,PASS,./vss_2d_test.bin --type half --channels 1 16x16 
+2D Sampled Read,half,1,1024x768,PASS,./vss_2d_test.bin --type half --channels 1 1024x768 
+2D Sampled Read,half,1,1920x1080,FAIL,./vss_2d_test.bin --type half --channels 1 1920x1080 
+2D Sampled Read,half,1,13x17,PASS,./vss_2d_test.bin --type half --channels 1 13x17 
+2D Sampled Read,half,1,1024x1024,PASS,./vss_2d_test.bin --type half --channels 1 1024x1024 
+2D Sampled Read,half,2,16x16,PASS,./vss_2d_test.bin --type half --channels 2 16x16 
+2D Sampled Read,half,2,1024x768,PASS,./vss_2d_test.bin --type half --channels 2 1024x768 
+2D Sampled Read,half,2,1920x1080,PASS,./vss_2d_test.bin --type half --channels 2 1920x1080 
+2D Sampled Read,half,2,13x17,PASS,./vss_2d_test.bin --type half --channels 2 13x17 
+2D Sampled Read,half,2,1024x1024,PASS,./vss_2d_test.bin --type half --channels 2 1024x1024 
+2D Sampled Read,half,4,16x16,PASS,./vss_2d_test.bin --type half --channels 4 16x16 
+2D Sampled Read,half,4,1024x768,PASS,./vss_2d_test.bin --type half --channels 4 1024x768 
+2D Sampled Read,half,4,1920x1080,PASS,./vss_2d_test.bin --type half --channels 4 1920x1080 
+2D Sampled Read,half,4,13x17,PASS,./vss_2d_test.bin --type half --channels 4 13x17 
+2D Sampled Read,half,4,1024x1024,PASS,./vss_2d_test.bin --type half --channels 4 1024x1024 
+2D Sampled Read,int32,1,16x16,PASS,./vss_2d_test.bin --type int32 --channels 1 16x16 
+2D Sampled Read,int32,1,1024x768,PASS,./vss_2d_test.bin --type int32 --channels 1 1024x768 
+2D Sampled Read,int32,1,1920x1080,PASS,./vss_2d_test.bin --type int32 --channels 1 1920x1080 
+2D Sampled Read,int32,1,13x17,PASS,./vss_2d_test.bin --type int32 --channels 1 13x17 
+2D Sampled Read,int32,1,1024x1024,PASS,./vss_2d_test.bin --type int32 --channels 1 1024x1024 
+2D Sampled Read,int32,2,16x16,PASS,./vss_2d_test.bin --type int32 --channels 2 16x16 
+2D Sampled Read,int32,2,1024x768,PASS,./vss_2d_test.bin --type int32 --channels 2 1024x768 
+2D Sampled Read,int32,2,1920x1080,PASS,./vss_2d_test.bin --type int32 --channels 2 1920x1080 
+2D Sampled Read,int32,2,13x17,PASS,./vss_2d_test.bin --type int32 --channels 2 13x17 
+2D Sampled Read,int32,2,1024x1024,PASS,./vss_2d_test.bin --type int32 --channels 2 1024x1024 
+2D Sampled Read,int32,4,16x16,PASS,./vss_2d_test.bin --type int32 --channels 4 16x16 
+2D Sampled Read,int32,4,1024x768,PASS,./vss_2d_test.bin --type int32 --channels 4 1024x768 
+2D Sampled Read,int32,4,1920x1080,PASS,./vss_2d_test.bin --type int32 --channels 4 1920x1080 
+2D Sampled Read,int32,4,13x17,PASS,./vss_2d_test.bin --type int32 --channels 4 13x17 
+2D Sampled Read,int32,4,1024x1024,PASS,./vss_2d_test.bin --type int32 --channels 4 1024x1024 
+2D Sampled Read,uint32,1,16x16,PASS,./vss_2d_test.bin --type uint32 --channels 1 16x16 
+2D Sampled Read,uint32,1,1024x768,PASS,./vss_2d_test.bin --type uint32 --channels 1 1024x768 
+2D Sampled Read,uint32,1,1920x1080,PASS,./vss_2d_test.bin --type uint32 --channels 1 1920x1080 
+2D Sampled Read,uint32,1,13x17,PASS,./vss_2d_test.bin --type uint32 --channels 1 13x17 
+2D Sampled Read,uint32,1,1024x1024,PASS,./vss_2d_test.bin --type uint32 --channels 1 1024x1024 
+2D Sampled Read,uint32,2,16x16,PASS,./vss_2d_test.bin --type uint32 --channels 2 16x16 
+2D Sampled Read,uint32,2,1024x768,PASS,./vss_2d_test.bin --type uint32 --channels 2 1024x768 
+2D Sampled Read,uint32,2,1920x1080,PASS,./vss_2d_test.bin --type uint32 --channels 2 1920x1080 
+2D Sampled Read,uint32,2,13x17,PASS,./vss_2d_test.bin --type uint32 --channels 2 13x17 
+2D Sampled Read,uint32,2,1024x1024,PASS,./vss_2d_test.bin --type uint32 --channels 2 1024x1024 
+2D Sampled Read,uint32,4,16x16,PASS,./vss_2d_test.bin --type uint32 --channels 4 16x16 
+2D Sampled Read,uint32,4,1024x768,PASS,./vss_2d_test.bin --type uint32 --channels 4 1024x768 
+2D Sampled Read,uint32,4,1920x1080,PASS,./vss_2d_test.bin --type uint32 --channels 4 1920x1080 
+2D Sampled Read,uint32,4,13x17,PASS,./vss_2d_test.bin --type uint32 --channels 4 13x17 
+2D Sampled Read,uint32,4,1024x1024,PASS,./vss_2d_test.bin --type uint32 --channels 4 1024x1024 
+2D Sampled Read,int16,1,16x16,PASS,./vss_2d_test.bin --type int16 --channels 1 16x16 
+2D Sampled Read,int16,1,1024x768,PASS,./vss_2d_test.bin --type int16 --channels 1 1024x768 
+2D Sampled Read,int16,1,1920x1080,FAIL,./vss_2d_test.bin --type int16 --channels 1 1920x1080 
+2D Sampled Read,int16,1,13x17,PASS,./vss_2d_test.bin --type int16 --channels 1 13x17 
+2D Sampled Read,int16,1,1024x1024,PASS,./vss_2d_test.bin --type int16 --channels 1 1024x1024 
+2D Sampled Read,int16,2,16x16,PASS,./vss_2d_test.bin --type int16 --channels 2 16x16 
+2D Sampled Read,int16,2,1024x768,PASS,./vss_2d_test.bin --type int16 --channels 2 1024x768 
+2D Sampled Read,int16,2,1920x1080,PASS,./vss_2d_test.bin --type int16 --channels 2 1920x1080 
+2D Sampled Read,int16,2,13x17,PASS,./vss_2d_test.bin --type int16 --channels 2 13x17 
+2D Sampled Read,int16,2,1024x1024,PASS,./vss_2d_test.bin --type int16 --channels 2 1024x1024 
+2D Sampled Read,int16,4,16x16,PASS,./vss_2d_test.bin --type int16 --channels 4 16x16 
+2D Sampled Read,int16,4,1024x768,PASS,./vss_2d_test.bin --type int16 --channels 4 1024x768 
+2D Sampled Read,int16,4,1920x1080,PASS,./vss_2d_test.bin --type int16 --channels 4 1920x1080 
+2D Sampled Read,int16,4,13x17,PASS,./vss_2d_test.bin --type int16 --channels 4 13x17 
+2D Sampled Read,int16,4,1024x1024,PASS,./vss_2d_test.bin --type int16 --channels 4 1024x1024 
+2D Sampled Read,uint16,1,16x16,PASS,./vss_2d_test.bin --type uint16 --channels 1 16x16 
+2D Sampled Read,uint16,1,1024x768,PASS,./vss_2d_test.bin --type uint16 --channels 1 1024x768 
+2D Sampled Read,uint16,1,1920x1080,FAIL,./vss_2d_test.bin --type uint16 --channels 1 1920x1080 
+2D Sampled Read,uint16,1,13x17,PASS,./vss_2d_test.bin --type uint16 --channels 1 13x17 
+2D Sampled Read,uint16,1,1024x1024,PASS,./vss_2d_test.bin --type uint16 --channels 1 1024x1024 
+2D Sampled Read,uint16,2,16x16,PASS,./vss_2d_test.bin --type uint16 --channels 2 16x16 
+2D Sampled Read,uint16,2,1024x768,PASS,./vss_2d_test.bin --type uint16 --channels 2 1024x768 
+2D Sampled Read,uint16,2,1920x1080,PASS,./vss_2d_test.bin --type uint16 --channels 2 1920x1080 
+2D Sampled Read,uint16,2,13x17,PASS,./vss_2d_test.bin --type uint16 --channels 2 13x17 
+2D Sampled Read,uint16,2,1024x1024,PASS,./vss_2d_test.bin --type uint16 --channels 2 1024x1024 
+2D Sampled Read,uint16,4,16x16,PASS,./vss_2d_test.bin --type uint16 --channels 4 16x16 
+2D Sampled Read,uint16,4,1024x768,PASS,./vss_2d_test.bin --type uint16 --channels 4 1024x768 
+2D Sampled Read,uint16,4,1920x1080,PASS,./vss_2d_test.bin --type uint16 --channels 4 1920x1080 
+2D Sampled Read,uint16,4,13x17,PASS,./vss_2d_test.bin --type uint16 --channels 4 13x17 
+2D Sampled Read,uint16,4,1024x1024,PASS,./vss_2d_test.bin --type uint16 --channels 4 1024x1024 
+2D Sampled Read,uint8,1,16x16,PASS,./vss_2d_test.bin --type uint8 --channels 1 16x16 
+2D Sampled Read,uint8,1,1024x768,PASS,./vss_2d_test.bin --type uint8 --channels 1 1024x768 
+2D Sampled Read,uint8,1,1920x1080,FAIL,./vss_2d_test.bin --type uint8 --channels 1 1920x1080 
+2D Sampled Read,uint8,1,13x17,PASS,./vss_2d_test.bin --type uint8 --channels 1 13x17 
+2D Sampled Read,uint8,1,1024x1024,PASS,./vss_2d_test.bin --type uint8 --channels 1 1024x1024 
+2D Sampled Read,uint8,2,16x16,PASS,./vss_2d_test.bin --type uint8 --channels 2 16x16 
+2D Sampled Read,uint8,2,1024x768,PASS,./vss_2d_test.bin --type uint8 --channels 2 1024x768 
+2D Sampled Read,uint8,2,1920x1080,FAIL,./vss_2d_test.bin --type uint8 --channels 2 1920x1080 
+2D Sampled Read,uint8,2,13x17,PASS,./vss_2d_test.bin --type uint8 --channels 2 13x17 
+2D Sampled Read,uint8,2,1024x1024,PASS,./vss_2d_test.bin --type uint8 --channels 2 1024x1024 
+2D Sampled Read,uint8,4,16x16,PASS,./vss_2d_test.bin --type uint8 --channels 4 16x16 
+2D Sampled Read,uint8,4,1024x768,PASS,./vss_2d_test.bin --type uint8 --channels 4 1024x768 
+2D Sampled Read,uint8,4,1920x1080,PASS,./vss_2d_test.bin --type uint8 --channels 4 1920x1080 
+2D Sampled Read,uint8,4,13x17,PASS,./vss_2d_test.bin --type uint8 --channels 4 13x17 
+2D Sampled Read,uint8,4,1024x1024,PASS,./vss_2d_test.bin --type uint8 --channels 4 1024x1024 
+2D Sampled Read,int8,1,16x16,PASS,./vss_2d_test.bin --type int8 --channels 1 16x16 
+2D Sampled Read,int8,1,1024x768,PASS,./vss_2d_test.bin --type int8 --channels 1 1024x768 
+2D Sampled Read,int8,1,1920x1080,FAIL,./vss_2d_test.bin --type int8 --channels 1 1920x1080 
+2D Sampled Read,int8,1,13x17,PASS,./vss_2d_test.bin --type int8 --channels 1 13x17 
+2D Sampled Read,int8,1,1024x1024,PASS,./vss_2d_test.bin --type int8 --channels 1 1024x1024 
+2D Sampled Read,int8,2,16x16,PASS,./vss_2d_test.bin --type int8 --channels 2 16x16 
+2D Sampled Read,int8,2,1024x768,PASS,./vss_2d_test.bin --type int8 --channels 2 1024x768 
+2D Sampled Read,int8,2,1920x1080,FAIL,./vss_2d_test.bin --type int8 --channels 2 1920x1080 
+2D Sampled Read,int8,2,13x17,PASS,./vss_2d_test.bin --type int8 --channels 2 13x17 
+2D Sampled Read,int8,2,1024x1024,PASS,./vss_2d_test.bin --type int8 --channels 2 1024x1024 
+2D Sampled Read,int8,4,16x16,PASS,./vss_2d_test.bin --type int8 --channels 4 16x16 
+2D Sampled Read,int8,4,1024x768,PASS,./vss_2d_test.bin --type int8 --channels 4 1024x768 
+2D Sampled Read,int8,4,1920x1080,PASS,./vss_2d_test.bin --type int8 --channels 4 1920x1080 
+2D Sampled Read,int8,4,13x17,PASS,./vss_2d_test.bin --type int8 --channels 4 13x17 
+2D Sampled Read,int8,4,1024x1024,PASS,./vss_2d_test.bin --type int8 --channels 4 1024x1024 
+2D Sampled Read,unorm8,1,16x16,PASS,./vss_2d_test.bin --type unorm8 --channels 1 16x16 
+2D Sampled Read,unorm8,1,1024x768,PASS,./vss_2d_test.bin --type unorm8 --channels 1 1024x768 
+2D Sampled Read,unorm8,1,1920x1080,FAIL,./vss_2d_test.bin --type unorm8 --channels 1 1920x1080 
+2D Sampled Read,unorm8,1,13x17,PASS,./vss_2d_test.bin --type unorm8 --channels 1 13x17 
+2D Sampled Read,unorm8,1,1024x1024,PASS,./vss_2d_test.bin --type unorm8 --channels 1 1024x1024 
+2D Sampled Read,unorm8,2,16x16,PASS,./vss_2d_test.bin --type unorm8 --channels 2 16x16 
+2D Sampled Read,unorm8,2,1024x768,PASS,./vss_2d_test.bin --type unorm8 --channels 2 1024x768 
+2D Sampled Read,unorm8,2,1920x1080,FAIL,./vss_2d_test.bin --type unorm8 --channels 2 1920x1080 
+2D Sampled Read,unorm8,2,13x17,PASS,./vss_2d_test.bin --type unorm8 --channels 2 13x17 
+2D Sampled Read,unorm8,2,1024x1024,PASS,./vss_2d_test.bin --type unorm8 --channels 2 1024x1024 
+2D Sampled Read,unorm8,4,16x16,PASS,./vss_2d_test.bin --type unorm8 --channels 4 16x16 
+2D Sampled Read,unorm8,4,1024x768,PASS,./vss_2d_test.bin --type unorm8 --channels 4 1024x768 
+2D Sampled Read,unorm8,4,1920x1080,PASS,./vss_2d_test.bin --type unorm8 --channels 4 1920x1080 
+2D Sampled Read,unorm8,4,13x17,PASS,./vss_2d_test.bin --type unorm8 --channels 4 13x17 
+2D Sampled Read,unorm8,4,1024x1024,PASS,./vss_2d_test.bin --type unorm8 --channels 4 1024x1024 
+2D Arithmetic Unsampled,float,1,16x16,PASS,./vs_2d_arith.bin --type float --channels 1 16x16 
+2D Arithmetic Unsampled,float,1,1024x768,PASS,./vs_2d_arith.bin --type float --channels 1 1024x768 
+2D Arithmetic Unsampled,float,1,1920x1080,FAIL,./vs_2d_arith.bin --type float --channels 1 1920x1080 
+2D Arithmetic Unsampled,float,1,13x17,PASS,./vs_2d_arith.bin --type float --channels 1 13x17 
+2D Arithmetic Unsampled,float,1,1024x1024,PASS,./vs_2d_arith.bin --type float --channels 1 1024x1024 
+2D Arithmetic Unsampled,float,2,16x16,PASS,./vs_2d_arith.bin --type float --channels 2 16x16 
+2D Arithmetic Unsampled,float,2,1024x768,PASS,./vs_2d_arith.bin --type float --channels 2 1024x768 
+2D Arithmetic Unsampled,float,2,1920x1080,FAIL,./vs_2d_arith.bin --type float --channels 2 1920x1080 
+2D Arithmetic Unsampled,float,2,13x17,PASS,./vs_2d_arith.bin --type float --channels 2 13x17 
+2D Arithmetic Unsampled,float,2,1024x1024,PASS,./vs_2d_arith.bin --type float --channels 2 1024x1024 
+2D Arithmetic Unsampled,float,4,16x16,PASS,./vs_2d_arith.bin --type float --channels 4 16x16 
+2D Arithmetic Unsampled,float,4,1024x768,PASS,./vs_2d_arith.bin --type float --channels 4 1024x768 
+2D Arithmetic Unsampled,float,4,1920x1080,FAIL,./vs_2d_arith.bin --type float --channels 4 1920x1080 
+2D Arithmetic Unsampled,float,4,13x17,PASS,./vs_2d_arith.bin --type float --channels 4 13x17 
+2D Arithmetic Unsampled,float,4,1024x1024,PASS,./vs_2d_arith.bin --type float --channels 4 1024x1024 
+2D Arithmetic Unsampled,half,1,16x16,PASS,./vs_2d_arith.bin --type half --channels 1 16x16 
+2D Arithmetic Unsampled,half,1,1024x768,PASS,./vs_2d_arith.bin --type half --channels 1 1024x768 
+2D Arithmetic Unsampled,half,1,1920x1080,FAIL,./vs_2d_arith.bin --type half --channels 1 1920x1080 
+2D Arithmetic Unsampled,half,1,13x17,PASS,./vs_2d_arith.bin --type half --channels 1 13x17 
+2D Arithmetic Unsampled,half,1,1024x1024,PASS,./vs_2d_arith.bin --type half --channels 1 1024x1024 
+2D Arithmetic Unsampled,half,2,16x16,PASS,./vs_2d_arith.bin --type half --channels 2 16x16 
+2D Arithmetic Unsampled,half,2,1024x768,PASS,./vs_2d_arith.bin --type half --channels 2 1024x768 
+2D Arithmetic Unsampled,half,2,1920x1080,FAIL,./vs_2d_arith.bin --type half --channels 2 1920x1080 
+2D Arithmetic Unsampled,half,2,13x17,PASS,./vs_2d_arith.bin --type half --channels 2 13x17 
+2D Arithmetic Unsampled,half,2,1024x1024,PASS,./vs_2d_arith.bin --type half --channels 2 1024x1024 
+2D Arithmetic Unsampled,half,4,16x16,PASS,./vs_2d_arith.bin --type half --channels 4 16x16 
+2D Arithmetic Unsampled,half,4,1024x768,PASS,./vs_2d_arith.bin --type half --channels 4 1024x768 
+2D Arithmetic Unsampled,half,4,1920x1080,FAIL,./vs_2d_arith.bin --type half --channels 4 1920x1080 
+2D Arithmetic Unsampled,half,4,13x17,PASS,./vs_2d_arith.bin --type half --channels 4 13x17 
+2D Arithmetic Unsampled,half,4,1024x1024,PASS,./vs_2d_arith.bin --type half --channels 4 1024x1024 
+2D Arithmetic Unsampled,int32,1,16x16,PASS,./vs_2d_arith.bin --type int32 --channels 1 16x16 
+2D Arithmetic Unsampled,int32,1,1024x768,PASS,./vs_2d_arith.bin --type int32 --channels 1 1024x768 
+2D Arithmetic Unsampled,int32,1,1920x1080,FAIL,./vs_2d_arith.bin --type int32 --channels 1 1920x1080 
+2D Arithmetic Unsampled,int32,1,13x17,PASS,./vs_2d_arith.bin --type int32 --channels 1 13x17 
+2D Arithmetic Unsampled,int32,1,1024x1024,PASS,./vs_2d_arith.bin --type int32 --channels 1 1024x1024 
+2D Arithmetic Unsampled,int32,2,16x16,PASS,./vs_2d_arith.bin --type int32 --channels 2 16x16 
+2D Arithmetic Unsampled,int32,2,1024x768,PASS,./vs_2d_arith.bin --type int32 --channels 2 1024x768 
+2D Arithmetic Unsampled,int32,2,1920x1080,FAIL,./vs_2d_arith.bin --type int32 --channels 2 1920x1080 
+2D Arithmetic Unsampled,int32,2,13x17,PASS,./vs_2d_arith.bin --type int32 --channels 2 13x17 
+2D Arithmetic Unsampled,int32,2,1024x1024,PASS,./vs_2d_arith.bin --type int32 --channels 2 1024x1024 
+2D Arithmetic Unsampled,int32,4,16x16,PASS,./vs_2d_arith.bin --type int32 --channels 4 16x16 
+2D Arithmetic Unsampled,int32,4,1024x768,PASS,./vs_2d_arith.bin --type int32 --channels 4 1024x768 
+2D Arithmetic Unsampled,int32,4,1920x1080,FAIL,./vs_2d_arith.bin --type int32 --channels 4 1920x1080 
+2D Arithmetic Unsampled,int32,4,13x17,PASS,./vs_2d_arith.bin --type int32 --channels 4 13x17 
+2D Arithmetic Unsampled,int32,4,1024x1024,PASS,./vs_2d_arith.bin --type int32 --channels 4 1024x1024 
+2D Arithmetic Unsampled,uint32,1,16x16,PASS,./vs_2d_arith.bin --type uint32 --channels 1 16x16 
+2D Arithmetic Unsampled,uint32,1,1024x768,PASS,./vs_2d_arith.bin --type uint32 --channels 1 1024x768 
+2D Arithmetic Unsampled,uint32,1,1920x1080,FAIL,./vs_2d_arith.bin --type uint32 --channels 1 1920x1080 
+2D Arithmetic Unsampled,uint32,1,13x17,PASS,./vs_2d_arith.bin --type uint32 --channels 1 13x17 
+2D Arithmetic Unsampled,uint32,1,1024x1024,PASS,./vs_2d_arith.bin --type uint32 --channels 1 1024x1024 
+2D Arithmetic Unsampled,uint32,2,16x16,PASS,./vs_2d_arith.bin --type uint32 --channels 2 16x16 
+2D Arithmetic Unsampled,uint32,2,1024x768,PASS,./vs_2d_arith.bin --type uint32 --channels 2 1024x768 
+2D Arithmetic Unsampled,uint32,2,1920x1080,FAIL,./vs_2d_arith.bin --type uint32 --channels 2 1920x1080 
+2D Arithmetic Unsampled,uint32,2,13x17,PASS,./vs_2d_arith.bin --type uint32 --channels 2 13x17 
+2D Arithmetic Unsampled,uint32,2,1024x1024,PASS,./vs_2d_arith.bin --type uint32 --channels 2 1024x1024 
+2D Arithmetic Unsampled,uint32,4,16x16,PASS,./vs_2d_arith.bin --type uint32 --channels 4 16x16 
+2D Arithmetic Unsampled,uint32,4,1024x768,PASS,./vs_2d_arith.bin --type uint32 --channels 4 1024x768 
+2D Arithmetic Unsampled,uint32,4,1920x1080,FAIL,./vs_2d_arith.bin --type uint32 --channels 4 1920x1080 
+2D Arithmetic Unsampled,uint32,4,13x17,PASS,./vs_2d_arith.bin --type uint32 --channels 4 13x17 
+2D Arithmetic Unsampled,uint32,4,1024x1024,PASS,./vs_2d_arith.bin --type uint32 --channels 4 1024x1024 
+2D Arithmetic Unsampled,int16,1,16x16,PASS,./vs_2d_arith.bin --type int16 --channels 1 16x16 
+2D Arithmetic Unsampled,int16,1,1024x768,PASS,./vs_2d_arith.bin --type int16 --channels 1 1024x768 
+2D Arithmetic Unsampled,int16,1,1920x1080,FAIL,./vs_2d_arith.bin --type int16 --channels 1 1920x1080 
+2D Arithmetic Unsampled,int16,1,13x17,PASS,./vs_2d_arith.bin --type int16 --channels 1 13x17 
+2D Arithmetic Unsampled,int16,1,1024x1024,PASS,./vs_2d_arith.bin --type int16 --channels 1 1024x1024 
+2D Arithmetic Unsampled,int16,2,16x16,PASS,./vs_2d_arith.bin --type int16 --channels 2 16x16 
+2D Arithmetic Unsampled,int16,2,1024x768,PASS,./vs_2d_arith.bin --type int16 --channels 2 1024x768 
+2D Arithmetic Unsampled,int16,2,1920x1080,FAIL,./vs_2d_arith.bin --type int16 --channels 2 1920x1080 
+2D Arithmetic Unsampled,int16,2,13x17,PASS,./vs_2d_arith.bin --type int16 --channels 2 13x17 
+2D Arithmetic Unsampled,int16,2,1024x1024,PASS,./vs_2d_arith.bin --type int16 --channels 2 1024x1024 
+2D Arithmetic Unsampled,int16,4,16x16,PASS,./vs_2d_arith.bin --type int16 --channels 4 16x16 
+2D Arithmetic Unsampled,int16,4,1024x768,PASS,./vs_2d_arith.bin --type int16 --channels 4 1024x768 
+2D Arithmetic Unsampled,int16,4,1920x1080,FAIL,./vs_2d_arith.bin --type int16 --channels 4 1920x1080 
+2D Arithmetic Unsampled,int16,4,13x17,PASS,./vs_2d_arith.bin --type int16 --channels 4 13x17 
+2D Arithmetic Unsampled,int16,4,1024x1024,PASS,./vs_2d_arith.bin --type int16 --channels 4 1024x1024 
+2D Arithmetic Unsampled,uint16,1,16x16,PASS,./vs_2d_arith.bin --type uint16 --channels 1 16x16 
+2D Arithmetic Unsampled,uint16,1,1024x768,PASS,./vs_2d_arith.bin --type uint16 --channels 1 1024x768 
+2D Arithmetic Unsampled,uint16,1,1920x1080,FAIL,./vs_2d_arith.bin --type uint16 --channels 1 1920x1080 
+2D Arithmetic Unsampled,uint16,1,13x17,PASS,./vs_2d_arith.bin --type uint16 --channels 1 13x17 
+2D Arithmetic Unsampled,uint16,1,1024x1024,PASS,./vs_2d_arith.bin --type uint16 --channels 1 1024x1024 
+2D Arithmetic Unsampled,uint16,2,16x16,PASS,./vs_2d_arith.bin --type uint16 --channels 2 16x16 
+2D Arithmetic Unsampled,uint16,2,1024x768,PASS,./vs_2d_arith.bin --type uint16 --channels 2 1024x768 
+2D Arithmetic Unsampled,uint16,2,1920x1080,FAIL,./vs_2d_arith.bin --type uint16 --channels 2 1920x1080 
+2D Arithmetic Unsampled,uint16,2,13x17,PASS,./vs_2d_arith.bin --type uint16 --channels 2 13x17 
+2D Arithmetic Unsampled,uint16,2,1024x1024,PASS,./vs_2d_arith.bin --type uint16 --channels 2 1024x1024 
+2D Arithmetic Unsampled,uint16,4,16x16,PASS,./vs_2d_arith.bin --type uint16 --channels 4 16x16 
+2D Arithmetic Unsampled,uint16,4,1024x768,PASS,./vs_2d_arith.bin --type uint16 --channels 4 1024x768 
+2D Arithmetic Unsampled,uint16,4,1920x1080,FAIL,./vs_2d_arith.bin --type uint16 --channels 4 1920x1080 
+2D Arithmetic Unsampled,uint16,4,13x17,PASS,./vs_2d_arith.bin --type uint16 --channels 4 13x17 
+2D Arithmetic Unsampled,uint16,4,1024x1024,PASS,./vs_2d_arith.bin --type uint16 --channels 4 1024x1024 
+2D Arithmetic Unsampled,uint8,1,16x16,PASS,./vs_2d_arith.bin --type uint8 --channels 1 16x16 
+2D Arithmetic Unsampled,uint8,1,1024x768,PASS,./vs_2d_arith.bin --type uint8 --channels 1 1024x768 
+2D Arithmetic Unsampled,uint8,1,1920x1080,FAIL,./vs_2d_arith.bin --type uint8 --channels 1 1920x1080 
+2D Arithmetic Unsampled,uint8,1,13x17,PASS,./vs_2d_arith.bin --type uint8 --channels 1 13x17 
+2D Arithmetic Unsampled,uint8,1,1024x1024,PASS,./vs_2d_arith.bin --type uint8 --channels 1 1024x1024 
+2D Arithmetic Unsampled,uint8,2,16x16,PASS,./vs_2d_arith.bin --type uint8 --channels 2 16x16 
+2D Arithmetic Unsampled,uint8,2,1024x768,PASS,./vs_2d_arith.bin --type uint8 --channels 2 1024x768 
+2D Arithmetic Unsampled,uint8,2,1920x1080,FAIL,./vs_2d_arith.bin --type uint8 --channels 2 1920x1080 
+2D Arithmetic Unsampled,uint8,2,13x17,PASS,./vs_2d_arith.bin --type uint8 --channels 2 13x17 
+2D Arithmetic Unsampled,uint8,2,1024x1024,PASS,./vs_2d_arith.bin --type uint8 --channels 2 1024x1024 
+2D Arithmetic Unsampled,uint8,4,16x16,PASS,./vs_2d_arith.bin --type uint8 --channels 4 16x16 
+2D Arithmetic Unsampled,uint8,4,1024x768,PASS,./vs_2d_arith.bin --type uint8 --channels 4 1024x768 
+2D Arithmetic Unsampled,uint8,4,1920x1080,FAIL,./vs_2d_arith.bin --type uint8 --channels 4 1920x1080 
+2D Arithmetic Unsampled,uint8,4,13x17,PASS,./vs_2d_arith.bin --type uint8 --channels 4 13x17 
+2D Arithmetic Unsampled,uint8,4,1024x1024,PASS,./vs_2d_arith.bin --type uint8 --channels 4 1024x1024 
+2D Arithmetic Unsampled,int8,1,16x16,PASS,./vs_2d_arith.bin --type int8 --channels 1 16x16 
+2D Arithmetic Unsampled,int8,1,1024x768,PASS,./vs_2d_arith.bin --type int8 --channels 1 1024x768 
+2D Arithmetic Unsampled,int8,1,1920x1080,FAIL,./vs_2d_arith.bin --type int8 --channels 1 1920x1080 
+2D Arithmetic Unsampled,int8,1,13x17,PASS,./vs_2d_arith.bin --type int8 --channels 1 13x17 
+2D Arithmetic Unsampled,int8,1,1024x1024,PASS,./vs_2d_arith.bin --type int8 --channels 1 1024x1024 
+2D Arithmetic Unsampled,int8,2,16x16,PASS,./vs_2d_arith.bin --type int8 --channels 2 16x16 
+2D Arithmetic Unsampled,int8,2,1024x768,PASS,./vs_2d_arith.bin --type int8 --channels 2 1024x768 
+2D Arithmetic Unsampled,int8,2,1920x1080,FAIL,./vs_2d_arith.bin --type int8 --channels 2 1920x1080 
+2D Arithmetic Unsampled,int8,2,13x17,PASS,./vs_2d_arith.bin --type int8 --channels 2 13x17 
+2D Arithmetic Unsampled,int8,2,1024x1024,PASS,./vs_2d_arith.bin --type int8 --channels 2 1024x1024 
+2D Arithmetic Unsampled,int8,4,16x16,PASS,./vs_2d_arith.bin --type int8 --channels 4 16x16 
+2D Arithmetic Unsampled,int8,4,1024x768,PASS,./vs_2d_arith.bin --type int8 --channels 4 1024x768 
+2D Arithmetic Unsampled,int8,4,1920x1080,FAIL,./vs_2d_arith.bin --type int8 --channels 4 1920x1080 
+2D Arithmetic Unsampled,int8,4,13x17,PASS,./vs_2d_arith.bin --type int8 --channels 4 13x17 
+2D Arithmetic Unsampled,int8,4,1024x1024,PASS,./vs_2d_arith.bin --type int8 --channels 4 1024x1024 
+2D Arithmetic Unsampled,unorm8,1,16x16,PASS,./vs_2d_arith.bin --type unorm8 --channels 1 16x16 
+2D Arithmetic Unsampled,unorm8,1,1024x768,PASS,./vs_2d_arith.bin --type unorm8 --channels 1 1024x768 
+2D Arithmetic Unsampled,unorm8,1,1920x1080,FAIL,./vs_2d_arith.bin --type unorm8 --channels 1 1920x1080 
+2D Arithmetic Unsampled,unorm8,1,13x17,PASS,./vs_2d_arith.bin --type unorm8 --channels 1 13x17 
+2D Arithmetic Unsampled,unorm8,1,1024x1024,PASS,./vs_2d_arith.bin --type unorm8 --channels 1 1024x1024 
+2D Arithmetic Unsampled,unorm8,2,16x16,PASS,./vs_2d_arith.bin --type unorm8 --channels 2 16x16 
+2D Arithmetic Unsampled,unorm8,2,1024x768,PASS,./vs_2d_arith.bin --type unorm8 --channels 2 1024x768 
+2D Arithmetic Unsampled,unorm8,2,1920x1080,FAIL,./vs_2d_arith.bin --type unorm8 --channels 2 1920x1080 
+2D Arithmetic Unsampled,unorm8,2,13x17,PASS,./vs_2d_arith.bin --type unorm8 --channels 2 13x17 
+2D Arithmetic Unsampled,unorm8,2,1024x1024,PASS,./vs_2d_arith.bin --type unorm8 --channels 2 1024x1024 
+2D Arithmetic Unsampled,unorm8,4,16x16,PASS,./vs_2d_arith.bin --type unorm8 --channels 4 16x16 
+2D Arithmetic Unsampled,unorm8,4,1024x768,PASS,./vs_2d_arith.bin --type unorm8 --channels 4 1024x768 
+2D Arithmetic Unsampled,unorm8,4,1920x1080,FAIL,./vs_2d_arith.bin --type unorm8 --channels 4 1920x1080 
+2D Arithmetic Unsampled,unorm8,4,13x17,PASS,./vs_2d_arith.bin --type unorm8 --channels 4 13x17 
+2D Arithmetic Unsampled,unorm8,4,1024x1024,PASS,./vs_2d_arith.bin --type unorm8 --channels 4 1024x1024 
+2D Arithmetic Sampled,float,1,16x16,PASS,./vs_2d_arith.bin --type float --channels 1 16x16 --sampled
+2D Arithmetic Sampled,float,1,1024x768,PASS,./vs_2d_arith.bin --type float --channels 1 1024x768 --sampled
+2D Arithmetic Sampled,float,1,1920x1080,FAIL,./vs_2d_arith.bin --type float --channels 1 1920x1080 --sampled
+2D Arithmetic Sampled,float,1,13x17,PASS,./vs_2d_arith.bin --type float --channels 1 13x17 --sampled
+2D Arithmetic Sampled,float,1,1024x1024,PASS,./vs_2d_arith.bin --type float --channels 1 1024x1024 --sampled
+2D Arithmetic Sampled,float,2,16x16,PASS,./vs_2d_arith.bin --type float --channels 2 16x16 --sampled
+2D Arithmetic Sampled,float,2,1024x768,PASS,./vs_2d_arith.bin --type float --channels 2 1024x768 --sampled
+2D Arithmetic Sampled,float,2,1920x1080,FAIL,./vs_2d_arith.bin --type float --channels 2 1920x1080 --sampled
+2D Arithmetic Sampled,float,2,13x17,PASS,./vs_2d_arith.bin --type float --channels 2 13x17 --sampled
+2D Arithmetic Sampled,float,2,1024x1024,PASS,./vs_2d_arith.bin --type float --channels 2 1024x1024 --sampled
+2D Arithmetic Sampled,float,4,16x16,PASS,./vs_2d_arith.bin --type float --channels 4 16x16 --sampled
+2D Arithmetic Sampled,float,4,1024x768,PASS,./vs_2d_arith.bin --type float --channels 4 1024x768 --sampled
+2D Arithmetic Sampled,float,4,1920x1080,FAIL,./vs_2d_arith.bin --type float --channels 4 1920x1080 --sampled
+2D Arithmetic Sampled,float,4,13x17,PASS,./vs_2d_arith.bin --type float --channels 4 13x17 --sampled
+2D Arithmetic Sampled,float,4,1024x1024,PASS,./vs_2d_arith.bin --type float --channels 4 1024x1024 --sampled
+2D Arithmetic Sampled,half,1,16x16,PASS,./vs_2d_arith.bin --type half --channels 1 16x16 --sampled
+2D Arithmetic Sampled,half,1,1024x768,PASS,./vs_2d_arith.bin --type half --channels 1 1024x768 --sampled
+2D Arithmetic Sampled,half,1,1920x1080,FAIL,./vs_2d_arith.bin --type half --channels 1 1920x1080 --sampled
+2D Arithmetic Sampled,half,1,13x17,PASS,./vs_2d_arith.bin --type half --channels 1 13x17 --sampled
+2D Arithmetic Sampled,half,1,1024x1024,PASS,./vs_2d_arith.bin --type half --channels 1 1024x1024 --sampled
+2D Arithmetic Sampled,half,2,16x16,PASS,./vs_2d_arith.bin --type half --channels 2 16x16 --sampled
+2D Arithmetic Sampled,half,2,1024x768,PASS,./vs_2d_arith.bin --type half --channels 2 1024x768 --sampled
+2D Arithmetic Sampled,half,2,1920x1080,FAIL,./vs_2d_arith.bin --type half --channels 2 1920x1080 --sampled
+2D Arithmetic Sampled,half,2,13x17,PASS,./vs_2d_arith.bin --type half --channels 2 13x17 --sampled
+2D Arithmetic Sampled,half,2,1024x1024,PASS,./vs_2d_arith.bin --type half --channels 2 1024x1024 --sampled
+2D Arithmetic Sampled,half,4,16x16,PASS,./vs_2d_arith.bin --type half --channels 4 16x16 --sampled
+2D Arithmetic Sampled,half,4,1024x768,PASS,./vs_2d_arith.bin --type half --channels 4 1024x768 --sampled
+2D Arithmetic Sampled,half,4,1920x1080,FAIL,./vs_2d_arith.bin --type half --channels 4 1920x1080 --sampled
+2D Arithmetic Sampled,half,4,13x17,PASS,./vs_2d_arith.bin --type half --channels 4 13x17 --sampled
+2D Arithmetic Sampled,half,4,1024x1024,PASS,./vs_2d_arith.bin --type half --channels 4 1024x1024 --sampled
+2D Arithmetic Sampled,int32,1,16x16,PASS,./vs_2d_arith.bin --type int32 --channels 1 16x16 --sampled
+2D Arithmetic Sampled,int32,1,1024x768,PASS,./vs_2d_arith.bin --type int32 --channels 1 1024x768 --sampled
+2D Arithmetic Sampled,int32,1,1920x1080,FAIL,./vs_2d_arith.bin --type int32 --channels 1 1920x1080 --sampled
+2D Arithmetic Sampled,int32,1,13x17,PASS,./vs_2d_arith.bin --type int32 --channels 1 13x17 --sampled
+2D Arithmetic Sampled,int32,1,1024x1024,PASS,./vs_2d_arith.bin --type int32 --channels 1 1024x1024 --sampled
+2D Arithmetic Sampled,int32,2,16x16,PASS,./vs_2d_arith.bin --type int32 --channels 2 16x16 --sampled
+2D Arithmetic Sampled,int32,2,1024x768,PASS,./vs_2d_arith.bin --type int32 --channels 2 1024x768 --sampled
+2D Arithmetic Sampled,int32,2,1920x1080,FAIL,./vs_2d_arith.bin --type int32 --channels 2 1920x1080 --sampled
+2D Arithmetic Sampled,int32,2,13x17,PASS,./vs_2d_arith.bin --type int32 --channels 2 13x17 --sampled
+2D Arithmetic Sampled,int32,2,1024x1024,PASS,./vs_2d_arith.bin --type int32 --channels 2 1024x1024 --sampled
+2D Arithmetic Sampled,int32,4,16x16,PASS,./vs_2d_arith.bin --type int32 --channels 4 16x16 --sampled
+2D Arithmetic Sampled,int32,4,1024x768,PASS,./vs_2d_arith.bin --type int32 --channels 4 1024x768 --sampled
+2D Arithmetic Sampled,int32,4,1920x1080,FAIL,./vs_2d_arith.bin --type int32 --channels 4 1920x1080 --sampled
+2D Arithmetic Sampled,int32,4,13x17,PASS,./vs_2d_arith.bin --type int32 --channels 4 13x17 --sampled
+2D Arithmetic Sampled,int32,4,1024x1024,PASS,./vs_2d_arith.bin --type int32 --channels 4 1024x1024 --sampled
+2D Arithmetic Sampled,uint32,1,16x16,PASS,./vs_2d_arith.bin --type uint32 --channels 1 16x16 --sampled
+2D Arithmetic Sampled,uint32,1,1024x768,PASS,./vs_2d_arith.bin --type uint32 --channels 1 1024x768 --sampled
+2D Arithmetic Sampled,uint32,1,1920x1080,FAIL,./vs_2d_arith.bin --type uint32 --channels 1 1920x1080 --sampled
+2D Arithmetic Sampled,uint32,1,13x17,PASS,./vs_2d_arith.bin --type uint32 --channels 1 13x17 --sampled
+2D Arithmetic Sampled,uint32,1,1024x1024,PASS,./vs_2d_arith.bin --type uint32 --channels 1 1024x1024 --sampled
+2D Arithmetic Sampled,uint32,2,16x16,PASS,./vs_2d_arith.bin --type uint32 --channels 2 16x16 --sampled
+2D Arithmetic Sampled,uint32,2,1024x768,PASS,./vs_2d_arith.bin --type uint32 --channels 2 1024x768 --sampled
+2D Arithmetic Sampled,uint32,2,1920x1080,FAIL,./vs_2d_arith.bin --type uint32 --channels 2 1920x1080 --sampled
+2D Arithmetic Sampled,uint32,2,13x17,PASS,./vs_2d_arith.bin --type uint32 --channels 2 13x17 --sampled
+2D Arithmetic Sampled,uint32,2,1024x1024,PASS,./vs_2d_arith.bin --type uint32 --channels 2 1024x1024 --sampled
+2D Arithmetic Sampled,uint32,4,16x16,PASS,./vs_2d_arith.bin --type uint32 --channels 4 16x16 --sampled
+2D Arithmetic Sampled,uint32,4,1024x768,PASS,./vs_2d_arith.bin --type uint32 --channels 4 1024x768 --sampled
+2D Arithmetic Sampled,uint32,4,1920x1080,FAIL,./vs_2d_arith.bin --type uint32 --channels 4 1920x1080 --sampled
+2D Arithmetic Sampled,uint32,4,13x17,PASS,./vs_2d_arith.bin --type uint32 --channels 4 13x17 --sampled
+2D Arithmetic Sampled,uint32,4,1024x1024,PASS,./vs_2d_arith.bin --type uint32 --channels 4 1024x1024 --sampled
+2D Arithmetic Sampled,int16,1,16x16,PASS,./vs_2d_arith.bin --type int16 --channels 1 16x16 --sampled
+2D Arithmetic Sampled,int16,1,1024x768,PASS,./vs_2d_arith.bin --type int16 --channels 1 1024x768 --sampled
+2D Arithmetic Sampled,int16,1,1920x1080,FAIL,./vs_2d_arith.bin --type int16 --channels 1 1920x1080 --sampled
+2D Arithmetic Sampled,int16,1,13x17,PASS,./vs_2d_arith.bin --type int16 --channels 1 13x17 --sampled
+2D Arithmetic Sampled,int16,1,1024x1024,PASS,./vs_2d_arith.bin --type int16 --channels 1 1024x1024 --sampled
+2D Arithmetic Sampled,int16,2,16x16,PASS,./vs_2d_arith.bin --type int16 --channels 2 16x16 --sampled
+2D Arithmetic Sampled,int16,2,1024x768,PASS,./vs_2d_arith.bin --type int16 --channels 2 1024x768 --sampled
+2D Arithmetic Sampled,int16,2,1920x1080,FAIL,./vs_2d_arith.bin --type int16 --channels 2 1920x1080 --sampled
+2D Arithmetic Sampled,int16,2,13x17,PASS,./vs_2d_arith.bin --type int16 --channels 2 13x17 --sampled
+2D Arithmetic Sampled,int16,2,1024x1024,PASS,./vs_2d_arith.bin --type int16 --channels 2 1024x1024 --sampled
+2D Arithmetic Sampled,int16,4,16x16,PASS,./vs_2d_arith.bin --type int16 --channels 4 16x16 --sampled
+2D Arithmetic Sampled,int16,4,1024x768,PASS,./vs_2d_arith.bin --type int16 --channels 4 1024x768 --sampled
+2D Arithmetic Sampled,int16,4,1920x1080,FAIL,./vs_2d_arith.bin --type int16 --channels 4 1920x1080 --sampled
+2D Arithmetic Sampled,int16,4,13x17,PASS,./vs_2d_arith.bin --type int16 --channels 4 13x17 --sampled
+2D Arithmetic Sampled,int16,4,1024x1024,PASS,./vs_2d_arith.bin --type int16 --channels 4 1024x1024 --sampled
+2D Arithmetic Sampled,uint16,1,16x16,PASS,./vs_2d_arith.bin --type uint16 --channels 1 16x16 --sampled
+2D Arithmetic Sampled,uint16,1,1024x768,PASS,./vs_2d_arith.bin --type uint16 --channels 1 1024x768 --sampled
+2D Arithmetic Sampled,uint16,1,1920x1080,FAIL,./vs_2d_arith.bin --type uint16 --channels 1 1920x1080 --sampled
+2D Arithmetic Sampled,uint16,1,13x17,PASS,./vs_2d_arith.bin --type uint16 --channels 1 13x17 --sampled
+2D Arithmetic Sampled,uint16,1,1024x1024,PASS,./vs_2d_arith.bin --type uint16 --channels 1 1024x1024 --sampled
+2D Arithmetic Sampled,uint16,2,16x16,PASS,./vs_2d_arith.bin --type uint16 --channels 2 16x16 --sampled
+2D Arithmetic Sampled,uint16,2,1024x768,PASS,./vs_2d_arith.bin --type uint16 --channels 2 1024x768 --sampled
+2D Arithmetic Sampled,uint16,2,1920x1080,FAIL,./vs_2d_arith.bin --type uint16 --channels 2 1920x1080 --sampled
+2D Arithmetic Sampled,uint16,2,13x17,PASS,./vs_2d_arith.bin --type uint16 --channels 2 13x17 --sampled
+2D Arithmetic Sampled,uint16,2,1024x1024,PASS,./vs_2d_arith.bin --type uint16 --channels 2 1024x1024 --sampled
+2D Arithmetic Sampled,uint16,4,16x16,PASS,./vs_2d_arith.bin --type uint16 --channels 4 16x16 --sampled
+2D Arithmetic Sampled,uint16,4,1024x768,PASS,./vs_2d_arith.bin --type uint16 --channels 4 1024x768 --sampled
+2D Arithmetic Sampled,uint16,4,1920x1080,FAIL,./vs_2d_arith.bin --type uint16 --channels 4 1920x1080 --sampled
+2D Arithmetic Sampled,uint16,4,13x17,PASS,./vs_2d_arith.bin --type uint16 --channels 4 13x17 --sampled
+2D Arithmetic Sampled,uint16,4,1024x1024,PASS,./vs_2d_arith.bin --type uint16 --channels 4 1024x1024 --sampled
+2D Arithmetic Sampled,uint8,1,16x16,PASS,./vs_2d_arith.bin --type uint8 --channels 1 16x16 --sampled
+2D Arithmetic Sampled,uint8,1,1024x768,PASS,./vs_2d_arith.bin --type uint8 --channels 1 1024x768 --sampled
+2D Arithmetic Sampled,uint8,1,1920x1080,FAIL,./vs_2d_arith.bin --type uint8 --channels 1 1920x1080 --sampled
+2D Arithmetic Sampled,uint8,1,13x17,PASS,./vs_2d_arith.bin --type uint8 --channels 1 13x17 --sampled
+2D Arithmetic Sampled,uint8,1,1024x1024,PASS,./vs_2d_arith.bin --type uint8 --channels 1 1024x1024 --sampled
+2D Arithmetic Sampled,uint8,2,16x16,PASS,./vs_2d_arith.bin --type uint8 --channels 2 16x16 --sampled
+2D Arithmetic Sampled,uint8,2,1024x768,PASS,./vs_2d_arith.bin --type uint8 --channels 2 1024x768 --sampled
+2D Arithmetic Sampled,uint8,2,1920x1080,FAIL,./vs_2d_arith.bin --type uint8 --channels 2 1920x1080 --sampled
+2D Arithmetic Sampled,uint8,2,13x17,PASS,./vs_2d_arith.bin --type uint8 --channels 2 13x17 --sampled
+2D Arithmetic Sampled,uint8,2,1024x1024,PASS,./vs_2d_arith.bin --type uint8 --channels 2 1024x1024 --sampled
+2D Arithmetic Sampled,uint8,4,16x16,PASS,./vs_2d_arith.bin --type uint8 --channels 4 16x16 --sampled
+2D Arithmetic Sampled,uint8,4,1024x768,PASS,./vs_2d_arith.bin --type uint8 --channels 4 1024x768 --sampled
+2D Arithmetic Sampled,uint8,4,1920x1080,FAIL,./vs_2d_arith.bin --type uint8 --channels 4 1920x1080 --sampled
+2D Arithmetic Sampled,uint8,4,13x17,PASS,./vs_2d_arith.bin --type uint8 --channels 4 13x17 --sampled
+2D Arithmetic Sampled,uint8,4,1024x1024,PASS,./vs_2d_arith.bin --type uint8 --channels 4 1024x1024 --sampled
+2D Arithmetic Sampled,int8,1,16x16,PASS,./vs_2d_arith.bin --type int8 --channels 1 16x16 --sampled
+2D Arithmetic Sampled,int8,1,1024x768,PASS,./vs_2d_arith.bin --type int8 --channels 1 1024x768 --sampled
+2D Arithmetic Sampled,int8,1,1920x1080,FAIL,./vs_2d_arith.bin --type int8 --channels 1 1920x1080 --sampled
+2D Arithmetic Sampled,int8,1,13x17,PASS,./vs_2d_arith.bin --type int8 --channels 1 13x17 --sampled
+2D Arithmetic Sampled,int8,1,1024x1024,PASS,./vs_2d_arith.bin --type int8 --channels 1 1024x1024 --sampled
+2D Arithmetic Sampled,int8,2,16x16,PASS,./vs_2d_arith.bin --type int8 --channels 2 16x16 --sampled
+2D Arithmetic Sampled,int8,2,1024x768,PASS,./vs_2d_arith.bin --type int8 --channels 2 1024x768 --sampled
+2D Arithmetic Sampled,int8,2,1920x1080,FAIL,./vs_2d_arith.bin --type int8 --channels 2 1920x1080 --sampled
+2D Arithmetic Sampled,int8,2,13x17,PASS,./vs_2d_arith.bin --type int8 --channels 2 13x17 --sampled
+2D Arithmetic Sampled,int8,2,1024x1024,PASS,./vs_2d_arith.bin --type int8 --channels 2 1024x1024 --sampled
+2D Arithmetic Sampled,int8,4,16x16,PASS,./vs_2d_arith.bin --type int8 --channels 4 16x16 --sampled
+2D Arithmetic Sampled,int8,4,1024x768,PASS,./vs_2d_arith.bin --type int8 --channels 4 1024x768 --sampled
+2D Arithmetic Sampled,int8,4,1920x1080,FAIL,./vs_2d_arith.bin --type int8 --channels 4 1920x1080 --sampled
+2D Arithmetic Sampled,int8,4,13x17,PASS,./vs_2d_arith.bin --type int8 --channels 4 13x17 --sampled
+2D Arithmetic Sampled,int8,4,1024x1024,PASS,./vs_2d_arith.bin --type int8 --channels 4 1024x1024 --sampled
+2D Arithmetic Sampled,unorm8,1,16x16,PASS,./vs_2d_arith.bin --type unorm8 --channels 1 16x16 --sampled
+2D Arithmetic Sampled,unorm8,1,1024x768,PASS,./vs_2d_arith.bin --type unorm8 --channels 1 1024x768 --sampled
+2D Arithmetic Sampled,unorm8,1,1920x1080,FAIL,./vs_2d_arith.bin --type unorm8 --channels 1 1920x1080 --sampled
+2D Arithmetic Sampled,unorm8,1,13x17,PASS,./vs_2d_arith.bin --type unorm8 --channels 1 13x17 --sampled
+2D Arithmetic Sampled,unorm8,1,1024x1024,PASS,./vs_2d_arith.bin --type unorm8 --channels 1 1024x1024 --sampled
+2D Arithmetic Sampled,unorm8,2,16x16,PASS,./vs_2d_arith.bin --type unorm8 --channels 2 16x16 --sampled
+2D Arithmetic Sampled,unorm8,2,1024x768,PASS,./vs_2d_arith.bin --type unorm8 --channels 2 1024x768 --sampled
+2D Arithmetic Sampled,unorm8,2,1920x1080,FAIL,./vs_2d_arith.bin --type unorm8 --channels 2 1920x1080 --sampled
+2D Arithmetic Sampled,unorm8,2,13x17,PASS,./vs_2d_arith.bin --type unorm8 --channels 2 13x17 --sampled
+2D Arithmetic Sampled,unorm8,2,1024x1024,PASS,./vs_2d_arith.bin --type unorm8 --channels 2 1024x1024 --sampled
+2D Arithmetic Sampled,unorm8,4,16x16,PASS,./vs_2d_arith.bin --type unorm8 --channels 4 16x16 --sampled
+2D Arithmetic Sampled,unorm8,4,1024x768,PASS,./vs_2d_arith.bin --type unorm8 --channels 4 1024x768 --sampled
+2D Arithmetic Sampled,unorm8,4,1920x1080,FAIL,./vs_2d_arith.bin --type unorm8 --channels 4 1920x1080 --sampled
+2D Arithmetic Sampled,unorm8,4,13x17,PASS,./vs_2d_arith.bin --type unorm8 --channels 4 13x17 --sampled
+2D Arithmetic Sampled,unorm8,4,1024x1024,PASS,./vs_2d_arith.bin --type unorm8 --channels 4 1024x1024 --sampled

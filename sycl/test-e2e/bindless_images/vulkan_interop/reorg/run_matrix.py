@@ -8,16 +8,16 @@ import argparse
 # ---------------------------------------------------------
 # CONFIGURATION
 # ---------------------------------------------------------
-SURVIVORS_FILE = "a01-survivors.json"
-CASUALTIES_FILE = "a01-casualties.json"
-SUMMARY_FILE = "a01-summary.csv"
+SURVIVORS_FILE = "ldx-survivors.json"
+CASUALTIES_FILE = "ldx-casualties.json"
+SUMMARY_FILE = "ldx-summary.csv"
 
 # Map your binary names here
 TESTS = [
     # Label                  Binary Name               Default Flags
-    #("1D Unsampled Read",   "./vsu_1d_test.bin",       ""),
-    #("1D Unsampled Write",  "./vsu_1d_w_test.bin",     ""),
-    #("1D Sampled Read",     "./vss_1d_test.bin",       ""),
+    ("1D Unsampled Read",   "./vsu_1d_test.bin",       ""),
+    ("1D Unsampled Write",  "./vsu_1d_w_test.bin",     ""),
+    ("1D Sampled Read",     "./vss_1d_test.bin",       ""),
 
     ("2D Unsampled Read",   "./vsu_2d_test.bin",       ""),
     ("2D Unsampled Write",  "./vsu_2d_w_test.bin",     ""), 
@@ -32,17 +32,18 @@ TESTS = [
 ]
 
 # (Width, Height) Tuples
-# DIMENSIONS = [
-#     (16, 16),       # Tiny Square
-#     (1024, 768),    # Classic Rect (4:3)
-#     (1920, 1080),   # Full HD (Stride Stress)
-#     (13, 17),       # Prime Rect (Alignment Stress)
-#     (1024, 1024),   # Power of Two
-#     # (3127, 123),  # The Cliff Hunter
-# ]
+DIMENSIONS = [
+    (16, 16),       # Tiny Square
+    (1024, 768),    # Classic Rect (4:3)
+    (1920, 1080),   # Full HD (Stride Stress)
+    (13, 17),       # Prime Rect (Alignment Stress)
+    (1024, 1024),   # Power of Two
+    # (3127, 123),  # The Cliff Hunter
+]
 
 
-DIMENSIONS = [(16,16)]
+#DIMENSIONS = [(16,16)]
+
 # DIMENSIONS = [
 #     (15, 16),
 #     (16, 16),
@@ -56,36 +57,7 @@ DIMENSIONS = [(16,16)]
 # ]
 
 
-# TARGET: The "Rule of 32"
-# We want to probe Height vs Width at 32, 64, 128, 256 boundaries.
-# DIMENSIONS = []
 
-# # 1. Tiny Control
-# DIMENSIONS.append((16, 16))
-
-# # 2. The Boundary Hunter
-# # Powers of 2 relevant to tiling (32 is the suspect, 64/128 are multiples)
-# BOUNDARIES = [32, 64, 128, 256]
-
-# for b in BOUNDARIES:
-#     # A. Perfect Alignment (Should PASS)
-#     DIMENSIONS.append((b, b))
-    
-#     # B. Vertical Alignment Stress (Height is the variable)
-#     DIMENSIONS.append((b, b-1))   # Just Under (e.g., 32x31) -> Expected PASS
-#     DIMENSIONS.append((b, b+1))   # Just Over  (e.g., 32x33) -> Expected CRASH/FAIL
-    
-#     # C. Horizontal Alignment Stress (Width is the variable)
-#     # We flip them to prove Width doesn't trigger the crash
-#     DIMENSIONS.append((b-1, b))   # (e.g., 31x32) -> Expected PASS
-#     DIMENSIONS.append((b+1, b))   # (e.g., 33x32) -> Expected PASS
-    
-#     # D. The "Half-Tile" Offset (e.g., 32x48)
-#     # To see if it's strictly Power-of-2 or just Multiples of 32
-#     DIMENSIONS.append((b, b + 16)) 
-
-# # 3. The "Full HD" Control (To confirm the 1920 issue aligns with this)
-# DIMENSIONS.append((1920, 1080)) # 1080 is NOT divisible by 32 (33.75) -> Expected FAIL
 
 TYPES = [
     "float", "half", "int32", "uint32", 
