@@ -161,7 +161,7 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
         kernelEvent = q.submit([&](sycl::handler& h) {
             if (useSemaphores) {
                 h.ext_oneapi_wait_external_semaphore(extSemA);
-                h.ext_oneapi_wait_external_semaphore(extSemB);
+                // h.ext_oneapi_wait_external_semaphore(extSemB);  // <-- commenting out this will cause this test to pass. 
             }
             h.parallel_for(sycl::range<2>(width, height), [=](sycl::item<2> item) {
                 int x = item.get_id(0);

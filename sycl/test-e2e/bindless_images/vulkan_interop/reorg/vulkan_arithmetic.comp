@@ -1,0 +1,28 @@
+#version 450
+
+// $VULKAN_SDK/bin/glslangValidator -V vulkan_arithmetic.comp -o vulkan_arithmetic.spv
+
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+// Binding 0: Input A
+layout(binding = 0, rgba32f) uniform readonly image2D imgA;
+
+// Binding 1: Input B
+layout(binding = 1, rgba32f) uniform readonly image2D imgB;
+
+// Binding 2: Output C
+layout(binding = 2, rgba32f) uniform writeonly image2D imgOut;
+
+void main() {
+    ivec2 uv = ivec2(gl_GlobalInvocationID.xy);
+    
+    // Bounds check (optional if dispatch is perfect, but good practice)
+    ivec2 size = imageSize(imgOut);
+    if (uv.x >= size.x || uv.y >= size.y) return;
+
+    vec4 a = imageLoad(imgA, uv);
+    vec4 b = imageLoad(imgB, uv);
+    
+    imageStore(imgOut, uv, a + b);
+}

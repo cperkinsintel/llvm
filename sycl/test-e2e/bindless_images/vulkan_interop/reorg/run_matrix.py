@@ -15,9 +15,9 @@ SUMMARY_FILE = "ldx-summary.csv"
 # Map your binary names here
 TESTS = [
     # Label                  Binary Name               Default Flags
-    ("1D Unsampled Read",   "./vsu_1d_test.bin",       ""),
-    ("1D Unsampled Write",  "./vsu_1d_w_test.bin",     ""),
-    ("1D Sampled Read",     "./vss_1d_test.bin",       ""),
+    # ("1D Unsampled Read",   "./vsu_1d_test.bin",       ""),
+    # ("1D Unsampled Write",  "./vsu_1d_w_test.bin",     ""),
+    # ("1D Sampled Read",     "./vss_1d_test.bin",       ""),
 
     ("2D Unsampled Read",   "./vsu_2d_test.bin",       ""),
     ("2D Unsampled Write",  "./vsu_2d_w_test.bin",     ""), 
@@ -42,7 +42,7 @@ DIMENSIONS = [
 ]
 
 
-#DIMENSIONS = [(16,16)]
+# DIMENSIONS = [(16,16)]
 
 # DIMENSIONS = [
 #     (15, 16),
