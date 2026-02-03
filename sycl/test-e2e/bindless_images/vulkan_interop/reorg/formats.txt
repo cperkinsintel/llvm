@@ -1,0 +1,171 @@
+RECAP
+=====
+
+- --linear works 1D.  Fails everywhere else.  (low priority)
+- 3D fails everywhere except 1x1x1.  (low priority)
+- The format (channel count, data type) don't seem to matter too much. Tests pass or fail regardless.
+- For 2D tests, the DIMENSIONS matter a lot. There are DEFINITELY problems as we cross the power-of-2 boundaries for height. 
+  Surprisingly, not for Width. 
+  Latest WORKING driver (ha) seems to work fine with 4 channel images, and has the "height not round" problem with 1 and 2 channel images.
+- But, assuming the One Direction test passes, then adding a Semaphores works as well.
+- 
+- Semaphores fail utterly in the arithmetic tests. Driver cannot handle multiple semaphore dependencies. 
+- sempaphores exhibit an addiitonal problem: if there is ANY failure (like using --linear or 3D) then all semaphore usage after that failure fails or hangs.
+
+
+(*) One Direction Tests are Single Image, Data Handoff.
+
+READ: Vulkan => hand off to SYCL.  Sampled and Unampled. 
+WRITE: SYCL => Vulkan.     Unsampled Only 
+
+
+
+(**) Arithmetic tests are Multi-Input, Single Output. ImageC = Image A + Image B. 
+
+Pipeline:
+- Vulkan: Uploads data to Image A. Signals SemA.
+- Vulkan: Uploads data to Image B. Signals SemB.
+- SYCL: Waits for both SemA and SemB.
+- SYCL: Reads A and B, adds them, writes to Image C.
+- SYCL: Signals SemC.
+- Vulkan: Waits for SemC, reads back Image C.
+
+
+
+
+sycl-ls
+[level_zero:gpu][level_zero:0] Intel(R) oneAPI Unified Runtime over Level-Zero V2, Intel(R) Arc(TM) B580 Graphics 20.1.0 [1.6.35096+9]
+[opencl:gpu][opencl:0] Intel(R) OpenCL Graphics, Intel(R) Arc(TM) B580 Graphics OpenCL 3.0 NEO  [25.35.35096.9]
+[opencl:cpu][opencl:1] Intel(R) OpenCL, 12th Gen Intel(R) Core(TM) i9-12900 OpenCL 3.0 (Build 0) [2025.20.6.0.04_224945]
+
+$ sycl-ls --verbose:
+
+Platform [#1]:
+    Version  : 1.6
+    Name     : Intel(R) oneAPI Unified Runtime over Level-Zero V2
+    Vendor   : Intel(R) Corporation
+    Devices  : 1
+        Device [#0]:
+        Type              : gpu
+        Version           : 20.1.0
+        Name              : Intel(R) Arc(TM) B580 Graphics
+        Vendor            : Intel(R) Corporation
+        Driver            : 1.6.35096+9
+        UUID              : 86800be2-0000-0000-0300-000000000000
+        DeviceID          : 57867
+        Num SubDevices    : 0
+        Num SubSubDevices : 0
+        Aspects           : gpu fp16 fp64 online_compiler online_linker queue_profiling usm_device_allocations usm_host_allocations usm_shared_allocations ext_intel_pci_address ext_intel_gpu_eu_count ext_intel_gpu_eu_simd_width ext_intel_gpu_slices ext_intel_gpu_subslices_per_slice ext_intel_gpu_eu_count_per_subslice atomic64 ext_intel_device_info_uuid ext_oneapi_native_assert ext_intel_gpu_hw_threads_per_eu ext_intel_free_memory ext_intel_device_id ext_intel_memory_clock_rate ext_intel_memory_bus_width ext_intel_legacy_image ext_oneapi_bindless_images ext_oneapi_bindless_images_1d_usm ext_oneapi_bindless_images_2d_usm ext_oneapi_external_memory_import ext_oneapi_external_semaphore_import ext_intel_esimd ext_oneapi_fragment ext_oneapi_chunk ext_oneapi_tangle ext_intel_matrix ext_oneapi_graph ext_oneapi_limited_graph ext_oneapi_private_alloca ext_oneapi_bindless_sampled_image_fetch_1d_usm ext_oneapi_bindless_sampled_image_fetch_1d ext_oneapi_bindless_sampled_image_fetch_2d_usm ext_oneapi_bindless_sampled_image_fetch_2d ext_oneapi_bindless_sampled_image_fetch_3d ext_oneapi_queue_profiling_tag ext_oneapi_virtual_mem ext_oneapi_image_array ext_oneapi_virtual_functions ext_intel_spill_memory_size ext_intel_current_clock_throttle_reasons ext_intel_power_limits ext_oneapi_async_memory_alloc ext_oneapi_exportable_device_mem ext_oneapi_clock_sub_group ext_oneapi_ipc_memory ext_oneapi_device_wait
+        info::device::sub_group_sizes: 16 32
+        Architecture: intel_gpu_bmg_g21
+
+
+
+
+Linux BMG Arithmetic Unsampled
+
+TEST                      | TYPE     | CH | SIZE       | RESULT
+--------------------------------------------------------------------------------
+2D Unsampled Read         | float    | 1  | 15x16      | PASS
+2D Unsampled Read         | float    | 1  | 16x16      | PASS
+2D Unsampled Read         | float    | 1  | 16x17      | PASS
+2D Unsampled Read         | float    | 1  | 31x32      | PASS
+2D Unsampled Read         | float    | 1  | 32x32      | PASS
+2D Unsampled Read         | float    | 1  | 32x33      | FAIL
+2D Unsampled Read         | float    | 1  | 63x64      | FAIL
+2D Unsampled Read         | float    | 1  | 64x64      | FAIL
+2D Unsampled Read         | float    | 1  | 64x65      | FAIL
+2D Unsampled Read         | float    | 2  | 15x16      | PASS
+2D Unsampled Read         | float    | 2  | 16x16      | PASS
+2D Unsampled Read         | float    | 2  | 16x17      | PASS
+2D Unsampled Read         | float    | 2  | 31x32      | PASS
+2D Unsampled Read         | float    | 2  | 32x32      | PASS
+2D Unsampled Read         | float    | 2  | 32x33      | FAIL
+2D Unsampled Read         | float    | 2  | 63x64      | FAIL
+2D Unsampled Read         | float    | 2  | 64x64      | FAIL
+2D Unsampled Read         | float    | 2  | 64x65      | FAIL
+2D Unsampled Read         | float    | 4  | 15x16      | PASS
+2D Unsampled Read         | float    | 4  | 16x16      | PASS
+2D Unsampled Read         | float    | 4  | 16x17      | PASS
+2D Unsampled Read         | float    | 4  | 31x32      | PASS
+2D Unsampled Read         | float    | 4  | 32x32      | PASS
+2D Unsampled Read         | float    | 4  | 32x33      | FAIL
+2D Unsampled Read         | float    | 4  | 63x64      | PASS
+2D Unsampled Read         | float    | 4  | 64x64      | PASS
+2D Unsampled Read         | float    | 4  | 64x65      | PASS
+2D Unsampled Read         | half     | 1  | 15x16      | PASS
+2D Unsampled Read         | half     | 1  | 16x16      | PASS
+2D Unsampled Read         | half     | 1  | 16x17      | PASS
+2D Unsampled Read         | half     | 1  | 31x32      | PASS
+2D Unsampled Read         | half     | 1  | 32x32      | PASS
+2D Unsampled Read         | half     | 1  | 32x33      | PASS
+-- HANG --
+
+2D Unsampled Write        | float    | 1  | 15x16      | PASS
+2D Unsampled Write        | float    | 1  | 16x16      | PASS
+2D Unsampled Write        | float    | 1  | 16x17      | PASS
+2D Unsampled Write        | float    | 1  | 31x32      | PASS
+2D Unsampled Write        | float    | 1  | 32x32      | PASS
+2D Unsampled Write        | float    | 1  | 32x33      | PASS
+-- HANG --
+
+2D Sampled Read           | float    | 1  | 15x16      | PASS
+2D Sampled Read           | float    | 1  | 16x16      | PASS
+2D Sampled Read           | float    | 1  | 16x17      | PASS
+2D Sampled Read           | float    | 1  | 31x32      | PASS
+2D Sampled Read           | float    | 1  | 32x32      | PASS
+2D Sampled Read           | float    | 1  | 32x33      | PASS
+-- HANG --
+
+2D Arithmetic Unsampled   | float    | 1  | 16x16      | PASS
+2D Arithmetic Unsampled   | float    | 1  | 32x32      | PASS
+2D Arithmetic Unsampled   | float    | 1  | 32x31      | PASS
+2D Arithmetic Unsampled   | float    | 1  | 32x33      | PASS
+2D Arithmetic Unsampled   | float    | 1  | 31x32      | PASS
+2D Arithmetic Unsampled   | float    | 1  | 33x32      | FAIL
+2D Arithmetic Unsampled   | float    | 1  | 32x48      | PASS
+2D Arithmetic Unsampled   | float    | 1  | 64x64      | FAIL     // Also flaky. 64x64 usually passes. 
+2D Arithmetic Unsampled   | float    | 1  | 64x63      | FAIL
+2D Arithmetic Unsampled   | float    | 1  | 64x65      | FAIL
+-- HANG --
+
+
+2D Arithmetic Sampled     | float    | 1  | 15x16      | PASS
+2D Arithmetic Sampled     | float    | 1  | 16x16      | PASS
+2D Arithmetic Sampled     | float    | 1  | 16x17      | PASS
+2D Arithmetic Sampled     | float    | 1  | 31x32      | PASS
+2D Arithmetic Sampled     | float    | 1  | 32x32      | PASS
+2D Arithmetic Sampled     | float    | 1  | 32x33      | FAIL
+-- HANG --
+
+
+
+
+
+LATEST DRIVER.
+==============
+
+$ sycl-ls
+[level_zero:gpu][level_zero:0] Intel(R) oneAPI Unified Runtime over Level-Zero V2, Intel(R) Arc(TM) B580 Graphics 20.1.0 [1.14.36711+4]
+[opencl:gpu][opencl:0] Intel(R) OpenCL Graphics, Intel(R) Arc(TM) B580 Graphics OpenCL 3.0 NEO  [26.01.36711.4]
+[opencl:cpu][opencl:1] Intel(R) OpenCL, 12th Gen Intel(R) Core(TM) i9-12900 OpenCL 3.0 (Build 0) [2025.20.6.0.04_224945]
+
+$ sycl-ls --verbose
+Platform [#1]:
+    Version  : 1.14
+    Name     : Intel(R) oneAPI Unified Runtime over Level-Zero V2
+    Vendor   : Intel(R) Corporation
+    Devices  : 1
+        Device [#0]:
+        Type              : gpu
+        Version           : 20.1.0
+        Name              : Intel(R) Arc(TM) B580 Graphics
+        Vendor            : Intel(R) Corporation
+        Driver            : 1.14.36711+4
+        UUID              : 86800be2-0000-0000-0300-000000000000
+        DeviceID          : 57867
+        Num SubDevices    : 0
+        Num SubSubDevices : 0
+        Aspects           : gpu fp16 fp64 online_compiler online_linker queue_profiling usm_device_allocations usm_host_allocations usm_shared_allocations ext_intel_pci_address ext_intel_gpu_eu_count ext_intel_gpu_eu_simd_width ext_intel_gpu_slices ext_intel_gpu_subslices_per_slice ext_intel_gpu_eu_count_per_subslice atomic64 ext_intel_device_info_uuid ext_oneapi_native_assert ext_intel_gpu_hw_threads_per_eu ext_intel_free_memory ext_intel_device_id ext_intel_memory_clock_rate ext_intel_memory_bus_width ext_intel_legacy_image ext_oneapi_bindless_images ext_oneapi_bindless_images_1d_usm ext_oneapi_bindless_images_2d_usm ext_oneapi_external_memory_import ext_oneapi_external_semaphore_import ext_intel_esimd ext_oneapi_fragment ext_oneapi_chunk ext_oneapi_tangle ext_intel_matrix ext_oneapi_graph ext_oneapi_limited_graph ext_oneapi_private_alloca ext_oneapi_bindless_sampled_image_fetch_1d_usm ext_oneapi_bindless_sampled_image_fetch_1d ext_oneapi_bindless_sampled_image_fetch_2d_usm ext_oneapi_bindless_sampled_image_fetch_2d ext_oneapi_bindless_sampled_image_fetch_3d ext_oneapi_queue_profiling_tag ext_oneapi_virtual_mem ext_oneapi_image_array ext_oneapi_virtual_functions ext_intel_spill_memory_size ext_intel_current_clock_throttle_reasons ext_intel_power_limits ext_oneapi_async_memory_alloc ext_oneapi_exportable_device_mem ext_oneapi_clock_sub_group ext_oneapi_ipc_memory ext_oneapi_device_wait
+        info::device::sub_group_sizes: 16 32
+        Architecture: intel_gpu_bmg_g21
