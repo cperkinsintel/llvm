@@ -5,9 +5,7 @@
 
   clang++ -fsycl -std=c++17 -o g_vs_test.bin golden_vulkan_sycl_rgba32_sfloat_2d_test.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
-  export VULTURE_SDK=/iusers/cperkins/sycl_workspace/1.4.328.1/x86_64/
-  clang++ -fsycl -std=c++17 -o g_vs_test.bin golden_vulkan_sycl_rgba32_sfloat_2d_test.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
-
+  
     ./vs_test.bin 
 
 
