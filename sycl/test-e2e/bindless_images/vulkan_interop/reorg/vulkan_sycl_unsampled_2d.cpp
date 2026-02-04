@@ -138,13 +138,21 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
 
         size_t pitchA = 0; // 0 means "compute automatically" (Tight)
         if (useLinear) {
-            pitchA = getRowPitch(vkCtx, imgA.image);
-            // Note: If A and B are same dims/format, pitch is likely same
+            pitchA = getRowPitch(vkCtx, imgRes.image);
         }
         sycl::image_channel_order order = getSyclChannelOrder(channels);
 
         sycl::image_channel_type syclType = syclOverride.has_value()  ? syclOverride.value() : getSyclChannelType<T>();
-        syclexp::image_descriptor imgDesc(sycl::range<2>(width, height), channels, syclType);
+        syclexp::image_descriptor imgDesc(
+            sycl::range<2>(width, height), // dims
+            channels,                      // num_channels
+            syclType,                      // channel_type
+            syclexp::image_type::standard, // type (default)
+            1,                             // num_levels (default)
+            1,                             // array_size (default)
+            0,                             // num_samples (default)
+            pitchA                         // pitch
+        );
         syclexp::image_mem_handle devHandle = syclexp::map_external_image_memory(extMem, imgDesc, q.get_device(), q.get_context());
         syclexp::unsampled_image_handle unsampledHandle = syclexp::create_image(devHandle, imgDesc, q.get_device(), q.get_context());
 

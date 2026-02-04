@@ -118,8 +118,23 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
         extSemOut = syclexp::import_external_semaphore(syclexp::external_semaphore_descriptor<syclexp::resource_fd>{getSemaphoreFd(vkCtx, semOutVk), syclexp::external_semaphore_handle_type::opaque_fd}, q.get_device(), q.get_context());
     }
 
+    size_t pitchA = 0; // 0 means "compute automatically" (Tight)
+    if (useLinear) {
+        pitchA = getRowPitch(vkCtx, imgA.image);
+        // Note: If A and B are same dims/format, pitch is likely same
+    }
+
     sycl::image_channel_type syclType = syclOverride.has_value() ? syclOverride.value() : getSyclChannelType<T>();
-    syclexp::image_descriptor imgDesc({(size_t)width, (size_t)height}, channels, syclType);
+    syclexp::image_descriptor imgDesc(
+        sycl::range<2>(width, height), // dims
+        channels,                      // num_channels
+        syclType,                      // channel_type
+        syclexp::image_type::standard, // type (default)
+        1,                             // num_levels (default)
+        1,                             // array_size (default)
+        0,                             // num_samples (default)
+        pitchA                         // pitch
+    );
 
     auto imgMemA = syclexp::map_external_image_memory(extMemA, imgDesc, q.get_device(), q.get_context());
     auto imgMemB = syclexp::map_external_image_memory(extMemB, imgDesc, q.get_device(), q.get_context());

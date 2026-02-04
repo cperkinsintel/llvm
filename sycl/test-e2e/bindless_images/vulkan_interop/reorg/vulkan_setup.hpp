@@ -167,7 +167,7 @@ inline VkFormat getUnorm8Format(int channels) {
 // ---------------------------------------------------------
 
 size_t getRowPitch(VulkanContext& ctx, VkImage image) {
-    VkImageSubresourceLayout layout;
+    VkSubresourceLayout layout;
     VkImageSubresource subResource { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0 };
     vkGetImageSubresourceLayout(ctx.device, image, &subResource, &layout);
     return layout.rowPitch;
