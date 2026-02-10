@@ -5,8 +5,11 @@
 
   clang++ -std=c++17 -o v_2d_test.bin vulkan_only_2d.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
-  export VULTURE_SDK=/iusers/cperkins/sycl_workspace/1.4.328.1/x86_64/
-  clang++ -std=c++17 -o v_2d_test.bin vulkan_only_2d.cpp -lvulkan -I$VULTURE_SDK/include -L$VULTURE_SDK/lib
+  
+  
+  clang++ -std=c++17 -o v_2d_test.exe vulkan_only_2d.cpp -DVK_USE_PLATFORM_WIN32_KHR -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+  
+
 
     ./v_2d_test.bin 
 
@@ -230,10 +233,17 @@ int main() {
     queueCreateInfo.pQueuePriorities = &queuePriority;
 
     // Define the extensions we need for Interop
+#ifdef WIN32
+   const char* deviceExtensions[] = {
+        VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME
+    };
+#else
     const char* deviceExtensions[] = {
         VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
         VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME
     };
+#endif
 
     VkDeviceCreateInfo deviceCreateInfo = {};
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -266,6 +276,16 @@ int main() {
     imageInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	
+	// tell vulkan that the image will be backed by external memory. 
+	VkExternalMemoryImageCreateInfo extImageInfo = {};
+    extImageInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
+    extImageInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+	imageInfo.pNext = &extImageInfo;
+	
+
+	
+   
 
     VkImage image;
     CHECK_VK(vkCreateImage(device, &imageInfo, nullptr, &image), "Failed to create image");
@@ -285,7 +305,11 @@ int main() {
     VkExportMemoryAllocateInfo exportAllocInfo = {};
     exportAllocInfo.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO;
     // On Linux/Intel, use OPAQUE_FD. On Windows, use OPAQUE_WIN32.
+#ifdef WIN32
+    exportAllocInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+#else
     exportAllocInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+#endif
     // Chain it to existing allocation info
     allocInfo.pNext = &exportAllocInfo;
 
