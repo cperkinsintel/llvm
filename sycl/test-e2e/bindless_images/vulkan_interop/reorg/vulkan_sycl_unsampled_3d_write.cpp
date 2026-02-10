@@ -4,7 +4,11 @@
 
   $VULKAN_SDK/bin/glslangValidator -V vulkan_shader_3d.comp -o vulkan_shader_3d.spv
 
-  clang++ -fsycl -std=c++17 -o vsu_3d_w_test.bin vulkan_sycl_unsampled_3d_write.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
+  clang++ -fsycl  -o vsu_3d_w_test.bin vulkan_sycl_unsampled_3d_write.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
+  
+  
+  
+  clang++ -fsycl  -o vsu_3d_w_test.exe vulkan_sycl_unsampled_3d_write.cpp  -DVK_USE_PLATFORM_WIN32_KHR -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
   
   FLAGS
     --semaphores   Use Vulkan Semaphores for SYCL Interop Sync
@@ -16,6 +20,13 @@
     ./vsu_3d_w_test.bin 
     ./vsu_3d_w_test.bin --semaphores --linear --channels 2 128x128x16
  */
+ 
+ /*
+  Vulkan/SYCL Test: VK_FORMAT_XXXX_SFLOAT 3D UnSampled Image Write
+
+  $VULKAN_SDK/bin/glslangValidator -V vulkan_shader_3d.comp -o vulkan_shader_3d.spv
+  clang++ -fsycl  -o vsu_3d_w_test.exe vulkan_sycl_unsampled_3d_write.cpp  -DVK_USE_PLATFORM_WIN32_KHR -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+*/
 #include "test_verification.hpp"
 #include "vulkan_setup.hpp"
 
@@ -25,27 +36,20 @@
 #include <string>
 #include <optional>
 
+namespace syclexp = sycl::ext::oneapi::experimental;
+
 // ---------------------------------------------------------
 // SYCL TYPE MAPPING HELPERS
 // ---------------------------------------------------------
-
-template <typename T>
-sycl::image_channel_type getSyclChannelType();
-
+template <typename T> sycl::image_channel_type getSyclChannelType();
 template <> inline sycl::image_channel_type getSyclChannelType<float>() { return sycl::image_channel_type::fp32; }
-
 template <> inline sycl::image_channel_type getSyclChannelType<int32_t>() { return sycl::image_channel_type::signed_int32; }
 template <> inline sycl::image_channel_type getSyclChannelType<uint32_t>() { return sycl::image_channel_type::unsigned_int32; }
-
 template <> inline sycl::image_channel_type getSyclChannelType<int16_t>() {  return sycl::image_channel_type::signed_int16; }
 template <> inline sycl::image_channel_type getSyclChannelType<uint16_t>() { return sycl::image_channel_type::unsigned_int16; }
-
 template <> inline sycl::image_channel_type getSyclChannelType<uint8_t>() { return sycl::image_channel_type::unsigned_int8; }
 template <> inline sycl::image_channel_type getSyclChannelType<int8_t>() { return sycl::image_channel_type::signed_int8; }
 
-
-
-// half
 template <> inline VkFormat getVulkanFormat<sycl::half>(int channels) {
     switch(channels) {
         case 1: return VK_FORMAT_R16_SFLOAT;
@@ -56,25 +60,16 @@ template <> inline VkFormat getVulkanFormat<sycl::half>(int channels) {
 }
 template <> inline sycl::image_channel_type getSyclChannelType<sycl::half>() { return sycl::image_channel_type::fp16; }
 
-
-
-// KERNEL VALUE GENERATOR
-template <typename T>
-T getKernelValue(size_t index, int channel, size_t rangeMax) {
-    if constexpr (std::is_floating_point_v<T>) {
-        float val = (float)index / (float)(rangeMax > 1 ? rangeMax - 1 : 1);
-        return static_cast<T>(val + (float)channel * 0.1f);
-    } else { return static_cast<T>((index + channel * 10) % 127); }
-}
-
+// ---------------------------------------------------------
+// TEST RUNNER
+// ---------------------------------------------------------
 template <typename T>
 int runTest(int width, int height, int depth, int channels, bool useLinear, bool useSemaphores, 
             VkFormat fmtOverride = VK_FORMAT_UNDEFINED, 
             std::optional<sycl::image_channel_type> syclOverride = std::nullopt)  {
+    
     VkImageTiling tiling = useLinear ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
-    VkFormat vkFormat = (fmtOverride != VK_FORMAT_UNDEFINED) 
-                      ? fmtOverride 
-                      : getVulkanFormat<T>(channels);
+    VkFormat vkFormat = (fmtOverride != VK_FORMAT_UNDEFINED) ? fmtOverride : getVulkanFormat<T>(channels);
     std::cout << "VK Format: " << getFormatString(vkFormat) << std::endl;
 
     VulkanContext vkCtx = createVulkanContext();
@@ -98,19 +93,50 @@ int runTest(int width, int height, int depth, int channels, bool useLinear, bool
     VkSemaphore vkSem = VK_NULL_HANDLE;
     if (useSemaphores) vkSem = createExportableSemaphore(vkCtx);
 
-    int memFd = getMemFd(vkCtx, imgRes.memory);
-    int semFd = -1;
-    if (useSemaphores) semFd = getSemaphoreFd(vkCtx, vkSem);
+    // --- REMOVED THE NAKED getMemFd CALL HERE ---
+    
+    // Initial clear/upload (Sanity Check)
+    if (!uploadAndVerify<T>(vkCtx, imgRes, vkSem, channels)) {
+        std::cerr << "Vulkan Upload Failed!" << std::endl; return 1;
+    }
 
-    namespace syclexp = sycl::ext::oneapi::experimental;
     try {
         sycl::queue q;
-        syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{memFd, syclexp::external_mem_handle_type::opaque_fd, imgRes.allocationSize};
+
+        // 1. IMPORT MEMORY
+#ifdef _WIN32
+        HANDLE memHandle = getMemHandle(vkCtx, imgRes.memory);
+        syclexp::external_mem_descriptor<syclexp::resource_win32_handle> extMemDesc{
+            memHandle, 
+            syclexp::external_mem_handle_type::win32_nt_handle, 
+            imgRes.allocationSize
+        };
+#else
+        int memFd = getMemFd(vkCtx, imgRes.memory);
+        syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{
+            memFd, 
+            syclexp::external_mem_handle_type::opaque_fd, 
+            imgRes.allocationSize
+        };
+#endif
         syclexp::external_mem extMem = syclexp::import_external_memory(extMemDesc, q.get_device(), q.get_context());
         
+        // 2. IMPORT SEMAPHORE
         syclexp::external_semaphore extSem;
         if (useSemaphores) {
-             syclexp::external_semaphore_descriptor<syclexp::resource_fd> extSemDesc{semFd, syclexp::external_semaphore_handle_type::opaque_fd};
+#ifdef _WIN32
+            HANDLE semHandle = getSemaphoreHandle(vkCtx, vkSem);
+            syclexp::external_semaphore_descriptor<syclexp::resource_win32_handle> extSemDesc{
+                semHandle, 
+                syclexp::external_semaphore_handle_type::win32_nt_handle
+            };
+#else
+            int semFd = getSemaphoreFd(vkCtx, vkSem);
+            syclexp::external_semaphore_descriptor<syclexp::resource_fd> extSemDesc{
+                semFd, 
+                syclexp::external_semaphore_handle_type::opaque_fd
+            };
+#endif
             extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
         }
 
@@ -128,40 +154,35 @@ int runTest(int width, int height, int depth, int channels, bool useLinear, bool
                 // unorm is special snowflake
                 bool isUnorm = (syclType == sycl::image_channel_type::unorm_int8);
                 if(isUnorm){
-                    // WRITING to 3D Image
-                    // Input: Generated Bytes (0..255)
-                    // Output: Normalized Floats (0.0..1.0) to the GPU
-
                     if (channels == 1) {
-                        float v = (float)getKernelValue<T>(index, 0, totalPixels) / 255.0f;
-                        syclexp::write_image(unsampledHandle, sycl::int3(x, y, z), v);
+                         float v = (float)generateTestValue<T>(index, 0, totalPixels) / 255.0f;
+                         syclexp::write_image(unsampledHandle, sycl::int3(x, y, z), v);
                     } 
                     else if (channels == 2) {
-                        float v1 = (float)getKernelValue<T>(index, 0, totalPixels) / 255.0f;
-                        float v2 = (float)getKernelValue<T>(index, 1, totalPixels) / 255.0f;
-                        syclexp::write_image(unsampledHandle, sycl::int3(x, y, z), sycl::float2(v1, v2));
+                         float v1 = (float)generateTestValue<T>(index, 0, totalPixels) / 255.0f;
+                         float v2 = (float)generateTestValue<T>(index, 1, totalPixels) / 255.0f;
+                         syclexp::write_image(unsampledHandle, sycl::int3(x, y, z), sycl::float2(v1, v2));
                     } 
                     else { // 4
-                        float v1 = (float)getKernelValue<T>(index, 0, totalPixels) / 255.0f;
-                        float v2 = (float)getKernelValue<T>(index, 1, totalPixels) / 255.0f;
-                        float v3 = (float)getKernelValue<T>(index, 2, totalPixels) / 255.0f;
-                        float v4 = (float)getKernelValue<T>(index, 3, totalPixels) / 255.0f;
-                        syclexp::write_image(unsampledHandle, sycl::int3(x, y, z), sycl::float4(v1, v2, v3, v4));
+                         float v1 = (float)generateTestValue<T>(index, 0, totalPixels) / 255.0f;
+                         float v2 = (float)generateTestValue<T>(index, 1, totalPixels) / 255.0f;
+                         float v3 = (float)generateTestValue<T>(index, 2, totalPixels) / 255.0f;
+                         float v4 = (float)generateTestValue<T>(index, 3, totalPixels) / 255.0f;
+                         syclexp::write_image(unsampledHandle, sycl::int3(x, y, z), sycl::float4(v1, v2, v3, v4));
                     }
-                    
-                    return; // Early exit. special snowflake gets to leave early.
+                    return; 
                 }
                 
                 if (channels == 1) {
-                    T val = getKernelValue<T>(index, 0, totalPixels);
+                    T val = generateTestValue<T>(index, 0, totalPixels);
                     syclexp::write_image(unsampledHandle, sycl::int3(x,y,z), val);
                 } else if (channels == 2) {
                     using Vec2 = sycl::vec<T, 2>;
-                    Vec2 px(getKernelValue<T>(index,0,totalPixels), getKernelValue<T>(index,1,totalPixels));
+                    Vec2 px(generateTestValue<T>(index,0,totalPixels), generateTestValue<T>(index,1,totalPixels));
                     syclexp::write_image(unsampledHandle, sycl::int3(x,y,z), px);
                 } else {
                     using Vec4 = sycl::vec<T, 4>;
-                    Vec4 px(getKernelValue<T>(index,0,totalPixels), getKernelValue<T>(index,1,totalPixels), getKernelValue<T>(index,2,totalPixels), getKernelValue<T>(index,3,totalPixels));
+                    Vec4 px(generateTestValue<T>(index,0,totalPixels), generateTestValue<T>(index,1,totalPixels), generateTestValue<T>(index,2,totalPixels), generateTestValue<T>(index,3,totalPixels));
                     syclexp::write_image(unsampledHandle, sycl::int3(x,y,z), px);
                 }
             });
@@ -217,7 +238,7 @@ int runTest(int width, int height, int depth, int channels, bool useLinear, bool
     vkDestroyBuffer(vkCtx.device, verifyBuffer, nullptr); vkFreeMemory(vkCtx.device, verifyMem, nullptr);
     if(useSemaphores) vkDestroySemaphore(vkCtx.device, vkSem, nullptr);
     cleanupVulkan(vkCtx, imgRes);
-    return 0;
+    return passed ? 0 : 1;
 }
 
 int main(int argc, char** argv) {
@@ -232,7 +253,7 @@ int main(int argc, char** argv) {
         else if(arg == "--type" && i+1 < argc) type = argv[++i];
         else if(arg.find("x") != std::string::npos) {
             size_t x1 = arg.find("x"); size_t x2 = arg.find("x", x1 + 1);
-            try { width = std::stoi(arg.substr(0, x1));
+            try { width = std::stoi(arg.substr(0, x1)); 
                 if (x2 != std::string::npos) { height = std::stoi(arg.substr(x1+1, x2-x1-1)); depth = std::stoi(arg.substr(x2+1)); }
                 else { height = std::stoi(arg.substr(x1+1)); }
             } catch (...) { }
@@ -246,21 +267,14 @@ int main(int argc, char** argv) {
 
     if (type == "float")  return runTest<float>(width, height, depth, channels, useLinear, useSemaphores);
     if (type == "half")   return runTest<sycl::half>(width, height, depth, channels, useLinear, useSemaphores);
-    
     if (type == "int32")  return runTest<int32_t>(width, height, depth, channels, useLinear, useSemaphores);
     if (type == "uint32") return runTest<uint32_t>(width, height, depth, channels, useLinear, useSemaphores);
-    
     if (type == "int16")  return runTest<int16_t>(width, height, depth, channels, useLinear, useSemaphores);
     if (type == "uint16") return runTest<uint16_t>(width, height, depth, channels, useLinear, useSemaphores);
-    
     if (type == "uint8")  return runTest<uint8_t>(width, height, depth, channels, useLinear, useSemaphores);
-    if (type == "int8")  return runTest<int8_t>(width, height, depth, channels, useLinear, useSemaphores);
-    if (type == "unorm8") {
-        // unorm8 is one of those scaled floats. 0-1.0  
-        return runTest<uint8_t>(width, height, depth, channels, useLinear, useSemaphores, 
-                              getUnorm8Format(channels), 
-                              sycl::image_channel_type::unorm_int8); 
-    }
+    if (type == "int8")   return runTest<int8_t>(width, height, depth, channels, useLinear, useSemaphores);
+    if (type == "unorm8") return runTest<uint8_t>(width, height, depth, channels, useLinear, useSemaphores, getUnorm8Format(channels), sycl::image_channel_type::unorm_int8); 
+    
     std::cerr << "Unknown type: " << type << std::endl; 
     return 1;
 }
