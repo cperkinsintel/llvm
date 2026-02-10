@@ -1,12 +1,60 @@
 #pragma once
 
-//#include "test_verification.hpp"
-#include <vulkan/vulkan.h>
 #include <iostream>
 #include <vector>
 #include <string>
 #include <stdexcept>
 #include <cstring>
+
+// suppress warnings. Mostly because Window __stdcall freaks out vulkan when compiling device code.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wignored-attributes"
+
+#include <vulkan/vulkan.h>
+
+#ifdef _WIN32
+    // #define WIN32_LEAN_AND_MEAN 
+    // #define NOMINMAX
+	// #include <windows.h>
+	
+	// I just can't, in good conscience, bring myself to import all of windows.h
+	// when we only need 6 void typedefs.
+	typedef void* HANDLE;
+    typedef struct HINSTANCE__* HINSTANCE;
+    typedef struct HWND__* HWND;
+    typedef struct HMONITOR__* HMONITOR;
+    typedef struct _SECURITY_ATTRIBUTES SECURITY_ATTRIBUTES;
+    typedef unsigned long DWORD;
+    typedef const wchar_t* LPCWSTR;
+	
+    #include <vulkan/vulkan_win32.h>
+#endif 
+
+// restore warnings
+#pragma clang diagnostic pop
+
+// ---------------------------------------------------------
+// PLATFORM ABSTRACTION
+// ---------------------------------------------------------
+#ifdef _WIN32
+    const std::vector<const char*> PLATFORM_EXTENSIONS = {
+        VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME
+    };
+    const auto PLATFORM_MEM_HANDLE_TYPE = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+    const auto PLATFORM_SEM_HANDLE_TYPE = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+#else
+    const std::vector<const char*> PLATFORM_EXTENSIONS = {
+        VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME
+    };
+    const auto PLATFORM_MEM_HANDLE_TYPE = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+    const auto PLATFORM_SEM_HANDLE_TYPE = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
+#endif
 
 // ---------------------------------------------------------
 // VULKAN HELPERS & TYPES
@@ -37,7 +85,7 @@ struct ImageResources {
 }
 
 // ---------------------------------------------------------
-// FORMAT MAPPING & STRINGS
+// FORMAT MAPPING & STRINGS (Unchanged)
 // ---------------------------------------------------------
 
 inline std::string getFormatString(VkFormat fmt) {
@@ -45,122 +93,43 @@ inline std::string getFormatString(VkFormat fmt) {
         case VK_FORMAT_R32_SFLOAT: return "VK_FORMAT_R32_SFLOAT";
         case VK_FORMAT_R32G32_SFLOAT: return "VK_FORMAT_R32G32_SFLOAT";
         case VK_FORMAT_R32G32B32A32_SFLOAT: return "VK_FORMAT_R32G32B32A32_SFLOAT";
-
-
         case VK_FORMAT_R16_SFLOAT: return "VK_FORMAT_R16_SFLOAT";
         case VK_FORMAT_R16G16_SFLOAT: return "VK_FORMAT_R16G16_SFLOAT";
         case VK_FORMAT_R16G16B16A16_SFLOAT: return "VK_FORMAT_R16G16B16A16_SFLOAT";
-        
-
         case VK_FORMAT_R32_SINT: return "VK_FORMAT_R32_SINT";
         case VK_FORMAT_R32G32_SINT: return "VK_FORMAT_R32G32_SINT";
         case VK_FORMAT_R32G32B32A32_SINT: return "VK_FORMAT_R32G32B32A32_SINT";
-
         case VK_FORMAT_R32_UINT: return "VK_FORMAT_R32_UINT";
         case VK_FORMAT_R32G32_UINT: return "VK_FORMAT_R32G32_UINT";
         case VK_FORMAT_R32G32B32A32_UINT: return "VK_FORMAT_R32G32B32A32_UINT";
-
-
         case VK_FORMAT_R16_SINT: return "VK_FORMAT_R16_SINT";
         case VK_FORMAT_R16G16_SINT: return "VK_FORMAT_R16G16_SINT";
         case VK_FORMAT_R16G16B16A16_SINT: return "VK_FORMAT_R16G16B16A16_SINT";
-
         case VK_FORMAT_R16_UINT: return "VK_FORMAT_R16_UINT";
         case VK_FORMAT_R16G16_UINT: return "VK_FORMAT_R16G16_UINT";
         case VK_FORMAT_R16G16B16A16_UINT: return "VK_FORMAT_R16G16B16A16_UINT";
-        
-
         case VK_FORMAT_R8_SINT: return "VK_FORMAT_R8_SINT";
         case VK_FORMAT_R8G8_SINT: return "VK_FORMAT_R8G8_SINT";
         case VK_FORMAT_R8G8B8A8_SINT: return "VK_FORMAT_R8G8B8A8_SINT";
-
         case VK_FORMAT_R8_UINT: return "VK_FORMAT_R8_UINT";
         case VK_FORMAT_R8G8_UINT: return "VK_FORMAT_R8G8_UINT";
         case VK_FORMAT_R8G8B8A8_UINT: return "VK_FORMAT_R8G8B8A8_UINT";
-
-        // 8 bit UNORM.  Others (16, 32, SNORM) aren't really a thing.
         case VK_FORMAT_R8_UNORM:       return "VK_FORMAT_R8_UNORM";
         case VK_FORMAT_R8G8_UNORM:     return "VK_FORMAT_R8G8_UNORM";
         case VK_FORMAT_R8G8B8A8_UNORM: return "VK_FORMAT_R8G8B8A8_UNORM";
-        
         default: return "UNKNOWN_FORMAT (" + std::to_string(fmt) + ")";
     }
 }
 
 template <typename T> VkFormat getVulkanFormat(int channels);
-
-template <> inline VkFormat getVulkanFormat<float>(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R32_SFLOAT;
-        case 2: return VK_FORMAT_R32G32_SFLOAT;
-        case 4: return VK_FORMAT_R32G32B32A32_SFLOAT;
-        default: throw std::runtime_error("Unsupported channels for float");
-    }
-}
-
-template <> inline VkFormat getVulkanFormat<int32_t>(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R32_SINT;
-        case 2: return VK_FORMAT_R32G32_SINT;
-        case 4: return VK_FORMAT_R32G32B32A32_SINT;
-        default: throw std::runtime_error("Unsupported channels for int32");
-    }
-}
-
-template <> inline VkFormat getVulkanFormat<uint32_t>(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R32_UINT;
-        case 2: return VK_FORMAT_R32G32_UINT;
-        case 4: return VK_FORMAT_R32G32B32A32_UINT;
-        default: throw std::runtime_error("Unsupported channels for uint32");
-    }
-}
-
-template <> inline VkFormat getVulkanFormat<int16_t>(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R16_SINT;
-        case 2: return VK_FORMAT_R16G16_SINT;
-        case 4: return VK_FORMAT_R16G16B16A16_SINT;
-        default: throw std::runtime_error("Unsupported channels for int16");
-    }
-}
-
-template <> inline VkFormat getVulkanFormat<uint16_t>(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R16_UINT;
-        case 2: return VK_FORMAT_R16G16_UINT;
-        case 4: return VK_FORMAT_R16G16B16A16_UINT;
-        default: throw std::runtime_error("Unsupported channels for uint16");
-    }
-}
-
-template <> inline VkFormat getVulkanFormat<uint8_t>(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R8_UINT;
-        case 2: return VK_FORMAT_R8G8_UINT;
-        case 4: return VK_FORMAT_R8G8B8A8_UINT;
-        default: throw std::runtime_error("Unsupported channels for uint8");
-    }
-}
-
-template <> inline VkFormat getVulkanFormat<int8_t>(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R8_SINT;
-        case 2: return VK_FORMAT_R8G8_SINT;
-        case 4: return VK_FORMAT_R8G8B8A8_SINT;
-        default: throw std::runtime_error("Unsupported channels for int8");
-    }
-}
-
-// UNORM is handled special.
-inline VkFormat getUnorm8Format(int channels) {
-    switch(channels) {
-        case 1: return VK_FORMAT_R8_UNORM;
-        case 2: return VK_FORMAT_R8G8_UNORM;
-        case 4: return VK_FORMAT_R8G8B8A8_UNORM;
-        default: throw std::runtime_error("Unsupported channels for UNORM8");
-    }
-}
+template <> inline VkFormat getVulkanFormat<float>(int channels) { switch(channels) { case 1: return VK_FORMAT_R32_SFLOAT; case 2: return VK_FORMAT_R32G32_SFLOAT; case 4: return VK_FORMAT_R32G32B32A32_SFLOAT; default: throw std::runtime_error("Unsupported channels for float"); } }
+template <> inline VkFormat getVulkanFormat<int32_t>(int channels) { switch(channels) { case 1: return VK_FORMAT_R32_SINT; case 2: return VK_FORMAT_R32G32_SINT; case 4: return VK_FORMAT_R32G32B32A32_SINT; default: throw std::runtime_error("Unsupported channels for int32"); } }
+template <> inline VkFormat getVulkanFormat<uint32_t>(int channels) { switch(channels) { case 1: return VK_FORMAT_R32_UINT; case 2: return VK_FORMAT_R32G32_UINT; case 4: return VK_FORMAT_R32G32B32A32_UINT; default: throw std::runtime_error("Unsupported channels for uint32"); } }
+template <> inline VkFormat getVulkanFormat<int16_t>(int channels) { switch(channels) { case 1: return VK_FORMAT_R16_SINT; case 2: return VK_FORMAT_R16G16_SINT; case 4: return VK_FORMAT_R16G16B16A16_SINT; default: throw std::runtime_error("Unsupported channels for int16"); } }
+template <> inline VkFormat getVulkanFormat<uint16_t>(int channels) { switch(channels) { case 1: return VK_FORMAT_R16_UINT; case 2: return VK_FORMAT_R16G16_UINT; case 4: return VK_FORMAT_R16G16B16A16_UINT; default: throw std::runtime_error("Unsupported channels for uint16"); } }
+template <> inline VkFormat getVulkanFormat<uint8_t>(int channels) { switch(channels) { case 1: return VK_FORMAT_R8_UINT; case 2: return VK_FORMAT_R8G8_UINT; case 4: return VK_FORMAT_R8G8B8A8_UINT; default: throw std::runtime_error("Unsupported channels for uint8"); } }
+template <> inline VkFormat getVulkanFormat<int8_t>(int channels) { switch(channels) { case 1: return VK_FORMAT_R8_SINT; case 2: return VK_FORMAT_R8G8_SINT; case 4: return VK_FORMAT_R8G8B8A8_SINT; default: throw std::runtime_error("Unsupported channels for int8"); } }
+inline VkFormat getUnorm8Format(int channels) { switch(channels) { case 1: return VK_FORMAT_R8_UNORM; case 2: return VK_FORMAT_R8G8_UNORM; case 4: return VK_FORMAT_R8G8B8A8_UNORM; default: throw std::runtime_error("Unsupported channels for UNORM8"); } }
 
 // ---------------------------------------------------------
 // Boilerplate
@@ -227,14 +196,9 @@ inline VulkanContext createVulkanContext() {
     deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
     deviceCreateInfo.queueCreateInfoCount = 1;
     
-    const char* deviceExtensions[] = {
-        VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
-        VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME,
-        VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
-        VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME
-    };
-    deviceCreateInfo.enabledExtensionCount = 4;
-    deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions;
+    // UPDATED: Use dynamic platform extensions
+    deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(PLATFORM_EXTENSIONS.size());
+    deviceCreateInfo.ppEnabledExtensionNames = PLATFORM_EXTENSIONS.data();
 
     VK_CHECK(vkCreateDevice(ctx.physicalDevice, &deviceCreateInfo, nullptr, &ctx.device));
     vkGetDeviceQueue(ctx.device, ctx.queueFamilyIndex, 0, &ctx.queue);
@@ -248,7 +212,6 @@ inline ImageResources createExportableImage(
     VkFormat format, 
     VkImageType type, 
     VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL,
-    // Default flags cover everything used in previous tests:
     VkImageUsageFlags usage = VK_IMAGE_USAGE_STORAGE_BIT | 
                               VK_IMAGE_USAGE_SAMPLED_BIT | 
                               VK_IMAGE_USAGE_TRANSFER_SRC_BIT | 
@@ -262,36 +225,40 @@ inline ImageResources createExportableImage(
     imageInfo.format = format;
     imageInfo.tiling = tiling;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    
-    // USE THE ARGUMENT HERE:
     imageInfo.usage = usage;
-    
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
-    // Export Memory Support
+    // Export Memory Support (Image Side)
     VkExternalMemoryImageCreateInfo extMemInfo = {VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO};
-    extMemInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT; 
+    extMemInfo.handleTypes = PLATFORM_MEM_HANDLE_TYPE; 
     imageInfo.pNext = &extMemInfo;
 
     ImageResources res;
-    res.extent = extent; // Save for later
+    res.extent = extent;
 
     VK_CHECK(vkCreateImage(ctx.device, &imageInfo, nullptr, &res.image));
 
     VkMemoryRequirements memRequirements;
     vkGetImageMemoryRequirements(ctx.device, res.image, &memRequirements);
 
+    // Export Memory Allocation (Memory Side)
+    VkExportMemoryAllocateInfo exportAllocInfo = {VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO};
+    exportAllocInfo.handleTypes = PLATFORM_MEM_HANDLE_TYPE;
+    
+    // --- UPDATED: Dedicated Allocation (Required for Windows Interop) ---
+    VkMemoryDedicatedAllocateInfo dedicatedAllocInfo = {VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO};
+    dedicatedAllocInfo.image = res.image;
+    dedicatedAllocInfo.buffer = VK_NULL_HANDLE;
+    dedicatedAllocInfo.pNext = &exportAllocInfo; // Chain Export info here
+    // -------------------------------------------------------------------
+
     VkMemoryAllocateInfo allocInfo = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
+    allocInfo.pNext = &dedicatedAllocInfo; // Chain Dedicated info here
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = findMemoryType(ctx.physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    // Export Memory Allocation
-    VkExportMemoryAllocateInfo exportAllocInfo = {VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO};
-    exportAllocInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
-    allocInfo.pNext = &exportAllocInfo;
-
-    res.allocationSize = allocInfo.allocationSize; // Save for later
+    res.allocationSize = allocInfo.allocationSize; 
 
     VK_CHECK(vkAllocateMemory(ctx.device, &allocInfo, nullptr, &res.memory));
     VK_CHECK(vkBindImageMemory(ctx.device, res.image, res.memory, 0));
@@ -302,7 +269,7 @@ inline ImageResources createExportableImage(
 inline VkSemaphore createExportableSemaphore(VulkanContext& ctx) {
     VkExportSemaphoreCreateInfo exportInfo{};
     exportInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO;
-    exportInfo.handleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
+    exportInfo.handleTypes = PLATFORM_SEM_HANDLE_TYPE;
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -313,6 +280,47 @@ inline VkSemaphore createExportableSemaphore(VulkanContext& ctx) {
     return semaphore;
 }
 
+// ---------------------------------------------------------
+// PLATFORM SPECIFIC GETTERS
+// ---------------------------------------------------------
+
+#ifdef _WIN32
+inline HANDLE getMemHandle(VulkanContext& ctx, VkDeviceMemory memory) {
+    VkMemoryGetWin32HandleInfoKHR getHandleInfo{};
+    getHandleInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR;
+    getHandleInfo.memory = memory;
+    getHandleInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+
+    HANDLE handle;
+    auto func = (PFN_vkGetMemoryWin32HandleKHR) vkGetDeviceProcAddr(ctx.device, "vkGetMemoryWin32HandleKHR");
+    if (!func) throw std::runtime_error("Failed to load vkGetMemoryWin32HandleKHR");
+    VK_CHECK(func(ctx.device, &getHandleInfo, &handle));
+    return handle;
+}
+
+inline HANDLE getSemaphoreHandle(VulkanContext& ctx, VkSemaphore semaphore) {
+    VkSemaphoreGetWin32HandleInfoKHR getHandleInfo{};
+    getHandleInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR;
+    getHandleInfo.semaphore = semaphore;
+    getHandleInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+
+    HANDLE handle;
+    auto func = (PFN_vkGetSemaphoreWin32HandleKHR) vkGetDeviceProcAddr(ctx.device, "vkGetSemaphoreWin32HandleKHR");
+    if (!func) throw std::runtime_error("Failed to load vkGetSemaphoreWin32HandleKHR");
+    VK_CHECK(func(ctx.device, &getHandleInfo, &handle));
+    return handle;
+}
+
+// Stub for compile compat if you have sloppy ifdefs elsewhere
+inline int getMemFd(VulkanContext& ctx, VkDeviceMemory memory) {
+    throw std::runtime_error("getMemFd called on Windows!");
+}
+inline int getSemaphoreFd(VulkanContext& ctx, VkSemaphore semaphore) {
+    throw std::runtime_error("getSemaphoreFd called on Windows!");
+}
+
+#else
+// LINUX IMPLEMENTATION
 inline int getMemFd(VulkanContext& ctx, VkDeviceMemory memory) {
     VkMemoryGetFdInfoKHR getFdInfo{};
     getFdInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR;
@@ -338,6 +346,12 @@ inline int getSemaphoreFd(VulkanContext& ctx, VkSemaphore semaphore) {
     VK_CHECK(func(ctx.device, &getFdInfo, &fd));
     return fd;
 }
+#endif
+
+// -----------------------------------------------------------
+//  GENERIC DATA GENERATION & VERIFICATION (Unchanged from here down)
+// -----------------------------------------------------------
+// ... [The rest of the file stays the same] ...
 
 // -----------------------------------------------------------
 //  GENERIC DATA GENERATION & VERIFICATION

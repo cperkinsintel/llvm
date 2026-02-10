@@ -5,6 +5,9 @@
 
   clang++ -fsycl -std=c++17 -o vsu_1d_test.bin vulkan_sycl_unsampled_1d_read.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
+  
+  clang++ -fsycl -std=c++17 -o vsu_1d_test.exe vulkan_sycl_unsampled_1d_read.cpp -DVK_USE_PLATFORM_WIN32_KHR -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+  
 
     ./vsu_1d_test.bin 
     ./vsu_1d_test.bin --semaphores
@@ -86,19 +89,48 @@ int runTest(int width, int channels, bool useLinear, bool useSemaphores,
         std::cerr << "Vulkan Upload Failed!" << std::endl; return 1;
     }
 
-    int memFd = getMemFd(vkCtx, imgRes.memory);
-    int semFd = -1;
-    if (useSemaphores) semFd = getSemaphoreFd(vkCtx, vkSem);
-
+    // --- START REPLACEMENT BLOCK ---
     namespace syclexp = sycl::ext::oneapi::experimental;
     try {
         sycl::queue q;
-        syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{memFd, syclexp::external_mem_handle_type::opaque_fd, imgRes.allocationSize};
+
+        // 1. IMPORT MEMORY (Platform Specific)
+#ifdef _WIN32
+        HANDLE memHandle = getMemHandle(vkCtx, imgRes.memory);
+        // descriptor type: resource_win32_handle
+        syclexp::external_mem_descriptor<syclexp::resource_win32_handle> extMemDesc{
+            memHandle, 
+            syclexp::external_mem_handle_type::win32_nt_handle, 
+            imgRes.allocationSize
+        };
+#else
+        int memFd = getMemFd(vkCtx, imgRes.memory);
+        // descriptor type: resource_fd
+        syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{
+            memFd, 
+            syclexp::external_mem_handle_type::opaque_fd, 
+            imgRes.allocationSize
+        };
+#endif
+        
         syclexp::external_mem extMem = syclexp::import_external_memory(extMemDesc, q.get_device(), q.get_context());
         
+        // 2. IMPORT SEMAPHORE (Platform Specific)
         syclexp::external_semaphore extSem;
         if (useSemaphores) {
-             syclexp::external_semaphore_descriptor<syclexp::resource_fd> extSemDesc{semFd, syclexp::external_semaphore_handle_type::opaque_fd};
+#ifdef _WIN32
+            HANDLE semHandle = getSemaphoreHandle(vkCtx, vkSem);
+            syclexp::external_semaphore_descriptor<syclexp::resource_win32_handle> extSemDesc{
+                semHandle, 
+                syclexp::external_semaphore_handle_type::win32_nt_handle
+            };
+#else
+            int semFd = getSemaphoreFd(vkCtx, vkSem);
+            syclexp::external_semaphore_descriptor<syclexp::resource_fd> extSemDesc{
+                semFd, 
+                syclexp::external_semaphore_handle_type::opaque_fd
+            };
+#endif
             extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
         }
 
