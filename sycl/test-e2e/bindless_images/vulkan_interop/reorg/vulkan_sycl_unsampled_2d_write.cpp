@@ -18,9 +18,7 @@
 
 */
 
-/*
-  Minimal Vulkan/SYCL Test: VK_FORMAT_R32G32B32A32_SFLOAT 2D UnSampled Write Image
-*/
+
 #include "test_verification.hpp" 
 #include "vulkan_setup.hpp"      
 
