@@ -3,7 +3,9 @@
 
   $VULKAN_SDK/bin/glslangValidator -V vulkan_shader_2d.comp -o vulkan_shader_2d.spv
 
-  clang++ -fsycl -std=c++17 -o vsu_2d_test.bin vulkan_sycl_unsampled_2d.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
+  clang++ -fsycl  -o vsu_2d_test.bin vulkan_sycl_unsampled_2d.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
+  
+  clang++ -fsycl  -o vsu_2d_test.exe vulkan_sycl_unsampled_2d.cpp -DVK_USE_PLATFORM_WIN32_KHR -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
   
     ./vsu_2d_test.bin 
     ./vsu_2d_test.bin --semaphores
@@ -106,33 +108,52 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
     VkSemaphore vkSem = VK_NULL_HANDLE;
     if (useSemaphores) vkSem = createExportableSemaphore(vkCtx);
 
-    // 3. Upload Data (Explicit Template Call)
     if (!uploadAndVerify<T>(vkCtx, imgRes, vkSem, channels)) {
-        std::cerr << "Vulkan Upload Failed!" << std::endl;
-        return 1;
+        std::cerr << "Vulkan Upload Failed!" << std::endl; return 1;
     }
 
-    // 4. Export Handles
-    int memFd = getMemFd(vkCtx, imgRes.memory);
-    int semFd = -1;
-    if (useSemaphores) semFd = getSemaphoreFd(vkCtx, vkSem);
-
-    // 5. SYCL Interop
+    // --- START REPLACEMENT BLOCK ---
     namespace syclexp = sycl::ext::oneapi::experimental;
-    
     try {
         sycl::queue q;
-        
-        syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{
-            memFd, syclexp::external_mem_handle_type::opaque_fd, imgRes.allocationSize
-        };
-        syclexp::external_mem extMem = syclexp::import_external_memory(extMemDesc, q.get_device(), q.get_context());
 
+        // 1. IMPORT MEMORY (Platform Specific)
+#ifdef _WIN32
+        HANDLE memHandle = getMemHandle(vkCtx, imgRes.memory);
+        // descriptor type: resource_win32_handle
+        syclexp::external_mem_descriptor<syclexp::resource_win32_handle> extMemDesc{
+            memHandle, 
+            syclexp::external_mem_handle_type::win32_nt_handle, 
+            imgRes.allocationSize
+        };
+#else
+        int memFd = getMemFd(vkCtx, imgRes.memory);
+        // descriptor type: resource_fd
+        syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{
+            memFd, 
+            syclexp::external_mem_handle_type::opaque_fd, 
+            imgRes.allocationSize
+        };
+#endif
+        
+        syclexp::external_mem extMem = syclexp::import_external_memory(extMemDesc, q.get_device(), q.get_context());
+        
+        // 2. IMPORT SEMAPHORE (Platform Specific)
         syclexp::external_semaphore extSem;
         if (useSemaphores) {
-             syclexp::external_semaphore_descriptor<syclexp::resource_fd> extSemDesc{
-                semFd, syclexp::external_semaphore_handle_type::opaque_fd
+#ifdef _WIN32
+            HANDLE semHandle = getSemaphoreHandle(vkCtx, vkSem);
+            syclexp::external_semaphore_descriptor<syclexp::resource_win32_handle> extSemDesc{
+                semHandle, 
+                syclexp::external_semaphore_handle_type::win32_nt_handle
             };
+#else
+            int semFd = getSemaphoreFd(vkCtx, vkSem);
+            syclexp::external_semaphore_descriptor<syclexp::resource_fd> extSemDesc{
+                semFd, 
+                syclexp::external_semaphore_handle_type::opaque_fd
+            };
+#endif
             extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
         }
 
@@ -147,11 +168,11 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
             sycl::range<2>(width, height), // dims
             channels,                      // num_channels
             syclType,                      // channel_type
-            syclexp::image_type::standard, // type (default)
-            1,                             // num_levels (default)
-            1,                             // array_size (default)
-            0,                             // num_samples (default)
-            pitchA                         // pitch
+            syclexp::image_type::standard//, // type (default)
+            // 1,                             // num_levels (default)
+            // 1,                             // array_size (default)
+            // 0,                             // num_samples (default)
+            // pitchA                         // pitch
         );
         syclexp::image_mem_handle devHandle = syclexp::map_external_image_memory(extMem, imgDesc, q.get_device(), q.get_context());
         syclexp::unsampled_image_handle unsampledHandle = syclexp::create_image(devHandle, imgDesc, q.get_device(), q.get_context());
