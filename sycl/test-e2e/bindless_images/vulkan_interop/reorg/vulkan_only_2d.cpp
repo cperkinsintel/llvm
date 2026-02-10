@@ -283,10 +283,6 @@ int main() {
     extImageInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
 	imageInfo.pNext = &extImageInfo;
 	
-
-	
-   
-
     VkImage image;
     CHECK_VK(vkCreateImage(device, &imageInfo, nullptr, &image), "Failed to create image");
     std::cout << "✓ Created 2D image (" << IMAGE_WIDTH << "x" << IMAGE_HEIGHT << ", VK_FORMAT_R32G32B32A32_SFLOAT)" << std::endl;
@@ -295,31 +291,33 @@ int main() {
     VkMemoryRequirements memRequirements;
     vkGetImageMemoryRequirements(device, image, &memRequirements);
 
-    VkMemoryAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = findMemoryType(physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-
-    // Enable the extension capability (requires VK_KHR_external_memory_fd)
+    // 1. Export Info (Saying "I want to share this")
     VkExportMemoryAllocateInfo exportAllocInfo = {};
     exportAllocInfo.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO;
-    // On Linux/Intel, use OPAQUE_FD. On Windows, use OPAQUE_WIN32.
 #ifdef WIN32
     exportAllocInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
 #else
     exportAllocInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
 #endif
-    // Chain it to existing allocation info
-    allocInfo.pNext = &exportAllocInfo;
 
+    // 2. Dedicated Info (Saying "This memory is strictly for the image handle I just created")
+    VkMemoryDedicatedAllocateInfo dedicatedAllocInfo = {};
+    dedicatedAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO;
+    dedicatedAllocInfo.image = image;            // <--- CRITICAL: Links memory to the specific image handle
+    dedicatedAllocInfo.buffer = VK_NULL_HANDLE;
+    dedicatedAllocInfo.pNext = &exportAllocInfo; // Chain the export info here
 
-
+    // 3. Main Allocation Info
+    VkMemoryAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.pNext = &dedicatedAllocInfo;       // Chain the dedicated info here
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = findMemoryType(physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
     VkDeviceMemory imageMemory;
     CHECK_VK(vkAllocateMemory(device, &allocInfo, nullptr, &imageMemory), "Failed to allocate image memory");
     CHECK_VK(vkBindImageMemory(device, image, imageMemory, 0), "Failed to bind image memory");
-    std::cout << "✓ Allocated and bound image memory" << std::endl;
+    std::cout << "✓ Allocated and bound dedicated image memory" << std::endl;
 
     // Create staging buffer for uploading data
     VkBufferCreateInfo stagingBufferInfo = {};
