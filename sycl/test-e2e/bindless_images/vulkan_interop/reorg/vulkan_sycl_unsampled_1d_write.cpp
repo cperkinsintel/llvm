@@ -3,7 +3,10 @@
 
   $VULKAN_SDK/bin/glslangValidator -V vulkan_shader_1d.comp -o vulkan_shader_1d.spv
 
-  clang++ -fsycl -std=c++17 -o vsu_1d_w_test.bin vulkan_sycl_unsampled_1d_write.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
+  clang++ -fsycl -o vsu_1d_w_test.bin vulkan_sycl_unsampled_1d_write.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
+  
+  
+  clang++ -fsycl  -o vsu_1d_w_test.exe vulkan_sycl_unsampled_1d_write.cpp -DVK_USE_PLATFORM_WIN32_KHR -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
   
 
     ./vsu_1d_w_test.bin 
@@ -62,13 +65,17 @@ template <> inline sycl::image_channel_type getSyclChannelType<sycl::half>() { r
 
 
 // KERNEL VALUE GENERATOR
-template <typename T>
-T getKernelValue(size_t index, int channel, size_t rangeMax) {
-    if constexpr (std::is_floating_point_v<T>) {
-        float val = (float)index / (float)(rangeMax > 1 ? rangeMax - 1 : 1);
-        return static_cast<T>(val + (float)channel * 0.1f);
-    } else { return static_cast<T>((index + channel * 10) % 127); }
-}
+// template <typename T>
+// T getKernelValue(size_t index, int channel, size_t rangeMax) {
+    // if constexpr (std::is_floating_point_v<T>) {
+        // float val = (float)index / (float)(rangeMax > 1 ? rangeMax - 1 : 1);
+        // return static_cast<T>(val + (float)channel * 0.1f);
+    // } else { return static_cast<T>((index + channel * 10) % 127); }
+// }
+// template <typename T>
+// T getKernelValue(size_t index, int channel, size_t rangeMax) {
+    // return static_cast<T>(1.0f); // FORCE 1.0
+// }
 
 template <typename T>
 int runTest(int width, int channels, bool useLinear, bool useSemaphores, 
@@ -83,6 +90,7 @@ int runTest(int width, int channels, bool useLinear, bool useSemaphores,
     VulkanContext vkCtx = createVulkanContext();
     VkExtent3D extent = {(uint32_t)width, 1, 1};
     ImageResources imgRes = createExportableImage(vkCtx, extent, vkFormat, VK_IMAGE_TYPE_1D, tiling);
+	
 
     // Initial Transition to GENERAL (Manual)
     {
@@ -97,23 +105,62 @@ int runTest(int width, int channels, bool useLinear, bool useSemaphores,
         VkSubmitInfo si = {VK_STRUCTURE_TYPE_SUBMIT_INFO}; si.commandBufferCount=1; si.pCommandBuffers=&cmd;
         vkQueueSubmit(vkCtx.queue, 1, &si, VK_NULL_HANDLE); vkQueueWaitIdle(vkCtx.queue); vkDestroyCommandPool(vkCtx.device, pool, nullptr);
     }
+	
 
     VkSemaphore vkSem = VK_NULL_HANDLE;
     if (useSemaphores) vkSem = createExportableSemaphore(vkCtx);
+	
 
-    int memFd = getMemFd(vkCtx, imgRes.memory);
-    int semFd = -1;
-    if (useSemaphores) semFd = getSemaphoreFd(vkCtx, vkSem);
+    // int memFd = getMemFd(vkCtx, imgRes.memory);
+    // int semFd = -1;
+    // if (useSemaphores) semFd = getSemaphoreFd(vkCtx, vkSem);
 
+    if (!uploadAndVerify<T>(vkCtx, imgRes, vkSem, channels)) {
+        std::cerr << "Vulkan Upload Failed!" << std::endl; return 1;
+    }
+
+    // --- START REPLACEMENT BLOCK ---
     namespace syclexp = sycl::ext::oneapi::experimental;
     try {
         sycl::queue q;
-        syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{memFd, syclexp::external_mem_handle_type::opaque_fd, imgRes.allocationSize};
+
+        // 1. IMPORT MEMORY (Platform Specific)
+#ifdef _WIN32
+        HANDLE memHandle = getMemHandle(vkCtx, imgRes.memory);
+        // descriptor type: resource_win32_handle
+        syclexp::external_mem_descriptor<syclexp::resource_win32_handle> extMemDesc{
+            memHandle, 
+            syclexp::external_mem_handle_type::win32_nt_handle, 
+            imgRes.allocationSize
+        };
+#else
+        int memFd = getMemFd(vkCtx, imgRes.memory);
+        // descriptor type: resource_fd
+        syclexp::external_mem_descriptor<syclexp::resource_fd> extMemDesc{
+            memFd, 
+            syclexp::external_mem_handle_type::opaque_fd, 
+            imgRes.allocationSize
+        };
+#endif
+        
         syclexp::external_mem extMem = syclexp::import_external_memory(extMemDesc, q.get_device(), q.get_context());
         
+        // 2. IMPORT SEMAPHORE (Platform Specific)
         syclexp::external_semaphore extSem;
         if (useSemaphores) {
-             syclexp::external_semaphore_descriptor<syclexp::resource_fd> extSemDesc{semFd, syclexp::external_semaphore_handle_type::opaque_fd};
+#ifdef _WIN32
+            HANDLE semHandle = getSemaphoreHandle(vkCtx, vkSem);
+            syclexp::external_semaphore_descriptor<syclexp::resource_win32_handle> extSemDesc{
+                semHandle, 
+                syclexp::external_semaphore_handle_type::win32_nt_handle
+            };
+#else
+            int semFd = getSemaphoreFd(vkCtx, vkSem);
+            syclexp::external_semaphore_descriptor<syclexp::resource_fd> extSemDesc{
+                semFd, 
+                syclexp::external_semaphore_handle_type::opaque_fd
+            };
+#endif
             extSem = syclexp::import_external_semaphore(extSemDesc, q.get_device(), q.get_context());
         }
 
