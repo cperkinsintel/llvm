@@ -4,6 +4,7 @@ import os
 import json
 import csv
 import argparse
+import platform
 
 # ---------------------------------------------------------
 # CONFIGURATION
@@ -12,52 +13,49 @@ SURVIVORS_FILE = "ldx-survivors.json"
 CASUALTIES_FILE = "ldx-casualties.json"
 SUMMARY_FILE = "ldx-summary.csv"
 
-# Map your binary names here
+# Map your binary names here (Keep Linux format ./name.bin as base)
 TESTS = [
-    # Label                  Binary Name               Default Flags
-    # ("1D Unsampled Read",   "./vsu_1d_test.bin",       ""),
-    # ("1D Unsampled Write",  "./vsu_1d_w_test.bin",     ""),
-    # ("1D Sampled Read",     "./vss_1d_test.bin",       ""),
+    # Label                   Binary Name                Default Flags
+    ("1D Unsampled Read",    "./vsu_1d_test.bin",       ""),
+    ("1D Unsampled Write",   "./vsu_1d_w_test.bin",     ""),
+    ("1D Sampled Read",      "./vss_1d_test.bin",       ""),
 
-    ("2D Unsampled Read",   "./vsu_2d_test.bin",       ""),
-    ("2D Unsampled Write",  "./vsu_2d_w_test.bin",     ""), 
-    ("2D Sampled Read",     "./vss_2d_test.bin",       ""),
+    ("2D Unsampled Read",    "./vsu_2d_test.bin",       ""),
+    ("2D Unsampled Write",   "./vsu_2d_w_test.bin",     ""), 
+    ("2D Sampled Read",      "./vss_2d_test.bin",       ""),
     
-    # ("3D Unsampled Read",   "./vsu_3d_test.bin",       ""),
-    # ("3D Unsampled Write",  "./vsu_3d_w_test.bin",     ""), 
-    # ("3D Sampled Read",     "./vss_3d_test.bin",       ""),
+    ("3D Unsampled Read",    "./vsu_3d_test.bin",       ""),
+    ("3D Unsampled Write",   "./vsu_3d_w_test.bin",     ""), 
+    ("3D Sampled Read",      "./vss_3d_test.bin",       ""),
 
-    ("2D Arithmetic Unsampled",       "./vs_2d_arith.bin",       ""),
-    ("2D Arithmetic Sampled",         "./vs_2d_arith.bin",       "--sampled"),
+    ("2D Arithmetic Unsampled",        "./vs_2d_arith.bin",        ""),
+    ("2D Arithmetic Sampled",          "./vs_2d_arith.bin",        "--sampled"),
 ]
 
 # (Width, Height) Tuples
 DIMENSIONS = [
-    (16, 16),       # Tiny Square
-    (1024, 768),    # Classic Rect (4:3)
-    #(1920, 1080),   # Full HD (Stride Stress)
-    (13, 17),       # Prime Rect (Alignment Stress)
-    (1024, 1024),   # Power of Two
-    # (3127, 123),  # The Cliff Hunter
+    (16, 16),        # Tiny Square
+    (1024, 768),     # Classic Rect (4:3)
+    #(1920, 1080),    # Full HD (Stride Stress) -- causes hang in unorm linux
+    (13, 17),        # Prime Rect (Alignment Stress)
+    (1024, 1024),    # Power of Two
+    # (3127, 123),   # The Cliff Hunter
 ]
 
 
 # DIMENSIONS = [(16,16)]
 
 # DIMENSIONS = [
-#     (15, 16),
-#     (16, 16),
-#     (16,17),
-#     (31,32),
-#     (32,32),
-#     (32,33),
-#     (63,64),
-#     (64,64),
-#     (64,65),
+#      (15, 16),
+#      (16, 16),
+#      (16,17),
+#      (31,32),
+#      (32,32),
+#      (32,33),
+#      (63,64),
+#      (64,64),
+#      (64,65),
 # ]
-
-
-
 
 TYPES = [
     "float", "half", "int32", "uint32", 
@@ -67,19 +65,44 @@ TYPES = [
 CHANNELS = ["1", "2", "4"]
 
 # ---------------------------------------------------------
-# UTILS
+# UTILS & PLATFORM HANDLING
 # ---------------------------------------------------------
+IS_WINDOWS = (os.name == 'nt')
+
+# Colors (Disable on Windows cmd.exe by default unless ANSI supported, 
+# but often works in modern terminals like VSCode/Windows Terminal)
+if IS_WINDOWS:
+    # Attempt to enable ANSI, otherwise disable colors to avoid junk chars
+    os.system('color') 
+    
 RED = "\033[91m"
 GREEN = "\033[92m"
 YELLOW = "\033[93m"
 RESET = "\033[0m"
 
+def get_platform_binary(linux_style_path):
+    """
+    Converts './app.bin' to '.\app.exe' if running on Windows.
+    Keeps it as './app.bin' on Linux.
+    """
+    if not IS_WINDOWS:
+        return linux_style_path
+    
+    # Windows Conversion
+    base_name = linux_style_path.replace("./", "") # Remove leading ./
+    base_name = base_name.replace(".bin", ".exe")  # Swap extension
+    
+    # Return with current directory prefix for safety
+    return f".\\{base_name}"
+
 def run_cmd(cmd):
     try:
+        # On Windows, shell=True requires the command string to be formatted for CMD/Powershell
         result = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         return True, result.stdout
     except subprocess.CalledProcessError as e:
         return False, e.stdout + e.stderr
+
 # ---------------------------------------------------------
 # PHASE 1: QUALIFICATION (LOGIC ONLY)
 # ---------------------------------------------------------
@@ -94,9 +117,15 @@ def run_phase_1():
     
     failures = 0
 
-    for label, binary, default_flags in TESTS:
-        if not os.path.exists(binary.split()[0]):
-            print(f"Skipping {label} (Binary not found)")
+    for label, raw_binary, default_flags in TESTS:
+        # 1. Adapt Binary Name to OS
+        binary = get_platform_binary(raw_binary)
+
+        # 2. Check existence
+        # remove prefix for os.path.exists check to be safe
+        check_path = binary.replace("./", "").replace(".\\", "")
+        if not os.path.exists(check_path):
+            print(f"Skipping {label} (Binary not found: {binary})")
             continue
 
         for type_name in TYPES:
@@ -113,6 +142,11 @@ def run_phase_1():
                     # Construct Basic Command
                     # We pass 'size_str' directly as the dimension argument
                     flags = f"--type {type_name} --channels {ch} {size_str}"
+
+                    # --linear auto-handling for Windows 1D tests if needed
+                    # (You can enable this if you want strict enforcement via runner)
+                    # if IS_WINDOWS and is_1d:
+                    #     flags += " --linear"
 
                     full_cmd = f"{binary} {flags} {default_flags}"
                     
