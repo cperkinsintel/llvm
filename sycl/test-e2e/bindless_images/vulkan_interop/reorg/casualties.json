@@ -1,632 +1,572 @@
 [
   {
-    "label": "2D Unsampled Read",
-    "type": "half",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_test.bin --type half --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Read",
-    "type": "int16",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_test.bin --type int16 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Read",
-    "type": "uint16",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_test.bin --type uint16 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Read",
-    "type": "uint8",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_test.bin --type uint8 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Read",
-    "type": "uint8",
-    "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_test.bin --type uint8 --channels 2 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Read",
-    "type": "int8",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_test.bin --type int8 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Read",
-    "type": "int8",
-    "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_test.bin --type int8 --channels 2 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Read",
+    "label": "2D Read",
+    "mode": "unsampled",
     "type": "unorm8",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_test.bin --type unorm8 --channels 1 1920x1080 "
+    "size": "16x16",
+    "linear": false,
+    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 1 16x16",
+    "output": "Running UNSAMPLED 2D Read Test | Type: unorm8 | Size: 16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 253 errors out of 256 values.\nMismatch at index 1 (pixel 1, channel 0): Expected \u0001, Got \ufffd\nMismatch at index 2 (pixel 2, channel 0): Expected \u0002, Got \ufffd\nMismatch at index 3 (pixel 3, channel 0): Expected \u0003, Got \ufffd\nMismatch at index 4 (pixel 4, channel 0): Expected \u0004, Got \ufffd\nMismatc"
   },
   {
-    "label": "2D Unsampled Read",
+    "label": "2D Read",
+    "mode": "unsampled",
     "type": "unorm8",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_test.bin --type unorm8 --channels 2 1920x1080 "
+    "size": "16x16",
+    "linear": false,
+    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 2 16x16",
+    "output": "Running UNSAMPLED 2D Read Test | Type: unorm8 | Size: 16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 507 errors out of 512 values.\nMismatch at index 1 (pixel 0, channel 1): Expected \n, Got \ufffd\nMismatch at index 2 (pixel 1, channel 0): Expected \u0001, Got \ufffd\nMismatch at index 3 (pixel 1, channel 1): Expected \u000b, Got \ufffd\nMismatch at index 4 (pixel 2, channel 0): Expected \u0002, Got \ufffd\nMisma"
   },
   {
-    "label": "2D Unsampled Write",
+    "label": "2D Read",
+    "mode": "unsampled",
+    "type": "unorm8",
+    "ch": "4",
+    "size": "16x16",
+    "linear": false,
+    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 4 16x16",
+    "output": "Running UNSAMPLED 2D Read Test | Type: unorm8 | Size: 16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 1015 errors out of 1024 values.\nMismatch at index 1 (pixel 0, channel 1): Expected \n, Got \ufffd\nMismatch at index 2 (pixel 0, channel 2): Expected \u0014, Got \ufffd\nMismatch at index 3 (pixel 0, channel 3): Expected \u001e, Got \ufffd\nMismatch at index 4 (pixel 1, channel 0): Expected \u0001, Got \ufffd"
+  },
+  {
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "float",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type float --channels 1 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type float --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: float | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 64 Got: 0.0312576 Exp: 0.0156288\nMismatch at 65 Got: 0.0315018 Exp: 0.015873\nMismatch at 66 Got: 0.031746 Exp: 0.0161172\nMismatch at 67 Got: 0.0319902 Exp: 0.0163614\nMismatch at 68 Got: 0.0322344 Exp: 0.0166056\nFAILURE! 3840 errors out of 4096 values.\n"
   },
   {
-    "label": "2D Unsampled Write",
-    "type": "half",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type half --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "half",
-    "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type half --channels 2 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "int32",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type int32 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "uint32",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "int16",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "int16",
-    "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 2 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "uint16",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "uint16",
-    "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 2 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "uint8",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "uint8",
-    "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 2 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "uint8",
-    "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 4 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "int8",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "int8",
-    "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 2 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "int8",
-    "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 4 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "unorm8",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "unorm8",
-    "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 2 1920x1080 "
-  },
-  {
-    "label": "2D Unsampled Write",
-    "type": "unorm8",
-    "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 4 1920x1080 "
-  },
-  {
-    "label": "2D Sampled Read",
-    "type": "half",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vss_2d_test.bin --type half --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Sampled Read",
-    "type": "int16",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vss_2d_test.bin --type int16 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Sampled Read",
-    "type": "uint16",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vss_2d_test.bin --type uint16 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Sampled Read",
-    "type": "uint8",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vss_2d_test.bin --type uint8 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Sampled Read",
-    "type": "uint8",
-    "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vss_2d_test.bin --type uint8 --channels 2 1920x1080 "
-  },
-  {
-    "label": "2D Sampled Read",
-    "type": "int8",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vss_2d_test.bin --type int8 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Sampled Read",
-    "type": "int8",
-    "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vss_2d_test.bin --type int8 --channels 2 1920x1080 "
-  },
-  {
-    "label": "2D Sampled Read",
-    "type": "unorm8",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vss_2d_test.bin --type unorm8 --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Sampled Read",
-    "type": "unorm8",
-    "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vss_2d_test.bin --type unorm8 --channels 2 1920x1080 "
-  },
-  {
-    "label": "2D Arithmetic Unsampled",
-    "type": "float",
-    "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type float --channels 1 1920x1080 "
-  },
-  {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "float",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type float --channels 2 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type float --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: float | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 17 Got: 0 Exp: 0.101954\nMismatch at 19 Got: 0 Exp: 0.102198\nMismatch at 21 Got: 0 Exp: 0.102442\nMismatch at 23 Got: 0 Exp: 0.102686\nMismatch at 25 Got: 0 Exp: 0.10293\nFAILURE! 7919 errors out of 8192 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "float",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type float --channels 4 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type float --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: float | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 17 Got: 0 Exp: 0.100977\nMismatch at 18 Got: 0 Exp: 0.200977\nMismatch at 19 Got: 0 Exp: 0.300977\nMismatch at 21 Got: 0 Exp: 0.101221\nMismatch at 22 Got: 0 Exp: 0.201221\nFAILURE! 16108 errors out of 16384 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "half",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type half --channels 1 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type half --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: half | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 64 Got: 1 Exp: 64\nMismatch at 65 Got: 2 Exp: 65\nMismatch at 66 Got: 3 Exp: 66\nMismatch at 67 Got: 4 Exp: 67\nMismatch at 68 Got: 5 Exp: 68\nFAILURE! 4008 errors out of 4096 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "half",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type half --channels 2 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type half --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: half | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 128 Got: 1 Exp: 64\nMismatch at 129 Got: 11 Exp: 74\nMismatch at 130 Got: 2 Exp: 65\nMismatch at 131 Got: 12 Exp: 75\nMismatch at 132 Got: 3 Exp: 66\nFAILURE! 7632 errors out of 8192 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "half",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type half --channels 4 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type half --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: half | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 32 Got: 0 Exp: 8\nMismatch at 33 Got: 0 Exp: 18\nMismatch at 34 Got: 0 Exp: 28\nMismatch at 35 Got: 0 Exp: 38\nMismatch at 36 Got: 0 Exp: 9\nFAILURE! 15808 errors out of 16384 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "int32",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int32 --channels 1 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type int32 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: int32 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 64 Got: 1 Exp: 64\nMismatch at 65 Got: 2 Exp: 65\nMismatch at 66 Got: 3 Exp: 66\nMismatch at 67 Got: 4 Exp: 67\nMismatch at 68 Got: 5 Exp: 68\nFAILURE! 3816 errors out of 4096 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "int32",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int32 --channels 2 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type int32 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: int32 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 16 Got: 0 Exp: 8\nMismatch at 17 Got: 0 Exp: 18\nMismatch at 18 Got: 0 Exp: 9\nMismatch at 19 Got: 0 Exp: 19\nMismatch at 20 Got: 0 Exp: 10\nFAILURE! 7904 errors out of 8192 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "int32",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int32 --channels 4 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type int32 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: int32 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 16 Got: 0 Exp: 4\nMismatch at 17 Got: 0 Exp: 14\nMismatch at 18 Got: 0 Exp: 24\nMismatch at 19 Got: 0 Exp: 34\nMismatch at 20 Got: 0 Exp: 5\nFAILURE! 15808 errors out of 16384 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "uint32",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint32 --channels 1 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type uint32 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: uint32 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 64 Got: 1 Exp: 64\nMismatch at 65 Got: 2 Exp: 65\nMismatch at 66 Got: 3 Exp: 66\nMismatch at 67 Got: 4 Exp: 67\nMismatch at 68 Got: 5 Exp: 68\nFAILURE! 3816 errors out of 4096 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "uint32",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint32 --channels 2 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type uint32 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: uint32 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 16 Got: 0 Exp: 8\nMismatch at 17 Got: 0 Exp: 18\nMismatch at 18 Got: 0 Exp: 9\nMismatch at 19 Got: 0 Exp: 19\nMismatch at 20 Got: 0 Exp: 10\nFAILURE! 7904 errors out of 8192 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "uint32",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint32 --channels 4 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type uint32 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: uint32 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 16 Got: 0 Exp: 4\nMismatch at 17 Got: 0 Exp: 14\nMismatch at 18 Got: 0 Exp: 24\nMismatch at 19 Got: 0 Exp: 34\nMismatch at 20 Got: 0 Exp: 5\nFAILURE! 15808 errors out of 16384 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "int16",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int16 --channels 1 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type int16 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: int16 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 64 Got: 1 Exp: 64\nMismatch at 65 Got: 2 Exp: 65\nMismatch at 66 Got: 3 Exp: 66\nMismatch at 67 Got: 4 Exp: 67\nMismatch at 68 Got: 5 Exp: 68\nFAILURE! 4008 errors out of 4096 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "int16",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int16 --channels 2 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type int16 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: int16 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 128 Got: 1 Exp: 64\nMismatch at 129 Got: 11 Exp: 74\nMismatch at 130 Got: 2 Exp: 65\nMismatch at 131 Got: 12 Exp: 75\nMismatch at 132 Got: 3 Exp: 66\nFAILURE! 7632 errors out of 8192 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "int16",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int16 --channels 4 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type int16 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: int16 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 32 Got: 0 Exp: 8\nMismatch at 33 Got: 0 Exp: 18\nMismatch at 34 Got: 0 Exp: 28\nMismatch at 35 Got: 0 Exp: 38\nMismatch at 36 Got: 0 Exp: 9\nFAILURE! 15808 errors out of 16384 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "uint16",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint16 --channels 1 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type uint16 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: uint16 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 64 Got: 1 Exp: 64\nMismatch at 65 Got: 2 Exp: 65\nMismatch at 66 Got: 3 Exp: 66\nMismatch at 67 Got: 4 Exp: 67\nMismatch at 68 Got: 5 Exp: 68\nFAILURE! 4008 errors out of 4096 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "uint16",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type uint16 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: uint16 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 128 Got: 1 Exp: 64\nMismatch at 129 Got: 11 Exp: 74\nMismatch at 130 Got: 2 Exp: 65\nMismatch at 131 Got: 12 Exp: 75\nMismatch at 132 Got: 3 Exp: 66\nFAILURE! 7632 errors out of 8192 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "uint16",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint16 --channels 4 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type uint16 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: uint16 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 32 Got: 0 Exp: 8\nMismatch at 33 Got: 0 Exp: 18\nMismatch at 34 Got: 0 Exp: 28\nMismatch at 35 Got: 0 Exp: 38\nMismatch at 36 Got: 0 Exp: 9\nFAILURE! 15808 errors out of 16384 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "uint8",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint8 --channels 1 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type uint8 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: uint8 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 64 Got: 1 Exp: 64\nMismatch at 65 Got: 2 Exp: 65\nMismatch at 66 Got: 3 Exp: 66\nMismatch at 67 Got: 4 Exp: 67\nMismatch at 68 Got: 5 Exp: 68\nFAILURE! 4008 errors out of 4096 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "uint8",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type uint8 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: uint8 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 128 Got: 1 Exp: 64\nMismatch at 129 Got: 11 Exp: 74\nMismatch at 130 Got: 2 Exp: 65\nMismatch at 131 Got: 12 Exp: 75\nMismatch at 132 Got: 3 Exp: 66\nFAILURE! 8016 errors out of 8192 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "uint8",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint8 --channels 4 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type uint8 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: uint8 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 256 Got: 1 Exp: 64\nMismatch at 257 Got: 11 Exp: 74\nMismatch at 258 Got: 21 Exp: 84\nMismatch at 259 Got: 31 Exp: 94\nMismatch at 260 Got: 2 Exp: 65\nFAILURE! 15264 errors out of 16384 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "int8",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int8 --channels 1 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type int8 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: int8 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 64 Got: 1 Exp: 64\nMismatch at 65 Got: 2 Exp: 65\nMismatch at 66 Got: 3 Exp: 66\nMismatch at 67 Got: 4 Exp: 67\nMismatch at 68 Got: 5 Exp: 68\nFAILURE! 4008 errors out of 4096 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "int8",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int8 --channels 2 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type int8 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: int8 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 128 Got: 1 Exp: 64\nMismatch at 129 Got: 11 Exp: 74\nMismatch at 130 Got: 2 Exp: 65\nMismatch at 131 Got: 12 Exp: 75\nMismatch at 132 Got: 3 Exp: 66\nFAILURE! 8016 errors out of 8192 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "int8",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int8 --channels 4 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type int8 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: int8 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 256 Got: 1 Exp: 64\nMismatch at 257 Got: 11 Exp: 74\nMismatch at 258 Got: 21 Exp: 84\nMismatch at 259 Got: 31 Exp: 94\nMismatch at 260 Got: 2 Exp: 65\nFAILURE! 15264 errors out of 16384 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "unorm8",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type unorm8 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: unorm8 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 64 Got: 1 Exp: 64\nMismatch at 65 Got: 2 Exp: 65\nMismatch at 66 Got: 3 Exp: 66\nMismatch at 67 Got: 4 Exp: 67\nMismatch at 68 Got: 5 Exp: 68\nFAILURE! 4008 errors out of 4096 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "unorm8",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type unorm8 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: unorm8 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 128 Got: 1 Exp: 64\nMismatch at 129 Got: 11 Exp: 74\nMismatch at 130 Got: 2 Exp: 65\nMismatch at 131 Got: 12 Exp: 75\nMismatch at 132 Got: 3 Exp: 66\nFAILURE! 8016 errors out of 8192 values.\n"
   },
   {
-    "label": "2D Arithmetic Unsampled",
+    "label": "3D Read",
+    "mode": "unsampled",
     "type": "unorm8",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 1920x1080 "
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsr_3d_test.bin --type unorm8 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Read Test | Type: unorm8 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nMismatch at 256 Got: 1 Exp: 64\nMismatch at 257 Got: 11 Exp: 74\nMismatch at 258 Got: 21 Exp: 84\nMismatch at 259 Got: 31 Exp: 94\nMismatch at 260 Got: 2 Exp: 65\nFAILURE! 15264 errors out of 16384 values.\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "float",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type float --channels 1 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type float --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: float | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 64 Got: 0.0625153 Exp: 0.0156288\nMismatch at 65 Got: 0.0627595 Exp: 0.015873\nMismatch at 66 Got: 0.0630037 Exp: 0.0161172\nMismatch at 67 Got: 0.0632479 Exp: 0.0163614\nMismatch at 68 Got: 0.0634921 Exp: 0.0166056\nFAILURE! (768 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "float",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type float --channels 2 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type float --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: float | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 16 Got: 0.125031 Exp: 0.0019536\nMismatch at 17 Got: 0.225031 Exp: 0.101954\nMismatch at 18 Got: 0.125275 Exp: 0.0021978\nMismatch at 19 Got: 0.225275 Exp: 0.102198\nMismatch at 20 Got: 0.125519 Exp: 0.002442\nFAILURE! (3840 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "float",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type float --channels 4 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type float --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: float | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 16 Got: 0.125031 Exp: 0.000976801\nMismatch at 17 Got: 0.225031 Exp: 0.100977\nMismatch at 18 Got: 0.325031 Exp: 0.200977\nMismatch at 19 Got: 0.425031 Exp: 0.300977\nMismatch at 20 Got: 0.125275 Exp: 0.001221\nFAILURE! (7936 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "half",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type half --channels 1 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type half --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: half | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 64 Got: 2 Exp: 64\nMismatch at 65 Got: 3 Exp: 65\nMismatch at 66 Got: 4 Exp: 66\nMismatch at 67 Got: 5 Exp: 67\nMismatch at 68 Got: 6 Exp: 68\nFAILURE! (960 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "half",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type half --channels 2 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type half --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: half | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 128 Got: 2 Exp: 64\nMismatch at 129 Got: 12 Exp: 74\nMismatch at 130 Got: 3 Exp: 65\nMismatch at 131 Got: 13 Exp: 75\nMismatch at 132 Got: 4 Exp: 66\nFAILURE! (1536 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "half",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type half --channels 4 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type half --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: half | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 32 Got: 4 Exp: 8\nMismatch at 33 Got: 14 Exp: 18\nMismatch at 34 Got: 24 Exp: 28\nMismatch at 35 Got: 34 Exp: 38\nMismatch at 36 Got: 5 Exp: 9\nFAILURE! (7680 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "int32",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int32 --channels 1 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type int32 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: int32 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 64 Got: 2 Exp: 64\nMismatch at 65 Got: 3 Exp: 65\nMismatch at 66 Got: 4 Exp: 66\nMismatch at 67 Got: 5 Exp: 67\nMismatch at 68 Got: 6 Exp: 68\nFAILURE! (768 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "int32",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int32 --channels 2 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type int32 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: int32 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 16 Got: 4 Exp: 8\nMismatch at 17 Got: 14 Exp: 18\nMismatch at 18 Got: 5 Exp: 9\nMismatch at 19 Got: 15 Exp: 19\nMismatch at 20 Got: 6 Exp: 10\nFAILURE! (3840 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "int32",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int32 --channels 4 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type int32 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: int32 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 256 Got: 2 Exp: 64\nMismatch at 257 Got: 12 Exp: 74\nMismatch at 258 Got: 22 Exp: 84\nMismatch at 259 Got: 32 Exp: 94\nMismatch at 260 Got: 3 Exp: 65\nFAILURE! (7680 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "uint32",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint32 --channels 1 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type uint32 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: uint32 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 64 Got: 2 Exp: 64\nMismatch at 65 Got: 3 Exp: 65\nMismatch at 66 Got: 4 Exp: 66\nMismatch at 67 Got: 5 Exp: 67\nMismatch at 68 Got: 6 Exp: 68\nFAILURE! (768 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "uint32",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint32 --channels 2 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type uint32 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: uint32 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 16 Got: 4 Exp: 8\nMismatch at 17 Got: 14 Exp: 18\nMismatch at 18 Got: 5 Exp: 9\nMismatch at 19 Got: 15 Exp: 19\nMismatch at 20 Got: 6 Exp: 10\nFAILURE! (3840 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "uint32",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint32 --channels 4 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type uint32 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: uint32 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 256 Got: 2 Exp: 64\nMismatch at 257 Got: 12 Exp: 74\nMismatch at 258 Got: 22 Exp: 84\nMismatch at 259 Got: 32 Exp: 94\nMismatch at 260 Got: 3 Exp: 65\nFAILURE! (7680 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "int16",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int16 --channels 1 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type int16 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: int16 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 64 Got: 2 Exp: 64\nMismatch at 65 Got: 3 Exp: 65\nMismatch at 66 Got: 4 Exp: 66\nMismatch at 67 Got: 5 Exp: 67\nMismatch at 68 Got: 6 Exp: 68\nFAILURE! (960 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "int16",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int16 --channels 2 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type int16 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: int16 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 128 Got: 2 Exp: 64\nMismatch at 129 Got: 12 Exp: 74\nMismatch at 130 Got: 3 Exp: 65\nMismatch at 131 Got: 13 Exp: 75\nMismatch at 132 Got: 4 Exp: 66\nFAILURE! (1536 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "int16",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int16 --channels 4 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type int16 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: int16 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 32 Got: 4 Exp: 8\nMismatch at 33 Got: 14 Exp: 18\nMismatch at 34 Got: 24 Exp: 28\nMismatch at 35 Got: 34 Exp: 38\nMismatch at 36 Got: 5 Exp: 9\nFAILURE! (7680 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "uint16",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint16 --channels 1 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type uint16 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: uint16 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 64 Got: 2 Exp: 64\nMismatch at 65 Got: 3 Exp: 65\nMismatch at 66 Got: 4 Exp: 66\nMismatch at 67 Got: 5 Exp: 67\nMismatch at 68 Got: 6 Exp: 68\nFAILURE! (960 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "uint16",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type uint16 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: uint16 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 128 Got: 2 Exp: 64\nMismatch at 129 Got: 12 Exp: 74\nMismatch at 130 Got: 3 Exp: 65\nMismatch at 131 Got: 13 Exp: 75\nMismatch at 132 Got: 4 Exp: 66\nFAILURE! (1536 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "uint16",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint16 --channels 4 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type uint16 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: uint16 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 32 Got: 4 Exp: 8\nMismatch at 33 Got: 14 Exp: 18\nMismatch at 34 Got: 24 Exp: 28\nMismatch at 35 Got: 34 Exp: 38\nMismatch at 36 Got: 5 Exp: 9\nFAILURE! (7680 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "uint8",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint8 --channels 1 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type uint8 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: uint8 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 64 Got: 2 Exp: 64\nMismatch at 65 Got: 3 Exp: 65\nMismatch at 66 Got: 4 Exp: 66\nMismatch at 67 Got: 5 Exp: 67\nMismatch at 68 Got: 6 Exp: 68\nFAILURE! (960 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "uint8",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type uint8 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: uint8 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 128 Got: 2 Exp: 64\nMismatch at 129 Got: 12 Exp: 74\nMismatch at 130 Got: 3 Exp: 65\nMismatch at 131 Got: 13 Exp: 75\nMismatch at 132 Got: 4 Exp: 66\nFAILURE! (1920 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "uint8",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type uint8 --channels 4 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type uint8 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: uint8 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 256 Got: 2 Exp: 64\nMismatch at 257 Got: 12 Exp: 74\nMismatch at 258 Got: 22 Exp: 84\nMismatch at 259 Got: 32 Exp: 94\nMismatch at 260 Got: 3 Exp: 65\nFAILURE! (3072 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "int8",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int8 --channels 1 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type int8 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: int8 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 64 Got: 2 Exp: 64\nMismatch at 65 Got: 3 Exp: 65\nMismatch at 66 Got: 4 Exp: 66\nMismatch at 67 Got: 5 Exp: 67\nMismatch at 68 Got: 6 Exp: 68\nFAILURE! (960 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "int8",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int8 --channels 2 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type int8 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: int8 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 128 Got: 2 Exp: 64\nMismatch at 129 Got: 12 Exp: 74\nMismatch at 130 Got: 3 Exp: 65\nMismatch at 131 Got: 13 Exp: 75\nMismatch at 132 Got: 4 Exp: 66\nFAILURE! (1920 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "int8",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type int8 --channels 4 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type int8 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: int8 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 256 Got: 2 Exp: 64\nMismatch at 257 Got: 12 Exp: 74\nMismatch at 258 Got: 22 Exp: 84\nMismatch at 259 Got: 32 Exp: 94\nMismatch at 260 Got: 3 Exp: 65\nFAILURE! (3072 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "unorm8",
     "ch": "1",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type unorm8 --channels 1 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: unorm8 | Size: 16x16x16 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 64 Got: 2 Exp: 64\nMismatch at 65 Got: 3 Exp: 65\nMismatch at 66 Got: 4 Exp: 66\nMismatch at 67 Got: 5 Exp: 67\nMismatch at 68 Got: 6 Exp: 68\nFAILURE! (960 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "unorm8",
     "ch": "2",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type unorm8 --channels 2 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: unorm8 | Size: 16x16x16 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 128 Got: 2 Exp: 64\nMismatch at 129 Got: 12 Exp: 74\nMismatch at 130 Got: 3 Exp: 65\nMismatch at 131 Got: 13 Exp: 75\nMismatch at 132 Got: 4 Exp: 66\nFAILURE! (1920 errors)\n"
   },
   {
-    "label": "2D Arithmetic Sampled",
+    "label": "3D Write",
+    "mode": "unsampled",
     "type": "unorm8",
     "ch": "4",
-    "size": "1920x1080",
-    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 1920x1080 --sampled"
+    "size": "16x16x16",
+    "linear": false,
+    "cmd": "./vsu_3d_w_test.bin --type unorm8 --channels 4 16x16x16",
+    "output": "Running UNSAMPLED 3D Write Test | Type: unorm8 | Size: 16x16x16 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nMismatch at 256 Got: 2 Exp: 64\nMismatch at 257 Got: 12 Exp: 74\nMismatch at 258 Got: 22 Exp: 84\nMismatch at 259 Got: 32 Exp: 94\nMismatch at 260 Got: 3 Exp: 65\nFAILURE! (3072 errors)\n"
   }
 ]
