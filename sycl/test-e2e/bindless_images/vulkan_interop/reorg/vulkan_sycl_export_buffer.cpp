@@ -1,22 +1,41 @@
+// REQUIRES: aspect-ext_oneapi_exportable_device_mem
+// REQUIRES: target-spir
+// REQUIRES: vulkan
+
+// XFAIL: windows && run-mode
+// XFAIL-TRACKER: https://github.com/intel/llvm/issues/21125
+
+// clang-format off
+
+// UNSUPPORTED: arch-intel_gpu_pvc
+// UNSUPPORTED-INTENDED: Our PVC runners don't have the userspace Vulkan driver installed
+
+// clang-format on
+
+// RUN: %{build} %link-vulkan -o %t.out %if target-spir %{ -Wno-ignored-attributes %}
+// RUN: %{run} %t.out
+
+
+
 /*
   SYCL -> Vulkan Buffer Export Test
   
-  Replaces: export_memory_to_vulkan.cpp
-
   clang++ -fsycl  -o vseb.bin vulkan_sycl_export_buffer.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
-  
   
   clang++ -fsycl  -o vseb.exe vulkan_sycl_export_buffer.cpp -Wno-ignored-attributes -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
 
-  
+
   Features:
-  - SYCL allocates exportable memory (alloc_exportable_device_mem).
-  - SYCL fills memory with pattern (0, 1, 2...).
+  - SYCL allocates exportable memory.
   - SYCL exports handle (FD/Win32).
+  - Vulkan queries handle properties to find correct memory index.
   - Vulkan imports handle into VkDeviceMemory.
   - Vulkan maps memory and verifies data.
-  - UUID Matching ensures SYCL and Vulkan use the same physical device.
 */
+
+#ifdef _WIN32
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif
 
 #include "test_verification.hpp"
 #include <vulkan/vulkan.h>
@@ -28,6 +47,7 @@
 #include <algorithm>
 #include <numeric>
 
+// UNCOMMENT THIS BLOCK:
 #ifdef _WIN32
 #include <vulkan/vulkan_win32.h>
 #define PLATFORM_MEM_HANDLE_TYPE VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT
@@ -36,7 +56,6 @@
 #define PLATFORM_MEM_HANDLE_TYPE VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT
 #endif
 
-// Macro to avoid variable shadowing
 #define VK_CHECK(f) { VkResult __vkRes = (f); if (__vkRes != VK_SUCCESS) { std::cerr << "Vulkan Error: " << __vkRes << std::endl; exit(1); } }
 
 namespace syclexp = sycl::ext::oneapi::experimental;
@@ -50,12 +69,11 @@ struct VulkanContext {
 };
 
 // ---------------------------------------------------------
-// UUID MATCHING LOGIC (Safe Context Creation)
+// UUID MATCHING LOGIC
 // ---------------------------------------------------------
 inline VulkanContext createUUIDMatchedContext(const sycl::device& syclDev) {
     VulkanContext ctx;
 
-    // 1. Create Instance
     VkApplicationInfo appInfo = {VK_STRUCTURE_TYPE_APPLICATION_INFO};
     appInfo.apiVersion = VK_API_VERSION_1_2;
 
@@ -71,10 +89,8 @@ inline VulkanContext createUUIDMatchedContext(const sycl::device& syclDev) {
 
     VK_CHECK(vkCreateInstance(&createInfo, nullptr, &ctx.instance));
 
-    // 2. Get SYCL UUID
     auto syclUUID = syclDev.get_info<sycl::ext::intel::info::device::uuid>();
 
-    // 3. Find Matching Vulkan Physical Device
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(ctx.instance, &deviceCount, nullptr);
     std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -101,7 +117,6 @@ inline VulkanContext createUUIDMatchedContext(const sycl::device& syclDev) {
         exit(1);
     }
 
-    // 4. Create Logical Device
     uint32_t queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(ctx.physicalDevice, &queueFamilyCount, nullptr);
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
@@ -145,7 +160,7 @@ inline VulkanContext createUUIDMatchedContext(const sycl::device& syclDev) {
 }
 
 // ---------------------------------------------------------
-// VULKAN IMPORT HELPER
+// VULKAN IMPORT HELPERS
 // ---------------------------------------------------------
 uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties) {
     VkPhysicalDeviceMemoryProperties memProperties;
@@ -158,44 +173,95 @@ uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, Vk
     throw std::runtime_error("failed to find suitable memory type!");
 }
 
+// Query the handle directly for its compatible memory type
+uint32_t getMemoryTypeFromHandle(VulkanContext& ctx, void* handle) {
 #ifdef _WIN32
-VkDeviceMemory importMemoryFromHandle(VulkanContext& ctx, VkDeviceSize size, uint32_t memTypeIndex, void* handle) {
+    auto func = (PFN_vkGetMemoryWin32HandlePropertiesKHR) vkGetDeviceProcAddr(ctx.device, "vkGetMemoryWin32HandlePropertiesKHR");
+    if (!func) throw std::runtime_error("Could not load vkGetMemoryWin32HandlePropertiesKHR");
+
+    VkMemoryWin32HandlePropertiesKHR props = {VK_STRUCTURE_TYPE_MEMORY_WIN32_HANDLE_PROPERTIES_KHR};
+    VkResult res = func(ctx.device, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT, handle, &props);
+    if (res != VK_SUCCESS) throw std::runtime_error("Failed to get Win32 handle properties");
+
+    std::cout << "[Debug] Handle MemoryTypeBits: " << std::hex << props.memoryTypeBits << std::dec << std::endl;
+
+    if (props.memoryTypeBits == 0) {
+        throw std::runtime_error("Handle reports NO compatible memory types! (Is the handle valid?)");
+    }
+
+    // RELAXED CONSTRAINT:
+    // We try to find DEVICE_LOCAL first for performance, but if that fails, 
+    // we accept ANY memory type the handle supports.
+    try {
+        return findMemoryType(ctx.physicalDevice, props.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    } catch (...) {
+        std::cout << "[Debug] Device Local not found for handle. Falling back to any compatible type." << std::endl;
+        return findMemoryType(ctx.physicalDevice, props.memoryTypeBits, 0);
+    }
+
+#else
+    // Linux equivalent (FD)
+    auto func = (PFN_vkGetMemoryFdPropertiesKHR) vkGetDeviceProcAddr(ctx.device, "vkGetMemoryFdPropertiesKHR");
+    if (!func) throw std::runtime_error("Could not load vkGetMemoryFdPropertiesKHR");
+    
+    int fd = (int)(intptr_t)handle; 
+    VkMemoryFdPropertiesKHR props = {VK_STRUCTURE_TYPE_MEMORY_FD_PROPERTIES_KHR};
+    VkResult res = func(ctx.device, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT, fd, &props);
+    if (res != VK_SUCCESS) throw std::runtime_error("Failed to get FD properties");
+
+    if (props.memoryTypeBits == 0) {
+        throw std::runtime_error("Handle reports NO compatible memory types!");
+    }
+
+    try {
+        return findMemoryType(ctx.physicalDevice, props.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    } catch (...) {
+        return findMemoryType(ctx.physicalDevice, props.memoryTypeBits, 0);
+    }
+#endif
+}
+
+// CHANGE: Pass the buffer handle so we can link the memory to it dedicated-ly
+VkDeviceMemory importMemoryFromHandle(VulkanContext& ctx, VkDeviceSize size, uint32_t memTypeIndex, void* handle, VkBuffer buffer) {
+    VkMemoryAllocateInfo allocInfo = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
+    allocInfo.allocationSize = size;
+    allocInfo.memoryTypeIndex = memTypeIndex;
+
+    // 1. The Import Struct
+#ifdef _WIN32
     VkImportMemoryWin32HandleInfoKHR importInfo = {VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR};
     importInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
     importInfo.handle = handle;
-
-    VkMemoryAllocateInfo allocInfo = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
     allocInfo.pNext = &importInfo;
-    allocInfo.allocationSize = size;
-    allocInfo.memoryTypeIndex = memTypeIndex;
-
-    VkDeviceMemory mem;
-    VK_CHECK(vkAllocateMemory(ctx.device, &allocInfo, nullptr, &mem));
-    return mem;
-}
 #else
-VkDeviceMemory importMemoryFromHandle(VulkanContext& ctx, VkDeviceSize size, uint32_t memTypeIndex, int fd) {
     VkImportMemoryFdInfoKHR importInfo = {VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR};
     importInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
-    importInfo.fd = fd;
-
-    VkMemoryAllocateInfo allocInfo = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
+    importInfo.fd = (int)(intptr_t)handle;
     allocInfo.pNext = &importInfo;
-    allocInfo.allocationSize = size;
-    allocInfo.memoryTypeIndex = memTypeIndex;
+#endif
+
+    // 2. The Dedicated Allocation Struct (CRITICAL FIX)
+    // We chain this to the import struct (or vice versa, order doesn't matter for pNext)
+    VkMemoryDedicatedAllocateInfo dedicatedInfo = {VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO};
+    dedicatedInfo.image = VK_NULL_HANDLE;
+    dedicatedInfo.buffer = buffer; // Tell driver: "This memory is for THIS buffer"
+    
+    // Chain it: alloc -> import -> dedicated
+    dedicatedInfo.pNext = allocInfo.pNext; 
+    allocInfo.pNext = &dedicatedInfo;
 
     VkDeviceMemory mem;
     VK_CHECK(vkAllocateMemory(ctx.device, &allocInfo, nullptr, &mem));
     return mem;
 }
-#endif
 
 // ---------------------------------------------------------
 // MAIN TEST
 // ---------------------------------------------------------
 int main(int argc, char** argv) {
-    size_t numElements = 1024;
-    size_t bufferSize = numElements * sizeof(uint32_t);
+    size_t alignment = 65536; 
+    size_t bufferSize = 65536; 
+    size_t numElements = bufferSize / sizeof(uint32_t); // 16384 elements
 
     try {
         // 1. SYCL Setup
@@ -212,19 +278,18 @@ int main(int argc, char** argv) {
         // 2. Vulkan Setup (Matched)
         VulkanContext vkCtx = createUUIDMatchedContext(dev);
 
-        // 3. SYCL Allocation (Exportable)
-        // Note: Using 0 alignment lets driver decide, or use specific alignment if needed.
+        // 3. SYCL Allocation
         #ifdef _WIN32
         auto handleType = syclexp::external_mem_handle_type::win32_nt_handle;
         #else
         auto handleType = syclexp::external_mem_handle_type::opaque_fd;
         #endif
         
-        void* syclPtr = syclexp::alloc_exportable_device_mem(0, bufferSize, handleType, dev, ctx);
+        void* syclPtr = syclexp::alloc_exportable_device_mem(alignment, bufferSize, handleType, dev, ctx);
 
         // 4. Fill Data in SYCL
         std::vector<uint32_t> initData(numElements);
-        std::iota(initData.begin(), initData.end(), 0); // 0, 1, 2...
+        std::iota(initData.begin(), initData.end(), 0); 
         q.memcpy(syclPtr, initData.data(), bufferSize).wait();
         std::cout << "[SYCL] Memory allocated and filled." << std::endl;
 
@@ -232,13 +297,15 @@ int main(int argc, char** argv) {
         #ifdef _WIN32
         void* nativeHandle = syclexp::export_device_mem_handle<syclexp::external_mem_handle_type::win32_nt_handle>(syclPtr, dev, ctx);
         #else
-        int nativeHandle = syclexp::export_device_mem_handle<syclexp::external_mem_handle_type::opaque_fd>(syclPtr, dev, ctx);
+        int fd = syclexp::export_device_mem_handle<syclexp::external_mem_handle_type::opaque_fd>(syclPtr, dev, ctx);
+        void* nativeHandle = (void*)(intptr_t)fd; // store in void* for generic passing
         #endif
-        std::cout << "[SYCL] Handle exported." << std::endl;
+        std::cout << "[SYCL] Handle exported: " << nativeHandle << std::endl;
 
-        // 6. Vulkan Import
-        // We need a dummy buffer to find the correct memory type index for import
-        VkBuffer dummyBuffer;
+        // 6. Vulkan Import (CORRECTED FLOW)
+        
+        // Step A: Create the buffer container
+        VkBuffer buffer;
         VkBufferCreateInfo bufferInfo = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
         bufferInfo.size = bufferSize;
         bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
@@ -248,19 +315,19 @@ int main(int argc, char** argv) {
         extBufInfo.handleTypes = PLATFORM_MEM_HANDLE_TYPE;
         bufferInfo.pNext = &extBufInfo;
 
-        VK_CHECK(vkCreateBuffer(vkCtx.device, &bufferInfo, nullptr, &dummyBuffer));
+        VK_CHECK(vkCreateBuffer(vkCtx.device, &bufferInfo, nullptr, &buffer));
 
-        VkMemoryRequirements memReq;
-        vkGetBufferMemoryRequirements(vkCtx.device, dummyBuffer, &memReq);
-        uint32_t memTypeIndex = findMemoryType(vkCtx.physicalDevice, memReq.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        // Step B: Ask the HANDLE which memory type it needs
+        // (This replaces the old logic of guessing based on buffer requirements)
+        uint32_t memTypeIndex = getMemoryTypeFromHandle(vkCtx, nativeHandle);
+        std::cout << "[Vulkan] Handle is compatible with Memory Type Index: " << memTypeIndex << std::endl;
 
-        // Import the handle
-        VkDeviceMemory importedMem = importMemoryFromHandle(vkCtx, bufferSize, memTypeIndex, nativeHandle);
-        VK_CHECK(vkBindBufferMemory(vkCtx.device, dummyBuffer, importedMem, 0));
+        // Step C: Allocate (Import) and Bind
+        VkDeviceMemory importedMem = importMemoryFromHandle(vkCtx, bufferSize, memTypeIndex, nativeHandle, buffer);
+        VK_CHECK(vkBindBufferMemory(vkCtx.device, buffer, importedMem, 0));
         std::cout << "[Vulkan] Handle imported and bound." << std::endl;
 
         // 7. Verification (Copy Vulkan Buffer -> Host Staging)
-        // Create Staging Buffer
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingMemory;
         VkBufferCreateInfo stageInfo = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
@@ -287,7 +354,7 @@ int main(int argc, char** argv) {
         VkCommandBufferBeginInfo begin = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
         vkBeginCommandBuffer(cmd, &begin);
         VkBufferCopy copyRegion = {0, 0, bufferSize};
-        vkCmdCopyBuffer(cmd, dummyBuffer, stagingBuffer, 1, &copyRegion);
+        vkCmdCopyBuffer(cmd, buffer, stagingBuffer, 1, &copyRegion);
         vkEndCommandBuffer(cmd);
 
         VkSubmitInfo submit = {VK_STRUCTURE_TYPE_SUBMIT_INFO}; submit.commandBufferCount = 1; submit.pCommandBuffers = &cmd;
@@ -317,7 +384,7 @@ int main(int argc, char** argv) {
         vkDestroyBuffer(vkCtx.device, stagingBuffer, nullptr);
         vkFreeMemory(vkCtx.device, stagingMemory, nullptr);
         vkDestroyCommandPool(vkCtx.device, pool, nullptr);
-        vkDestroyBuffer(vkCtx.device, dummyBuffer, nullptr);
+        vkDestroyBuffer(vkCtx.device, buffer, nullptr);
         vkFreeMemory(vkCtx.device, importedMem, nullptr);
         vkDestroyDevice(vkCtx.device, nullptr);
         vkDestroyInstance(vkCtx.instance, nullptr);

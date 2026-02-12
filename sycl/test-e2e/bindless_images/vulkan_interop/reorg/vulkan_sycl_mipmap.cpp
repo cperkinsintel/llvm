@@ -1,10 +1,23 @@
+// REQUIRES: aspect-ext_oneapi_bindless_images
+// REQUIRES: aspect-ext_oneapi_external_memory_import
+// REQUIRES: aspect-ext_oneapi_mipmap
+// REQUIRES: vulkan
+
+// XFAIL: linux
+// XFAIL-TRACKER: https://github.com/intel/llvm/issues/21131
+
+// UNSUPPORTED: cuda
+// UNSUPPORTED-TRACKER: https://github.com/intel/llvm/issues/21131
+
+// RUN: %{build} %link-vulkan -o %t.out %if target-spir %{ -Wno-ignored-attributes %}
+// RUN: %{run} %t.out
+
+
 /*
   Vulkan/SYCL Mipmap Interop Test
-  
-  Replaces: mipmaps.cpp
+ 
 
   clang++ -fsycl  -o vsmm.bin vulkan_sycl_mipmap.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
-  
   
   clang++ -fsycl  -o vsmm.exe vulkan_sycl_mipmap.cpp -Wno-ignored-attributes -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
 
@@ -20,6 +33,10 @@
     ./vulkan_sycl_mipmap.bin
     ./vulkan_sycl_mipmap.bin --semaphores
 */
+
+#ifdef _WIN32
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif
 
 #include "test_verification.hpp"
 #include <vulkan/vulkan.h>

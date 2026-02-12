@@ -1,15 +1,26 @@
+// REQUIRES: aspect-ext_oneapi_bindless_images
+// REQUIRES: aspect-ext_oneapi_external_memory_import
+// REQUIRES: aspect-ext_oneapi_external_semaphore_import
+// REQUIRES: vulkan
+
+// UNSUPPORTED: linux && run-mode
+// UNSUPPORTED-TRACKER: https://github.com/intel/llvm/issues/21133
+
+// XFAIL: linux && gpu-intel-dg2
+// XFAIL-TRACKER: https://github.com/intel/llvm/issues/21136
+
+// RUN: %{build} %link-vulkan -o %t.out %if target-spir %{ -Wno-ignored-attributes -DTEST_L0_SUPPORTED_VK_FORMAT %}
+// RUN: %{run} env NEOReadDebugKeys=1 UseBindlessMode=1 UseExternalAllocatorForSshAndDsh=1 %t.out
+
+
+
 /*
   Vulkan/SYCL Timeline Semaphore & Bindless Image Test
 
   clang++ -fsycl  -o vsts.bin vulkan_sycl_timeline_semaphore.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
-  
+
   clang++ -fsycl  -o vsts.exe vulkan_sycl_timeline_semaphore.cpp -Wno-ignored-attributes -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
-
-
-  Replaces:
-    - semaphore_export.cpp (Timeline logic)
-    - bindless_timeline.cpp (Image logic)
 
   Features:
   - Uses Timeline Semaphores (uint64_t) for fine-grained sync.
@@ -19,6 +30,10 @@
   - Uses Bindless Images for the actual data processing.
   - UUID Matching for Multi-GPU safety.
 */
+
+#ifdef _WIN32
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif
 
 #include "test_verification.hpp"
 #include <vulkan/vulkan.h>
