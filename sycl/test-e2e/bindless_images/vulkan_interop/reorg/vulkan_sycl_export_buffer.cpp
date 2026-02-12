@@ -6,7 +6,7 @@
   clang++ -fsycl  -o vseb.bin vulkan_sycl_export_buffer.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
   
-  clang++ -fsycl  -o vseb.exe vulkan_sycl_export_buffer.cpp -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+  clang++ -fsycl  -o vseb.exe vulkan_sycl_export_buffer.cpp -Wno-ignored-attributes -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
 
   
   Features:

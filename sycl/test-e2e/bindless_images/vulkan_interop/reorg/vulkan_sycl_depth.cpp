@@ -6,7 +6,7 @@
 
   clang++ -fsycl  -o vsd.bin vulkan_sycl_depth.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
-  clang++ -fsycl  -o vsd.exe vulkan_sycl_depth.cpp -DVK_USE_PLATFORM_WIN32_KHR -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+  clang++ -fsycl  -o vsd.exe vulkan_sycl_depth.cpp -Wno-ignored-attributes -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
   
   Features:
   - Supports Depth Formats (D32_SFLOAT, D16_UNORM)

@@ -6,7 +6,7 @@
   clang++ -fsycl  -o vsu_3d_test.bin vulkan_sycl_unsampled_3d.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
   
-  clang++ -fsycl  -o vsu_3d_test.exe vulkan_sycl_unsampled_3d.cpp -DVK_USE_PLATFORM_WIN32_KHR -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+  clang++ -fsycl  -o vsu_3d_test.exe vulkan_sycl_unsampled_3d.cpp -Wno-ignored-attributes -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
   
   FLAGS
     --semaphores   Use Vulkan Semaphores for SYCL Interop Sync

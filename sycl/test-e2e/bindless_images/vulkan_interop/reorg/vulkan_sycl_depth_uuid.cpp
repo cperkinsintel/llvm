@@ -3,7 +3,7 @@
 
   clang++ -fsycl  -o vsdu.bin vulkan_sycl_depth_uuid.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
-  clang++ -fsycl  -o vsdu.exe vulkan_sycl_depth_uuid.cpp -DVK_USE_PLATFORM_WIN32_KHR -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+  clang++ -fsycl  -o vsdu.exe vulkan_sycl_depth_uuid.cpp -Wno-ignored-attributes -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
   
   Fixes:
   - Finds the specific Vulkan Physical Device that matches the SYCL Device UUID.

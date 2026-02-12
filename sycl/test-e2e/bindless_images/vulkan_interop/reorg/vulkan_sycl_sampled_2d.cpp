@@ -5,7 +5,7 @@
 
   clang++ -fsycl -std=c++17 -o vss_2d_test.bin vulkan_sycl_sampled_2d.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
-  clang++ -fsycl -std=c++17 -o vss_2d_test.exe vulkan_sycl_sampled_2d.cpp -DVK_USE_PLATFORM_WIN32_KHR -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+  clang++ -fsycl -std=c++17 -o vss_2d_test.exe vulkan_sycl_sampled_2d.cpp -Wno-ignored-attributes -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
   
     ./vss_2d_test.bin 
     ./vss_2d_test.bin --semaphores

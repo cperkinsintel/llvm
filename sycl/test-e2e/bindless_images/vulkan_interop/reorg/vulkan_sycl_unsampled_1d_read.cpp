@@ -6,7 +6,7 @@
   clang++ -fsycl -std=c++17 -o vsu_1d_test.bin vulkan_sycl_unsampled_1d_read.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
   
-  clang++ -fsycl -std=c++17 -o vsu_1d_test.exe vulkan_sycl_unsampled_1d_read.cpp -DVK_USE_PLATFORM_WIN32_KHR -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+  clang++ -fsycl -std=c++17 -o vsu_1d_test.exe vulkan_sycl_unsampled_1d_read.cpp -Wno-ignored-attributes -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
   
 
     ./vsu_1d_test.bin 

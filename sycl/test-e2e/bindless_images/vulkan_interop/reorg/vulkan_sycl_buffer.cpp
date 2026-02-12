@@ -7,7 +7,7 @@
   clang++ -fsycl  -o vsb.bin vulkan_sycl_buffer.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
   
-  clang++ -fsycl  -o vsb.exe vulkan_sycl_buffer.cpp -DVK_USE_PLATFORM_WIN32_KHR -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+  clang++ -fsycl  -o vsb.exe vulkan_sycl_buffer.cpp -Wno-ignored-attributes -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
 
 
   

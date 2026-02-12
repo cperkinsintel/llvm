@@ -4,7 +4,7 @@
   clang++ -fsycl  -o vsts.bin vulkan_sycl_timeline_semaphore.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
   
-  clang++ -fsycl  -o vsts.exe vulkan_sycl_timeline_semaphore.cpp -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+  clang++ -fsycl  -o vsts.exe vulkan_sycl_timeline_semaphore.cpp -Wno-ignored-attributes -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
 
 
   Replaces:

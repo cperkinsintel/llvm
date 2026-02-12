@@ -5,7 +5,7 @@
 
   clang++ -fsycl -o vsr_1d_test.bin vulkan_sycl_image_interop_read_1d.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
-  clang++ -fsycl -o vsr_1d_test.exe vulkan_sycl_image_interop_read_1d.cpp  -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+  clang++ -fsycl -o vsr_1d_test.exe vulkan_sycl_image_interop_read_1d.cpp -Wno-ignored-attributes  -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
   
   USAGE:
     ./vsr_1d_test.bin [FLAGS] [Wx]

@@ -3,7 +3,7 @@
 
   clang++ -fsycl -o vsw_2d_test.bin vulkan_sycl_image_interop_write_2d_unsampled.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
   
-  clang++ -fsycl -o vsw_2d_test.exe vulkan_sycl_image_interop_write_2d_unsampled.cpp  -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+  clang++ -fsycl -o vsw_2d_test.exe vulkan_sycl_image_interop_write_2d_unsampled.cpp -Wno-ignored-attributes  -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
   
     ./vsw_2d_test.bin 
 

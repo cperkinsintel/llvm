@@ -4,7 +4,7 @@
   $VULKAN_SDK/bin/glslangValidator -V vulkan_shader_2d.comp -o vulkan_shader_2d.spv
   clang++ -fsycl -o vs_2d_arith.bin vulkan_sycl_2d_arithmetic.cpp -lvulkan -I$VULKAN_SDK/include -L$VULKAN_SDK/lib
    
-  clang++ -fsycl -o vs_2d_arith.exe vulkan_sycl_2d_arithmetic.cpp -DVK_USE_PLATFORM_WIN32_KHR -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
+  clang++ -fsycl -o vs_2d_arith.exe vulkan_sycl_2d_arithmetic.cpp -Wno-ignored-attributes -lvulkan-1 -I$VULKAN_SDK/Include -L$VULKAN_SDK/Lib
 
   FLAGS
     --semaphores   Use Vulkan Semaphores for SYCL Interop Sync

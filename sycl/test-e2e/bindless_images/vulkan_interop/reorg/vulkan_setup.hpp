@@ -7,11 +7,9 @@
 #include <cstring>
 
 #ifdef _WIN32
-#define VK_USE_PLATFORM_WIN32_KHR
+// be sure to use -Wno-ignored-attributes on Windows or the __stdcall will freak out when doing the device pass compilation
 
-// suppress warnings. Mostly because Window __stdcall freaks out vulkan when compiling device code.
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wignored-attributes"
+#define VK_USE_PLATFORM_WIN32_KHR
 #endif
 
 
@@ -35,10 +33,6 @@
     #include <vulkan/vulkan_win32.h>
 #endif 
 
-#ifdef _WIN32
-// restore warnings
-#pragma clang diagnostic pop
-#endif
 
 // ---------------------------------------------------------
 // PLATFORM ABSTRACTION
