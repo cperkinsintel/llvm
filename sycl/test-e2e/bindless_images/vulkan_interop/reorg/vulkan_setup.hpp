@@ -6,9 +6,14 @@
 #include <stdexcept>
 #include <cstring>
 
+#ifdef _WIN32
+#define VK_USE_PLATFORM_WIN32_KHR
+
 // suppress warnings. Mostly because Window __stdcall freaks out vulkan when compiling device code.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wignored-attributes"
+#endif
+
 
 #include <vulkan/vulkan.h>
 
@@ -30,8 +35,10 @@
     #include <vulkan/vulkan_win32.h>
 #endif 
 
+#ifdef _WIN32
 // restore warnings
 #pragma clang diagnostic pop
+#endif
 
 // ---------------------------------------------------------
 // PLATFORM ABSTRACTION
@@ -246,15 +253,15 @@ inline ImageResources createExportableImage(
     VkExportMemoryAllocateInfo exportAllocInfo = {VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO};
     exportAllocInfo.handleTypes = PLATFORM_MEM_HANDLE_TYPE;
     
-    // --- UPDATED: Dedicated Allocation (Required for Windows Interop) ---
+    // Dedicated Allocation (Required for Windows Interop)
     VkMemoryDedicatedAllocateInfo dedicatedAllocInfo = {VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO};
     dedicatedAllocInfo.image = res.image;
     dedicatedAllocInfo.buffer = VK_NULL_HANDLE;
-    dedicatedAllocInfo.pNext = &exportAllocInfo; // Chain Export info here
-    // -------------------------------------------------------------------
+    dedicatedAllocInfo.pNext = &exportAllocInfo; // Chain export info
+
 
     VkMemoryAllocateInfo allocInfo = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
-    allocInfo.pNext = &dedicatedAllocInfo; // Chain Dedicated info here
+    allocInfo.pNext = &dedicatedAllocInfo; // Chain Dedicated info 
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = findMemoryType(ctx.physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
@@ -265,6 +272,8 @@ inline ImageResources createExportableImage(
 
     return res;
 }
+
+
 
 inline VkSemaphore createExportableSemaphore(VulkanContext& ctx) {
     VkExportSemaphoreCreateInfo exportInfo{};
@@ -348,38 +357,9 @@ inline int getSemaphoreFd(VulkanContext& ctx, VkSemaphore semaphore) {
 }
 #endif
 
-// -----------------------------------------------------------
-//  GENERIC DATA GENERATION & VERIFICATION (Unchanged from here down)
-// -----------------------------------------------------------
-// ... [The rest of the file stays the same] ...
 
-// -----------------------------------------------------------
-//  GENERIC DATA GENERATION & VERIFICATION
-// -----------------------------------------------------------
 
-// // Helper to generate a test value for a given index and channel
-// template <typename T>
-// T generateTestValue(size_t index, int channel, size_t rangeMax) {
-//     if constexpr (std::is_floating_point_v<T>) {
-//         // Floating point: 0.0 to 1.0 gradient
-//         float val = (float)index / (float)(rangeMax > 1 ? rangeMax - 1 : 1);
-//         return static_cast<T>(val + (float)channel * 0.1f);
-//     } else {
-//         // Integer: Sequential numbers wrapping around
-//         // e.g. (index + channel)
-//         return static_cast<T>((index + channel * 10) % 127); 
-//     }
-// }
 
-// // Helper to compare with tolerance
-// template <typename T>
-// bool checkValue(T actual, T expected) {
-//     if constexpr (std::is_floating_point_v<T>) {
-//         return std::abs(actual - expected) < 0.01f;
-//     } else {
-//         return actual == expected;
-//     }
-// }
 
 // ---------------------------------------------------------
 // HELPER: Upload Data (Host -> Staging -> Device)
@@ -492,7 +472,7 @@ bool verifyImage(VulkanContext& ctx, ImageResources& imgRes, int channels, VkSem
 
     size_t totalPixels = width * height * depth;
 
-    // 1. Create Staging Buffer
+    // Create Staging Buffer
     VkBuffer stagingBuffer; 
     VkDeviceMemory stagingMemory;
     VkDeviceSize dataSize = totalPixels * channels * 4; 
@@ -510,7 +490,7 @@ bool verifyImage(VulkanContext& ctx, ImageResources& imgRes, int channels, VkSem
     VK_CHECK(vkAllocateMemory(ctx.device, &ai, nullptr, &stagingMemory));
     VK_CHECK(vkBindBufferMemory(ctx.device, stagingBuffer, stagingMemory, 0));
 
-    // 2. Command Buffer
+    // Command Buffer
     VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO }; 
     poolInfo.queueFamilyIndex = ctx.queueFamilyIndex;
     VkCommandPool pool; 
@@ -521,12 +501,10 @@ bool verifyImage(VulkanContext& ctx, ImageResources& imgRes, int channels, VkSem
     ca.commandPool = pool; ca.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY; ca.commandBufferCount = 1;
     vkAllocateCommandBuffers(ctx.device, &ca, &cmd);
 
-    // --- FIX START: Use valid BeginInfo ---
     VkCommandBufferBeginInfo beginInfo = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
     vkBeginCommandBuffer(cmd, &beginInfo);
-    // --- FIX END ---
 
-    // Safety Barrier: Ensure writes from SYCL (External) are visible before we transfer
+    // Safety Barrier: Ensure writes from SYCL (External) are visible before transfer
     VkImageMemoryBarrier barrier = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
     barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL; // Assume SYCL left it in GENERAL
     barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL; // We keep it in GENERAL
@@ -545,7 +523,7 @@ bool verifyImage(VulkanContext& ctx, ImageResources& imgRes, int channels, VkSem
 
     vkEndCommandBuffer(cmd);
 
-    // 3. Submit
+    // Submit
     VkSubmitInfo si = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
     si.commandBufferCount = 1;
     si.pCommandBuffers = &cmd;
@@ -558,7 +536,7 @@ bool verifyImage(VulkanContext& ctx, ImageResources& imgRes, int channels, VkSem
     vkQueueSubmit(ctx.queue, 1, &si, VK_NULL_HANDLE);
     vkQueueWaitIdle(ctx.queue);
 
-    // 4. Verify Data
+    // Verify Data
     void* data;
     vkMapMemory(ctx.device, stagingMemory, 0, dataSize, 0, &data);
     
@@ -593,40 +571,7 @@ bool verifyImage(VulkanContext& ctx, ImageResources& imgRes, int channels, VkSem
     return passed;
 }
 
-// ---------------------------------------------------------
-// COMPATIBILITY SHIM (The "Old" API)
-// ---------------------------------------------------------
-// This allows your existing tests to call uploadAndVerify<T>(...) without changes.
-// template <typename T>
-// bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaphore signalSemaphore, int channels) {
-//     size_t totalPixels = imgRes.extent.width * imgRes.extent.height * imgRes.extent.depth;
-    
-//     // 1. Synchronous Upload
-//     uploadImage(ctx, imgRes, channels, VK_NULL_HANDLE, [&](size_t i, int c) {
-//         return generateTestValue<T>(i, c, totalPixels);
-//     });
 
-//     // 2. Synchronous Verify
-//     bool result = verifyImage(ctx, imgRes, channels, VK_NULL_HANDLE, [&](size_t i, int c) {
-//         return generateTestValue<T>(i, c, totalPixels);
-//     });
-
-//     if (!result) {
-//         std::cerr << "CRITICAL: Initial Vulkan upload/verify failed. SYCL will likely fail." << std::endl;
-//         return false;
-//     }
-
-//     // 3. Signal Semaphore for SYCL
-//     if (signalSemaphore != VK_NULL_HANDLE) {
-//         VkSubmitInfo si = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
-//         si.signalSemaphoreCount = 1;
-//         si.pSignalSemaphores = &signalSemaphore;
-//         vkQueueSubmit(ctx.queue, 1, &si, VK_NULL_HANDLE);
-//         // Do NOT wait idle here.
-//     }
-    
-//     return true;
-// }
 
 template <typename T>
 bool uploadAndVerify(VulkanContext& ctx, ImageResources& imgRes, VkSemaphore signalSemaphore = VK_NULL_HANDLE, int channels = 4) {
