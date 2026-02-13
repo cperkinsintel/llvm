@@ -1,3 +1,17 @@
+// REQUIRES: aspect-ext_oneapi_external_memory_import
+// REQUIRES: vulkan
+
+
+
+// RUN: %{build} %link-vulkan -o %t.out %if target-spir %{ -Wno-ignored-attributes %}
+// RUN: %{run} %t.out
+// RUN: %{run} %t.out --semaphores
+
+// DMABUF not on Windows.  
+// RUN: %{run} %t.out --dmabuf
+// RUN: %{run} %t.out --semaphores --dmabuf
+
+
 /*
   Vulkan/SYCL Buffer Interop Test (USM)
   
@@ -20,10 +34,10 @@
   - Verifies results on Host via Vulkan
   
   Usage:
-    ./vulkan_sycl_buffer.bin
-    ./vulkan_sycl_buffer.bin --semaphores
-    ./vulkan_sycl_buffer.bin --dmabuf
-    ./vulkan_sycl_buffer.bin --size 1024
+    ./vsb.bin
+    ./vsb.bin --semaphores
+    ./vsb.bin --dmabuf
+    ./vsb.bin --size 1024
 */
 
 #include "test_verification.hpp" // Ensure this is first/available
@@ -376,12 +390,17 @@ int main(int argc, char** argv) {
 
     cleanupBuffer(vkCtx, inBuf);
     cleanupBuffer(vkCtx, outBuf);
+
+    // TODO: restore the resource freeing below.
+	// workaround CMPLRLLVM-73463:  Do not destroy Vulkan Device.
+
+
     if(useSemaphores) {
-        vkDestroySemaphore(vkCtx.device, signalSem, nullptr);
-        vkDestroySemaphore(vkCtx.device, waitSem, nullptr);
+    //    vkDestroySemaphore(vkCtx.device, signalSem, nullptr);
+    //    vkDestroySemaphore(vkCtx.device, waitSem, nullptr);
     }
-    vkDestroyDevice(vkCtx.device, nullptr);
-    vkDestroyInstance(vkCtx.instance, nullptr);
+    //vkDestroyDevice(vkCtx.device, nullptr);
+    //vkDestroyInstance(vkCtx.instance, nullptr);
 
     return (errors == 0) ? 0 : 1;
 }

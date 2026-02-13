@@ -444,11 +444,14 @@ int main(int argc, char** argv) {
         // Cleanup
         syclexp::destroy_image_handle(imgHandle, q);
         syclexp::release_external_memory(extMem, q);
+
+        // TODO: restore the resource freeing below.
+	    // workaround CMPLRLLVM-73463:  Do not destroy Vulkan Device.
         
-        vkDestroyImage(vkCtx.device, img.image, nullptr);
-        vkFreeMemory(vkCtx.device, img.memory, nullptr);
-        vkDestroyDevice(vkCtx.device, nullptr);
-        vkDestroyInstance(vkCtx.instance, nullptr);
+        // vkDestroyImage(vkCtx.device, img.image, nullptr);
+        // vkFreeMemory(vkCtx.device, img.memory, nullptr);
+        // vkDestroyDevice(vkCtx.device, nullptr);
+        // vkDestroyInstance(vkCtx.instance, nullptr);
 
     } catch (std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;

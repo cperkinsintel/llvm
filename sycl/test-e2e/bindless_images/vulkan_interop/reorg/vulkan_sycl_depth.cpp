@@ -1,3 +1,13 @@
+// REQUIRES: aspect-ext_oneapi_bindless_images
+// REQUIRES: aspect-ext_oneapi_external_memory_import || (windows && level_zero && aspect-ext_oneapi_bindless_images)
+// REQUIRES: vulkan
+
+// RUN: %{build} %link-vulkan -o %t.out %if target-spir %{ -Wno-ignored-attributes %}
+// RUN: %{run} env NEOReadDebugKeys=1 UseBindlessMode=1 UseExternalAllocatorForSshAndDsh=1 %t.out
+// RUN: %{run} env NEOReadDebugKeys=1 UseBindlessMode=1 UseExternalAllocatorForSshAndDsh=1 %t.out --semaphores
+// RUN: %{run} env NEOReadDebugKeys=1 UseBindlessMode=1 UseExternalAllocatorForSshAndDsh=1 %t.out --d16
+// RUN: %{run} env NEOReadDebugKeys=1 UseBindlessMode=1 UseExternalAllocatorForSshAndDsh=1 %t.out --semaphores --d16
+
 /*
   Vulkan/SYCL Depth Image Interop Test
   
@@ -15,18 +25,10 @@
   - Semaphores support
   
   Usage:
-    ./vulkan_sycl_depth.bin
-    ./vulkan_sycl_depth.bin --semaphores
-    ./vulkan_sycl_depth.bin --d16
-    ./vulkan_sycl_depth.bin 64x64
-*/
-/*
-  Vulkan/SYCL Depth Image Interop Test - EXTENSION FIX
-  
-  Hypothesis: The crash occurs because 'vulkan_setup.hpp' is missing 
-  VK_KHR_dedicated_allocation in the device creation list. 
-  This causes the driver to ignore the dedicated allocation request, 
-  leading to metadata mismatches (DEVICE_LOST) during interop.
+    ./vsd.bin
+    ./vsd.bin --semaphores
+    ./vsd.bin --d16
+    ./vsd.bin 64x64
 */
 
 #include "test_verification.hpp"
@@ -248,12 +250,15 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    vkDestroyImage(vkCtx.device, inImg.image, nullptr);
-    vkFreeMemory(vkCtx.device, inImg.memory, nullptr);
-    vkDestroyImage(vkCtx.device, outImg.image, nullptr);
-    vkFreeMemory(vkCtx.device, outImg.memory, nullptr);
-    vkDestroyDevice(vkCtx.device, nullptr);
-    vkDestroyInstance(vkCtx.instance, nullptr);
+    // TODO: restore the resource freeing below.
+	// workaround CMPLRLLVM-73463:  Do not destroy Vulkan Device.
+
+    // vkDestroyImage(vkCtx.device, inImg.image, nullptr);
+    // vkFreeMemory(vkCtx.device, inImg.memory, nullptr);
+    // vkDestroyImage(vkCtx.device, outImg.image, nullptr);
+    // vkFreeMemory(vkCtx.device, outImg.memory, nullptr);
+    // vkDestroyDevice(vkCtx.device, nullptr);
+    // vkDestroyInstance(vkCtx.instance, nullptr);
 
     std::cout << "EXTENSION FIX RUN COMPLETE" << std::endl;
     return 0;
