@@ -330,18 +330,21 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
         }
         
         syclexp::release_external_memory(extMem, q.get_device(), q.get_context());
+		
+		// TODO: restore the resource freeing below.
+		// workaround CMPLRLLVM-73463:  Do not destroy Vulkan Device.
         
         if (useSemaphores) {
             syclexp::release_external_semaphore(extSem, q.get_device(), q.get_context());
-            vkDestroySemaphore(vkCtx.device, vkSem, nullptr);
+            // vkDestroySemaphore(vkCtx.device, vkSem, nullptr);
         }
 
-        cleanupVulkan(vkCtx, imgRes);
+        // cleanupVulkan(vkCtx, imgRes);
         return passed ? 0 : 1;
 
     } catch (std::exception& e) {
         std::cerr << "SYCL Exception: " << e.what() << std::endl;
-        cleanupVulkan(vkCtx, imgRes);
+        // cleanupVulkan(vkCtx, imgRes);
         return 1;
     }
 }

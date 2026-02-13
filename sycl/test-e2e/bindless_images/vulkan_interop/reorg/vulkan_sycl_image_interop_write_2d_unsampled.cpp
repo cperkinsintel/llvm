@@ -233,10 +233,13 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
     }
     vkUnmapMemory(vkCtx.device, verifyMem);
     if(passed) std::cout << "SUCCESS!" << std::endl; else std::cout << "FAILURE! (" << errorCount << " errors)" << std::endl;
+	
+	// TODO: restore the resource freeing below.
+	// workaround CMPLRLLVM-73463:  Do not destroy Vulkan Device.
 
-    vkDestroyBuffer(vkCtx.device, verifyBuffer, nullptr); vkFreeMemory(vkCtx.device, verifyMem, nullptr);
-    if(useSemaphores) vkDestroySemaphore(vkCtx.device, vkSem, nullptr);
-    cleanupVulkan(vkCtx, imgRes);
+    // vkDestroyBuffer(vkCtx.device, verifyBuffer, nullptr); vkFreeMemory(vkCtx.device, verifyMem, nullptr);
+    // if(useSemaphores) vkDestroySemaphore(vkCtx.device, vkSem, nullptr);
+    // cleanupVulkan(vkCtx, imgRes);
     return passed ? 0 : 1;
 }
 
