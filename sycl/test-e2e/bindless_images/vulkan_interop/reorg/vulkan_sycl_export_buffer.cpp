@@ -47,7 +47,7 @@
 #include <algorithm>
 #include <numeric>
 
-// UNCOMMENT THIS BLOCK:
+
 #ifdef _WIN32
 #include <vulkan/vulkan_win32.h>
 #define PLATFORM_MEM_HANDLE_TYPE VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT
@@ -380,7 +380,7 @@ int main(int argc, char** argv) {
 
         // Cleanup
         syclexp::free_exportable_memory(syclPtr, dev, ctx);
-        
+       
         vkDestroyBuffer(vkCtx.device, stagingBuffer, nullptr);
         vkFreeMemory(vkCtx.device, stagingMemory, nullptr);
         vkDestroyCommandPool(vkCtx.device, pool, nullptr);
@@ -388,6 +388,7 @@ int main(int argc, char** argv) {
         vkFreeMemory(vkCtx.device, importedMem, nullptr);
         vkDestroyDevice(vkCtx.device, nullptr);
         vkDestroyInstance(vkCtx.instance, nullptr);
+	
 
     } catch (std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;

@@ -28,8 +28,8 @@
   - Vulkan Signals (Value N) -> SYCL Waits (Value N).
   - SYCL Signals (Value N) -> Vulkan Waits (Value N).
   - Uses Bindless Images for the actual data processing.
-  - UUID Matching for Multi-GPU safety.
 */
+
 
 #ifdef _WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -137,7 +137,7 @@ inline VulkanContext createUUIDMatchedContext(const sycl::device& syclDev) {
         VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
         VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
         VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME,
-        VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME, // Essential!
+        VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
         VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME,
 #ifdef _WIN32
         VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME,
@@ -154,7 +154,6 @@ inline VulkanContext createUUIDMatchedContext(const sycl::device& syclDev) {
     devInfo.enabledExtensionCount = (uint32_t)devExts.size();
     devInfo.ppEnabledExtensionNames = devExts.data();
     
-    // Enable Timeline Semaphores Feature
     VkPhysicalDeviceTimelineSemaphoreFeatures timelineFeatures = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES};
     timelineFeatures.timelineSemaphore = VK_TRUE;
     devInfo.pNext = &timelineFeatures;
@@ -287,159 +286,187 @@ int main() {
     int iterations = 100; // Stress Test Loop
 
     try {
-        sycl::queue q;
-        std::cout << "[SYCL] Device: " << q.get_device().get_info<sycl::info::device::name>() << std::endl;
-
-        VulkanContext vkCtx = createUUIDMatchedContext(q.get_device());
-        ImageResources inImg = createImage(vkCtx, width, height);
-        ImageResources outImg = createImage(vkCtx, width, height);
-
-        // Create Timeline Semaphores
-        VkSemaphore vkToSyclSem = createTimelineSemaphore(vkCtx, 0); // Vulkan Signals -> SYCL Waits
-        VkSemaphore syclToVkSem = createTimelineSemaphore(vkCtx, 0); // SYCL Signals -> Vulkan Waits
-
-        // Import Resources to SYCL
-        #ifdef _WIN32
-        auto inDesc = syclexp::external_mem_descriptor<syclexp::resource_win32_handle>{getMemHandle(vkCtx, inImg.memory), syclexp::external_mem_handle_type::win32_nt_handle, inImg.allocationSize};
-        auto outDesc = syclexp::external_mem_descriptor<syclexp::resource_win32_handle>{getMemHandle(vkCtx, outImg.memory), syclexp::external_mem_handle_type::win32_nt_handle, outImg.allocationSize};
+        VulkanContext vkCtx;
+        ImageResources inImg;
+        ImageResources outImg;
+        VkSemaphore vkToSyclSem;
+        VkSemaphore syclToVkSem;
+        VkCommandPool pool;
         
-        auto waitSemDesc = syclexp::external_semaphore_descriptor<syclexp::resource_win32_handle>{getSemHandle(vkCtx, vkToSyclSem), syclexp::external_semaphore_handle_type::timeline_win32_nt_handle};
-        auto sigSemDesc = syclexp::external_semaphore_descriptor<syclexp::resource_win32_handle>{getSemHandle(vkCtx, syclToVkSem), syclexp::external_semaphore_handle_type::timeline_win32_nt_handle};
-        #else
-        auto inDesc = syclexp::external_mem_descriptor<syclexp::resource_fd>{getMemFd(vkCtx, inImg.memory), syclexp::external_mem_handle_type::opaque_fd, inImg.allocationSize};
-        auto outDesc = syclexp::external_mem_descriptor<syclexp::resource_fd>{getMemFd(vkCtx, outImg.memory), syclexp::external_mem_handle_type::opaque_fd, outImg.allocationSize};
-        
-        auto waitSemDesc = syclexp::external_semaphore_descriptor<syclexp::resource_fd>{getSemFd(vkCtx, vkToSyclSem), syclexp::external_semaphore_handle_type::timeline_fd};
-        auto sigSemDesc = syclexp::external_semaphore_descriptor<syclexp::resource_fd>{getSemFd(vkCtx, syclToVkSem), syclexp::external_semaphore_handle_type::timeline_fd};
-        #endif
+        {
+            sycl::queue q;
+            std::cout << "[SYCL] Device: " << q.get_device().get_info<sycl::info::device::name>() << std::endl;
 
-        auto inExtMem = syclexp::import_external_memory(inDesc, q);
-        auto outExtMem = syclexp::import_external_memory(outDesc, q);
-        auto syclWaitSem = syclexp::import_external_semaphore(waitSemDesc, q);
-        auto syclSigSem = syclexp::import_external_semaphore(sigSemDesc, q);
+            vkCtx = createUUIDMatchedContext(q.get_device());
+            inImg = createImage(vkCtx, width, height);
+            outImg = createImage(vkCtx, width, height);
 
-        syclexp::image_descriptor imgDesc({(size_t)width, (size_t)height}, 4, sycl::image_channel_type::fp32);
-        auto inMap = syclexp::map_external_image_memory(inExtMem, imgDesc, q);
-        auto outMap = syclexp::map_external_image_memory(outExtMem, imgDesc, q);
-        
-        auto inHandle = syclexp::create_image(inMap, imgDesc, q);
-        auto outHandle = syclexp::create_image(outMap, imgDesc, q);
+            // Create Timeline Semaphores
+            vkToSyclSem = createTimelineSemaphore(vkCtx, 0); // Vulkan Signals -> SYCL Waits
+            syclToVkSem = createTimelineSemaphore(vkCtx, 0); // SYCL Signals -> Vulkan Waits
 
-        // Command Pool
-        VkCommandPoolCreateInfo poolInfo = {VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
-        poolInfo.queueFamilyIndex = vkCtx.queueFamilyIndex;
-        VkCommandPool pool; vkCreateCommandPool(vkCtx.device, &poolInfo, nullptr, &pool);
-        VkCommandBuffer cmd; VkCommandBufferAllocateInfo alloc = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
-        alloc.commandPool = pool; alloc.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY; alloc.commandBufferCount = 1;
-        vkAllocateCommandBuffers(vkCtx.device, &alloc, &cmd);
-
-        std::cout << "Starting Stress Test (" << iterations << " iterations)..." << std::endl;
-
-        for(int i = 1; i <= iterations; ++i) {
-            uint64_t signalVal = i;
-
-            // --- VULKAN: Upload Data -> Signal(i) ---
-            void* data; vkMapMemory(vkCtx.device, inImg.stagingMemory, 0, imgSize, 0, &data);
-            float val = (float)i; // Unique value per iteration
-            for(int k=0; k<width*height*4; ++k) ((float*)data)[k] = val;
-            vkUnmapMemory(vkCtx.device, inImg.stagingMemory);
-
-            vkResetCommandBuffer(cmd, 0);
-            VkCommandBufferBeginInfo begin = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-            vkBeginCommandBuffer(cmd, &begin);
-
-            // Transition Undefined -> Transfer Dst
-            VkImageMemoryBarrier bar = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
-            bar.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED; bar.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            bar.image = inImg.image; bar.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-            bar.srcAccessMask = 0; bar.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &bar);
-
-            VkBufferImageCopy copy = {}; copy.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1}; copy.imageExtent = { (uint32_t)width, (uint32_t)height, 1 };
-            vkCmdCopyBufferToImage(cmd, inImg.stagingBuffer, inImg.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy);
-
-            // Transition Transfer Dst -> General
-            bar.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL; bar.newLayout = VK_IMAGE_LAYOUT_GENERAL;
-            bar.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT; bar.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-            vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &bar);
+            // Import Resources to SYCL
+            #ifdef _WIN32
+            auto inDesc = syclexp::external_mem_descriptor<syclexp::resource_win32_handle>{getMemHandle(vkCtx, inImg.memory), syclexp::external_mem_handle_type::win32_nt_handle, inImg.allocationSize};
+            auto outDesc = syclexp::external_mem_descriptor<syclexp::resource_win32_handle>{getMemHandle(vkCtx, outImg.memory), syclexp::external_mem_handle_type::win32_nt_handle, outImg.allocationSize};
             
-            // Also Transition Output to General
-            bar.image = outImg.image; bar.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED; bar.newLayout = VK_IMAGE_LAYOUT_GENERAL;
-            bar.srcAccessMask = 0; bar.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-            vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &bar);
-
-            vkEndCommandBuffer(cmd);
-
-            VkTimelineSemaphoreSubmitInfo timelineInfo = {VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO};
-            timelineInfo.signalSemaphoreValueCount = 1; timelineInfo.pSignalSemaphoreValues = &signalVal;
+            auto waitSemDesc = syclexp::external_semaphore_descriptor<syclexp::resource_win32_handle>{getSemHandle(vkCtx, vkToSyclSem), syclexp::external_semaphore_handle_type::timeline_win32_nt_handle};
+            auto sigSemDesc = syclexp::external_semaphore_descriptor<syclexp::resource_win32_handle>{getSemHandle(vkCtx, syclToVkSem), syclexp::external_semaphore_handle_type::timeline_win32_nt_handle};
+            #else
+            auto inDesc = syclexp::external_mem_descriptor<syclexp::resource_fd>{getMemFd(vkCtx, inImg.memory), syclexp::external_mem_handle_type::opaque_fd, inImg.allocationSize};
+            auto outDesc = syclexp::external_mem_descriptor<syclexp::resource_fd>{getMemFd(vkCtx, outImg.memory), syclexp::external_mem_handle_type::opaque_fd, outImg.allocationSize};
             
-            VkSubmitInfo si = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
-            si.pNext = &timelineInfo;
-            si.commandBufferCount = 1; si.pCommandBuffers = &cmd;
-            si.signalSemaphoreCount = 1; si.pSignalSemaphores = &vkToSyclSem;
-            
-            vkQueueSubmit(vkCtx.queue, 1, &si, VK_NULL_HANDLE);
+            auto waitSemDesc = syclexp::external_semaphore_descriptor<syclexp::resource_fd>{getSemFd(vkCtx, vkToSyclSem), syclexp::external_semaphore_handle_type::timeline_fd};
+            auto sigSemDesc = syclexp::external_semaphore_descriptor<syclexp::resource_fd>{getSemFd(vkCtx, syclToVkSem), syclexp::external_semaphore_handle_type::timeline_fd};
+            #endif
 
-            // --- SYCL: Wait(i) -> Kernel -> Signal(i) ---
-            q.ext_oneapi_wait_external_semaphore(syclWaitSem, signalVal);
+            auto inExtMem = syclexp::import_external_memory(inDesc, q);
+            auto outExtMem = syclexp::import_external_memory(outDesc, q);
+            auto syclWaitSem = syclexp::import_external_semaphore(waitSemDesc, q);
+            auto syclSigSem = syclexp::import_external_semaphore(sigSemDesc, q);
+
+            syclexp::image_descriptor imgDesc({(size_t)width, (size_t)height}, 4, sycl::image_channel_type::fp32);
+            auto inMap = syclexp::map_external_image_memory(inExtMem, imgDesc, q);
+            auto outMap = syclexp::map_external_image_memory(outExtMem, imgDesc, q);
             
-            q.submit([&](sycl::handler& h){
-                h.parallel_for(sycl::range<2>(width, height), [=](sycl::item<2> item){
-                    int x = item.get_id(0);
-                    int y = item.get_id(1);
-                    sycl::float4 px = syclexp::fetch_image<sycl::float4>(inHandle, sycl::int2(x,y));
-                    // Simple op: multiply by 2
-                    px = px * 2.0f; 
-                    syclexp::write_image(outHandle, sycl::int2(x,y), px);
+            auto inHandle = syclexp::create_image(inMap, imgDesc, q);
+            auto outHandle = syclexp::create_image(outMap, imgDesc, q);
+
+            // Command Pool
+            VkCommandPoolCreateInfo poolInfo = {VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
+            poolInfo.queueFamilyIndex = vkCtx.queueFamilyIndex;
+            vkCreateCommandPool(vkCtx.device, &poolInfo, nullptr, &pool);
+            VkCommandBuffer cmd; VkCommandBufferAllocateInfo alloc = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
+            alloc.commandPool = pool; alloc.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY; alloc.commandBufferCount = 1;
+            vkAllocateCommandBuffers(vkCtx.device, &alloc, &cmd);
+
+            std::cout << "Starting Stress Test (" << iterations << " iterations)..." << std::endl;
+
+            for(int i = 1; i <= iterations; ++i) {
+                uint64_t signalVal = i;
+
+                // --- VULKAN: Upload Data -> Signal(i) ---
+                void* data; vkMapMemory(vkCtx.device, inImg.stagingMemory, 0, imgSize, 0, &data);
+                float val = (float)i; // Unique value per iteration
+                for(int k=0; k<width*height*4; ++k) ((float*)data)[k] = val;
+                vkUnmapMemory(vkCtx.device, inImg.stagingMemory);
+
+                vkResetCommandBuffer(cmd, 0);
+                VkCommandBufferBeginInfo begin = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+                vkBeginCommandBuffer(cmd, &begin);
+
+                // Transition Undefined -> Transfer Dst
+                VkImageMemoryBarrier bar = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
+                bar.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED; 
+                // CACHE FIX: Use GENERAL for subsequent iterations to ensure cache flush? 
+                // Actually, if we use UNDEFINED, we discard. If we want safety, use GENERAL if i > 1.
+                if (i > 1) bar.oldLayout = VK_IMAGE_LAYOUT_GENERAL; 
+                
+                bar.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                bar.image = inImg.image; bar.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+                bar.srcAccessMask = (i > 1) ? VK_ACCESS_SHADER_READ_BIT : 0; 
+                bar.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &bar);
+
+                VkBufferImageCopy copy = {}; copy.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1}; copy.imageExtent = { (uint32_t)width, (uint32_t)height, 1 };
+                vkCmdCopyBufferToImage(cmd, inImg.stagingBuffer, inImg.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy);
+
+                // Transition Transfer Dst -> General
+                bar.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL; bar.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+                bar.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT; bar.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &bar);
+                
+                // Also Transition Output to General
+                bar.image = outImg.image; bar.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED; 
+                if (i > 1) bar.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+                bar.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+                bar.srcAccessMask = 0; bar.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &bar);
+
+                vkEndCommandBuffer(cmd);
+
+                VkTimelineSemaphoreSubmitInfo timelineInfo = {VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO};
+                timelineInfo.signalSemaphoreValueCount = 1; timelineInfo.pSignalSemaphoreValues = &signalVal;
+                
+                VkSubmitInfo si = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
+                si.pNext = &timelineInfo;
+                si.commandBufferCount = 1; si.pCommandBuffers = &cmd;
+                si.signalSemaphoreCount = 1; si.pSignalSemaphores = &vkToSyclSem;
+                
+                vkQueueSubmit(vkCtx.queue, 1, &si, VK_NULL_HANDLE);
+
+                // --- SYCL: Wait(i) -> Kernel -> Signal(i) ---
+                q.ext_oneapi_wait_external_semaphore(syclWaitSem, signalVal);
+                
+                q.submit([&](sycl::handler& cgh){
+                    cgh.parallel_for(sycl::range<2>(width, height), [=](sycl::item<2> item){
+                        int x = item.get_id(0);
+                        int y = item.get_id(1);
+                        sycl::float4 px = syclexp::fetch_image<sycl::float4>(inHandle, sycl::int2(x,y));
+                        // Simple op: multiply by 2
+                        px = px * 2.0f; 
+                        syclexp::write_image(outHandle, sycl::int2(x,y), px);
+                    });
                 });
-            });
 
-            q.ext_oneapi_signal_external_semaphore(syclSigSem, signalVal);
+                q.ext_oneapi_signal_external_semaphore(syclSigSem, signalVal);
 
-            // --- VULKAN: Wait(i) -> Check Results ---
-            // We use host wait for simplicity in checking results immediately
-            VkSemaphoreWaitInfo waitInfo = {VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO};
-            waitInfo.semaphoreCount = 1; waitInfo.pSemaphores = &syclToVkSem; waitInfo.pValues = &signalVal;
-            vkWaitSemaphores(vkCtx.device, &waitInfo, UINT64_MAX);
+                // --- VULKAN: Wait(i) -> Check Results ---
+                // We use host wait for simplicity in checking results immediately
+                VkSemaphoreWaitInfo waitInfo = {VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO};
+                waitInfo.semaphoreCount = 1; waitInfo.pSemaphores = &syclToVkSem; waitInfo.pValues = &signalVal;
+                vkWaitSemaphores(vkCtx.device, &waitInfo, UINT64_MAX);
 
-            // Readback
-            vkResetCommandBuffer(cmd, 0);
-            vkBeginCommandBuffer(cmd, &begin);
-            VkBufferImageCopy readback = {}; readback.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1}; readback.imageExtent = { (uint32_t)width, (uint32_t)height, 1 };
-            vkCmdCopyImageToBuffer(cmd, outImg.image, VK_IMAGE_LAYOUT_GENERAL, outImg.stagingBuffer, 1, &readback);
-            vkEndCommandBuffer(cmd);
-            
-            VkSubmitInfo siRead = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
-            siRead.commandBufferCount = 1; siRead.pCommandBuffers = &cmd;
-            vkQueueSubmit(vkCtx.queue, 1, &siRead, VK_NULL_HANDLE);
-            vkQueueWaitIdle(vkCtx.queue);
+                // Readback
+                vkResetCommandBuffer(cmd, 0);
+                vkBeginCommandBuffer(cmd, &begin);
+                
+                // Flush caches before readback
+                VkImageMemoryBarrier readBar = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
+                readBar.image = outImg.image;
+                readBar.oldLayout = VK_IMAGE_LAYOUT_GENERAL; readBar.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+                readBar.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT; readBar.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+                vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &readBar);
 
-            void* resData; vkMapMemory(vkCtx.device, outImg.stagingMemory, 0, imgSize, 0, &resData);
-            float expected = val * 2.0f;
-            float actual = ((float*)resData)[0]; // Check first pixel
-            vkUnmapMemory(vkCtx.device, outImg.stagingMemory);
+                VkBufferImageCopy readback = {}; readback.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1}; readback.imageExtent = { (uint32_t)width, (uint32_t)height, 1 };
+                vkCmdCopyImageToBuffer(cmd, outImg.image, VK_IMAGE_LAYOUT_GENERAL, outImg.stagingBuffer, 1, &readback);
+                vkEndCommandBuffer(cmd);
+                
+                VkSubmitInfo siRead = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
+                siRead.commandBufferCount = 1; siRead.pCommandBuffers = &cmd;
+                vkQueueSubmit(vkCtx.queue, 1, &siRead, VK_NULL_HANDLE);
+                vkQueueWaitIdle(vkCtx.queue);
 
-            if(std::abs(actual - expected) > 0.01f) {
-                std::cerr << "FAILURE at iteration " << i << ". Expected " << expected << " Got " << actual << std::endl;
-                return 1;
+                void* resData; vkMapMemory(vkCtx.device, outImg.stagingMemory, 0, imgSize, 0, &resData);
+                float expected = val * 2.0f;
+                float actual = ((float*)resData)[0]; // Check first pixel
+                vkUnmapMemory(vkCtx.device, outImg.stagingMemory);
+
+                if(std::abs(actual - expected) > 0.01f) {
+                    std::cerr << "FAILURE at iteration " << i << ". Expected " << expected << " Got " << actual << std::endl;
+                    return 1;
+                }
             }
-        }
 
-        std::cout << "SUCCESS! All iterations passed." << std::endl;
+            std::cout << "SUCCESS! All iterations passed." << std::endl;
 
-        // Cleanup
-        vkDeviceWaitIdle(vkCtx.device);
-        syclexp::destroy_image_handle(inHandle, q); syclexp::destroy_image_handle(outHandle, q);
-        syclexp::release_external_semaphore(syclWaitSem, q); syclexp::release_external_semaphore(syclSigSem, q);
-        syclexp::release_external_memory(inExtMem, q); syclexp::release_external_memory(outExtMem, q);
+            // Explicit SYCL Cleanup
+            syclexp::destroy_image_handle(inHandle, q); syclexp::destroy_image_handle(outHandle, q);
+            syclexp::release_external_semaphore(syclWaitSem, q); syclexp::release_external_semaphore(syclSigSem, q);
+            syclexp::release_external_memory(inExtMem, q); syclexp::release_external_memory(outExtMem, q);
+            q.wait_and_throw();
+        } 
+        // ~queue (SYCL Runtime caches device here)
+
+        // workaround CMPLRLLVM-73463:  Do not destroy Vulkan Device.
         
-        vkDestroySemaphore(vkCtx.device, vkToSyclSem, nullptr); vkDestroySemaphore(vkCtx.device, syclToVkSem, nullptr);
-        vkDestroyCommandPool(vkCtx.device, pool, nullptr);
-        vkDestroyImage(vkCtx.device, inImg.image, nullptr); vkFreeMemory(vkCtx.device, inImg.memory, nullptr);
-        vkDestroyBuffer(vkCtx.device, inImg.stagingBuffer, nullptr); vkFreeMemory(vkCtx.device, inImg.stagingMemory, nullptr);
-        vkDestroyImage(vkCtx.device, outImg.image, nullptr); vkFreeMemory(vkCtx.device, outImg.memory, nullptr);
-        vkDestroyBuffer(vkCtx.device, outImg.stagingBuffer, nullptr); vkFreeMemory(vkCtx.device, outImg.stagingMemory, nullptr);
-        vkDestroyDevice(vkCtx.device, nullptr); vkDestroyInstance(vkCtx.instance, nullptr);
+        // vkDestroySemaphore(vkCtx.device, vkToSyclSem, nullptr); vkDestroySemaphore(vkCtx.device, syclToVkSem, nullptr);
+        // vkDestroyCommandPool(vkCtx.device, pool, nullptr);
+        // vkDestroyImage(vkCtx.device, inImg.image, nullptr); vkFreeMemory(vkCtx.device, inImg.memory, nullptr);
+        // vkDestroyBuffer(vkCtx.device, inImg.stagingBuffer, nullptr); vkFreeMemory(vkCtx.device, inImg.stagingMemory, nullptr);
+        // vkDestroyImage(vkCtx.device, outImg.image, nullptr); vkFreeMemory(vkCtx.device, outImg.memory, nullptr);
+        // vkDestroyBuffer(vkCtx.device, outImg.stagingBuffer, nullptr); vkFreeMemory(vkCtx.device, outImg.stagingMemory, nullptr);
+        // vkDestroyDevice(vkCtx.device, nullptr); vkDestroyInstance(vkCtx.instance, nullptr);
 
     } catch (std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
