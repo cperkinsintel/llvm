@@ -250,15 +250,12 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // TODO: restore the resource freeing below.
-	// workaround CMPLRLLVM-73463:  Do not destroy Vulkan Device.
-
-    // vkDestroyImage(vkCtx.device, inImg.image, nullptr);
-    // vkFreeMemory(vkCtx.device, inImg.memory, nullptr);
-    // vkDestroyImage(vkCtx.device, outImg.image, nullptr);
-    // vkFreeMemory(vkCtx.device, outImg.memory, nullptr);
-    // vkDestroyDevice(vkCtx.device, nullptr);
-    // vkDestroyInstance(vkCtx.instance, nullptr);
+    vkDestroyImage(vkCtx.device, inImg.image, nullptr);
+    vkFreeMemory(vkCtx.device, inImg.memory, nullptr);
+    vkDestroyImage(vkCtx.device, outImg.image, nullptr);
+    vkFreeMemory(vkCtx.device, outImg.memory, nullptr);
+    vkDestroyDevice(vkCtx.device, nullptr);
+    vkDestroyInstance(vkCtx.instance, nullptr);
 
     std::cout << "EXTENSION FIX RUN COMPLETE" << std::endl;
     return 0;

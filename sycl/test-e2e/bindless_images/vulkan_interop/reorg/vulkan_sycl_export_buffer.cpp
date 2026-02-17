@@ -380,17 +380,14 @@ int main(int argc, char** argv) {
 
         // Cleanup
         syclexp::free_exportable_memory(syclPtr, dev, ctx);
-
-        // TODO: restore the resource freeing below.
-	    // workaround CMPLRLLVM-73463:  Do not destroy Vulkan Device.
        
-        // vkDestroyBuffer(vkCtx.device, stagingBuffer, nullptr);
-        // vkFreeMemory(vkCtx.device, stagingMemory, nullptr);
-        // vkDestroyCommandPool(vkCtx.device, pool, nullptr);
-        // vkDestroyBuffer(vkCtx.device, buffer, nullptr);
-        // vkFreeMemory(vkCtx.device, importedMem, nullptr);
-        // vkDestroyDevice(vkCtx.device, nullptr);
-        // vkDestroyInstance(vkCtx.instance, nullptr);
+        vkDestroyBuffer(vkCtx.device, stagingBuffer, nullptr);
+        vkFreeMemory(vkCtx.device, stagingMemory, nullptr);
+        vkDestroyCommandPool(vkCtx.device, pool, nullptr);
+        vkDestroyBuffer(vkCtx.device, buffer, nullptr);
+        vkFreeMemory(vkCtx.device, importedMem, nullptr);
+        vkDestroyDevice(vkCtx.device, nullptr);
+        vkDestroyInstance(vkCtx.instance, nullptr);
 	
 
     } catch (std::exception& e) {

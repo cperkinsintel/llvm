@@ -391,16 +391,13 @@ int main(int argc, char** argv) {
     cleanupBuffer(vkCtx, inBuf);
     cleanupBuffer(vkCtx, outBuf);
 
-    // TODO: restore the resource freeing below.
-	// workaround CMPLRLLVM-73463:  Do not destroy Vulkan Device.
-
 
     if(useSemaphores) {
-    //    vkDestroySemaphore(vkCtx.device, signalSem, nullptr);
-    //    vkDestroySemaphore(vkCtx.device, waitSem, nullptr);
+       vkDestroySemaphore(vkCtx.device, signalSem, nullptr);
+       vkDestroySemaphore(vkCtx.device, waitSem, nullptr);
     }
-    //vkDestroyDevice(vkCtx.device, nullptr);
-    //vkDestroyInstance(vkCtx.instance, nullptr);
+    vkDestroyDevice(vkCtx.device, nullptr);
+    vkDestroyInstance(vkCtx.instance, nullptr);
 
     return (errors == 0) ? 0 : 1;
 }

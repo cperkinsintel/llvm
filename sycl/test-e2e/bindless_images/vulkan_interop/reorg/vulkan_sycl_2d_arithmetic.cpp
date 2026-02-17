@@ -320,35 +320,31 @@ int runTest(int width, int height, int channels, bool useLinear, bool useSemapho
         if(passed) std::cout << "SUCCESS!" << std::endl;
         else std::cout << "FAILURE!" << std::endl;
 		
-		// TODO: restore the resource freeing below.
-		// workaround CMPLRLLVM-73463:  Do not destroy Vulkan Device.
 
         if(useSemaphores) { 
-            // vkDestroySemaphore(vkCtx.device, semA, nullptr); 
-            // vkDestroySemaphore(vkCtx.device, semB, nullptr); 
-            // vkDestroySemaphore(vkCtx.device, semOutVk, nullptr); 
+            vkDestroySemaphore(vkCtx.device, semA, nullptr); 
+            vkDestroySemaphore(vkCtx.device, semB, nullptr); 
+            vkDestroySemaphore(vkCtx.device, semOutVk, nullptr); 
         }
 
-        // cleanupImageResources(vkCtx, imgA);
-        // cleanupImageResources(vkCtx, imgB);
-        // cleanupVulkan(vkCtx, imgOut);
+        cleanupImageResources(vkCtx, imgA);
+        cleanupImageResources(vkCtx, imgB);
+        cleanupVulkan(vkCtx, imgOut);
         
         return passed ? 0 : 1;
 
     } catch (std::exception& e) {
         std::cerr << "SYCL Exception: " << e.what() << std::endl;
-		
-		// TODO: restore the resource freeing below.
-		// workaround CMPLRLLVM-73463:  Do not destroy Vulkan Device.
+	
 		
         // Clean up Vulkan resources even on exception
-        // if(useSemaphores) { 
-            // if(semA) vkDestroySemaphore(vkCtx.device, semA, nullptr); 
-            // if(semB) vkDestroySemaphore(vkCtx.device, semB, nullptr); 
-        // }
-        // cleanupImageResources(vkCtx, imgA);
-        // cleanupImageResources(vkCtx, imgB);
-        // cleanupVulkan(vkCtx, imgOut);
+        if(useSemaphores) { 
+            if(semA) vkDestroySemaphore(vkCtx.device, semA, nullptr); 
+            if(semB) vkDestroySemaphore(vkCtx.device, semB, nullptr); 
+        }
+        cleanupImageResources(vkCtx, imgA);
+        cleanupImageResources(vkCtx, imgB);
+        cleanupVulkan(vkCtx, imgOut);
         return 1;
     }
 }

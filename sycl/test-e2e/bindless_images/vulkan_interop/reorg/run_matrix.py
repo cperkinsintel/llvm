@@ -33,8 +33,6 @@ OUTPUT FILES:
     summary.csv         - Phase 1 Results
     summary_phase2.csv  - Phase 2 Results (including Semaphores)
 """
-
-
 import subprocess
 import sys
 import os
@@ -72,13 +70,6 @@ CHANNELS = ["1", "2", "4"]
 # ---------------------------------------------------------
 def get_vulkan_format(data_type, channels):
     """Maps SYCL-style types/channels to Vulkan Format strings."""
-    prefix = {
-        "1": "R",
-        "2": "R8G8" if data_type == "uint8" else "R16G16" if "16" in data_type else "R32G32",
-        "4": "R32G32B32A32" # Default to 32-bit for the R/G/B/A naming
-    }
-    
-    # Specific overrides for 4-channel naming conventions
     if channels == "4":
         chan_prefix = "R32G32B32A32" if "32" in data_type or data_type == "float" else \
                       "R16G16B16A16" if "16" in data_type or data_type == "half" else \
@@ -93,25 +84,18 @@ def get_vulkan_format(data_type, channels):
                       "R8"
 
     suffix = {
-        "float":  "SFLOAT",
-        "half":   "SFLOAT",
-        "int32":  "SINT",
-        "uint32": "UINT",
-        "int16":  "SINT",
-        "uint16": "UINT",
-        "int8":   "SINT",
-        "uint8":  "UINT",
-        "unorm8": "UNORM"
+        "float":  "SFLOAT", "half":   "SFLOAT", "int32":  "SINT",
+        "uint32": "UINT", "int16":  "SINT", "uint16": "UINT",
+        "int8":   "SINT", "uint8":  "UINT", "unorm8": "UNORM"
     }
 
     return f"VK_FORMAT_{chan_prefix}_{suffix.get(data_type, 'UNKNOWN')}"
 
 # ---------------------------------------------------------
-# UTILS & PLATFORM HANDLING
+# UTILS
 # ---------------------------------------------------------
 IS_WINDOWS = (os.name == 'nt')
 if IS_WINDOWS: os.system('color') 
-
 RED = "\033[91m"; GREEN = "\033[92m"; YELLOW = "\033[93m"; RESET = "\033[0m"
 
 def get_platform_binary(linux_style_path):
@@ -119,22 +103,24 @@ def get_platform_binary(linux_style_path):
     base_name = linux_style_path.replace("./", "").replace(".bin", ".exe")
     return f".\\{base_name}"
 
-def run_cmd(cmd, timeout=30):
+def run_cmd(cmd, timeout=5):
     try:
         result = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
         return True, result.stdout.decode('utf-8', errors='replace')
     except subprocess.TimeoutExpired: return False, "TIMEOUT"
     except subprocess.CalledProcessError as e:
-        return False, (e.stdout.decode('utf-8') if e.stdout else "") + (e.stderr.decode('utf-8') if e.stderr else "")
+        stdout = e.stdout.decode('utf-8', errors='replace') if e.stdout else ""
+        stderr = e.stderr.decode('utf-8', errors='replace') if e.stderr else ""
+        return False, stdout + stderr
 
 # ---------------------------------------------------------
-# PHASE 1: LOGIC QUALIFICATION
+# PHASE 1
 # ---------------------------------------------------------
 def run_phase_1(include_linear=False):
     print(f"\n{YELLOW}=== PHASE 1: LOGIC QUALIFICATION ==={RESET}")
     all_results = []; survivors = []; casualties = []; failures = 0
 
-    configs = [(False, False), (False, True)] # Optimal Unsampled/Sampled
+    configs = [(False, False), (False, True)]
     if include_linear: configs += [(True, False), (True, True)]
 
     for label, raw_binary, test_support in TESTS:
@@ -143,7 +129,6 @@ def run_phase_1(include_linear=False):
 
         for is_linear, is_sampled in configs:
             if is_sampled and test_support == "unsampled_only": continue
-            
             tiling_str = "LINEAR" if is_linear else "OPTIMAL"
             mode_str = "SAMPLED" if is_sampled else "UNSAMPLED"
 
@@ -160,8 +145,9 @@ def run_phase_1(include_linear=False):
                         success, output = run_cmd(full_cmd)
                         
                         status_clean = "PASS" if success else "FAIL"
-                        print(f"{label:<15} | {vk_format:<25} | {tiling_str:<8} | {status_clean}")
+                        print(f"{label:<15} | {vk_format:<25} | {status_clean}")
                         
+                        # --- KEY FIX: Save vk_format in the record for survivors.json ---
                         record = {
                             "label": label, "vk_format": vk_format, "mode": mode_str,
                             "tiling": tiling_str, "type": type_name, "ch": ch,
@@ -169,21 +155,18 @@ def run_phase_1(include_linear=False):
                         }
 
                         all_results.append({
-                            "Vulkan Format": vk_format,
-                            "Test Name": label,
-                            "Mode": mode_str,
-                            "Tiling": tiling_str,
-                            "Data Type": type_name,
-                            "Channels": ch,
-                            "Dimensions": size_str,
-                            "Phase 1 Result": status_clean,
-                            "Command": full_cmd
+                            "Vulkan Format": vk_format, "Test Name": label, "Mode": mode_str,
+                            "Tiling": tiling_str, "Data Type": type_name, "Channels": ch,
+                            "Dimensions": size_str, "Phase 1 Result": status_clean, "Command": full_cmd
                         })
 
                         if success: survivors.append(record)
                         else:
                             failures += 1
                             casualties.append({**record, "output": output[:500]})
+
+    with open(SURVIVORS_FILE, 'w') as f: json.dump(survivors, f, indent=2)
+    with open(CASUALTIES_FILE, 'w') as f: json.dump(casualties, f, indent=2)
 
     if all_results:
         with open(SUMMARY_FILE_P1, 'w', newline='') as f:
@@ -194,7 +177,7 @@ def run_phase_1(include_linear=False):
     return len(survivors) > 0
 
 # ---------------------------------------------------------
-# PHASE 2: SYNC VERIFICATION
+# PHASE 2
 # ---------------------------------------------------------
 def run_phase_2():
     print(f"\n{YELLOW}=== PHASE 2: SYNC VERIFICATION ==={RESET}")
@@ -205,18 +188,14 @@ def run_phase_2():
     
     for test in survivors:
         csv_record = {
-            "Vulkan Format": test['vk_format'],
-            "Test Name": test['label'],
-            "Mode": test['mode'],
-            "Tiling": test['tiling'],
-            "Data Type": test['type'],
-            "Channels": test['ch'],
-            "Dimensions": test['size'],
-            "Command": test['cmd'] + " --semaphores"
+            "Vulkan Format": test['vk_format'], "Test Name": test['label'],
+            "Mode": test['mode'], "Tiling": test['tiling'],
+            "Data Type": test['type'], "Channels": test['ch'],
+            "Dimensions": test['size'], "Command": test['cmd'] + " --semaphores"
         }
 
         if not semaphore_alive and not IS_WINDOWS:
-            csv_record["Phase 2 Result"] = "SKIPPED (System Unstable)"
+            csv_record["Phase 2 Result"] = "SKIPPED"
             phase2_results_csv.append(csv_record)
             continue
 
@@ -226,7 +205,6 @@ def run_phase_2():
         
         csv_record["Phase 2 Result"] = status_clean
         phase2_results_csv.append(csv_record)
-        
         if not success and not IS_WINDOWS: semaphore_alive = False
 
     if phase2_results_csv:
@@ -241,7 +219,6 @@ if __name__ == "__main__":
     parser.add_argument('mode', nargs='?', choices=['phase1', 'phase2', 'all'], default='all')
     parser.add_argument('--linear', action='store_true')
     args = parser.parse_args()
-
     if args.mode in ['phase1', 'all']:
         if not run_phase_1(include_linear=args.linear): sys.exit(1)
     if args.mode in ['phase2', 'all']:

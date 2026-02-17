@@ -1,6 +1,17 @@
 [
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "float",
+    "ch": "1",
+    "size": "32",
+    "cmd": "./vsr_1d_test.bin --type float --channels 1 32"
+  },
+  {
+    "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -10,6 +21,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -19,15 +31,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type float --channels 1 32"
+    "cmd": "./vsr_1d_test.bin --type float --channels 2 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -37,6 +51,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -46,15 +61,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type float --channels 2 32"
+    "cmd": "./vsr_1d_test.bin --type float --channels 4 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -64,6 +81,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -73,15 +91,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "float",
-    "ch": "4",
+    "type": "half",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type float --channels 4 32"
+    "cmd": "./vsr_1d_test.bin --type half --channels 1 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -91,6 +111,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -100,15 +121,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type half --channels 1 32"
+    "cmd": "./vsr_1d_test.bin --type half --channels 2 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -118,6 +141,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -127,15 +151,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type half --channels 2 32"
+    "cmd": "./vsr_1d_test.bin --type half --channels 4 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -145,6 +171,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -154,15 +181,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "half",
-    "ch": "4",
+    "type": "int32",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type half --channels 4 32"
+    "cmd": "./vsr_1d_test.bin --type int32 --channels 1 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -172,6 +201,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -181,15 +211,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int32 --channels 1 32"
+    "cmd": "./vsr_1d_test.bin --type int32 --channels 2 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -199,6 +231,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -208,15 +241,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int32 --channels 2 32"
+    "cmd": "./vsr_1d_test.bin --type int32 --channels 4 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -226,6 +261,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -235,15 +271,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int32",
-    "ch": "4",
+    "type": "uint32",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int32 --channels 4 32"
+    "cmd": "./vsr_1d_test.bin --type uint32 --channels 1 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -253,6 +291,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -262,15 +301,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint32 --channels 1 32"
+    "cmd": "./vsr_1d_test.bin --type uint32 --channels 2 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -280,6 +321,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -289,15 +331,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint32 --channels 2 32"
+    "cmd": "./vsr_1d_test.bin --type uint32 --channels 4 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -307,6 +351,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -316,15 +361,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint32",
-    "ch": "4",
+    "type": "int16",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint32 --channels 4 32"
+    "cmd": "./vsr_1d_test.bin --type int16 --channels 1 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -334,6 +381,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -343,15 +391,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int16 --channels 1 32"
+    "cmd": "./vsr_1d_test.bin --type int16 --channels 2 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -361,6 +411,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -370,15 +421,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int16 --channels 2 32"
+    "cmd": "./vsr_1d_test.bin --type int16 --channels 4 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -388,6 +441,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -397,15 +451,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int16",
-    "ch": "4",
+    "type": "uint16",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int16 --channels 4 32"
+    "cmd": "./vsr_1d_test.bin --type uint16 --channels 1 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -415,6 +471,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -424,15 +481,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint16 --channels 1 32"
+    "cmd": "./vsr_1d_test.bin --type uint16 --channels 2 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -442,6 +501,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -451,15 +511,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint16 --channels 2 32"
+    "cmd": "./vsr_1d_test.bin --type uint16 --channels 4 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -469,6 +531,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -478,15 +541,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint16",
-    "ch": "4",
+    "type": "uint8",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint16 --channels 4 32"
+    "cmd": "./vsr_1d_test.bin --type uint8 --channels 1 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -496,6 +561,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -505,15 +571,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint8 --channels 1 32"
+    "cmd": "./vsr_1d_test.bin --type uint8 --channels 2 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -523,6 +591,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -532,15 +601,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint8 --channels 2 32"
+    "cmd": "./vsr_1d_test.bin --type uint8 --channels 4 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -550,6 +621,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -559,15 +631,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "4",
+    "type": "int8",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint8 --channels 4 32"
+    "cmd": "./vsr_1d_test.bin --type int8 --channels 1 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -577,6 +651,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -586,15 +661,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int8 --channels 1 32"
+    "cmd": "./vsr_1d_test.bin --type int8 --channels 2 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -604,6 +681,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -613,15 +691,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int8 --channels 2 32"
+    "cmd": "./vsr_1d_test.bin --type int8 --channels 4 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -631,6 +711,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -640,15 +721,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "4",
+    "type": "unorm8",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int8 --channels 4 32"
+    "cmd": "./vsr_1d_test.bin --type unorm8 --channels 1 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -658,6 +741,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -667,15 +751,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type unorm8 --channels 1 32"
+    "cmd": "./vsr_1d_test.bin --type unorm8 --channels 2 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -685,6 +771,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -694,15 +781,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type unorm8 --channels 2 32"
+    "cmd": "./vsr_1d_test.bin --type unorm8 --channels 4 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -712,6 +801,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -721,15 +811,17 @@
   },
   {
     "label": "1D Read",
-    "mode": "UNSAMPLED",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
+    "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "4",
+    "type": "float",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type unorm8 --channels 4 32"
+    "cmd": "./vsr_1d_test.bin --type float --channels 1 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -739,6 +831,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -748,15 +841,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type float --channels 1 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type float --channels 2 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -766,6 +861,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -775,15 +871,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type float --channels 2 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type float --channels 4 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -793,6 +891,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -802,15 +901,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "float",
-    "ch": "4",
+    "type": "half",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type float --channels 4 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type half --channels 1 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -820,6 +921,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -829,15 +931,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type half --channels 1 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type half --channels 2 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -847,6 +951,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -856,15 +961,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type half --channels 2 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type half --channels 4 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -874,6 +981,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -883,15 +991,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "half",
-    "ch": "4",
+    "type": "int32",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type half --channels 4 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type int32 --channels 1 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -901,6 +1011,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -910,15 +1021,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int32 --channels 1 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type int32 --channels 2 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -928,6 +1041,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -937,15 +1051,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int32 --channels 2 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type int32 --channels 4 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -955,6 +1071,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -964,15 +1081,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int32",
-    "ch": "4",
+    "type": "uint32",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int32 --channels 4 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type uint32 --channels 1 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -982,6 +1101,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -991,15 +1111,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint32 --channels 1 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type uint32 --channels 2 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -1009,6 +1131,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -1018,15 +1141,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint32 --channels 2 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type uint32 --channels 4 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -1036,6 +1161,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -1045,15 +1171,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint32",
-    "ch": "4",
+    "type": "int16",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint32 --channels 4 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type int16 --channels 1 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -1063,6 +1191,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -1072,15 +1201,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int16 --channels 1 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type int16 --channels 2 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -1090,6 +1221,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -1099,15 +1231,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int16 --channels 2 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type int16 --channels 4 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -1117,6 +1251,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -1126,15 +1261,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int16",
-    "ch": "4",
+    "type": "uint16",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int16 --channels 4 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type uint16 --channels 1 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -1144,6 +1281,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -1153,15 +1291,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint16 --channels 1 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type uint16 --channels 2 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -1171,6 +1311,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -1180,15 +1321,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint16 --channels 2 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type uint16 --channels 4 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -1198,6 +1341,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -1207,15 +1351,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint16",
-    "ch": "4",
+    "type": "uint8",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint16 --channels 4 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type uint8 --channels 1 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -1225,6 +1371,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -1234,15 +1381,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint8 --channels 1 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type uint8 --channels 2 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -1252,6 +1401,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -1261,15 +1411,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint8 --channels 2 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type uint8 --channels 4 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -1279,6 +1431,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -1288,15 +1441,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "4",
+    "type": "int8",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type uint8 --channels 4 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type int8 --channels 1 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -1306,6 +1461,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -1315,15 +1471,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int8 --channels 1 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type int8 --channels 2 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -1333,6 +1491,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -1342,15 +1501,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int8 --channels 2 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type int8 --channels 4 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -1360,6 +1521,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -1369,15 +1531,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "4",
+    "type": "unorm8",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type int8 --channels 4 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type unorm8 --channels 1 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -1387,6 +1551,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -1396,15 +1561,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type unorm8 --channels 1 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type unorm8 --channels 2 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -1414,6 +1581,7 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -1423,15 +1591,17 @@
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsr_1d_test.bin --type unorm8 --channels 2 --sampled 32"
+    "cmd": "./vsr_1d_test.bin --type unorm8 --channels 4 --sampled 32"
   },
   {
     "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -1441,15 +1611,7 @@
   },
   {
     "label": "1D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "4",
-    "size": "32",
-    "cmd": "./vsr_1d_test.bin --type unorm8 --channels 4 --sampled 32"
-  },
-  {
-    "label": "1D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -1459,6 +1621,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "float",
+    "ch": "1",
+    "size": "32",
+    "cmd": "./vsu_1d_w_test.bin --type float --channels 1 32"
+  },
+  {
+    "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -1468,6 +1641,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -1477,15 +1651,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type float --channels 1 32"
+    "cmd": "./vsu_1d_w_test.bin --type float --channels 2 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -1495,6 +1671,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -1504,15 +1681,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type float --channels 2 32"
+    "cmd": "./vsu_1d_w_test.bin --type float --channels 4 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -1522,6 +1701,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -1531,15 +1711,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "float",
-    "ch": "4",
+    "type": "half",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type float --channels 4 32"
+    "cmd": "./vsu_1d_w_test.bin --type half --channels 1 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -1549,6 +1731,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -1558,15 +1741,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type half --channels 1 32"
+    "cmd": "./vsu_1d_w_test.bin --type half --channels 2 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -1576,6 +1761,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -1585,15 +1771,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type half --channels 2 32"
+    "cmd": "./vsu_1d_w_test.bin --type half --channels 4 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -1603,6 +1791,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -1612,15 +1801,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "half",
-    "ch": "4",
+    "type": "int32",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type half --channels 4 32"
+    "cmd": "./vsu_1d_w_test.bin --type int32 --channels 1 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -1630,6 +1821,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -1639,15 +1831,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type int32 --channels 1 32"
+    "cmd": "./vsu_1d_w_test.bin --type int32 --channels 2 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -1657,6 +1851,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -1666,15 +1861,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type int32 --channels 2 32"
+    "cmd": "./vsu_1d_w_test.bin --type int32 --channels 4 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -1684,6 +1881,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -1693,15 +1891,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int32",
-    "ch": "4",
+    "type": "uint32",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type int32 --channels 4 32"
+    "cmd": "./vsu_1d_w_test.bin --type uint32 --channels 1 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -1711,6 +1911,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -1720,15 +1921,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type uint32 --channels 1 32"
+    "cmd": "./vsu_1d_w_test.bin --type uint32 --channels 2 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -1738,6 +1941,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -1747,15 +1951,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type uint32 --channels 2 32"
+    "cmd": "./vsu_1d_w_test.bin --type uint32 --channels 4 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -1765,6 +1971,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -1774,15 +1981,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint32",
-    "ch": "4",
+    "type": "int16",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type uint32 --channels 4 32"
+    "cmd": "./vsu_1d_w_test.bin --type int16 --channels 1 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -1792,6 +2001,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -1801,15 +2011,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type int16 --channels 1 32"
+    "cmd": "./vsu_1d_w_test.bin --type int16 --channels 2 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -1819,6 +2031,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -1828,15 +2041,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type int16 --channels 2 32"
+    "cmd": "./vsu_1d_w_test.bin --type int16 --channels 4 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -1846,6 +2061,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -1855,15 +2071,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int16",
-    "ch": "4",
+    "type": "uint16",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type int16 --channels 4 32"
+    "cmd": "./vsu_1d_w_test.bin --type uint16 --channels 1 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -1873,6 +2091,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -1882,15 +2101,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type uint16 --channels 1 32"
+    "cmd": "./vsu_1d_w_test.bin --type uint16 --channels 2 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -1900,6 +2121,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -1909,15 +2131,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type uint16 --channels 2 32"
+    "cmd": "./vsu_1d_w_test.bin --type uint16 --channels 4 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -1927,6 +2151,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -1936,15 +2161,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint16",
-    "ch": "4",
+    "type": "uint8",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type uint16 --channels 4 32"
+    "cmd": "./vsu_1d_w_test.bin --type uint8 --channels 1 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -1954,6 +2181,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -1963,15 +2191,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type uint8 --channels 1 32"
+    "cmd": "./vsu_1d_w_test.bin --type uint8 --channels 2 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -1981,6 +2211,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -1990,15 +2221,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type uint8 --channels 2 32"
+    "cmd": "./vsu_1d_w_test.bin --type uint8 --channels 4 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -2008,6 +2241,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -2017,15 +2251,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "4",
+    "type": "int8",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type uint8 --channels 4 32"
+    "cmd": "./vsu_1d_w_test.bin --type int8 --channels 1 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -2035,6 +2271,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -2044,15 +2281,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type int8 --channels 1 32"
+    "cmd": "./vsu_1d_w_test.bin --type int8 --channels 2 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -2062,6 +2301,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -2071,15 +2311,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type int8 --channels 2 32"
+    "cmd": "./vsu_1d_w_test.bin --type int8 --channels 4 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -2089,6 +2331,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -2098,15 +2341,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "4",
+    "type": "unorm8",
+    "ch": "1",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type int8 --channels 4 32"
+    "cmd": "./vsu_1d_w_test.bin --type unorm8 --channels 1 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -2116,6 +2361,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -2125,15 +2371,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
-    "ch": "1",
+    "ch": "2",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type unorm8 --channels 1 32"
+    "cmd": "./vsu_1d_w_test.bin --type unorm8 --channels 2 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -2143,6 +2391,7 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -2152,15 +2401,17 @@
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
-    "ch": "2",
+    "ch": "4",
     "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type unorm8 --channels 2 32"
+    "cmd": "./vsu_1d_w_test.bin --type unorm8 --channels 4 32"
   },
   {
     "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -2170,15 +2421,7 @@
   },
   {
     "label": "1D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "4",
-    "size": "32",
-    "cmd": "./vsu_1d_w_test.bin --type unorm8 --channels 4 32"
-  },
-  {
-    "label": "1D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -2188,15 +2431,7 @@
   },
   {
     "label": "2D Read",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "float",
-    "ch": "1",
-    "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type float --channels 1 31x32"
-  },
-  {
-    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -2206,15 +2441,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
-    "ch": "2",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type float --channels 2 31x32"
+    "cmd": "./vsr_2d_test.bin --type float --channels 1 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -2224,15 +2461,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type float --channels 4 31x32"
+    "cmd": "./vsr_2d_test.bin --type float --channels 2 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -2242,15 +2481,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "half",
-    "ch": "1",
+    "type": "float",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type half --channels 1 31x32"
+    "cmd": "./vsr_2d_test.bin --type float --channels 4 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -2260,24 +2501,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type half --channels 2 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "half",
-    "ch": "4",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type half --channels 4 31x32"
+    "cmd": "./vsr_2d_test.bin --type half --channels 1 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -2287,15 +2521,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int32",
-    "ch": "1",
+    "type": "half",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type int32 --channels 1 31x32"
+    "cmd": "./vsr_2d_test.bin --type half --channels 4 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -2305,15 +2541,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "2",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type int32 --channels 2 31x32"
+    "cmd": "./vsr_2d_test.bin --type int32 --channels 1 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -2323,15 +2561,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type int32 --channels 4 31x32"
+    "cmd": "./vsr_2d_test.bin --type int32 --channels 2 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -2341,15 +2581,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint32",
-    "ch": "1",
+    "type": "int32",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type uint32 --channels 1 31x32"
+    "cmd": "./vsr_2d_test.bin --type int32 --channels 4 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -2359,15 +2601,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "2",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type uint32 --channels 2 31x32"
+    "cmd": "./vsr_2d_test.bin --type uint32 --channels 1 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -2377,15 +2621,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type uint32 --channels 4 31x32"
+    "cmd": "./vsr_2d_test.bin --type uint32 --channels 2 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -2395,15 +2641,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int16",
-    "ch": "1",
+    "type": "uint32",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type int16 --channels 1 31x32"
+    "cmd": "./vsr_2d_test.bin --type uint32 --channels 4 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -2413,24 +2661,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type int16 --channels 2 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int16",
-    "ch": "4",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type int16 --channels 4 31x32"
+    "cmd": "./vsr_2d_test.bin --type int16 --channels 1 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -2440,15 +2681,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint16",
-    "ch": "1",
+    "type": "int16",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type uint16 --channels 1 31x32"
+    "cmd": "./vsr_2d_test.bin --type int16 --channels 4 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -2458,24 +2701,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type uint16 --channels 2 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint16",
-    "ch": "4",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type uint16 --channels 4 31x32"
+    "cmd": "./vsr_2d_test.bin --type uint16 --channels 1 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -2485,15 +2721,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "1",
+    "type": "uint16",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type uint8 --channels 1 31x32"
+    "cmd": "./vsr_2d_test.bin --type uint16 --channels 4 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -2503,33 +2741,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type uint8 --channels 2 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "4",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type uint8 --channels 4 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int8",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type int8 --channels 1 31x32"
+    "cmd": "./vsr_2d_test.bin --type uint8 --channels 1 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -2539,33 +2761,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type int8 --channels 2 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "4",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type int8 --channels 4 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "float",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type float --channels 1 --sampled 31x32"
+    "cmd": "./vsr_2d_test.bin --type int8 --channels 1 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -2575,24 +2781,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type float --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "float",
-    "ch": "4",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type float --channels 4 --sampled 31x32"
+    "cmd": "./vsr_2d_test.bin --type float --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -2602,15 +2801,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "half",
-    "ch": "1",
+    "type": "float",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type half --channels 1 --sampled 31x32"
+    "cmd": "./vsr_2d_test.bin --type float --channels 4 --sampled 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -2620,33 +2821,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type half --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "half",
-    "ch": "4",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type half --channels 4 --sampled 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int32",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type int32 --channels 1 --sampled 31x32"
+    "cmd": "./vsr_2d_test.bin --type half --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -2656,24 +2841,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type int32 --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int32",
-    "ch": "4",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type int32 --channels 4 --sampled 31x32"
+    "cmd": "./vsr_2d_test.bin --type int32 --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -2683,15 +2861,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint32",
-    "ch": "1",
+    "type": "int32",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type uint32 --channels 1 --sampled 31x32"
+    "cmd": "./vsr_2d_test.bin --type int32 --channels 4 --sampled 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -2701,24 +2881,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type uint32 --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint32",
-    "ch": "4",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type uint32 --channels 4 --sampled 31x32"
+    "cmd": "./vsr_2d_test.bin --type uint32 --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -2728,15 +2901,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int16",
-    "ch": "1",
+    "type": "uint32",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type int16 --channels 1 --sampled 31x32"
+    "cmd": "./vsr_2d_test.bin --type uint32 --channels 4 --sampled 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -2746,33 +2921,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type int16 --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int16",
-    "ch": "4",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type int16 --channels 4 --sampled 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint16",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type uint16 --channels 1 --sampled 31x32"
+    "cmd": "./vsr_2d_test.bin --type int16 --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -2782,33 +2941,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type uint16 --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint16",
-    "ch": "4",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type uint16 --channels 4 --sampled 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint8",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type uint8 --channels 1 --sampled 31x32"
+    "cmd": "./vsr_2d_test.bin --type uint16 --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -2818,87 +2961,17 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type uint8 --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "4",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type uint8 --channels 4 --sampled 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "1",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type int8 --channels 1 --sampled 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type int8 --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "4",
-    "size": "32x32",
-    "cmd": "./vsr_2d_test.bin --type int8 --channels 4 --sampled 32x32"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "float",
-    "ch": "1",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type float --channels 1 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "float",
-    "ch": "2",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type float --channels 2 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "float",
-    "ch": "4",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type float --channels 4 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "half",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type half --channels 1 31x32"
+    "cmd": "./vsr_2d_test.bin --type uint8 --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -2908,69 +2981,17 @@
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
-    "ch": "1",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type half --channels 1 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "half",
-    "ch": "2",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type half --channels 2 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "half",
-    "ch": "4",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type half --channels 4 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int32",
-    "ch": "1",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type int32 --channels 1 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int32",
-    "ch": "2",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type int32 --channels 2 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int32",
-    "ch": "4",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type int32 --channels 4 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint32",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 1 31x32"
+    "cmd": "./vsu_2d_w_test.bin --type half --channels 1 31x32"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -2980,51 +3001,17 @@
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "1",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 1 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint32",
-    "ch": "2",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 2 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint32",
-    "ch": "4",
-    "size": "32x32",
-    "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 4 32x32"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint32",
-    "ch": "4",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 4 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int16",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 1 31x32"
+    "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 1 31x32"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -3034,159 +3021,17 @@
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
-    "ch": "1",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 1 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int16",
-    "ch": "2",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 2 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int16",
-    "ch": "4",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 4 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint16",
-    "ch": "1",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 1 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint16",
-    "ch": "2",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 2 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint16",
-    "ch": "4",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 4 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "1",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 1 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "2",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 2 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "4",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 4 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "1",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 1 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "2",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 2 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "4",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 4 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "1",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 1 32x33"
-  },
-  {
-    "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "2",
-    "size": "32x33",
-    "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 2 32x33"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "float",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type float --channels 1 31x32"
+    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 1 31x32"
   },
   {
     "label": "2D Arithmetic",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "float",
-    "ch": "1",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type float --channels 1 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "float",
-    "ch": "2",
-    "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type float --channels 2 31x32"
-  },
-  {
-    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -3196,15 +3041,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type float --channels 4 31x32"
+    "cmd": "./vs_2d_arith.bin --type float --channels 2 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -3214,15 +3061,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "half",
-    "ch": "1",
+    "type": "float",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type half --channels 1 31x32"
+    "cmd": "./vs_2d_arith.bin --type float --channels 4 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -3232,24 +3081,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type half --channels 2 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "half",
-    "ch": "4",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type half --channels 4 31x32"
+    "cmd": "./vs_2d_arith.bin --type half --channels 1 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -3259,15 +3101,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int32",
-    "ch": "1",
+    "type": "half",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type int32 --channels 1 31x32"
+    "cmd": "./vs_2d_arith.bin --type half --channels 4 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -3277,15 +3121,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "2",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type int32 --channels 2 31x32"
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 1 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -3295,15 +3141,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type int32 --channels 4 31x32"
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 2 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -3313,15 +3161,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint32",
-    "ch": "1",
+    "type": "int32",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type uint32 --channels 1 31x32"
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 4 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -3331,15 +3181,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "2",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type uint32 --channels 2 31x32"
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 1 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -3349,15 +3201,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type uint32 --channels 4 31x32"
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 2 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -3367,15 +3221,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int16",
-    "ch": "1",
+    "type": "uint32",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type int16 --channels 1 31x32"
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 4 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -3385,24 +3241,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type int16 --channels 2 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int16",
-    "ch": "4",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type int16 --channels 4 31x32"
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 1 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -3412,15 +3261,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint16",
-    "ch": "1",
+    "type": "int16",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type uint16 --channels 1 31x32"
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 4 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -3430,24 +3281,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint16",
-    "ch": "4",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type uint16 --channels 4 31x32"
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 1 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -3457,15 +3301,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "1",
+    "type": "uint16",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type uint8 --channels 1 31x32"
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 4 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -3475,33 +3321,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "4",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type uint8 --channels 4 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int8",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type int8 --channels 1 31x32"
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 1 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -3511,33 +3341,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type int8 --channels 2 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "4",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type int8 --channels 4 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 31x32"
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 1 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -3547,33 +3361,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "4",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "float",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type float --channels 1 --sampled 31x32"
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -3583,24 +3381,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type float --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "float",
-    "ch": "4",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type float --channels 4 --sampled 31x32"
+    "cmd": "./vs_2d_arith.bin --type float --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
@@ -3610,15 +3401,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "half",
-    "ch": "1",
+    "type": "float",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type half --channels 1 --sampled 31x32"
+    "cmd": "./vs_2d_arith.bin --type float --channels 4 --sampled 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
@@ -3628,33 +3421,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type half --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "half",
-    "ch": "4",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type half --channels 4 --sampled 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int32",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type int32 --channels 1 --sampled 31x32"
+    "cmd": "./vs_2d_arith.bin --type half --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -3664,24 +3441,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type int32 --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int32",
-    "ch": "4",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type int32 --channels 4 --sampled 31x32"
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
@@ -3691,15 +3461,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint32",
-    "ch": "1",
+    "type": "int32",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type uint32 --channels 1 --sampled 31x32"
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 4 --sampled 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -3709,24 +3481,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type uint32 --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint32",
-    "ch": "4",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type uint32 --channels 4 --sampled 31x32"
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
@@ -3736,15 +3501,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int16",
-    "ch": "1",
+    "type": "uint32",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type int16 --channels 1 --sampled 31x32"
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 4 --sampled 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
@@ -3754,33 +3521,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type int16 --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int16",
-    "ch": "4",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type int16 --channels 4 --sampled 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint16",
     "ch": "1",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type uint16 --channels 1 --sampled 31x32"
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -3790,15 +3541,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 --sampled 32x32"
+    "ch": "1",
+    "size": "31x32",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
@@ -3808,15 +3561,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "1",
+    "type": "uint16",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type uint8 --channels 1 --sampled 31x32"
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 4 --sampled 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -3826,15 +3581,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 --sampled 32x32"
+    "ch": "1",
+    "size": "31x32",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 1 --sampled 31x32"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
@@ -3844,24 +3601,17 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "1",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type int8 --channels 1 --sampled 32x32"
+    "type": "uint8",
+    "ch": "4",
+    "size": "31x32",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 4 --sampled 31x32"
   },
   {
     "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type int8 --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
@@ -3871,38 +3621,12 @@
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "1",
-    "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 --sampled 31x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "1",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 --sampled 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "2",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 --sampled 32x32"
-  },
-  {
-    "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
+    "type": "int8",
     "ch": "4",
-    "size": "32x32",
-    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 --sampled 32x32"
+    "size": "31x32",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 4 --sampled 31x32"
   }
 ]

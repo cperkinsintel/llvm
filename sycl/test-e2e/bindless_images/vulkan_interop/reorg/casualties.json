@@ -1,326 +1,425 @@
 [
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type float --channels 1 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: float | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type float --channels 2 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: float | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type float --channels 4 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: float | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type half --channels 1 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: half | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 32 errors out of 1056 values.\nMismatch at index 1024 (pixel 1024, channel 0): Expected 8, Got 0\nMismatch at index 1025 (pixel 1025, channel 0): Expected 9, Got 0\nMismatch at index 1026 (pixel 1026, channel 0): Expected 10, Got 0\nMismatch at index 1027 (pixel 1027, channel 0): "
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "half",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type half --channels 2 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type half --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type half --channels 2 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: half | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type half --channels 4 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: half | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int32 --channels 1 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: int32 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int32 --channels 2 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: int32 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int32 --channels 4 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: int32 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint32 --channels 1 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: uint32 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint32 --channels 2 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: uint32 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint32 --channels 4 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: uint32 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int16 --channels 1 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: int16 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 32 errors out of 1056 values.\nMismatch at index 1024 (pixel 1024, channel 0): Expected 8, Got 0\nMismatch at index 1025 (pixel 1025, channel 0): Expected 9, Got 0\nMismatch at index 1026 (pixel 1026, channel 0): Expected 10, Got 0\nMismatch at index 1027 (pixel 1027, channel 0): E"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int16",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type int16 --channels 2 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type int16 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int16 --channels 2 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: int16 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int16 --channels 4 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: int16 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint16 --channels 1 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: uint16 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 32 errors out of 1056 values.\nMismatch at index 1024 (pixel 1024, channel 0): Expected 8, Got 0\nMismatch at index 1025 (pixel 1025, channel 0): Expected 9, Got 0\nMismatch at index 1026 (pixel 1026, channel 0): Expected 10, Got 0\nMismatch at index 1027 (pixel 1027, channel 0): "
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint16",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type uint16 --channels 2 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type uint16 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint16 --channels 2 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: uint16 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint16 --channels 4 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: uint16 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint8 --channels 1 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: uint8 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 32 errors out of 1056 values.\nMismatch at index 1024 (pixel 1024, channel 0): Expected \b, Got \u0000\nMismatch at index 1025 (pixel 1025, channel 0): Expected \t, Got \u0000\nMismatch at index 1026 (pixel 1026, channel 0): Expected \n, Got \u0000\nMismatch at index 1027 (pixel 1027, channel 0): Exp"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint8",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type uint8 --channels 2 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type uint8 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint8 --channels 2 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: uint8 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 64 errors out of 2112 values.\nMismatch at index 2048 (pixel 1024, channel 0): Expected \b, Got \u0000\nMismatch at index 2049 (pixel 1024, channel 1): Expected \u0012, Got \u0000\nMismatch at index 2050 (pixel 1025, channel 0): Expected \t, Got \u0000\nMismatch at index 2051 (pixel 1025, channel 1): E"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint8",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type uint8 --channels 4 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type uint8 --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint8 --channels 4 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: uint8 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int8 --channels 1 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: int8 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 32 errors out of 1056 values.\nMismatch at index 1024 (pixel 1024, channel 0): Expected \b, Got \u0000\nMismatch at index 1025 (pixel 1025, channel 0): Expected \t, Got \u0000\nMismatch at index 1026 (pixel 1026, channel 0): Expected \n, Got \u0000\nMismatch at index 1027 (pixel 1027, channel 0): Expe"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int8",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type int8 --channels 2 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type int8 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int8 --channels 2 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: int8 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 64 errors out of 2112 values.\nMismatch at index 2048 (pixel 1024, channel 0): Expected \b, Got \u0000\nMismatch at index 2049 (pixel 1024, channel 1): Expected \u0012, Got \u0000\nMismatch at index 2050 (pixel 1025, channel 0): Expected \t, Got \u0000\nMismatch at index 2051 (pixel 1025, channel 1): Ex"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int8",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type int8 --channels 4 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type int8 --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int8 --channels 4 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: int8 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "1",
-    "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 1 31x32",
-    "output": "Running UNSAMPLED 2D Read Test | Type: unorm8 | Size: 31x32 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 984 errors out of 992 values.\nMismatch at index 1 (pixel 1, channel 0): Expected \u0001, Got \ufffd\nMismatch at index 2 (pixel 2, channel 0): Expected \u0002, Got \ufffd\nMismatch at index 3 (pixel 3, channel 0): Expected \u0003, Got \ufffd\nMismatch at index 4 (pixel 4, channel 0): Expected \u0004, Got \ufffd\nMismatc"
-  },
-  {
-    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
@@ -331,1812 +430,2708 @@
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_UNORM",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "1",
+    "size": "31x32",
+    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 1 31x32",
+    "output": "Running UNSAMPLED 2D Read Test | Type: unorm8 | Size: 31x32 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 984 errors out of 992 values.\nMismatch at index 1 (pixel 1, channel 0): Expected \u0001, Got \ufffd\nMismatch at index 2 (pixel 2, channel 0): Expected \u0002, Got \ufffd\nMismatch at index 3 (pixel 3, channel 0): Expected \u0003, Got \ufffd\nMismatch at index 4 (pixel 4, channel 0): Expected \u0004, Got \ufffd\nMismatc"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type unorm8 --channels 1 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: unorm8 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 1047 errors out of 1056 values.\nMismatch at index 1 (pixel 1, channel 0): Expected \u0001, Got \ufffd\nMismatch at index 2 (pixel 2, channel 0): Expected \u0002, Got \ufffd\nMismatch at index 3 (pixel 3, channel 0): Expected \u0003, Got \ufffd\nMismatch at index 4 (pixel 4, channel 0): Expected \u0004, Got \ufffd\nMisma"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "2",
-    "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
-  },
-  {
-    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "2",
     "size": "32x32",
     "cmd": "./vsr_2d_test.bin --type unorm8 --channels 2 32x32",
-    "output": "Running UNSAMPLED 2D Read Test | Type: unorm8 | Size: 32x32 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 2031 errors out of 2048 values.\nMismatch at index 1 (pixel 0, channel 1): Expected \n, Got \ufffd\nMismatch at index 2 (pixel 1, channel 0): Expected \u0001, Got \ufffd\nMismatch at index 3 (pixel 1, channel 1): Expected \u000b, Got \ufffd\nMismatch at index 4 (pixel 2, channel 0): Expected \u0002, Got \ufffd\nMis"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "2",
+    "size": "31x32",
+    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 2 31x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type unorm8 --channels 2 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: unorm8 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 2095 errors out of 2112 values.\nMismatch at index 1 (pixel 0, channel 1): Expected \n, Got \ufffd\nMismatch at index 2 (pixel 1, channel 0): Expected \u0001, Got \ufffd\nMismatch at index 3 (pixel 1, channel 1): Expected \u000b, Got \ufffd\nMismatch at index 4 (pixel 2, channel 0): Expected \u0002, Got \ufffd\nMis"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "4",
-    "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
-  },
-  {
-    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "4",
     "size": "32x32",
     "cmd": "./vsr_2d_test.bin --type unorm8 --channels 4 32x32",
-    "output": "Running UNSAMPLED 2D Read Test | Type: unorm8 | Size: 32x32 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 4063 errors out of 4096 values.\nMismatch at index 1 (pixel 0, channel 1): Expected \n, Got \ufffd\nMismatch at index 2 (pixel 0, channel 2): Expected \u0014, Got \ufffd\nMismatch at index 3 (pixel 0, channel 3): Expected \u001e, Got \ufffd\nMismatch at index 4 (pixel 1, channel 0): Expected \u0001, Got \ufffd"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "4",
+    "size": "31x32",
+    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 4 31x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type unorm8 --channels 4 32x33",
-    "output": "Running UNSAMPLED 2D Read Test | Type: unorm8 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type float --channels 1 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: float | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 32 errors out of 1056 values.\nMismatch at index 1024 (pixel 1024, channel 0): Expected 0.970616, Got 0\nMismatch at index 1025 (pixel 1025, channel 0): Expected 0.971564, Got 0\nMismatch at index 1026 (pixel 1026, channel 0): Expected 0.972512, Got 0\nMismatch at index 1027 (pixel"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "float",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type float --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type float --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type float --channels 2 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: float | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type float --channels 4 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: float | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type half --channels 1 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: half | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 32 errors out of 1056 values.\nMismatch at index 1024 (pixel 1024, channel 0): Expected 8, Got 0\nMismatch at index 1025 (pixel 1025, channel 0): Expected 9, Got 0\nMismatch at index 1026 (pixel 1026, channel 0): Expected 10, Got 0\nMismatch at index 1027 (pixel 1027, channel 0): Ex"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "half",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type half --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type half --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type half --channels 2 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: half | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 64 errors out of 2112 values.\nMismatch at index 2048 (pixel 1024, channel 0): Expected 8, Got 0\nMismatch at index 2049 (pixel 1024, channel 1): Expected 18, Got 0\nMismatch at index 2050 (pixel 1025, channel 0): Expected 9, Got 0\nMismatch at index 2051 (pixel 1025, channel 1):"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "half",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type half --channels 4 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type half --channels 4 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type half --channels 4 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: half | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_SFLOAT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int32 --channels 1 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: int32 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 32 errors out of 1056 values.\nMismatch at index 1024 (pixel 1024, channel 0): Expected 8, Got 0\nMismatch at index 1025 (pixel 1025, channel 0): Expected 9, Got 0\nMismatch at index 1026 (pixel 1026, channel 0): Expected 10, Got 0\nMismatch at index 1027 (pixel 1027, channel 0): Exp"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int32",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type int32 --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type int32 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int32 --channels 2 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: int32 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int32 --channels 4 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: int32 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint32 --channels 1 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: uint32 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 32 errors out of 1056 values.\nMismatch at index 1024 (pixel 1024, channel 0): Expected 8, Got 0\nMismatch at index 1025 (pixel 1025, channel 0): Expected 9, Got 0\nMismatch at index 1026 (pixel 1026, channel 0): Expected 10, Got 0\nMismatch at index 1027 (pixel 1027, channel 0): Ex"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint32",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type uint32 --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type uint32 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint32 --channels 2 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: uint32 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint32 --channels 4 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: uint32 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int16 --channels 1 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: int16 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 32 errors out of 1056 values.\nMismatch at index 1024 (pixel 1024, channel 0): Expected 8, Got 0\nMismatch at index 1025 (pixel 1025, channel 0): Expected 9, Got 0\nMismatch at index 1026 (pixel 1026, channel 0): Expected 10, Got 0\nMismatch at index 1027 (pixel 1027, channel 0): Exp"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int16",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type int16 --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type int16 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int16 --channels 2 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: int16 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 64 errors out of 2112 values.\nMismatch at index 2048 (pixel 1024, channel 0): Expected 8, Got 0\nMismatch at index 2049 (pixel 1024, channel 1): Expected 18, Got 0\nMismatch at index 2050 (pixel 1025, channel 0): Expected 9, Got 0\nMismatch at index 2051 (pixel 1025, channel 1): "
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int16",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type int16 --channels 4 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type int16 --channels 4 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int16 --channels 4 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: int16 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint16 --channels 1 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: uint16 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 32 errors out of 1056 values.\nMismatch at index 1024 (pixel 1024, channel 0): Expected 8, Got 0\nMismatch at index 1025 (pixel 1025, channel 0): Expected 9, Got 0\nMismatch at index 1026 (pixel 1026, channel 0): Expected 10, Got 0\nMismatch at index 1027 (pixel 1027, channel 0): Ex"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint16",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type uint16 --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type uint16 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint16 --channels 2 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: uint16 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 64 errors out of 2112 values.\nMismatch at index 2048 (pixel 1024, channel 0): Expected 8, Got 0\nMismatch at index 2049 (pixel 1024, channel 1): Expected 18, Got 0\nMismatch at index 2050 (pixel 1025, channel 0): Expected 9, Got 0\nMismatch at index 2051 (pixel 1025, channel 1):"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint16",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type uint16 --channels 4 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type uint16 --channels 4 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint16 --channels 4 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: uint16 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint8 --channels 1 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: uint8 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 32 errors out of 1056 values.\nMismatch at index 1024 (pixel 1024, channel 0): Expected \b, Got \u0000\nMismatch at index 1025 (pixel 1025, channel 0): Expected \t, Got \u0000\nMismatch at index 1026 (pixel 1026, channel 0): Expected \n, Got \u0000\nMismatch at index 1027 (pixel 1027, channel 0): Expec"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint8",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type uint8 --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type uint8 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint8 --channels 2 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: uint8 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 64 errors out of 2112 values.\nMismatch at index 2048 (pixel 1024, channel 0): Expected \b, Got \u0000\nMismatch at index 2049 (pixel 1024, channel 1): Expected \u0012, Got \u0000\nMismatch at index 2050 (pixel 1025, channel 0): Expected \t, Got \u0000\nMismatch at index 2051 (pixel 1025, channel 1): Exp"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint8",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type uint8 --channels 4 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type uint8 --channels 4 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type uint8 --channels 4 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: uint8 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 128 errors out of 4224 values.\nMismatch at index 4096 (pixel 1024, channel 0): Expected \b, Got \u0000\nMismatch at index 4097 (pixel 1024, channel 1): Expected \u0012, Got \u0000\nMismatch at index 4098 (pixel 1024, channel 2): Expected \u001c, Got \u0000\nMismatch at index 4099 (pixel 1024, channel 3)"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_SINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int8",
+    "ch": "1",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type int8 --channels 1 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "1",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type int8 --channels 1 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int8 --channels 1 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: int8 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 32 errors out of 1056 values.\nMismatch at index 1024 (pixel 1024, channel 0): Expected \b, Got \u0000\nMismatch at index 1025 (pixel 1025, channel 0): Expected \t, Got \u0000\nMismatch at index 1026 (pixel 1026, channel 0): Expected \n, Got \u0000\nMismatch at index 1027 (pixel 1027, channel 0): Expect"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int8",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type int8 --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type int8 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int8 --channels 2 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: int8 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 64 errors out of 2112 values.\nMismatch at index 2048 (pixel 1024, channel 0): Expected \b, Got \u0000\nMismatch at index 2049 (pixel 1024, channel 1): Expected \u0012, Got \u0000\nMismatch at index 2050 (pixel 1025, channel 0): Expected \t, Got \u0000\nMismatch at index 2051 (pixel 1025, channel 1): Expe"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int8",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vsr_2d_test.bin --type int8 --channels 4 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vsr_2d_test.bin --type int8 --channels 4 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type int8 --channels 4 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: int8 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_SINT\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 128 errors out of 4224 values.\nMismatch at index 4096 (pixel 1024, channel 0): Expected \b, Got \u0000\nMismatch at index 4097 (pixel 1024, channel 1): Expected \u0012, Got \u0000\nMismatch at index 4098 (pixel 1024, channel 2): Expected \u001c, Got \u0000\nMismatch at index 4099 (pixel 1024, channel 3):"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "1",
-    "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 1 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
-  },
-  {
-    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "1",
     "size": "32x32",
     "cmd": "./vsr_2d_test.bin --type unorm8 --channels 1 --sampled 32x32",
-    "output": "Running SAMPLED 2D Read Test | Type: unorm8 | Size: 32x32 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 1015 errors out of 1024 values.\nMismatch at index 1 (pixel 1, channel 0): Expected \u0001, Got \ufffd\nMismatch at index 2 (pixel 2, channel 0): Expected \u0002, Got \ufffd\nMismatch at index 3 (pixel 3, channel 0): Expected \u0003, Got \ufffd\nMismatch at index 4 (pixel 4, channel 0): Expected \u0004, Got \ufffd\nMismatc"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_UNORM",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "1",
+    "size": "31x32",
+    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 1 --sampled 31x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type unorm8 --channels 1 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: unorm8 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 1047 errors out of 1056 values.\nMismatch at index 1 (pixel 1, channel 0): Expected \u0001, Got \ufffd\nMismatch at index 2 (pixel 2, channel 0): Expected \u0002, Got \ufffd\nMismatch at index 3 (pixel 3, channel 0): Expected \u0003, Got \ufffd\nMismatch at index 4 (pixel 4, channel 0): Expected \u0004, Got \ufffd\nMismatc"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "2",
-    "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
-  },
-  {
-    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "2",
     "size": "32x32",
     "cmd": "./vsr_2d_test.bin --type unorm8 --channels 2 --sampled 32x32",
-    "output": "Running SAMPLED 2D Read Test | Type: unorm8 | Size: 32x32 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 2031 errors out of 2048 values.\nMismatch at index 1 (pixel 0, channel 1): Expected \n, Got \ufffd\nMismatch at index 2 (pixel 1, channel 0): Expected \u0001, Got \ufffd\nMismatch at index 3 (pixel 1, channel 1): Expected \u000b, Got \ufffd\nMismatch at index 4 (pixel 2, channel 0): Expected \u0002, Got \ufffd\nMisma"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "2",
+    "size": "31x32",
+    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 2 --sampled 31x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type unorm8 --channels 2 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: unorm8 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 2095 errors out of 2112 values.\nMismatch at index 1 (pixel 0, channel 1): Expected \n, Got \ufffd\nMismatch at index 2 (pixel 1, channel 0): Expected \u0001, Got \ufffd\nMismatch at index 3 (pixel 1, channel 1): Expected \u000b, Got \ufffd\nMismatch at index 4 (pixel 2, channel 0): Expected \u0002, Got \ufffd\nMisma"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "4",
-    "size": "31x32",
-    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 4 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
-  },
-  {
-    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "4",
     "size": "32x32",
     "cmd": "./vsr_2d_test.bin --type unorm8 --channels 4 --sampled 32x32",
-    "output": "Running SAMPLED 2D Read Test | Type: unorm8 | Size: 32x32 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 4063 errors out of 4096 values.\nMismatch at index 1 (pixel 0, channel 1): Expected \n, Got \ufffd\nMismatch at index 2 (pixel 0, channel 2): Expected \u0014, Got \ufffd\nMismatch at index 3 (pixel 0, channel 3): Expected \u001e, Got \ufffd\nMismatch at index 4 (pixel 1, channel 0): Expected \u0001, Got \ufffd\nM"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "4",
+    "size": "31x32",
+    "cmd": "./vsr_2d_test.bin --type unorm8 --channels 4 --sampled 31x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Read",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsr_2d_test.bin --type unorm8 --channels 4 --sampled 32x33",
-    "output": "Running SAMPLED 2D Read Test | Type: unorm8 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Kernel Executed.\nFAILURE! 4191 errors out of 4224 values.\nMismatch at index 1 (pixel 0, channel 1): Expected \n, Got \ufffd\nMismatch at index 2 (pixel 0, channel 2): Expected \u0014, Got \ufffd\nMismatch at index 3 (pixel 0, channel 3): Expected \u001e, Got \ufffd\nMismatch at index 4 (pixel 1, channel 0): Expected \u0001, Got \ufffd\nM"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
-    "mode": "UNSAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "float",
-    "ch": "1",
-    "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type float --channels 1 31x32",
-    "output": "TIMEOUT: Test hung"
-  },
-  {
-    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "1",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type float --channels 1 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: float | Size: 32x32 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_SFLOAT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
-    "ch": "2",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type float --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type float --channels 1 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "float",
+    "ch": "1",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type float --channels 1 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "2",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type float --channels 2 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: float | Size: 32x32 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_SFLOAT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type float --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type float --channels 2 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "float",
+    "ch": "2",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type float --channels 2 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "4",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type float --channels 4 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: float | Size: 32x32 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_SFLOAT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "float",
+    "ch": "4",
+    "size": "31x32",
+    "cmd": "./vsu_2d_w_test.bin --type float --channels 4 31x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "float",
+    "ch": "4",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type float --channels 4 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
-    "ch": "2",
-    "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type half --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "ch": "1",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type half --channels 1 32x33",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "2",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type half --channels 2 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: half | Size: 32x32 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_SFLOAT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type half --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type half --channels 2 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "half",
+    "ch": "2",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type half --channels 2 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "4",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type half --channels 4 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: half | Size: 32x32 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_SFLOAT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int32",
-    "ch": "1",
+    "type": "half",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type int32 --channels 1 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type half --channels 4 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "half",
+    "ch": "4",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type half --channels 4 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "1",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type int32 --channels 1 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: int32 | Size: 32x32 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32_SINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "2",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type int32 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type int32 --channels 1 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int32",
+    "ch": "1",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type int32 --channels 1 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "2",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type int32 --channels 2 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: int32 | Size: 32x32 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_SINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type int32 --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type int32 --channels 2 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int32",
+    "ch": "2",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type int32 --channels 2 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "4",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type int32 --channels 4 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: int32 | Size: 32x32 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32B32A32_SINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int32",
+    "ch": "4",
+    "size": "31x32",
+    "cmd": "./vsu_2d_w_test.bin --type int32 --channels 4 31x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int32",
+    "ch": "4",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type int32 --channels 4 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
-    "ch": "2",
-    "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "ch": "1",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 1 32x33",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "2",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 2 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: uint32 | Size: 32x32 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R32G32_UINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint32",
+    "ch": "2",
+    "size": "31x32",
+    "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 2 31x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint32",
+    "ch": "2",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 2 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint32",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 4 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint32",
+    "ch": "4",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type uint32 --channels 4 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
-    "ch": "2",
-    "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "ch": "1",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 1 32x33",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "2",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type int16 --channels 2 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: int16 | Size: 32x32 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_SINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 2 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int16",
+    "ch": "2",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 2 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "4",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type int16 --channels 4 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: int16 | Size: 32x32 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_SINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint16",
-    "ch": "1",
+    "type": "int16",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 1 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 4 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int16",
+    "ch": "4",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type int16 --channels 4 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "1",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 1 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: uint16 | Size: 32x32 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16_UINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
-    "ch": "2",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 1 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint16",
+    "ch": "1",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 1 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "2",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 2 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: uint16 | Size: 32x32 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16_UINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 2 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint16",
+    "ch": "2",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 2 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "4",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 4 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: uint16 | Size: 32x32 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R16G16B16A16_UINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "1",
+    "type": "uint16",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 1 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 4 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint16",
+    "ch": "4",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type uint16 --channels 4 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "1",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 1 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: uint8 | Size: 32x32 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
-    "ch": "2",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 1 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint8",
+    "ch": "1",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 1 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "2",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 2 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: uint8 | Size: 32x32 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_UINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 2 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint8",
+    "ch": "2",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 2 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "4",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 4 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: uint8 | Size: 32x32 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "1",
+    "type": "uint8",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 1 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 4 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint8",
+    "ch": "4",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type uint8 --channels 4 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "1",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type int8 --channels 1 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: int8 | Size: 32x32 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_SINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
-    "ch": "2",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 1 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int8",
+    "ch": "1",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 1 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "2",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type int8 --channels 2 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: int8 | Size: 32x32 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_SINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 2 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int8",
+    "ch": "2",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 2 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "4",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type int8 --channels 4 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: int8 | Size: 32x32 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_SINT\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
-    "type": "unorm8",
-    "ch": "1",
+    "type": "int8",
+    "ch": "4",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 1 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 4 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int8",
+    "ch": "4",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type int8 --channels 4 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "1",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 1 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: unorm8 | Size: 32x32 | Channels: 1 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8_UNORM\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
-    "ch": "2",
+    "ch": "1",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 1 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8_UNORM",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "1",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 1 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "2",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 2 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: unorm8 | Size: 32x32 | Channels: 2 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8_UNORM\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
-    "ch": "4",
+    "ch": "2",
     "size": "31x32",
-    "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 2 31x32",
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "2",
+    "size": "32x33",
+    "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 2 32x33",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "4",
     "size": "32x32",
     "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 4 32x32",
-    "output": "Running UNSAMPLED 2D Write Test | Type: unorm8 | Size: 32x32 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UNORM\nVulkan Error at line 683: -4\nterminate called after throwing an instance of 'std::runtime_error'\n  what():  Vulkan Error\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "4",
+    "size": "31x32",
+    "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 4 31x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Write",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vsu_2d_w_test.bin --type unorm8 --channels 4 32x33",
-    "output": "Running UNSAMPLED 2D Write Test | Type: unorm8 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Semaphores: OFF\nVK Format: VK_FORMAT_R8G8B8A8_UNORM\n\u2713 Vulkan Data Verified (Internal Round-Trip Passed)\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "float",
+    "ch": "1",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type float --channels 1 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "float",
+    "ch": "1",
+    "size": "31x32",
+    "cmd": "./vs_2d_arith.bin --type float --channels 1 31x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type float --channels 1 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: float | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R32_SFLOAT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type float --channels 2 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: float | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R32G32_SFLOAT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type float --channels 4 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: float | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R32G32B32A32_SFLOAT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type half --channels 1 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: half | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R16_SFLOAT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "half",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type half --channels 2 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type half --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type half --channels 2 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: half | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R16G16_SFLOAT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type half --channels 4 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: half | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R16G16B16A16_SFLOAT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int32 --channels 1 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int32 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R32_SINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int32 --channels 2 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int32 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R32G32_SINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int32 --channels 4 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int32 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R32G32B32A32_SINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint32 --channels 1 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint32 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R32_UINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint32 --channels 2 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint32 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R32G32_UINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint32 --channels 4 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint32 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R32G32B32A32_UINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int16 --channels 1 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int16 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R16_SINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int16",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 2 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type int16 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int16 --channels 2 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int16 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R16G16_SINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int16 --channels 4 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int16 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R16G16B16A16_SINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint16 --channels 1 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint16 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R16_UINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint16",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint16 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R16G16_UINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint16 --channels 4 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint16 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R16G16B16A16_UINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint8 --channels 1 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint8 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R8_UINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint8",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint8 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R8G8_UINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint8",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 4 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type uint8 --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint8 --channels 4 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint8 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R8G8B8A8_UINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int8 --channels 1 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int8 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R8_SINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int8",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 2 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type int8 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int8 --channels 2 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int8 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R8G8_SINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int8",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 4 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type int8 --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int8 --channels 4 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int8 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R8G8B8A8_SINT\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: unorm8 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R8_UNORM\n  Mode: UNSAMPLED Input\nMismatch at 1024 ch:0 Got: 0 Exp: 64\nMismatch at 1025 ch:0 Got: 0 Exp: 67\nMismatch at 1026 ch:0 Got: 0 Exp: 70\nMismatch at 1027 ch:0 Got: 0 Exp: 73\nMismatch at 1028 ch:0 Got: 0 Exp: 76\nFAILURE!\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: unorm8 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R8G8_UNORM\n  Mode: UNSAMPLED Input\nMismatch at 1024 ch:0 Got: 0 Exp: 64\nMismatch at 1024 ch:1 Got: 0 Exp: 79\nMismatch at 1025 ch:0 Got: 0 Exp: 67\nMismatch at 1025 ch:1 Got: 0 Exp: 82\nMismatch at 1026 ch:0 Got: 0 Exp: 70\nFAILURE!\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
+    "mode": "UNSAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "UNSAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: unorm8 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: NO | Semaphores: OFF\n  VK Format: VK_FORMAT_R8G8B8A8_UNORM\n  Mode: UNSAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type float --channels 1 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: float | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R32_SFLOAT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "float",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type float --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type float --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type float --channels 2 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: float | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R32G32_SFLOAT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "float",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type float --channels 4 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: float | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R32G32B32A32_SFLOAT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type half --channels 1 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: half | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R16_SFLOAT\n  Mode: SAMPLED Input\nMismatch at 1024 ch:0 Got: 0 Exp: 64\nMismatch at 1025 ch:0 Got: 0 Exp: 67\nMismatch at 1026 ch:0 Got: 0 Exp: 70\nMismatch at 1027 ch:0 Got: 0 Exp: 73\nMismatch at 1028 ch:0 Got: 0 Exp: 76\nFAILURE!\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "half",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type half --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type half --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type half --channels 2 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: half | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R16G16_SFLOAT\n  Mode: SAMPLED Input\nMismatch at 1024 ch:0 Got: 0 Exp: 64\nMismatch at 1024 ch:1 Got: 0 Exp: 79\nMismatch at 1025 ch:0 Got: 0 Exp: 67\nMismatch at 1025 ch:1 Got: 0 Exp: 82\nMismatch at 1026 ch:0 Got: 0 Exp: 70\nFAILURE!\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "half",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type half --channels 4 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type half --channels 4 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SFLOAT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "half",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type half --channels 4 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: half | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R16G16B16A16_SFLOAT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int32 --channels 1 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int32 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R32_SINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int32",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type int32 --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type int32 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int32 --channels 2 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int32 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R32G32_SINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int32",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int32 --channels 4 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int32 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R32G32B32A32_SINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint32 --channels 1 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint32 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R32_UINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint32",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type uint32 --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type uint32 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint32 --channels 2 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint32 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R32G32_UINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R32G32B32A32_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint32",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint32 --channels 4 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint32 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R32G32B32A32_UINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int16 --channels 1 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int16 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R16_SINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int16",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type int16 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int16 --channels 2 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int16 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R16G16_SINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int16",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type int16 --channels 4 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type int16 --channels 4 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int16",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int16 --channels 4 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int16 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R16G16B16A16_SINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint16 --channels 1 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint16 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R16_UINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint16",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint16 --channels 2 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint16 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R16G16_UINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint16",
-    "ch": "4",
-    "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type uint16 --channels 4 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
-  },
-  {
-    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R16G16B16A16_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint16",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint16 --channels 4 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint16 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R16G16B16A16_UINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint8 --channels 1 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint8 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R8_UINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "uint8",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint8 --channels 2 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint8 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R8G8_UINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "uint8",
-    "ch": "4",
-    "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type uint8 --channels 4 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
-  },
-  {
-    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "uint8",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type uint8 --channels 4 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: uint8 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R8G8B8A8_UINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_SINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int8",
+    "ch": "1",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 1 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "1",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type int8 --channels 1 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int8 --channels 1 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int8 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R8_SINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "int8",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type int8 --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type int8 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int8 --channels 2 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int8 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R8G8_SINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
-    "mode": "SAMPLED",
-    "tiling": "OPTIMAL",
-    "type": "int8",
-    "ch": "4",
-    "size": "31x32",
-    "cmd": "./vs_2d_arith.bin --type int8 --channels 4 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
-  },
-  {
-    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_SINT",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "int8",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type int8 --channels 4 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: int8 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R8G8B8A8_SINT\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_UNORM",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "1",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_UNORM",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "1",
+    "size": "31x32",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 --sampled 31x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "1",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type unorm8 --channels 1 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: unorm8 | Size: 32x33 | Channels: 1 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R8_UNORM\n  Mode: SAMPLED Input\nMismatch at 1024 ch:0 Got: 0 Exp: 64\nMismatch at 1025 ch:0 Got: 0 Exp: 67\nMismatch at 1026 ch:0 Got: 0 Exp: 70\nMismatch at 1027 ch:0 Got: 0 Exp: 73\nMismatch at 1028 ch:0 Got: 0 Exp: 76\nFAILURE!\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "2",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "2",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "2",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type unorm8 --channels 2 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: unorm8 | Size: 32x33 | Channels: 2 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R8G8_UNORM\n  Mode: SAMPLED Input\nMismatch at 1024 ch:0 Got: 0 Exp: 64\nMismatch at 1024 ch:1 Got: 0 Exp: 79\nMismatch at 1025 ch:0 Got: 0 Exp: 67\nMismatch at 1025 ch:1 Got: 0 Exp: 82\nMismatch at 1026 ch:0 Got: 0 Exp: 70\nFAILURE!\n"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
+    "mode": "SAMPLED",
+    "tiling": "OPTIMAL",
+    "type": "unorm8",
+    "ch": "4",
+    "size": "32x32",
+    "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 --sampled 32x32",
+    "output": "TIMEOUT"
+  },
+  {
+    "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "4",
     "size": "31x32",
     "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 --sampled 31x32",
-    "output": "TIMEOUT: Test hung"
+    "output": "TIMEOUT"
   },
   {
     "label": "2D Arithmetic",
+    "vk_format": "VK_FORMAT_R8G8B8A8_UNORM",
     "mode": "SAMPLED",
     "tiling": "OPTIMAL",
     "type": "unorm8",
     "ch": "4",
     "size": "32x33",
     "cmd": "./vs_2d_arith.bin --type unorm8 --channels 4 --sampled 32x33",
-    "output": "Running 2D ARITHMETIC Test (C = A + B) | Type: unorm8 | Size: 32x33 | Channels: 4 | Tiling: OPTIMAL | Sampled: YES | Semaphores: OFF\n  VK Format: VK_FORMAT_R8G8B8A8_UNORM\n  Mode: SAMPLED Input\nSYCL Exception: level_zero backend failed with error: 20 (UR_RESULT_ERROR_DEVICE_LOST)\n"
+    "output": "TIMEOUT"
   }
 ]

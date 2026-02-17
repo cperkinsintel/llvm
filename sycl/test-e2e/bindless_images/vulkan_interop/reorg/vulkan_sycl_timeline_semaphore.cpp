@@ -457,16 +457,14 @@ int main() {
             q.wait_and_throw();
         } 
         // ~queue (SYCL Runtime caches device here)
-
-        // workaround CMPLRLLVM-73463:  Do not destroy Vulkan Device.
         
-        // vkDestroySemaphore(vkCtx.device, vkToSyclSem, nullptr); vkDestroySemaphore(vkCtx.device, syclToVkSem, nullptr);
-        // vkDestroyCommandPool(vkCtx.device, pool, nullptr);
-        // vkDestroyImage(vkCtx.device, inImg.image, nullptr); vkFreeMemory(vkCtx.device, inImg.memory, nullptr);
-        // vkDestroyBuffer(vkCtx.device, inImg.stagingBuffer, nullptr); vkFreeMemory(vkCtx.device, inImg.stagingMemory, nullptr);
-        // vkDestroyImage(vkCtx.device, outImg.image, nullptr); vkFreeMemory(vkCtx.device, outImg.memory, nullptr);
-        // vkDestroyBuffer(vkCtx.device, outImg.stagingBuffer, nullptr); vkFreeMemory(vkCtx.device, outImg.stagingMemory, nullptr);
-        // vkDestroyDevice(vkCtx.device, nullptr); vkDestroyInstance(vkCtx.instance, nullptr);
+        vkDestroySemaphore(vkCtx.device, vkToSyclSem, nullptr); vkDestroySemaphore(vkCtx.device, syclToVkSem, nullptr);
+        vkDestroyCommandPool(vkCtx.device, pool, nullptr);
+        vkDestroyImage(vkCtx.device, inImg.image, nullptr); vkFreeMemory(vkCtx.device, inImg.memory, nullptr);
+        vkDestroyBuffer(vkCtx.device, inImg.stagingBuffer, nullptr); vkFreeMemory(vkCtx.device, inImg.stagingMemory, nullptr);
+        vkDestroyImage(vkCtx.device, outImg.image, nullptr); vkFreeMemory(vkCtx.device, outImg.memory, nullptr);
+        vkDestroyBuffer(vkCtx.device, outImg.stagingBuffer, nullptr); vkFreeMemory(vkCtx.device, outImg.stagingMemory, nullptr);
+        vkDestroyDevice(vkCtx.device, nullptr); vkDestroyInstance(vkCtx.instance, nullptr);
 
     } catch (std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
