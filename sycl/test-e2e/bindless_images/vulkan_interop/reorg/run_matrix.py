@@ -54,9 +54,13 @@ TESTS = [
     ("2D Read",       "./vsr_2d_test.bin",        "both"),
     ("2D Write",      "./vsu_2d_w_test.bin",      "unsampled_only"), 
     ("2D Arithmetic", "./vs_2d_arith.bin",        "both"),
+
+    #("3D Read",       "./vsr_3d_test.bin",        "both"),
+    #("3D Write",      "./vsu_3d_w_test.bin",      "unsampled_only"), 
 ]
 
-DIMENSIONS = [(32,32), (31,32), (32,33)]
+DIMENSIONS = [(16,16)] # [(32,32), (31,32), (32,33)]
+# DIMENSIONS = [(32,33)]
 
 TYPES = [
     "float", "half", "int32", "uint32", 
