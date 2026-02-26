@@ -8,7 +8,7 @@
 
 // Tests using an OpenCL-C defined kernel with multiple local accessors
 
-// REQUIRES: ocloc && (opencl || level_zero)
+// REQUIRES: opencl || level_zero
 // RUN: %{build} -o %t.out
 // RUN: %{run} %t.out
 

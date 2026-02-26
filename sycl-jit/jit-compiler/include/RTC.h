@@ -201,6 +201,16 @@ JIT_EXPORT_SYMBOL RTCResult compileSYCL(InMemoryFile SourceFile,
                                         View<char> CachedIR, bool SaveIR,
                                         BinaryFormat Format);
 
+/// Compiles OpenCL C source code.
+///
+/// Similar to compileSYCL but adheres to OpenCL C semantics (no SYCL-specific
+/// flags or libraries added by default).
+JIT_EXPORT_SYMBOL RTCResult compileOpenCLC(InMemoryFile SourceFile,
+                                           View<InMemoryFile> IncludeFiles,
+                                           View<const char *> UserArgs,
+                                           View<char> CachedIR, bool SaveIR,
+                                           BinaryFormat Format);
+
 /// Requests that the JIT binary referenced by \p Address is deleted from the
 /// `JITContext`.
 JIT_EXPORT_SYMBOL void destroyBinary(BinaryAddress Address);

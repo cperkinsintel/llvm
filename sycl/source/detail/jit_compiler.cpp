@@ -101,6 +101,15 @@ jit_compiler::jit_compiler()
       return false;
     }
 
+    this->CompileOpenCLCHandle = reinterpret_cast<CompileOpenCLCFuncT>(
+        sycl::detail::ur::getOsLibraryFuncAddress(LibraryPtr.get(),
+                                                  "compileOpenCLC"));
+    // We don't error out if compileOpenCLC is missing, to allow running with
+    // older JIT libraries (though functionality will fade/fail if used).
+    if (!this->CompileOpenCLCHandle) {
+      // Optional warning or just silent accept.
+    }
+
     LibraryHandle = std::move(LibraryPtr);
     return true;
   };
@@ -426,6 +435,67 @@ std::pair<sycl_device_binaries, std::string> jit_compiler::compileSYCL(
     // overwrite the entry with the newly compiled IR.
     std::vector<char> SavedIR{IR.begin(), IR.end()};
     PersistentDeviceCodeCache::putDeviceCodeIRToDisc(CacheKey, SavedIR);
+  }
+
+  std::string Prefix = CompilationID + '$';
+  return std::make_pair(createDeviceBinaries(Result.getBundleInfo(), Prefix),
+                        std::move(Prefix));
+}
+
+std::pair<sycl_device_binaries, std::string> jit_compiler::compileOpenCLC(
+    const std::string &CompilationID, const std::string &Source,
+    const std::vector<std::pair<std::string, std::string>> &IncludePairs,
+    const std::vector<std::string> &UserArgs, std::string *LogPtr,
+    ::jit_compiler::BinaryFormat Format) {
+
+  if (!CompileOpenCLCHandle) {
+    throw sycl::exception(sycl::errc::feature_not_supported,
+                          "JIT library does not support OpenCL C compilation "
+                          "(compileOpenCLC symbol missing)");
+  }
+
+  auto appendToLog = [LogPtr](const char *Msg) {
+    if (LogPtr) {
+      LogPtr->append(Msg);
+    }
+  };
+
+  std::string FileName = CompilationID + ".cl";
+  ::jit_compiler::InMemoryFile SourceFile{FileName.c_str(), Source.c_str()};
+
+  std::vector<::jit_compiler::InMemoryFile> IncludeFilesView;
+  IncludeFilesView.reserve(IncludePairs.size());
+  std::transform(IncludePairs.begin(), IncludePairs.end(),
+                 std::back_inserter(IncludeFilesView), [](const auto &Pair) {
+                   return ::jit_compiler::InMemoryFile{Pair.first.c_str(),
+                                                       Pair.second.c_str()};
+                 });
+  std::vector<const char *> UserArgsView;
+  UserArgsView.reserve(UserArgs.size());
+  std::transform(UserArgs.begin(), UserArgs.end(),
+                 std::back_inserter(UserArgsView),
+                 [](const auto &Arg) { return Arg.c_str(); });
+
+  // For OpenCL C, we skip the persistent cache logic for now to avoid
+  // polluting the SYCL cache with potentially incompatible entries,
+  // and because CalculateHashHandle forces SYCL mode.
+  // We can enable it later if we update CalculateHash to support modes.
+  std::vector<char> CachedIR;
+  bool SaveIR = false;
+
+  auto Result = CompileOpenCLCHandle(SourceFile, IncludeFilesView, UserArgsView,
+                                     CachedIR, SaveIR, Format);
+
+  const char *BuildLog = Result.getBuildLog();
+  appendToLog(BuildLog);
+  switch (Result.getErrorCode()) {
+    using RTCErrC = ::jit_compiler::RTCResult::RTCErrorCode;
+  case RTCErrC::BUILD:
+    throw sycl::exception(sycl::errc::build, BuildLog);
+  case RTCErrC::INVALID:
+    throw sycl::exception(sycl::errc::invalid, BuildLog);
+  default: // RTCErrC::SUCCESS
+    break;
   }
 
   std::string Prefix = CompilationID + '$';

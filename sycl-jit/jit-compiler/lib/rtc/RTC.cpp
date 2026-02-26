@@ -54,11 +54,11 @@ JIT_EXPORT_SYMBOL RTCHashResult calculateHash(InMemoryFile SourceFile,
   return RTCHashResult{Hash.c_str()};
 }
 
-JIT_EXPORT_SYMBOL RTCResult compileSYCL(InMemoryFile SourceFile,
-                                        View<InMemoryFile> IncludeFiles,
-                                        View<const char *> UserArgs,
-                                        View<char> CachedIR, bool SaveIR,
-                                        BinaryFormat Format) {
+static RTCResult compileImpl(InMemoryFile SourceFile,
+                             View<InMemoryFile> IncludeFiles,
+                             View<const char *> UserArgs, View<char> CachedIR,
+                             bool SaveIR, BinaryFormat Format,
+                             LanguageMode Mode) {
   llvm::LLVMContext Context;
   std::string BuildLog;
   configureDiagnostics(Context, BuildLog);
@@ -71,8 +71,7 @@ JIT_EXPORT_SYMBOL RTCResult compileSYCL(InMemoryFile SourceFile,
   }
 
   llvm::StringRef TraceFileName;
-  if (auto *Arg =
-          UserArgList.getLastArg(clang::options::OPT_ftime_trace_EQ)) {
+  if (auto *Arg = UserArgList.getLastArg(clang::options::OPT_ftime_trace_EQ)) {
     TraceFileName = Arg->getValue();
     unsigned Granularity =
         500; // microseconds. Same default as in `clang::FrontendOptions`.
@@ -83,8 +82,7 @@ JIT_EXPORT_SYMBOL RTCResult compileSYCL(InMemoryFile SourceFile,
                     Arg->getAsString(UserArgList) + "'\n";
       }
     }
-    bool Verbose =
-        UserArgList.hasArg(clang::options::OPT_ftime_trace_verbose);
+    bool Verbose = UserArgList.hasArg(clang::options::OPT_ftime_trace_verbose);
 
     llvm::timeTraceProfilerInitialize(Granularity, /*ProcName=*/"sycl-rtc",
                                       Verbose);
@@ -107,7 +105,7 @@ JIT_EXPORT_SYMBOL RTCResult compileSYCL(InMemoryFile SourceFile,
   bool FromSource = !Module;
   if (FromSource) {
     if (auto Error = compileDeviceCode(SourceFile, IncludeFiles, UserArgList,
-                                       BuildLog, Context, Format)
+                                       BuildLog, Context, Format, Mode)
                          .moveInto(Module)) {
       return errorTo<RTCResult>(std::move(Error), "Device compilation failed");
     }
@@ -122,7 +120,7 @@ JIT_EXPORT_SYMBOL RTCResult compileSYCL(InMemoryFile SourceFile,
   }
 
   if (auto Error =
-          linkDeviceLibraries(*Module, UserArgList, BuildLog, Format)) {
+          linkDeviceLibraries(*Module, UserArgList, BuildLog, Format, Mode)) {
     return errorTo<RTCResult>(std::move(Error), "Device linking failed");
   }
 
@@ -154,6 +152,24 @@ JIT_EXPORT_SYMBOL RTCResult compileSYCL(InMemoryFile SourceFile,
   }
 
   return RTCResult{std::move(BundleInfo), std::move(IR), BuildLog.c_str()};
+}
+
+JIT_EXPORT_SYMBOL RTCResult compileSYCL(InMemoryFile SourceFile,
+                                        View<InMemoryFile> IncludeFiles,
+                                        View<const char *> UserArgs,
+                                        View<char> CachedIR, bool SaveIR,
+                                        BinaryFormat Format) {
+  return compileImpl(SourceFile, IncludeFiles, UserArgs, CachedIR, SaveIR,
+                     Format, LanguageMode::SYCL);
+}
+
+JIT_EXPORT_SYMBOL RTCResult compileOpenCLC(InMemoryFile SourceFile,
+                                           View<InMemoryFile> IncludeFiles,
+                                           View<const char *> UserArgs,
+                                           View<char> CachedIR, bool SaveIR,
+                                           BinaryFormat Format) {
+  return compileImpl(SourceFile, IncludeFiles, UserArgs, CachedIR, SaveIR,
+                     Format, LanguageMode::OpenCLC);
 }
 
 JIT_EXPORT_SYMBOL void destroyBinary(BinaryAddress Address) {
