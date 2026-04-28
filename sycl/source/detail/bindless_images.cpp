@@ -991,18 +991,28 @@ std::unordered_map<ur_exp_external_mem_handle_t, HANDLE> g_win32NameHandles;
 
 HANDLE openNamedHandleImpl(void *device, const void *name) {
 #ifdef SYCL_HAS_D3D12_INTEROP
-  auto d3dDevice = static_cast<ID3D12Device *>(device);
-  HANDLE openedHandle = nullptr;
+  // OpenSharedHandleByName requires ID3D12Device1 or higher
+  auto d3dDeviceBase = static_cast<ID3D12Device *>(device);
+  ID3D12Device1 *d3dDevice1 = nullptr;
 
+  HRESULT hr = d3dDeviceBase->QueryInterface(IID_PPV_ARGS(&d3dDevice1));
+  if (FAILED(hr)) {
+    std::wcerr << L"[SYCL] Failed to query ID3D12Device1 interface: 0x"
+               << std::hex << hr << std::dec << L"\n";
+    return nullptr;
+  }
+
+  HANDLE openedHandle = nullptr;
   const wchar_t *wname = static_cast<const wchar_t *>(name);
 
   // Debug logging
   std::wcerr << L"[SYCL] Attempting to open named handle: \"" << wname
              << L"\"\n";
-  std::wcerr << L"[SYCL] Device pointer: " << device << L"\n";
+  std::wcerr << L"[SYCL] Device pointer: " << device << L", Device1: "
+             << d3dDevice1 << L"\n";
 
-  HRESULT hr =
-      d3dDevice->OpenSharedHandleByName(wname, GENERIC_ALL, &openedHandle);
+  hr = d3dDevice1->OpenSharedHandleByName(wname, GENERIC_ALL, &openedHandle);
+  d3dDevice1->Release(); // Release the QI'd interface
 
   if (FAILED(hr)) {
     std::wcerr << L"[SYCL] OpenSharedHandleByName FAILED with HRESULT: 0x"
