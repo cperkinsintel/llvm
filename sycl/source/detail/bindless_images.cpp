@@ -683,9 +683,7 @@ __SYCL_EXPORT void release_external_memory(external_mem extMem,
     std::lock_guard<std::mutex> lock(g_openedHandlesMutex);
     auto it = g_openedHandles.find(extMem.raw_handle);
     if (it != g_openedHandles.end()) {
-      // Need to declare CloseHandle to avoid including windows.h here
-      extern "C" __declspec(dllimport) int __stdcall CloseHandle(void *);
-      CloseHandle(it->second);
+      CloseHandle(static_cast<HANDLE>(it->second));
       g_openedHandles.erase(it);
     }
   }
@@ -826,6 +824,13 @@ __SYCL_EXPORT external_semaphore import_external_semaphore(
       externalSemaphoreDesc, syclQueue.get_device(), syclQueue.get_context());
 }
 
+// Now that all template specializations are defined, safe to include windows.h
+// for CloseHandle
+#if defined(_WIN32) || defined(_WIN64)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
+
 __SYCL_EXPORT void
 release_external_semaphore(external_semaphore externalSemaphore,
                            const sycl::device &syclDevice,
@@ -845,9 +850,7 @@ release_external_semaphore(external_semaphore externalSemaphore,
         g_openedHandles.find(reinterpret_cast<ur_exp_external_mem_handle_t>(
             externalSemaphore.raw_handle));
     if (it != g_openedHandles.end()) {
-      // Need to declare CloseHandle to avoid including windows.h here
-      extern "C" __declspec(dllimport) int __stdcall CloseHandle(void *);
-      CloseHandle(it->second);
+      CloseHandle(static_cast<HANDLE>(it->second));
       g_openedHandles.erase(it);
     }
   }
