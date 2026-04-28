@@ -496,13 +496,23 @@ __SYCL_EXPORT external_mem import_external_memory<resource_win32_handle>(
       externalMemDesc, syclQueue.get_device(), syclQueue.get_context());
 }
 
-// Forward declare Windows helper for resource_win32_name (defined after
-// template specializations)
+// Windows support for resource_win32_name
 #if defined(_WIN32) || defined(_WIN64)
+#define WIN32_LEAN_AND_MEAN
+#include <mutex>
+#include <unordered_map>
+#include <windows.h>
+
+// Track opened handles so we can close them on release
 namespace {
+std::mutex g_openedHandlesMutex;
+std::unordered_map<ur_exp_external_mem_handle_t, HANDLE> g_openedHandles;
+
+// Forward declare - implementation after template specializations to avoid
+// D3D12 header triggering implicit instantiation
 void *openNamedHandleImpl(void *device, const void *name);
-}
-#endif
+} // anonymous namespace
+#endif // _WIN32 || _WIN64
 
 template <>
 __SYCL_EXPORT external_mem import_external_memory<resource_win32_name>(
@@ -849,11 +859,6 @@ release_external_semaphore(external_semaphore externalSemaphore,
 
 // Windows helper implementation for resource_win32_name
 #if defined(_WIN32) || defined(_WIN64)
-#define WIN32_LEAN_AND_MEAN
-#include <mutex>
-#include <unordered_map>
-#include <windows.h>
-
 // Include D3D12 only if available - otherwise provide stub
 #ifdef __has_include
 #if __has_include(<d3d12.h>)
@@ -862,11 +867,8 @@ release_external_semaphore(external_semaphore externalSemaphore,
 #endif
 #endif
 
-// Track opened handles so we can close them on release
+// Implement the forward-declared helper
 namespace {
-std::mutex g_openedHandlesMutex;
-std::unordered_map<ur_exp_external_mem_handle_t, HANDLE> g_openedHandles;
-
 void *openNamedHandleImpl(void *device, const void *name) {
 #ifdef SYCL_HAS_D3D12_INTEROP
   auto d3dDevice = static_cast<ID3D12Device *>(device);
