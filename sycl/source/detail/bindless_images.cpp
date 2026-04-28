@@ -994,10 +994,24 @@ HANDLE openNamedHandleImpl(void *device, const void *name) {
   auto d3dDevice = static_cast<ID3D12Device *>(device);
   HANDLE openedHandle = nullptr;
 
-  HRESULT hr = d3dDevice->OpenSharedHandleByName(
-      static_cast<const wchar_t *>(name), GENERIC_ALL, &openedHandle);
+  const wchar_t *wname = static_cast<const wchar_t *>(name);
 
-  return SUCCEEDED(hr) ? openedHandle : nullptr;
+  // Debug logging
+  std::wcerr << L"[SYCL] Attempting to open named handle: \"" << wname
+             << L"\"\n";
+  std::wcerr << L"[SYCL] Device pointer: " << device << L"\n";
+
+  HRESULT hr =
+      d3dDevice->OpenSharedHandleByName(wname, GENERIC_ALL, &openedHandle);
+
+  if (FAILED(hr)) {
+    std::wcerr << L"[SYCL] OpenSharedHandleByName FAILED with HRESULT: 0x"
+               << std::hex << hr << std::dec << L"\n";
+    return nullptr;
+  }
+
+  std::wcerr << L"[SYCL] Successfully opened handle: " << openedHandle << L"\n";
+  return openedHandle;
 #else
   (void)device;
   (void)name;
