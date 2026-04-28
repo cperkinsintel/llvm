@@ -496,47 +496,13 @@ __SYCL_EXPORT external_mem import_external_memory<resource_win32_handle>(
       externalMemDesc, syclQueue.get_device(), syclQueue.get_context());
 }
 
+// Forward declare Windows helper for resource_win32_name (defined after
+// template specializations)
 #if defined(_WIN32) || defined(_WIN64)
-#define WIN32_LEAN_AND_MEAN
-#include <mutex>
-#include <unordered_map>
-#include <windows.h>
-
-// Include D3D12 only if available - otherwise provide stub
-#ifdef __has_include
-#if __has_include(<d3d12.h>)
-#include <d3d12.h>
-#define SYCL_HAS_D3D12_INTEROP 1
-#endif
-#endif
-
-// Track opened handles so we can close them on release
 namespace {
-std::mutex g_openedHandlesMutex;
-std::unordered_map<ur_exp_external_mem_handle_t, HANDLE> g_openedHandles;
-
-void *openNamedHandle(void *device, const void *name) {
-#ifdef SYCL_HAS_D3D12_INTEROP
-  auto d3dDevice = static_cast<ID3D12Device *>(device);
-  HANDLE openedHandle = nullptr;
-
-  HRESULT hr = d3dDevice->OpenSharedHandleByName(
-      static_cast<const wchar_t *>(name), GENERIC_ALL, &openedHandle);
-
-  if (FAILED(hr)) {
-    return nullptr;
-  }
-
-  return openedHandle;
-#else
-  // D3D12 headers not available - throw error
-  throw sycl::exception(
-      sycl::make_error_code(sycl::errc::feature_not_supported),
-      "resource_win32_name requires D3D12 headers at compile time. "
-      "Use resource_win32_handle with manually opened handle instead.");
-#endif
+void *openNamedHandleImpl(void *device, const void *name);
 }
-} // anonymous namespace
+#endif
 
 template <>
 __SYCL_EXPORT external_mem import_external_memory<resource_win32_name>(
@@ -547,8 +513,8 @@ __SYCL_EXPORT external_mem import_external_memory<resource_win32_name>(
 
   // Open the named handle if device is provided
   if (externalMemDesc.external_resource.device) {
-    openedHandle = openNamedHandle(externalMemDesc.external_resource.device,
-                                   externalMemDesc.external_resource.name);
+    openedHandle = openNamedHandleImpl(externalMemDesc.external_resource.device,
+                                       externalMemDesc.external_resource.name);
 
     if (!openedHandle) {
       throw sycl::exception(sycl::make_error_code(sycl::errc::invalid),
@@ -596,8 +562,8 @@ __SYCL_EXPORT external_semaphore import_external_semaphore(
   // Open the named handle if device is provided
   if (externalSemaphoreDesc.external_resource.device) {
     openedHandle =
-        openNamedHandle(externalSemaphoreDesc.external_resource.device,
-                        externalSemaphoreDesc.external_resource.name);
+        openNamedHandleImpl(externalSemaphoreDesc.external_resource.device,
+                            externalSemaphoreDesc.external_resource.name);
 
     if (!openedHandle) {
       throw sycl::exception(sycl::make_error_code(sycl::errc::invalid),
@@ -880,6 +846,52 @@ release_external_semaphore(external_semaphore externalSemaphore,
   release_external_semaphore(externalSemaphore, syclQueue.get_device(),
                              syclQueue.get_context());
 }
+
+// Windows helper implementation for resource_win32_name
+#if defined(_WIN32) || defined(_WIN64)
+#define WIN32_LEAN_AND_MEAN
+#include <mutex>
+#include <unordered_map>
+#include <windows.h>
+
+// Include D3D12 only if available - otherwise provide stub
+#ifdef __has_include
+#if __has_include(<d3d12.h>)
+#include <d3d12.h>
+#define SYCL_HAS_D3D12_INTEROP 1
+#endif
+#endif
+
+// Track opened handles so we can close them on release
+namespace {
+std::mutex g_openedHandlesMutex;
+std::unordered_map<ur_exp_external_mem_handle_t, HANDLE> g_openedHandles;
+
+void *openNamedHandleImpl(void *device, const void *name) {
+#ifdef SYCL_HAS_D3D12_INTEROP
+  auto d3dDevice = static_cast<ID3D12Device *>(device);
+  HANDLE openedHandle = nullptr;
+
+  HRESULT hr = d3dDevice->OpenSharedHandleByName(
+      static_cast<const wchar_t *>(name), GENERIC_ALL, &openedHandle);
+
+  if (FAILED(hr)) {
+    return nullptr;
+  }
+
+  return openedHandle;
+#else
+  // D3D12 headers not available - throw error
+  (void)device;
+  (void)name;
+  throw sycl::exception(
+      sycl::make_error_code(sycl::errc::feature_not_supported),
+      "resource_win32_name requires D3D12 headers at compile time. "
+      "Use resource_win32_handle with manually opened handle instead.");
+#endif
+}
+} // anonymous namespace
+#endif // _WIN32 || _WIN64
 
 __SYCL_EXPORT sycl::range<3> get_image_range(const image_mem_handle memHandle,
                                              const sycl::device &syclDevice,
