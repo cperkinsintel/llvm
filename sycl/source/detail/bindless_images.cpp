@@ -1005,23 +1005,10 @@ HANDLE openNamedHandleImpl(void *device, const void *name) {
   HANDLE openedHandle = nullptr;
   const wchar_t *wname = static_cast<const wchar_t *>(name);
 
-  // Debug logging
-  std::wcerr << L"[SYCL] Attempting to open named handle: \"" << wname
-             << L"\"\n";
-  std::wcerr << L"[SYCL] Device pointer: " << device << L", Device1: "
-             << d3dDevice1 << L"\n";
-
   hr = d3dDevice1->OpenSharedHandleByName(wname, GENERIC_ALL, &openedHandle);
   d3dDevice1->Release(); // Release the QI'd interface
 
-  if (FAILED(hr)) {
-    std::wcerr << L"[SYCL] OpenSharedHandleByName FAILED with HRESULT: 0x"
-               << std::hex << hr << std::dec << L"\n";
-    return nullptr;
-  }
-
-  std::wcerr << L"[SYCL] Successfully opened handle: " << openedHandle << L"\n";
-  return openedHandle;
+  return SUCCEEDED(hr) ? openedHandle : nullptr;
 #else
   (void)device;
   (void)name;
