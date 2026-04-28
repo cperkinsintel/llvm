@@ -40,11 +40,14 @@ namespace syclexp = sycl::ext::oneapi::experimental;
 struct D3D12NamedBuffer {
   Microsoft::WRL::ComPtr<ID3D12Resource> resource;
   std::wstring name;
+  HANDLE keepAliveHandle; // Must keep at least one handle open for the name to
+                          // persist
 };
 
 struct D3D12NamedFence {
   Microsoft::WRL::ComPtr<ID3D12Fence> fence;
   std::wstring name;
+  HANDLE keepAliveHandle;
 };
 
 // Create a buffer with a named shared handle
@@ -73,14 +76,13 @@ D3D12NamedBuffer createNamedExportableBuffer(D3D12Context &ctx, size_t size,
     throw std::runtime_error("Failed to create named buffer");
   }
 
-  // Create a NAMED shared handle
-  HANDLE tempHandle;
+  // Create a NAMED shared handle and keep it open so the name persists
   hr = ctx.device->CreateSharedHandle(result.resource.Get(), nullptr,
-                                      GENERIC_ALL, name, &tempHandle);
+                                      GENERIC_ALL, name,
+                                      &result.keepAliveHandle);
   if (FAILED(hr)) {
     throw std::runtime_error("Failed to create named shared handle");
   }
-  CloseHandle(tempHandle);
 
   std::wcout << L"[D3D12] Created named buffer: " << name << L"\n";
 
@@ -99,14 +101,12 @@ D3D12NamedFence createNamedExportableFence(D3D12Context &ctx,
     throw std::runtime_error("Failed to create fence");
   }
 
-  // Create a NAMED shared handle
-  HANDLE tempHandle;
+  // Create a NAMED shared handle and keep it open so the name persists
   hr = ctx.device->CreateSharedHandle(result.fence.Get(), nullptr, GENERIC_ALL,
-                                      name, &tempHandle);
+                                      name, &result.keepAliveHandle);
   if (FAILED(hr)) {
     throw std::runtime_error("Failed to create named shared fence handle");
   }
-  CloseHandle(tempHandle);
 
   std::wcout << L"[D3D12] Created named fence: " << name << L"\n";
 
@@ -374,6 +374,10 @@ int main(int argc, char **argv) {
   }
 
   // D3D12 Cleanup
+  CloseHandle(inBuf.keepAliveHandle);
+  CloseHandle(outBuf.keepAliveHandle);
+  if (useSemaphores)
+    CloseHandle(extFence.keepAliveHandle);
   cleanupBuffer(inStaging);
   cleanupBuffer(outStaging);
   if (d3dCtx.fenceEvent)
