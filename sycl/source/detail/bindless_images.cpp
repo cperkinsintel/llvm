@@ -512,8 +512,8 @@ std::unordered_map<ur_exp_external_mem_handle_t, HANDLE> g_openedHandles;
 // D3D12 header triggering implicit instantiation
 void *openNamedHandleImpl(void *device, const void *name);
 } // anonymous namespace
-#endif // _WIN32 || _WIN64
 
+// Template specializations for resource_win32_name
 template <>
 __SYCL_EXPORT external_mem import_external_memory<resource_win32_name>(
     external_mem_descriptor<resource_win32_name> externalMemDesc,
